@@ -1,0 +1,13 @@
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+.claude/
+__pycache__/
+*.pyc
+node_modules/
+
+# Eval run artifacts — keep `expected.md` under version control, not run outputs
+evals/runs/
+**/evals/runs/

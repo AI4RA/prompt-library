@@ -1,0 +1,21 @@
+solicitation: NSF 26-508
+program: "TechAccess: AI-Ready America — State/Territory Coordination Hubs"
+agency: NSF (TIP, EDU, CISE) with DOL, USDA-NIFA, SBA
+parent_guide: NSF PAPPG
+posted: 2026-03-25
+rounds: 3
+loi_required: true
+cost_sharing: not-required
+structural_features:
+  - multi-round
+  - letter-of-intent
+  - per-organization-proposal-limit
+  - per-pi-proposal-limit
+  - partner-agencies
+  - pappg-deviations
+validated_by: barrierobison
+validated_at: 2026-04-17
+notes: |
+  First validated case. Exercises multi-round date handling, LOI requirements,
+  organizational and PI proposal limits, and several explicit PAPPG deviations
+  (modified review criteria, required collaboration, mandatory convenings).

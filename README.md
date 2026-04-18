@@ -1,0 +1,39 @@
+# AI4RA Prompt Library
+
+Versioned storage and evaluation data for prompts, skills, agents, and related components used across AI4RA applications.
+
+## Layout
+
+Each component is a directory under `components/` named by a short slug. A component represents a single *task* (e.g., "extract a submission checklist from an RFP") and may have multiple platform-specific *manifestations*:
+
+- `prompt.md` — the canonical, LLM-agnostic prompt
+- `skill/SKILL.md` — Claude Skill form (frontmatter for the Claude Code / Agent SDK skill loader)
+- `agent/AGENT.md` — subagent / agent definition (if applicable)
+- additional formats as platforms emerge
+
+Every component carries its own:
+
+- `README.md` — what it does, current version, which manifestations exist
+- `CHANGELOG.md` — per-component version history (semver)
+- `evals/` — test cases and known-good outputs
+
+## Versioning
+
+Each component is versioned independently using semver, declared in the `version:` field of the frontmatter on every manifestation file. When a change lands, bump the version in *every* manifestation of that component and add a `CHANGELOG.md` entry.
+
+- **MAJOR** — output contract changes (breaks downstream consumers)
+- **MINOR** — new capability, backward compatible
+- **PATCH** — wording or clarity fixes, no behavior change expected
+
+The repository itself is not versioned by tag. Consumers pin to a commit SHA plus a component slug and declared version.
+
+## Adding a component
+
+1. Copy `templates/new-component/` into `components/<slug>/`
+2. Fill in `README.md`, at least one manifestation file, and the `CHANGELOG.md` 1.0.0 entry
+3. Add at least one eval case under `evals/cases/`
+4. Register any new tags or categories in `taxonomy.md`
+
+## Shared vocabulary
+
+See [`taxonomy.md`](taxonomy.md) for the canonical set of tags, categories, domains, and manifestation types. Prefer existing vocabulary; propose additions in the same PR that introduces a component needing them.
