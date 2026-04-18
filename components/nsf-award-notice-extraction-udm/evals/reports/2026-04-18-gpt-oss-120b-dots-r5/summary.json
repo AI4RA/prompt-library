@@ -1,0 +1,1233 @@
+{
+  "run_name": "2026-04-18-gpt-oss-120b-dots-r5",
+  "generated_at": "2026-04-18T23:04:54Z",
+  "config": {
+    "started_at": "20260418T223142Z",
+    "prompt_sha256": "f828e83e0e8cc13eb833e517c788b46e6cf3ac178c000ed5d23d87737cf19db7",
+    "model": "openai/gpt-oss-120b",
+    "ocr_provider": "mindrouter",
+    "temperature": 0.1,
+    "max_tokens": 16384,
+    "n_replicates": 5,
+    "pdf_count": 28,
+    "pdf_concurrency": 3,
+    "prompt_file": "components/nsf-award-notice-extraction-udm/prompt.md"
+  },
+  "headline": {
+    "n_documents": 28,
+    "n_replicates_attempted": 140,
+    "n_success": 140,
+    "n_api_error": 0,
+    "n_parse_error": 0,
+    "ocr_latency_ms": {
+      "p50": 19126.5,
+      "p95": 22583.949999999997,
+      "min": 9999,
+      "max": 29271
+    },
+    "chat_latency_ms": {
+      "p50": 66876.5,
+      "p95": 89133.94999999997,
+      "min": 17974,
+      "max": 126596
+    },
+    "prompt_tokens": {
+      "p50": 5446.0,
+      "p95": 6074.0,
+      "min": 4465,
+      "max": 6994
+    },
+    "completion_tokens": {
+      "p50": 7821.5,
+      "p95": 9464.049999999996,
+      "min": 2657,
+      "max": 14073,
+      "n_over_80pct_of_cap": 1,
+      "n_over_95pct_of_cap": 0,
+      "cap": 16384
+    }
+  },
+  "validation": {
+    "n_total": 140,
+    "n_valid": 0,
+    "valid_rate_pct": 0.0,
+    "n_valid_ignoring_extra_top_keys": 78,
+    "valid_rate_ignoring_extras_pct": 55.71,
+    "top_errors": [
+      [
+        "<root> :: additionalProperties",
+        140
+      ],
+      [
+        "linked_awards/0 :: required",
+        34
+      ],
+      [
+        "linked_awards/1 :: required",
+        18
+      ],
+      [
+        "special_conditions/2/category :: enum",
+        8
+      ],
+      [
+        "budget_categories/25/label :: minLength",
+        8
+      ],
+      [
+        "budget_categories/26/label :: minLength",
+        6
+      ],
+      [
+        "special_conditions/1/category :: enum",
+        5
+      ],
+      [
+        "linked_awards/0 :: additionalProperties",
+        5
+      ],
+      [
+        "linked_awards/1 :: additionalProperties",
+        5
+      ],
+      [
+        "award_title :: type",
+        5
+      ],
+      [
+        "current_budget_period/end_date :: type",
+        5
+      ],
+      [
+        "current_budget_period/start_date :: type",
+        5
+      ],
+      [
+        "expenditure_limitation :: type",
+        5
+      ],
+      [
+        "special_conditions/4/category :: enum",
+        4
+      ],
+      [
+        "special_conditions/5/category :: enum",
+        2
+      ],
+      [
+        "linked_awards/0 :: type",
+        2
+      ],
+      [
+        "linked_awards/1 :: type",
+        2
+      ],
+      [
+        "budget_categories/23/code :: type",
+        1
+      ],
+      [
+        "budget_categories/25/code :: type",
+        1
+      ],
+      [
+        "budget_categories/41/code :: type",
+        1
+      ]
+    ],
+    "name_drift": {
+      "extra_top_keys": [
+        {
+          "extra_key": "total_intended_award_amount",
+          "count": 135,
+          "likely_schema_key": "total_intended_amount"
+        },
+        {
+          "extra_key": "total_amount_obligated_to_date",
+          "count": 126,
+          "likely_schema_key": "total_obligated_to_date"
+        },
+        {
+          "extra_key": "total_approved_cost_share_or_matching_amount",
+          "count": 113,
+          "likely_schema_key": null
+        },
+        {
+          "extra_key": "period_of_performance_end",
+          "count": 50,
+          "likely_schema_key": null
+        },
+        {
+          "extra_key": "period_of_performance_start",
+          "count": 50,
+          "likely_schema_key": "start_date"
+        },
+        {
+          "extra_key": "award_period_end_date",
+          "count": 35,
+          "likely_schema_key": "end_date"
+        },
+        {
+          "extra_key": "award_period_start_date",
+          "count": 35,
+          "likely_schema_key": "start_date"
+        },
+        {
+          "extra_key": "award_period_end",
+          "count": 29,
+          "likely_schema_key": null
+        },
+        {
+          "extra_key": "award_period_start",
+          "count": 29,
+          "likely_schema_key": "start_date"
+        },
+        {
+          "extra_key": "period_of_performance_end_date",
+          "count": 12,
+          "likely_schema_key": "end_date"
+        },
+        {
+          "extra_key": "period_of_performance_start_date",
+          "count": 12,
+          "likely_schema_key": "start_date"
+        },
+        {
+          "extra_key": "award_period_of_performance_end_date",
+          "count": 6,
+          "likely_schema_key": "end_date"
+        },
+        {
+          "extra_key": "award_period_of_performance_start_date",
+          "count": 6,
+          "likely_schema_key": "start_date"
+        },
+        {
+          "extra_key": "award_period_of_performance_end",
+          "count": 5,
+          "likely_schema_key": null
+        },
+        {
+          "extra_key": "award_period_of_performance_start",
+          "count": 5,
+          "likely_schema_key": "start_date"
+        },
+        {
+          "extra_key": "total_award_amount",
+          "count": 5,
+          "likely_schema_key": null
+        },
+        {
+          "extra_key": "total_approved_cost_share",
+          "count": 4,
+          "likely_schema_key": null
+        },
+        {
+          "extra_key": "total_approved_cost_share_amount",
+          "count": 4,
+          "likely_schema_key": null
+        },
+        {
+          "extra_key": "award_end_date",
+          "count": 2,
+          "likely_schema_key": "end_date"
+        },
+        {
+          "extra_key": "award_start_date",
+          "count": 2,
+          "likely_schema_key": "start_date"
+        },
+        {
+          "extra_key": "total_cost_share_approved_amount",
+          "count": 2,
+          "likely_schema_key": "cost_share_approved_amount"
+        }
+      ],
+      "missing_top_keys": [
+        [
+          "proposal_number",
+          140
+        ],
+        [
+          "end_date",
+          140
+        ],
+        [
+          "total_intended_amount",
+          140
+        ],
+        [
+          "award_status",
+          140
+        ],
+        [
+          "start_date",
+          140
+        ],
+        [
+          "sponsor_award_number",
+          140
+        ],
+        [
+          "total_obligated_to_date",
+          133
+        ],
+        [
+          "amendment_date",
+          115
+        ],
+        [
+          "award_date",
+          32
+        ],
+        [
+          "expenditure_limitation",
+          17
+        ],
+        [
+          "cost_share_approved_amount",
+          5
+        ]
+      ]
+    }
+  },
+  "consistency": {
+    "field_rollup": [
+      {
+        "field": "expenditure_limitation",
+        "n_docs": 28,
+        "pct_full_agreement": 35.7,
+        "n_full": 10,
+        "n_two_distinct": 18,
+        "n_three_plus": 0
+      },
+      {
+        "field": "amendment_date",
+        "n_docs": 28,
+        "pct_full_agreement": 46.4,
+        "n_full": 13,
+        "n_two_distinct": 15,
+        "n_three_plus": 0
+      },
+      {
+        "field": "award_date",
+        "n_docs": 28,
+        "pct_full_agreement": 50.0,
+        "n_full": 14,
+        "n_two_distinct": 14,
+        "n_three_plus": 0
+      },
+      {
+        "field": "cfda_name",
+        "n_docs": 28,
+        "pct_full_agreement": 82.1,
+        "n_full": 23,
+        "n_two_distinct": 1,
+        "n_three_plus": 4
+      },
+      {
+        "field": "indirect_cost_base",
+        "n_docs": 28,
+        "pct_full_agreement": 82.1,
+        "n_full": 23,
+        "n_two_distinct": 4,
+        "n_three_plus": 1
+      },
+      {
+        "field": "cfda_number",
+        "n_docs": 28,
+        "pct_full_agreement": 82.1,
+        "n_full": 23,
+        "n_two_distinct": 5,
+        "n_three_plus": 0
+      },
+      {
+        "field": "cost_share_approved_amount",
+        "n_docs": 28,
+        "pct_full_agreement": 82.1,
+        "n_full": 23,
+        "n_two_distinct": 5,
+        "n_three_plus": 0
+      },
+      {
+        "field": "funding_opportunity_number",
+        "n_docs": 28,
+        "pct_full_agreement": 89.3,
+        "n_full": 25,
+        "n_two_distinct": 3,
+        "n_three_plus": 0
+      },
+      {
+        "field": "total_obligated_to_date",
+        "n_docs": 28,
+        "pct_full_agreement": 89.3,
+        "n_full": 25,
+        "n_two_distinct": 3,
+        "n_three_plus": 0
+      },
+      {
+        "field": "is_collaborative_research",
+        "n_docs": 28,
+        "pct_full_agreement": 92.9,
+        "n_full": 26,
+        "n_two_distinct": 2,
+        "n_three_plus": 0
+      },
+      {
+        "field": "indirect_cost_rate_percent",
+        "n_docs": 28,
+        "pct_full_agreement": 96.4,
+        "n_full": 27,
+        "n_two_distinct": 1,
+        "n_three_plus": 0
+      },
+      {
+        "field": "award_id",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "award_number",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "sponsor_award_number",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "award_title",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "sponsor_name",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "managing_division",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "award_instrument",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "award_status",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "is_research_and_development",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "funding_opportunity_title",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "proposal_number",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "amendment_number",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "amendment_type",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "award_received_date",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "start_date",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "end_date",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "amount_obligated_this_amendment",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "total_intended_amount",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "recipient_organization.address",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "recipient_organization.email",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "recipient_organization.legal_name",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "recipient_organization.uei",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "current_budget_period.direct_cost",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "current_budget_period.end_date",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "current_budget_period.indirect_cost",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "current_budget_period.obligated_amount",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "current_budget_period.period_label",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "current_budget_period.period_number",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      },
+      {
+        "field": "current_budget_period.start_date",
+        "n_docs": 28,
+        "pct_full_agreement": 100.0,
+        "n_full": 28,
+        "n_two_distinct": 0,
+        "n_three_plus": 0
+      }
+    ],
+    "doc_rollup": [
+      {
+        "doc": "award_19",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 6,
+        "pct_disagreement": 15.0
+      },
+      {
+        "doc": "award_02",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 5,
+        "pct_disagreement": 12.5
+      },
+      {
+        "doc": "award_06",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 4,
+        "pct_disagreement": 10.0
+      },
+      {
+        "doc": "award_10",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 4,
+        "pct_disagreement": 10.0
+      },
+      {
+        "doc": "award_16",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 4,
+        "pct_disagreement": 10.0
+      },
+      {
+        "doc": "award_18",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 4,
+        "pct_disagreement": 10.0
+      },
+      {
+        "doc": "award_23",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 4,
+        "pct_disagreement": 10.0
+      },
+      {
+        "doc": "award_05",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 3,
+        "pct_disagreement": 7.5
+      },
+      {
+        "doc": "award_09",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 3,
+        "pct_disagreement": 7.5
+      },
+      {
+        "doc": "award_11",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 3,
+        "pct_disagreement": 7.5
+      },
+      {
+        "doc": "award_13",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 3,
+        "pct_disagreement": 7.5
+      },
+      {
+        "doc": "award_14",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 3,
+        "pct_disagreement": 7.5
+      },
+      {
+        "doc": "award_17",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 3,
+        "pct_disagreement": 7.5
+      },
+      {
+        "doc": "award_20",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 3,
+        "pct_disagreement": 7.5
+      },
+      {
+        "doc": "award_27",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 3,
+        "pct_disagreement": 7.5
+      },
+      {
+        "doc": "award_28",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 3,
+        "pct_disagreement": 7.5
+      },
+      {
+        "doc": "award_01",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 2,
+        "pct_disagreement": 5.0
+      },
+      {
+        "doc": "award_03",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 2,
+        "pct_disagreement": 5.0
+      },
+      {
+        "doc": "award_12",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 2,
+        "pct_disagreement": 5.0
+      },
+      {
+        "doc": "award_21",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 2,
+        "pct_disagreement": 5.0
+      },
+      {
+        "doc": "award_22",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 2,
+        "pct_disagreement": 5.0
+      },
+      {
+        "doc": "award_24",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 2,
+        "pct_disagreement": 5.0
+      },
+      {
+        "doc": "award_25",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 2,
+        "pct_disagreement": 5.0
+      },
+      {
+        "doc": "award_04",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 1,
+        "pct_disagreement": 2.5
+      },
+      {
+        "doc": "award_08",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 1,
+        "pct_disagreement": 2.5
+      },
+      {
+        "doc": "award_15",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 1,
+        "pct_disagreement": 2.5
+      },
+      {
+        "doc": "award_26",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 1,
+        "pct_disagreement": 2.5
+      },
+      {
+        "doc": "award_07",
+        "n_fields_probed": 40,
+        "n_fields_with_disagreement": 0,
+        "pct_disagreement": 0.0
+      }
+    ],
+    "array_rollup": [
+      {
+        "array": "special_conditions",
+        "mean_cv": 0.181,
+        "max_cv": 1.225,
+        "pct_docs_stable": 25.0,
+        "worst_docs": [
+          {
+            "doc": "award_27",
+            "lens": [
+              1,
+              0,
+              0,
+              0,
+              1
+            ],
+            "cv": 1.225
+          },
+          {
+            "doc": "award_19",
+            "lens": [
+              0,
+              3,
+              3,
+              3,
+              3
+            ],
+            "cv": 0.5
+          },
+          {
+            "doc": "award_06",
+            "lens": [
+              2,
+              1,
+              2,
+              3,
+              3
+            ],
+            "cv": 0.34
+          }
+        ]
+      },
+      {
+        "array": "terms_and_conditions",
+        "mean_cv": 0.14,
+        "max_cv": 0.298,
+        "pct_docs_stable": 10.7,
+        "worst_docs": [
+          {
+            "doc": "award_21",
+            "lens": [
+              2,
+              4,
+              2,
+              3,
+              4
+            ],
+            "cv": 0.298
+          },
+          {
+            "doc": "award_10",
+            "lens": [
+              2,
+              2,
+              3,
+              4,
+              3
+            ],
+            "cv": 0.267
+          },
+          {
+            "doc": "award_20",
+            "lens": [
+              3,
+              3,
+              3,
+              4,
+              2
+            ],
+            "cv": 0.211
+          }
+        ]
+      },
+      {
+        "array": "budget_categories",
+        "mean_cv": 0.137,
+        "max_cv": 0.243,
+        "pct_docs_stable": 7.1,
+        "worst_docs": [
+          {
+            "doc": "award_07",
+            "lens": [
+              48,
+              30,
+              30,
+              29,
+              48
+            ],
+            "cv": 0.243
+          },
+          {
+            "doc": "award_05",
+            "lens": [
+              27,
+              48,
+              48,
+              31,
+              48
+            ],
+            "cv": 0.233
+          },
+          {
+            "doc": "award_02",
+            "lens": [
+              30,
+              48,
+              48,
+              48,
+              30
+            ],
+            "cv": 0.216
+          }
+        ]
+      },
+      {
+        "array": "linked_awards",
+        "mean_cv": 0.054,
+        "max_cv": 0.5,
+        "pct_docs_stable": 89.3,
+        "worst_docs": [
+          {
+            "doc": "award_09",
+            "lens": [
+              0,
+              1,
+              1,
+              1,
+              1
+            ],
+            "cv": 0.5
+          },
+          {
+            "doc": "award_12",
+            "lens": [
+              0,
+              1,
+              1,
+              1,
+              1
+            ],
+            "cv": 0.5
+          },
+          {
+            "doc": "award_18",
+            "lens": [
+              0,
+              1,
+              1,
+              1,
+              1
+            ],
+            "cv": 0.5
+          }
+        ]
+      },
+      {
+        "array": "project_personnel",
+        "mean_cv": 0.0,
+        "max_cv": 0.0,
+        "pct_docs_stable": 100.0,
+        "worst_docs": []
+      },
+      {
+        "array": "sponsor_contacts",
+        "mean_cv": 0.0,
+        "max_cv": 0.0,
+        "pct_docs_stable": 100.0,
+        "worst_docs": []
+      },
+      {
+        "array": "subawards",
+        "mean_cv": 0.0,
+        "max_cv": 0.0,
+        "pct_docs_stable": 100.0,
+        "worst_docs": []
+      }
+    ]
+  },
+  "coverage": {
+    "scalars": [
+      {
+        "field": "sponsor_award_number",
+        "pct_populated": 0.0,
+        "n_non_null": 0,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "award_status",
+        "pct_populated": 0.0,
+        "n_non_null": 0,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "proposal_number",
+        "pct_populated": 0.0,
+        "n_non_null": 0,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "start_date",
+        "pct_populated": 0.0,
+        "n_non_null": 0,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "end_date",
+        "pct_populated": 0.0,
+        "n_non_null": 0,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "total_intended_amount",
+        "pct_populated": 0.0,
+        "n_non_null": 0,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "total_obligated_to_date",
+        "pct_populated": 5.0,
+        "n_non_null": 7,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "award_received_date",
+        "pct_populated": 14.3,
+        "n_non_null": 20,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "amendment_date",
+        "pct_populated": 17.9,
+        "n_non_null": 25,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "expenditure_limitation",
+        "pct_populated": 53.6,
+        "n_non_null": 75,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "indirect_cost_rate_percent",
+        "pct_populated": 62.1,
+        "n_non_null": 87,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "award_date",
+        "pct_populated": 77.1,
+        "n_non_null": 108,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "indirect_cost_base",
+        "pct_populated": 92.1,
+        "n_non_null": 129,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "award_title",
+        "pct_populated": 96.4,
+        "n_non_null": 135,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "is_research_and_development",
+        "pct_populated": 96.4,
+        "n_non_null": 135,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "funding_opportunity_number",
+        "pct_populated": 96.4,
+        "n_non_null": 135,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "funding_opportunity_title",
+        "pct_populated": 96.4,
+        "n_non_null": 135,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "cfda_number",
+        "pct_populated": 96.4,
+        "n_non_null": 135,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "cfda_name",
+        "pct_populated": 96.4,
+        "n_non_null": 135,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "cost_share_approved_amount",
+        "pct_populated": 96.4,
+        "n_non_null": 135,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "award_id",
+        "pct_populated": 100.0,
+        "n_non_null": 140,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "award_number",
+        "pct_populated": 100.0,
+        "n_non_null": 140,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "sponsor_name",
+        "pct_populated": 100.0,
+        "n_non_null": 140,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "managing_division",
+        "pct_populated": 100.0,
+        "n_non_null": 140,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "award_instrument",
+        "pct_populated": 100.0,
+        "n_non_null": 140,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "is_collaborative_research",
+        "pct_populated": 100.0,
+        "n_non_null": 140,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "amendment_number",
+        "pct_populated": 100.0,
+        "n_non_null": 140,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "amendment_type",
+        "pct_populated": 100.0,
+        "n_non_null": 140,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "amendment_description",
+        "pct_populated": 100.0,
+        "n_non_null": 140,
+        "n_total": 140,
+        "schema_declared": true
+      },
+      {
+        "field": "amount_obligated_this_amendment",
+        "pct_populated": 100.0,
+        "n_non_null": 140,
+        "n_total": 140,
+        "schema_declared": true
+      }
+    ],
+    "arrays": [
+      {
+        "field": "subawards",
+        "pct_non_empty": 3.6,
+        "n_non_empty": 5,
+        "n_total": 140
+      },
+      {
+        "field": "linked_awards",
+        "pct_non_empty": 26.4,
+        "n_non_empty": 37,
+        "n_total": 140
+      },
+      {
+        "field": "special_conditions",
+        "pct_non_empty": 93.6,
+        "n_non_empty": 131,
+        "n_total": 140
+      },
+      {
+        "field": "budget_categories",
+        "pct_non_empty": 96.4,
+        "n_non_empty": 135,
+        "n_total": 140
+      },
+      {
+        "field": "project_personnel",
+        "pct_non_empty": 100.0,
+        "n_non_empty": 140,
+        "n_total": 140
+      },
+      {
+        "field": "sponsor_contacts",
+        "pct_non_empty": 100.0,
+        "n_non_empty": 140,
+        "n_total": 140
+      },
+      {
+        "field": "terms_and_conditions",
+        "pct_non_empty": 100.0,
+        "n_non_empty": 140,
+        "n_total": 140
+      }
+    ]
+  }
+}
