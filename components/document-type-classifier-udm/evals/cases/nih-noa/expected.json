@@ -1,0 +1,7 @@
+{
+  "document_type": "award_notice",
+  "confidence": 0.95,
+  "evidence_excerpt": "Notice of Award",
+  "rationale": "Document carries the canonical 'Notice of Award' header with a FAIN, period of performance, obligation amount, recipient information, and statutory authority, and explicitly marks the action as Type 1 (New) with no amendment or modification indicator.",
+  "secondary_candidates": []
+}

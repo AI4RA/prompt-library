@@ -1,0 +1,32 @@
+case: NSF program solicitation first-page excerpt
+source: "NSF Program Solicitation — Growing Research Access for Nationally Transformative Equity and Diversity (GRANTED)"
+source_url: "https://www.nsf.gov/funding/opportunities/granted-growing-research-access-nationally-transformative"
+retrieved: 2026-04-18
+
+structural_features:
+  - self-identifying-header
+  - sponsor-explicit
+  - program-number-present
+  - directed-to-applicants
+
+schema_features:
+  - high-confidence-band
+  - empty-secondary-candidates
+  - self-identifying-phrase-rule
+
+validated_by: barrierobison
+validated_at: 2026-04-18
+validated_against_version: "1.0.0"
+
+notes: |
+  Baseline "easy" solicitation case. The document is headed with the literal
+  phrase "Program Solicitation" followed by an NSF announcement number and a
+  program title, which is the highest-signal indicator the classifier looks
+  for. Confidence belongs in the 0.9+ band and secondary_candidates must be
+  empty.
+
+  Input is a short, synthetic reconstruction of the canonical NSF
+  solicitation first-page layout (Program Solicitation header, Important
+  Information box with due dates, Synopsis paragraph). It does not copy any
+  specific public solicitation verbatim, but it mirrors the structure of
+  NSF's PAPPG-standard opening.
