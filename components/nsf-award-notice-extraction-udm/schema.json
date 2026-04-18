@@ -1,0 +1,453 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/nsf-award-notice-extraction-udm/schema.json",
+  "title": "NSF Award Notice Extraction \u2014 UDM Output",
+  "description": "Flat JSON contract for an NSF Award Notice (or amendment notice) extracted to the Unified Data Model as extended for research administration. One JSON object per notice. Amendment 000 represents the initial award; subsequent amendment numbers represent modifications to an existing award. The ingest service decides whether to create an Award record or an AwardModification record based on amendment_number.",
+  "version": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "award_number",
+    "award_title",
+    "sponsor_name",
+    "amendment_number",
+    "recipient_organization",
+    "project_personnel",
+    "sponsor_contacts",
+    "budget_categories",
+    "subawards",
+    "linked_awards",
+    "terms_and_conditions",
+    "special_conditions"
+  ],
+  "properties": {
+    "award_id": {
+      "type": ["string", "null"],
+      "description": "Stable identifier for the award in the form '<SPONSOR_CODE>-<AWARD_NUMBER>' (e.g., 'NSF-2427549'). Null when no canonical form is appropriate; the ingest service may generate one."
+    },
+    "award_number": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Federal Award Identification Number (FAIN) as published by the sponsor. For NSF, the numeric award ID shown as 'Award Number (FAIN)'."
+    },
+    "sponsor_award_number": {
+      "type": ["string", "null"],
+      "description": "Alternate sponsor-side award identifier when distinct from award_number."
+    },
+    "award_title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Full project title as stated in the notice."
+    },
+    "sponsor_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Full name of the sponsoring agency (e.g., 'National Science Foundation'). Do not abbreviate."
+    },
+    "managing_division": {
+      "type": ["string", "null"],
+      "description": "Sponsor sub-division or directorate that owns the award (e.g., 'OIA', 'BIO', 'ENG'). Verbatim from the notice."
+    },
+    "award_instrument": {
+      "type": ["string", "null"],
+      "description": "Award instrument type (e.g., 'Standard Grant', 'Continuing Grant', 'Cooperative Agreement', 'Fellowship', 'IPA'). Verbatim from the notice."
+    },
+    "award_status": {
+      "type": ["string", "null"],
+      "description": "Lifecycle state at the time of this notice. Default 'Active' for initial obligations unless the notice explicitly indicates otherwise."
+    },
+    "is_research_and_development": {
+      "type": ["boolean", "null"],
+      "description": "True when the notice explicitly flags the award as an R&D Award. Null when the flag is not present."
+    },
+    "is_collaborative_research": {
+      "type": "boolean",
+      "description": "True when the award title begins with 'Collaborative Research:' or the notice explicitly indicates a Collaborative Research configuration. Sibling awards are captured in linked_awards."
+    },
+    "funding_opportunity_number": {
+      "type": ["string", "null"],
+      "description": "Program announcement / solicitation identifier referenced by the notice (e.g., 'PD 23-221Y', 'NSF 26-508')."
+    },
+    "funding_opportunity_title": {
+      "type": ["string", "null"],
+      "description": "Program name accompanying funding_opportunity_number."
+    },
+    "cfda_number": {
+      "type": ["string", "null"],
+      "description": "CFDA / Assistance Listing number. Comma-separated when multiple are listed."
+    },
+    "cfda_name": {
+      "type": ["string", "null"],
+      "description": "CFDA / Assistance Listing descriptive name."
+    },
+    "proposal_number": {
+      "type": ["string", "null"],
+      "description": "Sponsor's proposal number tying this award to its originating proposal. Often identical to award_number for NSF."
+    },
+    "amendment_number": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Amendment sequence. '000' denotes the initial obligation / new project; subsequent values ('001', '002', ...) denote modifications."
+    },
+    "amendment_type": {
+      "type": ["string", "null"],
+      "description": "Type of amendment as named in the notice (e.g., 'New Project', 'Administrative', 'No-Cost Extension', 'Supplemental', 'Budget Reallocation')."
+    },
+    "amendment_date": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "ISO date of the amendment action."
+    },
+    "amendment_description": {
+      "type": ["string", "null"],
+      "description": "Free-text narrative block describing the action and any special conditions embedded in it. Preserve verbatim where possible; structured items derived from this block also appear in special_conditions."
+    },
+    "award_date": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "ISO date on which the sponsor executed the award (may equal amendment_date for initial obligations)."
+    },
+    "award_received_date": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "ISO date on which the recipient received the notice, when that information is preserved in the document (e.g., email header date). Null when not present."
+    },
+    "start_date": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "Start date of the period of performance (ISO)."
+    },
+    "end_date": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "End date of the period of performance (ISO)."
+    },
+    "amount_obligated_this_amendment": {
+      "type": ["number", "null"],
+      "description": "USD obligated by this specific notice / amendment. Plain number, no currency symbol."
+    },
+    "total_intended_amount": {
+      "type": ["number", "null"],
+      "description": "Sponsor's total intended award amount across the full period of performance."
+    },
+    "total_obligated_to_date": {
+      "type": ["number", "null"],
+      "description": "Cumulative obligated amount after this amendment (includes all prior amendments)."
+    },
+    "cost_share_approved_amount": {
+      "type": ["number", "null"],
+      "description": "Approved cost share / matching amount in USD. Emit 0 (not null) when the notice states no cost share is approved."
+    },
+    "expenditure_limitation": {
+      "type": ["string", "null"],
+      "description": "Expenditure limitation as stated in the notice (e.g., 'Not Applicable', or a specific rule). Verbatim."
+    },
+    "indirect_cost_rate_percent": {
+      "type": ["number", "null"],
+      "description": "Indirect cost (F&A) rate as a percentage (e.g., 38.0 for 38%). Do not include the '%' symbol."
+    },
+    "indirect_cost_base": {
+      "type": ["string", "null"],
+      "enum": ["MTDC", "TDC", "TFFA", "SWB", "Other", null],
+      "description": "Indirect cost base. 'MTDC' = Modified Total Direct Costs, 'TDC' = Total Direct Costs, 'TFFA' = Total Federal Funds Awarded, 'SWB' = Salaries and Wages Base. Use 'Other' when the base does not match these codes."
+    },
+    "recipient_organization": {
+      "type": "object",
+      "description": "Institution receiving the award.",
+      "additionalProperties": false,
+      "required": ["legal_name"],
+      "properties": {
+        "legal_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Legal business name as stated in the notice."
+        },
+        "address": {
+          "type": ["string", "null"],
+          "description": "Street address including city, state, and ZIP. Verbatim."
+        },
+        "email": {
+          "type": ["string", "null"],
+          "description": "Official recipient email address (often the institutional sponsored programs office inbox)."
+        },
+        "uei": {
+          "type": ["string", "null"],
+          "description": "Unique Entity Identifier (12 characters)."
+        }
+      }
+    },
+    "current_budget_period": {
+      "type": ["object", "null"],
+      "description": "The budget period this notice covers. For Standard Grants the entire period of performance is a single budget period. For Continuing Grants this is the specific period being obligated.",
+      "additionalProperties": false,
+      "required": ["start_date", "end_date", "obligated_amount"],
+      "properties": {
+        "period_number": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Ordinal of this budget period within the award (1 for the first period)."
+        },
+        "period_label": {
+          "type": ["string", "null"],
+          "description": "Optional label (e.g., 'Year 1', 'FY2025')."
+        },
+        "start_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "direct_cost": {
+          "type": ["number", "null"],
+          "description": "Total direct cost (category H in the NSF-format budget)."
+        },
+        "indirect_cost": {
+          "type": ["number", "null"],
+          "description": "Total indirect / F&A cost (category I)."
+        },
+        "obligated_amount": {
+          "type": "number",
+          "description": "Obligated amount for this period (category J on a single-period award, or the period-specific obligation for multi-period continuations)."
+        }
+      }
+    },
+    "project_personnel": {
+      "type": "array",
+      "description": "Every named project participant listed in the notice. Captures role, name, email, organization, and whether they are at the recipient institution.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "name"],
+        "properties": {
+          "role": {
+            "type": "string",
+            "description": "Role label as stated in the notice (e.g., 'PI', 'co-PI', 'Senior Personnel', 'Key Person')."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Full name as stated."
+          },
+          "email": {
+            "type": ["string", "null"]
+          },
+          "organization": {
+            "type": ["string", "null"],
+            "description": "The person's home organization as stated in the notice. Not resolved to an Organization_ID by the extractor."
+          },
+          "is_at_recipient_institution": {
+            "type": ["boolean", "null"],
+            "description": "True when the person's organization matches recipient_organization.legal_name. This flag drives subaward inference."
+          }
+        }
+      }
+    },
+    "sponsor_contacts": {
+      "type": "array",
+      "description": "Sponsor-side contacts listed in the notice (grants officers, program officers). Distinct from project_personnel; these are not on the award team.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "name"],
+        "properties": {
+          "role": {
+            "type": "string",
+            "description": "Role label as stated (e.g., 'Managing Grants Official', 'Awarding Official', 'Managing Program Officer')."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": ["string", "null"]
+          },
+          "phone": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    },
+    "budget_categories": {
+      "type": "array",
+      "description": "Every stated line item of the NSF-format budget (A\u2013M and their subcategories). Includes stated totals (H, J, L) as separate entries \u2014 do not re-compute. Omit entries that are not printed in the notice.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "label"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[A-M]$",
+            "description": "Top-level category letter A\u2013M (NSF-format budget)."
+          },
+          "subcode": {
+            "type": ["string", "null"],
+            "description": "Subcategory name when the line falls under a parent category (e.g., 'PostDoctoral', 'OtherProfessionals', 'ParticipantSupportStipends', 'Subawards'). Null for top-level lines."
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Line label as printed (e.g., 'Senior Personnel', 'Post Doctoral Scholars', 'Participant Support Costs Travel')."
+          },
+          "amount": {
+            "type": ["number", "null"],
+            "description": "Dollar amount. Plain number. Null when the line reports a count only (e.g., 'Total Number of Participants')."
+          },
+          "count": {
+            "type": ["number", "null"],
+            "description": "Person count or participant count associated with this line. Null when the line is amount-only."
+          },
+          "calendar_months": {
+            "type": ["number", "null"]
+          },
+          "academic_months": {
+            "type": ["number", "null"]
+          },
+          "summer_months": {
+            "type": ["number", "null"]
+          }
+        }
+      }
+    },
+    "subawards": {
+      "type": "array",
+      "description": "Subrecipient entries. NSF notices rarely itemize subawardees with allocations \u2014 they show a single Subawards line in category G and list Co-PIs at external institutions. Emit explicit entries when the notice names them. Also emit an INFERRED entry when a Co-PI's organization differs from the recipient AND the budget shows a non-zero Subawards line; set inferred=true and leave amounts null.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["subawardee_name", "inferred"],
+        "properties": {
+          "subawardee_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pi_name": {
+            "type": ["string", "null"]
+          },
+          "pi_email": {
+            "type": ["string", "null"]
+          },
+          "description": {
+            "type": ["string", "null"],
+            "description": "Scope of work reference or, for inferred entries, a note explaining the basis of inference and the aggregate Subawards line amount from the budget."
+          },
+          "obligated_amount": {
+            "type": ["number", "null"]
+          },
+          "anticipated_amount": {
+            "type": ["number", "null"]
+          },
+          "uei": {
+            "type": ["string", "null"]
+          },
+          "inferred": {
+            "type": "boolean",
+            "description": "True when the entry was derived from cross-referencing Co-PI organizations against the recipient and the Subawards budget line rather than an explicit enumeration in the notice."
+          }
+        }
+      }
+    },
+    "linked_awards": {
+      "type": "array",
+      "description": "Related awards referenced by this notice. Populated when the notice mentions a parent, sibling (Collaborative Research), predecessor, or companion award.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["relationship", "award_number"],
+        "properties": {
+          "relationship": {
+            "type": "string",
+            "enum": ["collaborative_sibling", "parent", "predecessor", "companion", "supplement_to", "other"]
+          },
+          "award_number": {
+            "type": "string",
+            "minLength": 1
+          },
+          "institution": {
+            "type": ["string", "null"]
+          },
+          "notes": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    },
+    "terms_and_conditions": {
+      "type": "array",
+      "description": "Cited authorities governing the award (statutes, agency-wide terms, agency-specific requirements, policy guide chapters). One entry per distinct citation.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["citation"],
+        "properties": {
+          "citation": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the authority (e.g., 'Research Terms and Conditions', 'NSF Agency Specific Requirements', 'NSF Proposal & Award Policies & Procedures Guide (PAPPG)')."
+          },
+          "citation_date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "ISO date version of the cited authority, when stated."
+          },
+          "url": {
+            "type": ["string", "null"],
+            "format": "uri"
+          },
+          "applicability_notes": {
+            "type": ["string", "null"],
+            "description": "Any scoping notes from the notice (e.g., a specific PAPPG chapter cited for a specific purpose)."
+          }
+        }
+      }
+    },
+    "special_conditions": {
+      "type": "array",
+      "description": "Award-specific conditions and obligations extracted from the amendment description and any other narrative in the notice. Categorized for downstream workflow routing.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "category"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "code": {
+            "type": ["string", "null"],
+            "pattern": "^[A-Z0-9_]{1,50}$"
+          },
+          "description": {
+            "type": ["string", "null"],
+            "description": "Detailed condition language, preserving the notice's wording for prescribed terms."
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "reporting",
+              "scope",
+              "budget",
+              "subaward",
+              "participant_support",
+              "personnel",
+              "compliance",
+              "publications",
+              "data_sharing",
+              "other"
+            ]
+          },
+          "action_required": {
+            "type": ["boolean", "null"],
+            "description": "True when the condition requires an action (written policies, separate ledgers, prior approval, etc.)."
+          },
+          "source_section": {
+            "type": ["string", "null"],
+            "description": "Section of the notice from which the condition was extracted (e.g., 'Amendment Description', 'General Terms and Conditions')."
+          }
+        }
+      }
+    }
+  }
+}

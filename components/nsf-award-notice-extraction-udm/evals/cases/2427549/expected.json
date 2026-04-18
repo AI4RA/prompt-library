@@ -1,0 +1,484 @@
+{
+  "award_id": "NSF-2427549",
+  "award_number": "2427549",
+  "sponsor_award_number": null,
+  "award_title": "Crossing the Innovation Valley of Death: Democratizing Data and Artificial Intelligence for Research Administration",
+  "sponsor_name": "National Science Foundation",
+  "managing_division": "OIA",
+  "award_instrument": "Standard Grant",
+  "award_status": "Active",
+  "is_research_and_development": true,
+  "is_collaborative_research": false,
+  "funding_opportunity_number": "PD 23-221Y",
+  "funding_opportunity_title": "Growing Research Access for Nationally Transformative Equity and Diversity",
+  "cfda_number": "47.083",
+  "cfda_name": "Office of Integrative Activities (Predominant source of funding for SEFA reporting)",
+  "proposal_number": "2427549",
+  "amendment_number": "000",
+  "amendment_type": "New Project",
+  "amendment_date": "2024-09-10",
+  "amendment_description": "The National Science Foundation hereby awards a Standard Grant for support of the project described in the proposal referenced above as modified by revised budget dated 07/26/2024.\n\nFunds provided for participant support may not be diverted by the awardee to other categories of expense without the prior written approval of the cognizant NSF Program Officer. Since participant support cost is not a normal account classification, the awardee organization must be able to separately identify participant support costs. It is highly recommended that separate accounts, sub-accounts, sub-task, or sub-ledgers be established to accumulate these costs. The awardee should have written policies and procedures to segregate participant support costs.\n\nThe Foundation authorizes the awardee to enter into the proposed subaward arrangement. The subaward agreement should contain appropriate provisions in accordance with the award terms and conditions in effect at the time of this award amendment, and contain any special conditions included in this award.",
+  "award_date": "2024-09-10",
+  "award_received_date": "2024-09-10",
+  "start_date": "2024-09-15",
+  "end_date": "2029-08-31",
+  "amount_obligated_this_amendment": 4546903,
+  "total_intended_amount": 4546903,
+  "total_obligated_to_date": 4546903,
+  "cost_share_approved_amount": 0,
+  "expenditure_limitation": "Not Applicable",
+  "indirect_cost_rate_percent": 38.0,
+  "indirect_cost_base": "MTDC",
+  "recipient_organization": {
+    "legal_name": "REGENTS OF THE UNIVERSITY OF IDAHO",
+    "address": "875 PERIMETER DR MOSCOW, ID 83844-9803",
+    "email": "osp@uidaho.edu",
+    "uei": "QWYKRJH5NNJ3"
+  },
+  "current_budget_period": {
+    "period_number": 1,
+    "period_label": null,
+    "start_date": "2024-09-15",
+    "end_date": "2029-08-31",
+    "direct_cost": 3688149,
+    "indirect_cost": 858754,
+    "obligated_amount": 4546903
+  },
+  "project_personnel": [
+    {
+      "role": "PI",
+      "name": "Sarah S Martonick",
+      "email": "smartonick@uidaho.edu",
+      "organization": "REGENTS OF THE UNIVERSITY OF IDAHO",
+      "is_at_recipient_institution": true
+    },
+    {
+      "role": "co-PI",
+      "name": "Barrie Robison",
+      "email": "brobison@uidaho.edu",
+      "organization": "REGENTS OF THE UNIVERSITY OF IDAHO",
+      "is_at_recipient_institution": true
+    },
+    {
+      "role": "co-PI",
+      "name": "Lucas J Sheneman",
+      "email": "sheneman@uidaho.edu",
+      "organization": "REGENTS OF THE UNIVERSITY OF IDAHO",
+      "is_at_recipient_institution": true
+    },
+    {
+      "role": "co-PI",
+      "name": "Sylvia Bradshaw",
+      "email": "sylviabradshaw@suu.edu",
+      "organization": "SOUTHERN UTAH UNIVERSITY",
+      "is_at_recipient_institution": false
+    }
+  ],
+  "sponsor_contacts": [
+    {
+      "role": "Managing Grants Official",
+      "name": "Cartia Brown-Morgan",
+      "email": "cbrownmo@nsf.gov",
+      "phone": "(703) 292-8709"
+    },
+    {
+      "role": "Awarding Official",
+      "name": "Jannele L. Gosey",
+      "email": "jgosey@nsf.gov",
+      "phone": null
+    },
+    {
+      "role": "Managing Program Officer",
+      "name": "Dina Stroud",
+      "email": "dstroud@nsf.gov",
+      "phone": "(703) 292-5015"
+    }
+  ],
+  "budget_categories": [
+    {
+      "code": "A",
+      "subcode": null,
+      "label": "Senior Personnel",
+      "amount": 153732,
+      "count": 15.0,
+      "calendar_months": 15.0,
+      "academic_months": 0.0,
+      "summer_months": 0.0
+    },
+    {
+      "code": "B",
+      "subcode": "PostDoctoral",
+      "label": "Post Doctoral Scholars",
+      "amount": 0,
+      "count": 0.0,
+      "calendar_months": 0.0,
+      "academic_months": 0.0,
+      "summer_months": 0.0
+    },
+    {
+      "code": "B",
+      "subcode": "OtherProfessionals",
+      "label": "Other Professionals",
+      "amount": 846727,
+      "count": 10.0,
+      "calendar_months": 60.0,
+      "academic_months": 0.0,
+      "summer_months": 0.0
+    },
+    {
+      "code": "B",
+      "subcode": "GraduateStudents",
+      "label": "Graduate Students",
+      "amount": 0,
+      "count": 0.0,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "B",
+      "subcode": "UndergraduateStudents",
+      "label": "Undergraduate Students",
+      "amount": 0,
+      "count": 0.0,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "B",
+      "subcode": "SecretarialClerical",
+      "label": "Secretarial - Clerical",
+      "amount": 0,
+      "count": 0.0,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "B",
+      "subcode": "Other",
+      "label": "Other",
+      "amount": 132123,
+      "count": 11.0,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "B",
+      "subcode": "TotalSalariesAndWages",
+      "label": "Total Salaries and Wages (A+B)",
+      "amount": 1132582,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "C",
+      "subcode": null,
+      "label": "Fringe Benefits",
+      "amount": 451201,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "C",
+      "subcode": "TotalWithFringe",
+      "label": "Total Salaries, Wages, Fringe Benefits (A + B + C)",
+      "amount": 1583783,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "D",
+      "subcode": null,
+      "label": "Equipment",
+      "amount": 45000,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "E",
+      "subcode": "Domestic",
+      "label": "Domestic",
+      "amount": 132000,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "E",
+      "subcode": "International",
+      "label": "International",
+      "amount": 0,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "F",
+      "subcode": "Stipends",
+      "label": "Participant Support Costs Stipends",
+      "amount": 52500,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "F",
+      "subcode": "Travel",
+      "label": "Participant Support Costs Travel",
+      "amount": 63000,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "F",
+      "subcode": "Subsistence",
+      "label": "Participant Support Costs Subsistence",
+      "amount": 0,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "F",
+      "subcode": "Other",
+      "label": "Participant Support Costs Other",
+      "amount": 0,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "F",
+      "subcode": "TotalParticipants",
+      "label": "Total Number of Participants",
+      "amount": null,
+      "count": 33.0,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "F",
+      "subcode": "Total",
+      "label": "Total Participant Costs (F)",
+      "amount": 115500,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "G",
+      "subcode": "MaterialsSupplies",
+      "label": "Materials Supplies",
+      "amount": 26500,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "G",
+      "subcode": "Publication",
+      "label": "Publication Costs",
+      "amount": 9000,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "G",
+      "subcode": "ConsultantServices",
+      "label": "Consultant Services",
+      "amount": 397594,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "G",
+      "subcode": "ComputerServices",
+      "label": "Computer Services",
+      "amount": 21000,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "G",
+      "subcode": "Subawards",
+      "label": "Subawards",
+      "amount": 1142772,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "G",
+      "subcode": "Other",
+      "label": "Other",
+      "amount": 215000,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "G",
+      "subcode": "Total",
+      "label": "Total Other Direct Costs (G)",
+      "amount": 1811866,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "H",
+      "subcode": null,
+      "label": "Total Direct Costs (A Through G)",
+      "amount": 3688149,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "I",
+      "subcode": null,
+      "label": "Indirect Costs",
+      "amount": 858754,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "J",
+      "subcode": null,
+      "label": "Total Direct and Indirect Costs (H + I)",
+      "amount": 4546903,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "K",
+      "subcode": null,
+      "label": "Fees",
+      "amount": 0,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "L",
+      "subcode": null,
+      "label": "Total Amount of Request (J) OR (J + K)",
+      "amount": 4546903,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    },
+    {
+      "code": "M",
+      "subcode": null,
+      "label": "Cost Sharing Proposed Level",
+      "amount": 0,
+      "count": null,
+      "calendar_months": null,
+      "academic_months": null,
+      "summer_months": null
+    }
+  ],
+  "subawards": [
+    {
+      "subawardee_name": "SOUTHERN UTAH UNIVERSITY",
+      "pi_name": "Sylvia Bradshaw",
+      "pi_email": "sylviabradshaw@suu.edu",
+      "description": "Implied subaward based on Co-PI Sylvia Bradshaw at Southern Utah University (distinct from the recipient institution). Aggregate Subawards line in Budget Category G totals $1,142,772; individual subawardee allocation is not broken out in the notice.",
+      "obligated_amount": null,
+      "anticipated_amount": null,
+      "uei": null,
+      "inferred": true
+    }
+  ],
+  "linked_awards": [],
+  "terms_and_conditions": [
+    {
+      "citation": "National Science Foundation Act of 1950, as amended",
+      "citation_date": null,
+      "url": null,
+      "applicability_notes": "42 U.S.C. 1861-75. Primary statutory authority for this award."
+    },
+    {
+      "citation": "Research Terms and Conditions (RTCs)",
+      "citation_date": "2020-11-12",
+      "url": "https://www.nsf.gov/awards/managing/rtc.jsp",
+      "applicability_notes": null
+    },
+    {
+      "citation": "NSF Agency Specific Requirements",
+      "citation_date": "2024-05-20",
+      "url": "https://www.nsf.gov/awards/managing/rtc.jsp",
+      "applicability_notes": null
+    },
+    {
+      "citation": "NSF Proposal & Award Policies & Procedures Guide (PAPPG)",
+      "citation_date": null,
+      "url": null,
+      "applicability_notes": "Chapter X.A.3.a cited for rebudgeting authority. The notice explicitly states NSF will not modify awards simply to correct indirect cost rates cited in the award notice."
+    }
+  ],
+  "special_conditions": [
+    {
+      "label": "Participant Support Cost Segregation",
+      "code": "PARTICIPANT_SUPPORT_SEGREGATION",
+      "description": "Funds provided for participant support may not be diverted by the awardee to other categories of expense without the prior written approval of the cognizant NSF Program Officer. Since participant support cost is not a normal account classification, the awardee organization must be able to separately identify participant support costs. It is highly recommended that separate accounts, sub-accounts, sub-task, or sub-ledgers be established to accumulate these costs. The awardee should have written policies and procedures to segregate participant support costs.",
+      "category": "participant_support",
+      "action_required": true,
+      "source_section": "Amendment Description"
+    },
+    {
+      "label": "Subaward Arrangement Authorized",
+      "code": "SUBAWARD_AUTHORIZED",
+      "description": "The Foundation authorizes the awardee to enter into the proposed subaward arrangement. The subaward agreement should contain appropriate provisions in accordance with the award terms and conditions in effect at the time of this award amendment, and contain any special conditions included in this award.",
+      "category": "subaward",
+      "action_required": true,
+      "source_section": "Amendment Description"
+    },
+    {
+      "label": "Indirect Cost Rate Non-Modification",
+      "code": "INDIRECT_COST_RATE_FINAL",
+      "description": "The rates are at the time of award and are based upon the budget submitted to the NSF. It does not include any out-year adjustments. The NSF will not modify awards simply to correct indirect cost rates cited in the award notice. See the Proposal & Award Policies & Procedures Guide (PAPPG) Chapter X.A.3.a. for guidance on re-budgeting authority.",
+      "category": "budget",
+      "action_required": false,
+      "source_section": "Indirect Cost Rates"
+    }
+  ]
+}

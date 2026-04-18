@@ -1,0 +1,47 @@
+case: FAIN 2427549 / Amendment 000
+award_number: "2427549"
+amendment_number: "000"
+award_instrument: Standard Grant
+sponsor: National Science Foundation
+managing_division: OIA
+funding_opportunity_number: PD 23-221Y
+funding_opportunity_title: "Growing Research Access for Nationally Transformative Equity and Diversity"
+cfda_number: "47.083"
+posted: 2024-09-10
+period_of_performance:
+  start: 2024-09-15
+  end: 2029-08-31
+
+structural_features:
+  - amendment-000-initial-obligation
+  - standard-grant-single-period
+  - single-prime-with-inferred-subaward
+  - copi-at-different-institution
+  - rd-award
+  - zero-cost-share
+  - nsf-format-budget-full
+  - participant-support-costs
+  - mtdc-indirect-base
+
+schema_features:
+  - subaward-inference-from-copi-organization
+  - budget-categories-A-through-M
+  - recipient-organization-object
+  - current-budget-period-object
+  - terms-and-conditions-nsf-boilerplate
+  - special-conditions-participant-support-segregation
+  - special-conditions-subaward-authorization
+
+validated_by: barrierobison
+validated_at: 2026-04-18
+validated_against_version: "1.0.0"
+
+notes: |
+  First case for this component. Representative of the most common NSF
+  Award Notice shape: a Standard Grant initial obligation to a single
+  prime institution, where collaboration with a second institution is
+  expressed via a Co-PI on a subaward rather than separate awards. The
+  notice does not itemize the subrecipient's allocation; the aggregate
+  Subawards line in budget category G totals $1,142,772 but individual
+  subawardees are not broken out. expected.json exercises the schema's
+  subaward inference rule on this pattern.
