@@ -34,6 +34,12 @@ The repository itself is not versioned by tag. Consumers pin to a commit SHA plu
 3. Add at least one eval case under `evals/cases/`
 4. Register any new tags or categories in `taxonomy.md`
 
+## CI
+
+A GitHub Actions workflow ([`.github/workflows/lint.yml`](.github/workflows/lint.yml)) runs [`.github/scripts/lint_components.py`](.github/scripts/lint_components.py) on every PR and push to `main`. It checks that each component has `README.md` + `CHANGELOG.md`, that every manifestation has valid YAML frontmatter with the required fields, that `version` is semver, that `category` / `domain` / `status` values exist in `taxonomy.md`, and that all manifestations under one component share the same `version` (lockstep).
+
+To run it locally: `pip install pyyaml && python .github/scripts/lint_components.py`.
+
 ## Shared vocabulary
 
 See [`taxonomy.md`](taxonomy.md) for the canonical set of tags, categories, domains, and manifestation types. Prefer existing vocabulary; propose additions in the same PR that introduces a component needing them.
