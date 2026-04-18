@@ -1,0 +1,32 @@
+solicitation: NSF 26-508
+program: "TechAccess: AI-Ready America — State/Territory Coordination Hubs"
+agency: National Science Foundation (lead) with DOL, USDA-NIFA, SBA
+parent_guide: NSF PAPPG
+posted: 2026-03-25
+rounds: 3
+loi_required: true
+cost_sharing: prohibited
+structural_features:
+  - multi-round
+  - letter-of-intent
+  - per-organization-proposal-limit
+  - partner-agencies
+  - pappg-deviations
+  - mandated-section-headers
+  - solicitation-specific-review-criteria
+schema_features:
+  - special_conditions-per-round
+  - structured_rule_cost_sharing
+  - structured_rule_proposal_limit_per_institution
+  - pappg_deviations-populated
+  - compliance-no-restriction-confirmation
+validated_by: barrierobison
+validated_at: 2026-04-18
+notes: |
+  Parity case with components/rfp-extraction/evals/cases/NSF_26-508. The two
+  files capture the same source truth in their respective output formats
+  (human checklist vs. structured JSON). The source document contains an
+  apparent inconsistency in the Round 2 schedule (LOI date Dec 15 2027 but
+  full-proposal date Jan 15 2027); expected.json preserves the values as
+  stated and flags the anomaly in the description of the corresponding
+  special_conditions entries.

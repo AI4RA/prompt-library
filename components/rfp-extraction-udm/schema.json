@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/rfp-extraction-udm/schema.json",
+  "title": "RFP Extraction — UDM Output",
+  "description": "Flat JSON contract for a funding announcement extracted to the Unified Data Model as extended for research administration. Scalar fields populate a single RFA record; the nine list-valued fields each create typed requirement rows categorized for downstream ingest.",
+  "version": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "rfa_title",
+    "sponsor_name",
+    "required_documents",
+    "formatting",
+    "review_criteria",
+    "eligibility",
+    "budget_constraints",
+    "compliance",
+    "submission_requirements",
+    "special_conditions",
+    "pappg_deviations"
+  ],
+  "properties": {
+    "rfa_id": {
+      "type": ["string", "null"],
+      "description": "Stable identifier for the announcement. When the sponsor publishes an opportunity number, use it prefixed with the sponsor code (e.g., 'NSF-26-508'). Null when no canonical identifier is available; the ingest service will assign one."
+    },
+    "rfa_number": {
+      "type": ["string", "null"],
+      "description": "Official announcement number as published by the sponsor (e.g., '26-508', 'PA-24-246', 'DE-FOA-0003117'). No prefix."
+    },
+    "rfa_title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Full title of the funding opportunity, including any track or component designation."
+    },
+    "sponsor_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Full name of the lead sponsoring agency or organization (e.g., 'National Science Foundation'). Do not emit an identifier or abbreviation; the ingest service resolves this to a Sponsor_Organization_ID."
+    },
+    "program_code": {
+      "type": ["string", "null"],
+      "description": "The sponsor's internal program or division code (e.g., 'NSF/TIP/ITE', 'NIH/NCI/CCR'). Null when not specified."
+    },
+    "announcement_url": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "description": "Canonical URL of the announcement on the sponsor's site."
+    },
+    "opportunity_number": {
+      "type": ["string", "null"],
+      "description": "Grants.gov or other portal opportunity ID, when distinct from rfa_number."
+    },
+    "cfda_number": {
+      "type": ["string", "null"],
+      "description": "CFDA / Assistance Listing number(s). Comma-separated when the announcement lists multiple (e.g., '47.070, 47.076')."
+    },
+    "announcement_date": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "ISO date (YYYY-MM-DD) the announcement was posted."
+    },
+    "submission_deadline": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "ISO date (YYYY-MM-DD) of the final full proposal deadline. For multi-round announcements, use the LAST round's full proposal deadline; document every round in special_conditions. Null only when the announcement is open-ended (rolling submissions)."
+    },
+    "loi_deadline": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "ISO date of the Letter of Intent / Notice of Intent deadline. For multi-round announcements, use the LAST round's LOI deadline; document every round in special_conditions."
+    },
+    "preproposal_deadline": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "ISO date of the preliminary proposal / pre-application / white paper deadline, when distinct from LOI."
+    },
+    "funding_floor": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Minimum award amount per award in USD (plain number, no currency symbol). Null when not stated."
+    },
+    "funding_ceiling": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Maximum total award amount per award in USD (plain number). When the announcement states a per-year cap over a multi-year project, emit the per-award total (per-year cap × maximum years). Null when not stated."
+    },
+    "expected_awards": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Estimated number of awards. When stated as a range ('4 to 6'), use the upper bound."
+    },
+    "max_duration_months": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "description": "Maximum project duration in MONTHS (not years). Convert years to months by multiplying by 12. Use the standard maximum; document any conditional extension (e.g., '4th year with phase-out plan') in special_conditions."
+    },
+    "submission_method": {
+      "type": ["string", "null"],
+      "description": "Submission portal as named by the sponsor (e.g., 'Research.gov', 'Grants.gov', 'eRA Commons', 'PAMS')."
+    },
+    "rfa_status": {
+      "type": ["string", "null"],
+      "enum": ["Active", "Closed", "Archived", "Draft", null],
+      "description": "Lifecycle state. Use 'Active' unless the announcement explicitly indicates closed, archived, or draft status."
+    },
+    "required_documents": {
+      "type": "array",
+      "description": "Documents the proposal must or may include (Project Summary, Project Description, Budget Justification, Biosketches, etc.). Both required and explicitly-optional documents go here; distinguish via is_required.",
+      "items": { "$ref": "#/$defs/requirementEntry" }
+    },
+    "formatting": {
+      "type": "array",
+      "description": "Formatting constraints: page limits, font, margins, line spacing, numbering.",
+      "items": { "$ref": "#/$defs/requirementEntry" }
+    },
+    "review_criteria": {
+      "type": "array",
+      "description": "Merit review criteria (standard agency criteria plus any solicitation-specific additions). Include weights in description when stated.",
+      "items": { "$ref": "#/$defs/requirementEntry" }
+    },
+    "eligibility": {
+      "type": "array",
+      "description": "Eligibility rules for organizations, PIs, Co-PIs, and personnel. Include 'no restriction' statements explicitly — the absence of a restriction is itself a compliance fact.",
+      "items": { "$ref": "#/$defs/requirementEntry" }
+    },
+    "budget_constraints": {
+      "type": "array",
+      "description": "Budget rules: caps, F&A limits, cost sharing, equipment thresholds, participant support, subaward rules, salary caps.",
+      "items": { "$ref": "#/$defs/requirementEntry" }
+    },
+    "compliance": {
+      "type": "array",
+      "description": "Compliance disclosure requirements (COI, SFI, RCR training, foreign interference, responsible conduct of research, etc.).",
+      "items": { "$ref": "#/$defs/requirementEntry" }
+    },
+    "submission_requirements": {
+      "type": "array",
+      "description": "Submission logistics beyond the portal name: file formats, collaborative proposal rules, AOR requirements, multi-institution coordination.",
+      "items": { "$ref": "#/$defs/requirementEntry" }
+    },
+    "special_conditions": {
+      "type": "array",
+      "description": "Special award conditions and post-award obligations. Also the correct home for per-round deadline details in multi-round announcements, conditional duration extensions, and coordination/collaboration mandates.",
+      "items": { "$ref": "#/$defs/requirementEntry" }
+    },
+    "pappg_deviations": {
+      "type": "array",
+      "description": "Places where the announcement explicitly deviates from the agency's parent proposal guide (PAPPG, SF424, Merit Review Guide, etc.). Highest-risk items for compliance review.",
+      "items": { "$ref": "#/$defs/requirementEntry" }
+    }
+  },
+  "$defs": {
+    "requirementEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "is_required"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable name of the requirement, preserving the announcement's exact wording for prescribed terms."
+        },
+        "code": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Z0-9_]{1,50}$",
+          "description": "Machine-readable code (SCREAMING_SNAKE_CASE, max 50 chars). Omit or set null when no natural code exists; the ingest mapper will auto-generate one from the label."
+        },
+        "description": {
+          "type": ["string", "null"],
+          "description": "Expanded detail or context — conditions under which it applies, consequences of noncompliance, related requirements."
+        },
+        "page_limit": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Page or word limit for documents and formatting items. Null for non-paginated items."
+        },
+        "format_spec": {
+          "type": ["string", "null"],
+          "description": "Format specification for documents and formatting items (e.g., 'PDF, single-column', '11pt Times New Roman')."
+        },
+        "is_required": {
+          "type": "boolean",
+          "description": "True for mandatory requirements, false for optional. For 'no restriction' eligibility entries, is_required is true (the check itself is required)."
+        },
+        "source_section": {
+          "type": ["string", "null"],
+          "description": "Citation to the source location in the announcement or parent guide (e.g., 'PAPPG II.D.2.b', 'Section IV.C', 'NOT-AG-24-012'). Populate whenever traceable."
+        },
+        "structured_rule_type": {
+          "type": ["string", "null"],
+          "description": "Machine-readable rule type for entries that can be enforced programmatically. Use a stable snake_case identifier."
+        },
+        "structured_rule_value": {
+          "type": ["string", "null"],
+          "description": "Value associated with structured_rule_type (e.g., 'prohibited', 'required_10_percent', '200000', 'PhD')."
+        }
+      }
+    }
+  }
+}
