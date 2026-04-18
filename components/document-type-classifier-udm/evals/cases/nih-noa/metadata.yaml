@@ -1,0 +1,35 @@
+case: NIH Notice of Award header block
+source: "Synthetic NIH Notice of Award modeled on the public HHS-3734 format"
+source_url: "https://grants.nih.gov/grants/policy/nihgps/html5/section_5/5.5_notice_of_award.htm"
+retrieved: 2026-04-18
+
+structural_features:
+  - self-identifying-header
+  - non-nsf-sponsor
+  - initial-award-not-amendment
+  - fain-present
+  - institute-and-action-code
+
+schema_features:
+  - high-confidence-band
+  - empty-secondary-candidates
+  - sponsor-agnostic-rule
+  - initial-vs-amendment-rule
+
+validated_by: barrierobison
+validated_at: 2026-04-18
+validated_against_version: "1.0.0"
+
+notes: |
+  Proves the sponsor-agnostic rule: the classifier must return
+  document_type: "award_notice" for a non-NSF award document that carries
+  the canonical "Notice of Award" header, a FAIN, a period of performance,
+  and an obligation amount. The document is a new (Type 1) action with no
+  amendment or modification marker, so it is award_notice, not
+  award_amendment.
+
+  Input is a synthetic reconstruction of the NIH NoA header format (HHS-3734
+  style). It does not copy any specific award verbatim; all names, amounts,
+  and identifiers are fictional. The structural indicators (Notice of Award
+  label, FAIN, institute code, type code, DUNS/UEI, project period) are
+  what the classifier should key on.

@@ -1,0 +1,40 @@
+case: Short ambiguous letter — weak letter of support vs. general correspondence
+source: "Synthetic short departmental letter drafted to exercise the confidence band 0.5–0.7 and the secondary_candidates rule"
+retrieved: 2026-04-18
+
+structural_features:
+  - letterhead-present
+  - salutation-present
+  - references-a-proposal
+  - no-concrete-commitment
+  - short-one-paragraph
+
+schema_features:
+  - mid-confidence-band
+  - populated-secondary-candidates
+  - secondary-must-differ-from-top
+  - emit-rule-top-below-0.8
+
+validated_by: barrierobison
+validated_at: 2026-04-18
+validated_against_version: "1.0.0"
+
+notes: |
+  Designed to exercise the secondary_candidates emit rule. The document
+  looks like a letter of support (letterhead, date, salutation, signature
+  block, references a specific proposal) but carries no concrete
+  commitment — no resources offered, no collaboration stated, no letter of
+  intent to subcontract, no personnel hours pledged. It reads like generic
+  departmental correspondence referencing a proposal.
+
+  A calibrated classifier should lean toward letter_support because of the
+  structural features but should be uncertain enough (top confidence in
+  the 0.6–0.75 band) to emit at least one secondary candidate. "other" is
+  the natural second choice because the letter's substance is closer to
+  general correspondence than to a committal letter of support.
+
+  The acceptable expected.json allows some flexibility: top-level
+  document_type must be letter_support, confidence must be strictly below
+  0.8 (so secondary_candidates is required non-empty), and the secondary
+  array must include 'other' with confidence below the top-level and
+  above 0.

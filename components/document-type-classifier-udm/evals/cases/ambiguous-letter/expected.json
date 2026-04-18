@@ -1,0 +1,13 @@
+{
+  "document_type": "letter_support",
+  "confidence": 0.68,
+  "evidence_excerpt": "I am writing in reference to your forthcoming proposal to the National Science Foundation, \"Phenotypic Plasticity in Alpine Plant Communities under Shifting Snowpack Regimes.\"",
+  "rationale": "Letterhead, date, salutation, named-proposal reference, and signature block match the letter-of-support form, but the body contains no concrete commitment of resources, collaboration, or effort, which lowers confidence.",
+  "secondary_candidates": [
+    {
+      "document_type": "other",
+      "confidence": 0.27,
+      "rationale": "The letter's substance — no resources offered, no collaborative role, no specific commitment — reads closer to general departmental correspondence than to a committal letter of support."
+    }
+  ]
+}

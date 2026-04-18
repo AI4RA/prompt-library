@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/document-type-classifier-udm/schema.json",
+  "title": "Document Type Classifier — UDM Output",
+  "description": "Single JSON object classifying a research-administration document into a controlled type vocabulary. Consumed by routing layers that dispatch the document to the appropriate downstream extractor or reviewer. One object per input document.",
+  "version": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "document_type",
+    "confidence",
+    "evidence_excerpt",
+    "rationale",
+    "secondary_candidates"
+  ],
+  "properties": {
+    "document_type": {
+      "$ref": "#/$defs/documentTypeCode",
+      "description": "Top-ranked document type. Emit 'other' rather than a guess when the input does not match any positive indicator."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Model confidence in the top-ranked document_type. Calibrated per the prompt's confidence rule: 0.9+ for documents with a canonical header or explicit self-identifying phrase, 0.7–0.9 for strong structural indicators without a literal label, 0.5–0.7 when several types plausibly fit, below 0.5 when the evidence is weak (prefer 'other' with low confidence over a speculative code)."
+    },
+    "evidence_excerpt": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A verbatim substring of the input that grounds the classification. Must be copyable from the source text; do not paraphrase. Keep it short (roughly one sentence or a short header line)."
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1,
+      "description": "One short sentence explaining the decision, referencing the indicator that tipped the classification."
+    },
+    "secondary_candidates": {
+      "type": "array",
+      "description": "Runner-up document types. Emit entries only when the top confidence is below 0.8 or a plausible alternative exceeds 0.3. Sorted by confidence descending. Empty array when the classification is unambiguous.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["document_type", "confidence", "rationale"],
+        "properties": {
+          "document_type": {
+            "$ref": "#/$defs/documentTypeCode",
+            "description": "Runner-up code. Must differ from the top-level document_type."
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Must be strictly less than or equal to the top-level confidence."
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1,
+            "description": "One short sentence explaining why this type remains plausible."
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "documentTypeCode": {
+      "type": "string",
+      "enum": [
+        "solicitation",
+        "proposal_narrative",
+        "biosketch",
+        "current_pending",
+        "facilities",
+        "data_mgmt",
+        "letter_support",
+        "budget",
+        "budget_justification",
+        "award_notice",
+        "award_amendment",
+        "jit_response",
+        "closeout_letter",
+        "other"
+      ],
+      "description": "Controlled vocabulary of research-administration document types. 'solicitation' covers RFP / RFA / FOA / NOFO / program announcement. 'proposal_narrative' is the technical narrative of a proposal. 'biosketch' is an NSF or NIH biographical sketch. 'current_pending' is the Current and Pending (Other) Support disclosure. 'facilities' is the Facilities, Equipment, and Other Resources section. 'data_mgmt' is the Data Management (and Sharing) Plan. 'letter_support' is a letter of support, commitment, or collaboration. 'budget' is a structured budget workbook or table. 'budget_justification' is the narrative justification for a budget. 'award_notice' is an initial Notice of Award. 'award_amendment' is a modification or amendment to an existing award. 'jit_response' is a Just-in-Time submission. 'closeout_letter' is a closeout notification or final-report package. 'other' is any document not matching the positive indicators of the above types."
+    }
+  }
+}
