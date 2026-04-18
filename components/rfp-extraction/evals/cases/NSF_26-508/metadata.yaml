@@ -15,6 +15,7 @@ structural_features:
   - pappg-deviations
 validated_by: barrierobison
 validated_at: 2026-04-17
+validated_against_version: "1.0.0"
 notes: |
   First validated case. Exercises multi-round date handling, LOI requirements,
   organizational and PI proposal limits, and several explicit PAPPG deviations

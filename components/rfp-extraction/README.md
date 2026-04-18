@@ -3,6 +3,7 @@
 Extracts a comprehensive submission and eligibility checklist from any federal funding announcement — RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, or program solicitation. Output is a single markdown document with GFM checkboxes that PIs can use for proposal development and OSP staff can use for pre-submission compliance review.
 
 **Current version:** 1.1.0
+**Last fully evaluated:** 1.0.0 — agent manifestation added in 1.1.0 without re-running evals
 **Category:** extraction
 **Domain:** research-administration
 **Status:** stable

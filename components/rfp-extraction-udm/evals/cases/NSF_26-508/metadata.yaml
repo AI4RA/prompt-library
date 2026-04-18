@@ -22,6 +22,7 @@ schema_features:
   - compliance-no-restriction-confirmation
 validated_by: barrierobison
 validated_at: 2026-04-18
+validated_against_version: "1.0.0"
 notes: |
   Parity case with components/rfp-extraction/evals/cases/NSF_26-508. The two
   files capture the same source truth in their respective output formats

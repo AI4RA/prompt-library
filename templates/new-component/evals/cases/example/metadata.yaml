@@ -1,0 +1,29 @@
+# Case identity
+case: example-case-slug
+source: "Brief description of the source (e.g., 'NSF 26-508 solicitation')"
+source_url: "https://..."
+retrieved: YYYY-MM-DD
+
+# Which structural features of the input this case exercises. Keep tags short
+# and reusable across cases so coverage gaps are easy to spot.
+structural_features:
+  - edge-case-1
+  - edge-case-2
+
+# Which component features this case exercises (output shape, rule types, etc.).
+schema_features: []
+
+# Validation metadata — REQUIRED.
+# validated_against_version: the component version at which expected.* was last
+#   human-validated. The linter warns when the component's current version has
+#   moved ahead of the minimum validated_against_version across all cases.
+# validated_by: the human who validated the expected output.
+# validated_at: ISO date of validation.
+validated_by: your-handle
+validated_at: YYYY-MM-DD
+validated_against_version: "1.0.0"
+
+# Optional free-form notes on what was confirmed, what was surprising, what
+# should be re-checked on the next revalidation pass.
+notes: |
+  ...

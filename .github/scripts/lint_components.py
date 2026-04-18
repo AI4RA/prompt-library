@@ -5,13 +5,17 @@ Lint components in the AI4RA prompt library.
 Checks:
   1. Each components/<slug>/ has README.md and CHANGELOG.md.
   2. Each manifestation file (prompt.md, skill/SKILL.md, agent/AGENT.md) has
-     YAML frontmatter with required fields: name, version, category, domain, status.
+     YAML frontmatter with required fields.
   3. version matches semver (MAJOR.MINOR.PATCH).
   4. category / domain / status are declared in taxonomy.md.
   5. All manifestation files in one component share the same version (lockstep).
+  6. Each eval case's metadata.yaml declares validated_against_version as
+     semver. The component's "last fully evaluated version" is computed as the
+     minimum across cases; if it trails the current version a WARNING is
+     emitted (non-blocking).
 
-Exits 0 on success, 1 on any error. Errors are printed in GitHub-Actions-friendly
-form (::error file=...::message) so they surface on the PR diff.
+Errors exit 1. Warnings don't affect exit status. Both use GitHub Actions
+annotation format (::error or ::warning file=...::message).
 """
 
 from __future__ import annotations
@@ -28,11 +32,7 @@ TAXONOMY_PATH = REPO_ROOT / "taxonomy.md"
 
 MANIFESTATION_FILES = ["prompt.md", "skill/SKILL.md", "agent/AGENT.md", "system.md"]
 
-# Fields required on every manifestation file.
 COMMON_REQUIRED = ["name", "version"]
-
-# Extra fields required per manifestation type. The canonical prompt carries the
-# task-level taxonomy; platform-specific files carry the fields their platform needs.
 EXTRA_REQUIRED_BY_FILE = {
     "prompt.md": ["category", "domain", "status"],
     "skill/SKILL.md": ["description"],
@@ -44,20 +44,30 @@ SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 FRONTMATTER_RE = re.compile(r"\A---\s*\n(.*?)\n---\s*\n", re.DOTALL)
 
 errors: list[str] = []
+warnings: list[str] = []
+status_lines: list[str] = []
+
+
+def _rel(path: Path) -> Path:
+    return path.relative_to(REPO_ROOT) if path.is_absolute() else path
 
 
 def error(file: Path, message: str) -> None:
-    rel = file.relative_to(REPO_ROOT) if file.is_absolute() else file
-    errors.append(f"::error file={rel}::{message}")
+    errors.append(f"::error file={_rel(file)}::{message}")
+
+
+def warning(file: Path, message: str) -> None:
+    warnings.append(f"::warning file={_rel(file)}::{message}")
+
+
+def parse_semver(s: str) -> tuple[int, int, int] | None:
+    if not isinstance(s, str) or not SEMVER_RE.match(s):
+        return None
+    major, minor, patch = s.split(".")
+    return int(major), int(minor), int(patch)
 
 
 def load_taxonomy(path: Path) -> dict[str, set[str]]:
-    """Parse taxonomy.md for valid values under each ## section.
-
-    Expected format per section:
-      ## Section Name
-      - `value` — description
-    """
     text = path.read_text()
     sections: dict[str, set[str]] = {}
     current: str | None = None
@@ -93,7 +103,6 @@ def parse_frontmatter(file: Path) -> dict | None:
 def check_manifestation(
     file: Path, rel_key: str, taxonomy: dict[str, set[str]]
 ) -> str | None:
-    """Validate a single manifestation file. Returns its version or None."""
     fm = parse_frontmatter(file)
     if fm is None:
         return None
@@ -128,7 +137,81 @@ def check_manifestation(
     return version if isinstance(version, str) and SEMVER_RE.match(version) else None
 
 
-def check_component(component_dir: Path, taxonomy: dict[str, set[str]]) -> None:
+def check_eval_validation(
+    component_dir: Path, component_version: str | None
+) -> str | None:
+    """Returns the component's last fully evaluated version, or None if no
+    cases exist or none declare a valid validated_against_version."""
+    cases_dir = component_dir / "evals" / "cases"
+    if not cases_dir.is_dir():
+        return None
+
+    case_dirs = sorted(p for p in cases_dir.iterdir() if p.is_dir())
+    if not case_dirs:
+        return None
+
+    min_parsed: tuple[int, int, int] | None = None
+    min_case_name: str | None = None
+
+    for case_dir in case_dirs:
+        meta_path = case_dir / "metadata.yaml"
+        if not meta_path.is_file():
+            error(case_dir, f"Eval case '{case_dir.name}' is missing metadata.yaml.")
+            continue
+        try:
+            meta = yaml.safe_load(meta_path.read_text())
+        except yaml.YAMLError as e:
+            error(meta_path, f"Invalid YAML: {e}")
+            continue
+        if not isinstance(meta, dict):
+            error(meta_path, "metadata.yaml must be a YAML mapping.")
+            continue
+
+        v = meta.get("validated_against_version")
+        if v in (None, ""):
+            error(
+                meta_path,
+                "Missing required field 'validated_against_version' (semver string, "
+                "e.g., '1.0.0'). Declares which component version this case's "
+                "expected.* was validated against.",
+            )
+            continue
+        parsed = parse_semver(v)
+        if parsed is None:
+            error(
+                meta_path,
+                f"validated_against_version '{v}' is not semver "
+                f"(expected MAJOR.MINOR.PATCH).",
+            )
+            continue
+
+        if min_parsed is None or parsed < min_parsed:
+            min_parsed = parsed
+            min_case_name = case_dir.name
+
+    if min_parsed is None:
+        return None
+
+    min_version_str = ".".join(str(x) for x in min_parsed)
+    component_parsed = parse_semver(component_version) if component_version else None
+
+    if component_parsed is not None and component_parsed > min_parsed:
+        warning(
+            component_dir,
+            f"Component '{component_dir.name}' is at version {component_version} but "
+            f"last fully evaluated version is {min_version_str} (oldest case: "
+            f"'{min_case_name}'). Re-run evals against the current version and update "
+            f"validated_against_version in the relevant case metadata.yaml, or declare "
+            f"the current version still valid by bumping validated_against_version.",
+        )
+
+    return min_version_str
+
+
+def check_component(
+    component_dir: Path, taxonomy: dict[str, set[str]]
+) -> tuple[str | None, str | None]:
+    """Returns (current_version, last_fully_evaluated_version)."""
     slug = component_dir.name
 
     for required in ["README.md", "CHANGELOG.md"]:
@@ -147,9 +230,10 @@ def check_component(component_dir: Path, taxonomy: dict[str, set[str]]) -> None:
             f"Component '{slug}' has no manifestation files "
             f"(expected at least one of: {', '.join(MANIFESTATION_FILES)}).",
         )
-        return
+        return None, None
 
     versions = {v for _, v in manifestations_found if v is not None}
+    current_version: str | None = None
     if len(versions) > 1:
         listing = ", ".join(
             f"{f.relative_to(REPO_ROOT)}={v}" for f, v in manifestations_found if v
@@ -159,6 +243,11 @@ def check_component(component_dir: Path, taxonomy: dict[str, set[str]]) -> None:
             f"Component '{slug}' has inconsistent versions across manifestations "
             f"(lockstep versioning required): {listing}.",
         )
+    elif len(versions) == 1:
+        current_version = next(iter(versions))
+
+    last_evaluated = check_eval_validation(component_dir, current_version)
+    return current_version, last_evaluated
 
 
 def main() -> int:
@@ -183,16 +272,35 @@ def main() -> int:
         print("No components found under components/ — nothing to lint.")
         return 0
 
+    component_status: list[tuple[str, str | None, str | None]] = []
     for component_dir in component_dirs:
-        check_component(component_dir, taxonomy)
+        current, last = check_component(component_dir, taxonomy)
+        component_status.append((component_dir.name, current, last))
+
+    for w in warnings:
+        print(w)
+    for e in errors:
+        print(e)
+
+    print()
+    print(f"Linted {len(component_dirs)} component(s).")
+    print("Evaluation status:")
+    for slug, current, last in component_status:
+        current_str = current or "?"
+        last_str = last or "none"
+        if current and last:
+            flag = "current" if current == last else f"behind ({last} validated)"
+        elif current and not last:
+            flag = "no validated eval cases"
+        else:
+            flag = "version unknown"
+        print(f"  {slug}: {current_str} — {flag}")
 
     if errors:
-        for e in errors:
-            print(e)
         print(f"\nLint failed with {len(errors)} error(s).", file=sys.stderr)
         return 1
-
-    print(f"Linted {len(component_dirs)} component(s). OK.")
+    if warnings:
+        print(f"\n{len(warnings)} warning(s).")
     return 0
 
 

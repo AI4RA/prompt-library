@@ -31,8 +31,14 @@ The repository itself is not versioned by tag. Consumers pin to a commit SHA plu
 
 1. Copy `templates/new-component/` into `components/<slug>/`
 2. Fill in `README.md`, at least one manifestation file, and the `CHANGELOG.md` 1.0.0 entry
-3. Add at least one eval case under `evals/cases/`
+3. Add at least one eval case under `evals/cases/` — every case's `metadata.yaml` must declare `validated_against_version` (see the evaluation status section below)
 4. Register any new tags or categories in `taxonomy.md`
+
+## Evaluation status
+
+Each eval case's `metadata.yaml` carries `validated_against_version`: the component version at which that case's `expected.*` was last human-validated. The component's **last fully evaluated version** is computed as the minimum `validated_against_version` across its cases. The linter warns (non-blocking) when a component's current version has moved ahead.
+
+When you re-run evals after a version bump and the expected output is still correct, update `validated_against_version` in the relevant case(s) to match the new component version. When the expected output changes, update the output file and `validated_against_version` in the same commit.
 
 ## CI
 
