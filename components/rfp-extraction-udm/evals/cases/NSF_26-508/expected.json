@@ -1,7 +1,7 @@
 {
   "rfa_id": "NSF-26-508",
   "rfa_number": "26-508",
-  "rfa_title": "TechAccess: AI-Ready America \u2014 State/Territory Coordination Hubs",
+  "rfa_title": "TechAccess: AI-Ready America — State/Territory Coordination Hubs",
   "sponsor_name": "National Science Foundation",
   "program_code": null,
   "announcement_url": "https://www.nsf.gov/pubs/2026/nsf26508/nsf26508.htm",
@@ -54,7 +54,7 @@
     {
       "label": "Project Description",
       "code": "PROJECT_DESCRIPTION",
-      "description": "Full narrative; 15-page limit; references cited not counted; must use the five mandated Section 1\u20135 headers verbatim or the proposal will be Returned Without Review.",
+      "description": "Full narrative; 15-page limit; references cited not counted; must use the five mandated Section 1–5 headers verbatim or the proposal will be Returned Without Review.",
       "page_limit": 15,
       "format_spec": null,
       "is_required": true,
@@ -206,7 +206,7 @@
       "structured_rule_value": null
     },
     {
-      "label": "Project Description Section 1 \u2014 Vision and Approach to Responsibilities",
+      "label": "Project Description Section 1 — Vision and Approach to Responsibilities",
       "code": "PD_SECTION_1_VISION_AND_APPROACH",
       "description": "Mandated section header must appear exactly as stated. Describes vision for advancing statewide AI readiness; addresses all five areas of responsibility (AI Learning and Resource Navigator; State/Territory AI Readiness Strategic Plan; AI Deployment Support; AI Readiness Training & Capacity Building; Coordination Within Priority Sectors); evidence of prior statewide/multi-sector experience; strategies for scaling and supporting local pilots.",
       "page_limit": null,
@@ -217,7 +217,7 @@
       "structured_rule_value": null
     },
     {
-      "label": "Project Description Section 2 \u2014 Organizational Background, Team Expertise, and Partnership Rationale",
+      "label": "Project Description Section 2 — Organizational Background, Team Expertise, and Partnership Rationale",
       "code": "PD_SECTION_2_ORG_TEAM_PARTNERSHIPS",
       "description": "Mandated section header must appear exactly as stated. Demonstrates lead organization's statewide convening power, operational capacity, and multi-sector initiative experience; team coordination across education, workforce, industry, and government; AI expertise; partner rationale; governance; Advisory Board (encouraged); identified partnership gaps with filling plans.",
       "page_limit": null,
@@ -228,7 +228,7 @@
       "structured_rule_value": null
     },
     {
-      "label": "Project Description Section 3 \u2014 Current State of AI Planning and Coordination",
+      "label": "Project Description Section 3 — Current State of AI Planning and Coordination",
       "code": "PD_SECTION_3_CURRENT_STATE",
       "description": "Mandated section header must appear exactly as stated. Overview of existing AI readiness efforts in the state/territory; key stakeholders; what is working; gaps and unmet needs; how the Hub will build on existing efforts.",
       "page_limit": null,
@@ -239,7 +239,7 @@
       "structured_rule_value": null
     },
     {
-      "label": "Project Description Section 4 \u2014 Work Plan, Milestones, and Performance Metrics",
+      "label": "Project Description Section 4 — Work Plan, Milestones, and Performance Metrics",
       "code": "PD_SECTION_4_WORK_PLAN",
       "description": "Mandated section header must appear exactly as stated. Work plan for each area of responsibility; milestones and timelines; performance metrics including required measures (individuals trained by category; small businesses and government entities assisted with hours/dollars saved; statewide convenings; national best-practice contributions; AI Deployment Corps trained; organizations receiving technical assistance); metrics must feed into national dashboards.",
       "page_limit": null,
@@ -250,7 +250,7 @@
       "structured_rule_value": null
     },
     {
-      "label": "Project Description Section 5 \u2014 Resource Mobilization and Leveraging Additional Support",
+      "label": "Project Description Section 5 — Resource Mobilization and Leveraging Additional Support",
       "code": "PD_SECTION_5_RESOURCE_MOBILIZATION",
       "description": "Mandated section header must appear exactly as stated. Strategies for attracting additional resources beyond NSF funding; plans for industry, philanthropy, state agency, and other support; integration into Hub activities; expansion, impact, and self-sustainment strategy.",
       "page_limit": null,
@@ -309,7 +309,7 @@
     {
       "label": "Mandated Project Description section headers",
       "code": "MANDATED_SECTION_HEADERS",
-      "description": "Project Description must use Sections 1\u20135 with the exact headers as mandated by the solicitation. Failure to use these five section headers is grounds for Return Without Review.",
+      "description": "Project Description must use Sections 1–5 with the exact headers as mandated by the solicitation. Failure to use these five section headers is grounds for Return Without Review.",
       "page_limit": null,
       "format_spec": null,
       "is_required": true,
@@ -582,7 +582,7 @@
   ],
   "special_conditions": [
     {
-      "label": "Round 1 \u2014 LOI Deadline",
+      "label": "Round 1 — LOI Deadline",
       "code": "ROUND_1_LOI_DEADLINE",
       "description": "Letter of Intent due 2026-06-16, 5:00 p.m. submitting organization's local time.",
       "page_limit": null,
@@ -593,7 +593,7 @@
       "structured_rule_value": null
     },
     {
-      "label": "Round 1 \u2014 Full Proposal Deadline",
+      "label": "Round 1 — Full Proposal Deadline",
       "code": "ROUND_1_FULL_PROPOSAL_DEADLINE",
       "description": "Full proposal due 2026-07-16, 5:00 p.m. submitting organization's local time.",
       "page_limit": null,
@@ -604,7 +604,7 @@
       "structured_rule_value": null
     },
     {
-      "label": "Round 2 \u2014 LOI Deadline",
+      "label": "Round 2 — LOI Deadline",
       "code": "ROUND_2_LOI_DEADLINE",
       "description": "Letter of Intent due 2027-12-15 per the solicitation. NOTE: This date appears inconsistent with the Round 2 Full Proposal date (2027-01-15), which falls approximately eleven months earlier; verify against the current solicitation before relying on either value.",
       "page_limit": null,
@@ -615,7 +615,7 @@
       "structured_rule_value": null
     },
     {
-      "label": "Round 2 \u2014 Full Proposal Deadline",
+      "label": "Round 2 — Full Proposal Deadline",
       "code": "ROUND_2_FULL_PROPOSAL_DEADLINE",
       "description": "Full proposal due 2027-01-15, 5:00 p.m. submitting organization's local time. NOTE: This date appears inconsistent with the Round 2 LOI date (2027-12-15); verify against the current solicitation before relying on either value.",
       "page_limit": null,
@@ -626,7 +626,7 @@
       "structured_rule_value": null
     },
     {
-      "label": "Round 3 \u2014 LOI Deadline",
+      "label": "Round 3 — LOI Deadline",
       "code": "ROUND_3_LOI_DEADLINE",
       "description": "Letter of Intent due 2027-06-01, 5:00 p.m. submitting organization's local time.",
       "page_limit": null,
@@ -637,7 +637,7 @@
       "structured_rule_value": null
     },
     {
-      "label": "Round 3 \u2014 Full Proposal Deadline",
+      "label": "Round 3 — Full Proposal Deadline",
       "code": "ROUND_3_FULL_PROPOSAL_DEADLINE",
       "description": "Full proposal due 2027-07-01, 5:00 p.m. submitting organization's local time.",
       "page_limit": null,

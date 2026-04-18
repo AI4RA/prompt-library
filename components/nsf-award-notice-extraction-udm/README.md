@@ -1,6 +1,6 @@
-# NSF Award Notice Extraction \u2014 UDM JSON
+# NSF Award Notice Extraction — UDM JSON
 
-Extracts an NSF Award Notice (initial obligation or amendment) into a single JSON object conforming to this library's Unified Data Model extension. Designed for the NSF notice format that arrives as a PDF printed from Outlook after OSP receipt \u2014 the email header, boxed notice body, and NSF-format 18-category budget table.
+Extracts an NSF Award Notice (initial obligation or amendment) into a single JSON object conforming to this library's Unified Data Model extension. Designed for the NSF notice format that arrives as a PDF printed from Outlook after OSP receipt — the email header, boxed notice body, and NSF-format 18-category budget table.
 
 **Current version:** 1.0.0
 **Category:** extraction
@@ -14,7 +14,7 @@ Extracts an NSF Award Notice (initial obligation or amendment) into a single JSO
 A PDF (or pasted text) of an NSF Award Notice. Typical structure:
 
 - Email header (`Subject`, `Date`, `From`, `To`, `CC`)
-- "NATIONAL SCIENCE FOUNDATION \u2014 Award Notice" boxed header with Award Number (FAIN) and Amendment Number
+- "NATIONAL SCIENCE FOUNDATION — Award Notice" boxed header with Award Number (FAIN) and Amendment Number
 - Recipient Information (legal name, address, email, UEI)
 - Amendment Information (type, date, number, proposal number, narrative description)
 - Award Information (instrument, dates, title, managing division, R&D flag, funding opportunity, assistance listing)
@@ -22,17 +22,17 @@ A PDF (or pasted text) of an NSF Award Notice. Typical structure:
 - Project Personnel (PI and Co-PIs, each with email and organization)
 - NSF Contact Information (managing grants official, awarding official, program officer)
 - General Terms and Conditions (citations to the NSF Act, RTCs, Agency Specific Requirements, PAPPG)
-- Budget table in NSF-format (categories A\u2013M plus subcategories)
+- Budget table in NSF-format (categories A–M plus subcategories)
 - Indirect Cost Rate table (rate + base)
 
 ## Outputs
 
 A single JSON object with:
 
-- **Identity scalars** \u2014 award number, title, sponsor, managing division, instrument, amendment info, funding opportunity, CFDA
-- **Date and funding scalars** \u2014 period of performance, obligations, cost share, indirect cost rate and base
-- **Nested objects** \u2014 `recipient_organization`, `current_budget_period`
-- **Eight arrays** (always present; `[]` when empty) \u2014 `project_personnel`, `sponsor_contacts`, `budget_categories`, `subawards`, `linked_awards`, `terms_and_conditions`, `special_conditions`
+- **Identity scalars** — award number, title, sponsor, managing division, instrument, amendment info, funding opportunity, CFDA
+- **Date and funding scalars** — period of performance, obligations, cost share, indirect cost rate and base
+- **Nested objects** — `recipient_organization`, `current_budget_period`
+- **Eight arrays** (always present; `[]` when empty) — `project_personnel`, `sponsor_contacts`, `budget_categories`, `subawards`, `linked_awards`, `terms_and_conditions`, `special_conditions`
 
 See [`schema.json`](schema.json) for the authoritative definition and [`prompt.md`](prompt.md) for the extraction rules the prompt follows.
 
@@ -50,8 +50,8 @@ Detected heuristically from the title prefix `"Collaborative Research:"` and/or 
 
 ## Manifestations
 
-- [`prompt.md`](prompt.md) \u2014 canonical, LLM-agnostic prompt
-- [`skill/SKILL.md`](skill/SKILL.md) \u2014 Claude Skill form
+- [`prompt.md`](prompt.md) — canonical, LLM-agnostic prompt
+- [`skill/SKILL.md`](skill/SKILL.md) — Claude Skill form
 
 ## Schema
 
@@ -68,7 +68,7 @@ Detected heuristically from the title prefix `"Collaborative Research:"` and/or 
 
 ## Evals
 
-See [`evals/`](evals/) for reference inputs and known-good outputs. The initial case is FAIN 2427549 \u2014 a Standard Grant new-project notice to a single prime institution with an implied subaward to a Co-PI at a different institution, exercising the subaward inference rule.
+See [`evals/`](evals/) for reference inputs and known-good outputs. The initial case is FAIN 2427549 — a Standard Grant new-project notice to a single prime institution with an implied subaward to a Co-PI at a different institution, exercising the subaward inference rule.
 
 ## Provenance
 

@@ -1,13 +1,13 @@
-# Evals \u2014 nsf-award-notice-extraction-udm
+# Evals — nsf-award-notice-extraction-udm
 
 ## Structure
 
 Each case lives under `cases/<faIN-or-slug>/` with:
 
-- `metadata.yaml` \u2014 award identifier, source notes, and (required) `validated_against_version`
-- `input-source.md` \u2014 where to find the source notice PDF
-- `expected.json` \u2014 the known-good extraction output, validated by a human reviewer and conforming to `../schema.json`
-- `notes.md` \u2014 optional observations from validation
+- `metadata.yaml` — award identifier, source notes, and (required) `validated_against_version`
+- `input-source.md` — where to find the source notice PDF
+- `expected.json` — the known-good extraction output, validated by a human reviewer and conforming to `../schema.json`
+- `notes.md` — optional observations from validation
 
 Run artifacts go under `runs/` (gitignored).
 
@@ -33,4 +33,4 @@ Prefer cases that each exercise distinct structural features:
 
 ## Current cases
 
-- `2427549/` \u2014 Standard Grant, Amendment 000, single prime (University of Idaho) with an inferred subaward to a Co-PI at Southern Utah University. Exercises the subaward inference rule, full NSF-format budget table with participant support costs, 38% MTDC indirect rate, and the NSF boilerplate special conditions for participant support segregation and subaward authorization.
+- `2427549/` — Standard Grant, Amendment 000, single prime (University of Idaho) with an inferred subaward to a Co-PI at Southern Utah University. Exercises the subaward inference rule, full NSF-format budget table with participant support costs, 38% MTDC indirect rate, and the NSF boilerplate special conditions for participant support segregation and subaward authorization.

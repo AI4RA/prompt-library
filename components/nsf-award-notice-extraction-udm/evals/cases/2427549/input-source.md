@@ -1,7 +1,7 @@
-# Input Source \u2014 FAIN 2427549 / Amendment 000
+# Input Source — FAIN 2427549 / Amendment 000
 
 **Award Number (FAIN):** 2427549
-**Amendment Number:** 000 (New Project \u2014 initial obligation)
+**Amendment Number:** 000 (New Project — initial obligation)
 **Amendment Date:** 2024-09-10
 **Program:** PD 23-221Y Growing Research Access for Nationally Transformative Equity and Diversity
 **Source document:** PDF printed from the NSF Award Notice email sent Tuesday, September 10, 2024 at 9:41 AM PDT from `jgosey@nsf.gov` to University of Idaho Office of Sponsored Programs (`osp@uidaho.edu`).

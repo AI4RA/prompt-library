@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/AI4RA/prompt-library/components/nsf-award-notice-extraction-udm/schema.json",
-  "title": "NSF Award Notice Extraction \u2014 UDM Output",
+  "title": "NSF Award Notice Extraction — UDM Output",
   "description": "Flat JSON contract for an NSF Award Notice (or amendment notice) extracted to the Unified Data Model as extended for research administration. One JSON object per notice. Amendment 000 represents the initial award; subsequent amendment numbers represent modifications to an existing award. The ingest service decides whether to create an Award record or an AwardModification record based on amendment_number.",
   "version": "1.0.0",
   "type": "object",
@@ -271,7 +271,7 @@
     },
     "budget_categories": {
       "type": "array",
-      "description": "Every stated line item of the NSF-format budget (A\u2013M and their subcategories). Includes stated totals (H, J, L) as separate entries \u2014 do not re-compute. Omit entries that are not printed in the notice.",
+      "description": "Every stated line item of the NSF-format budget (A–M and their subcategories). Includes stated totals (H, J, L) as separate entries — do not re-compute. Omit entries that are not printed in the notice.",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -280,7 +280,7 @@
           "code": {
             "type": "string",
             "pattern": "^[A-M]$",
-            "description": "Top-level category letter A\u2013M (NSF-format budget)."
+            "description": "Top-level category letter A–M (NSF-format budget)."
           },
           "subcode": {
             "type": ["string", "null"],
@@ -313,7 +313,7 @@
     },
     "subawards": {
       "type": "array",
-      "description": "Subrecipient entries. NSF notices rarely itemize subawardees with allocations \u2014 they show a single Subawards line in category G and list Co-PIs at external institutions. Emit explicit entries when the notice names them. Also emit an INFERRED entry when a Co-PI's organization differs from the recipient AND the budget shows a non-zero Subawards line; set inferred=true and leave amounts null.",
+      "description": "Subrecipient entries. NSF notices rarely itemize subawardees with allocations — they show a single Subawards line in category G and list Co-PIs at external institutions. Emit explicit entries when the notice names them. Also emit an INFERRED entry when a Co-PI's organization differs from the recipient AND the budget shows a non-zero Subawards line; set inferred=true and leave amounts null.",
       "items": {
         "type": "object",
         "additionalProperties": false,
