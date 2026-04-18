@@ -2,6 +2,11 @@
 
 All notable changes to this component. Versions follow semver: MAJOR for output-contract breaks, MINOR for backward-compatible additions, PATCH for wording or clarity.
 
+## [1.1.0] — 2026-04-18
+
+- Add agent manifestation (`agent/AGENT.md`, name `rfp-extractor`, tools: Read/WebFetch/Glob/Grep/Write). Resolves file paths, URLs, or pasted text; optionally writes the checklist to a file; reports a one-line summary of the most consequential constraint.
+- Lockstep version bump on `prompt.md` and `skill/SKILL.md` (no content change in those manifestations).
+
 ## [1.0.0] — 2026-04-18
 
 - Initial version.

@@ -2,11 +2,11 @@
 
 Extracts a comprehensive submission and eligibility checklist from any federal funding announcement — RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, or program solicitation. Output is a single markdown document with GFM checkboxes that PIs can use for proposal development and OSP staff can use for pre-submission compliance review.
 
-**Current version:** 1.0.0
+**Current version:** 1.1.0
 **Category:** extraction
 **Domain:** research-administration
 **Status:** stable
-**Manifestations:** prompt, skill
+**Manifestations:** prompt, skill, agent
 
 ## Inputs
 
@@ -35,6 +35,7 @@ Every actionable item is expressed as a `- [ ]` checkbox so the output functions
 
 - [`prompt.md`](prompt.md) — canonical, LLM-agnostic prompt
 - [`skill/SKILL.md`](skill/SKILL.md) — Claude Skill form for use with Claude Code / Agent SDK
+- [`agent/AGENT.md`](agent/AGENT.md) — subagent form (`rfp-extractor`) that resolves file/URL/text inputs, writes output, and reports a one-line summary
 
 ## Evals
 
