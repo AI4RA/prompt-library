@@ -2,15 +2,7 @@
 name: rfp-extraction
 version: 1.1.0
 description: Extracts a complete submission and eligibility checklist from a federal funding announcement (RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, program solicitation). Use when the user provides or references a funding announcement and wants a PI- or OSP-ready compliance checklist. Also use when the user mentions preparing a proposal and needs to know page limits, required documents, deadlines, or deviations from the agency's standard proposal guide.
-category: extraction
-domain: research-administration
-status: stable
-tags: [rfp, rfa, foa, nofo, grants, compliance, checklist]
-audience: [principal-investigators, sponsored-programs-staff]
-created: 2026-04-17
-updated: 2026-04-18
 ---
-
 # RFP Submission & Eligibility Extraction Prompt
 
 > **Purpose:** LLM-agnostic prompt for extracting a comprehensive submission and eligibility checklist from any federal funding announcement (RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, or program solicitation).

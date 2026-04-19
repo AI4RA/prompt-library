@@ -1,0 +1,20 @@
+{
+  "name": "nsf-award-notice-extraction-udm",
+  "version": "1.0.0",
+  "description": "Extracts an NSF Award Notice (or amendment notice) into a single structured JSON object conforming to this library's Unified Data Model extension for research administration. Use when the input is an NSF-formatted Notice of Award — an initial obligation (Amendment 000) or any subsequent amendment — typically arriving as a PDF printed from Outlook. Also use when a user uploads an \"NSF NOA\", \"NSF award letter\", or \"NSF award notice\" and wants machine-readable output for ingest into a grants management system, database, or compliance workflow. Output is a flat JSON with identity scalars, funding scalars, indirect cost fields, recipient and budget-period objects, and eight categorized arrays (project personnel, sponsor contacts, budget categories, subawards, linked awards, terms and conditions, special conditions). For the human-readable summary form or for non-NSF award notices, use a different component.",
+  "author": {
+    "name": "AI4RA",
+    "url": "https://github.com/AI4RA"
+  },
+  "category": "extraction",
+  "keywords": [
+    "nsf",
+    "award",
+    "notice",
+    "noa",
+    "amendment",
+    "udm",
+    "structured-extraction",
+    "json"
+  ]
+}

@@ -2,15 +2,7 @@
 name: nsf-award-notice-extraction-udm
 version: 1.0.0
 description: Extracts an NSF Award Notice (or amendment notice) into a single structured JSON object conforming to this library's Unified Data Model extension for research administration. Use when the input is an NSF-formatted Notice of Award — an initial obligation (Amendment 000) or any subsequent amendment — typically arriving as a PDF printed from Outlook. Also use when a user uploads an "NSF NOA", "NSF award letter", or "NSF award notice" and wants machine-readable output for ingest into a grants management system, database, or compliance workflow. Output is a flat JSON with identity scalars, funding scalars, indirect cost fields, recipient and budget-period objects, and eight categorized arrays (project personnel, sponsor contacts, budget categories, subawards, linked awards, terms and conditions, special conditions). For the human-readable summary form or for non-NSF award notices, use a different component.
-category: extraction
-domain: research-administration
-status: stable
-tags: [nsf, award, notice, noa, amendment, udm, structured-extraction, json]
-audience: [ingest-pipelines, sponsored-programs-staff]
-created: 2026-04-18
-updated: 2026-04-18
 ---
-
 # NSF Award Notice Structured Extraction — UDM JSON
 
 > **Purpose:** Extract an NSF Award Notice (or subsequent amendment notice) into a single JSON object conforming to this component's Unified Data Model (UDM) schema. The ingest service decides whether the output creates an Award record or an AwardModification record based on `amendment_number`.

@@ -1,0 +1,19 @@
+{
+  "name": "rfp-extraction",
+  "version": "1.1.0",
+  "description": "Extracts a complete submission and eligibility checklist from a federal funding announcement (RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, program solicitation). Use when the user provides or references a funding announcement and wants a PI- or OSP-ready compliance checklist. Also use when the user mentions preparing a proposal and needs to know page limits, required documents, deadlines, or deviations from the agency's standard proposal guide.",
+  "author": {
+    "name": "AI4RA",
+    "url": "https://github.com/AI4RA"
+  },
+  "category": "extraction",
+  "keywords": [
+    "rfp",
+    "rfa",
+    "foa",
+    "nofo",
+    "grants",
+    "compliance",
+    "checklist"
+  ]
+}

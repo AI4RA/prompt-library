@@ -2,15 +2,7 @@
 name: document-type-classifier-udm
 version: 1.0.0
 description: Classifies a research-administration document into one of a controlled 14-code vocabulary (solicitation, proposal_narrative, biosketch, current_pending, facilities, data_mgmt, letter_support, budget, budget_justification, award_notice, award_amendment, jit_response, closeout_letter, other) so upstream routing can dispatch to the correct extractor or reviewer. Use when a user uploads a grants-related document and asks "what is this?", when routing an incoming file through an ingest pipeline, or when triaging a mixed folder of proposal and award documents. Input is plain text or OCR markdown of the document (typically the first N pages, or the whole body for short files). Output is one small JSON object with document_type, confidence, a verbatim evidence excerpt, a one-sentence rationale, and a secondary_candidates array that is only populated when the classification is ambiguous. Sponsor-agnostic — an NIH NOA, an NSF NOA, and a DoE award letter all classify as award_notice. For extracting the structured contents of a document rather than identifying its type, use a type-specific extraction component.
-category: classification
-domain: research-administration
-status: experimental
-tags: [classification, routing, triage, udm, research-administration, document-type]
-audience: [ingest-pipelines, sponsored-programs-staff, routing-layer]
-created: 2026-04-18
-updated: 2026-04-18
 ---
-
 # Document Type Classifier — UDM
 
 > **Purpose:** Given the text of a single research-administration document, emit one JSON object identifying its type from a controlled vocabulary. The output is used upstream of extraction pipelines to pick the right downstream component.

@@ -2,15 +2,7 @@
 name: rfp-extraction-udm
 version: 1.0.0
 description: Extracts a federal funding announcement (RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, or program solicitation) into a single structured JSON object conforming to this library's Unified Data Model extension. Use when the user wants machine-readable output — for ingest pipelines, database loading, compliance automation, or programmatic analysis — rather than a human-readable checklist. Output is a flat JSON with scalar opportunity metadata plus nine categorized requirement arrays (documents, formatting, review criteria, eligibility, budget constraints, compliance, submission requirements, special conditions, parent-guide deviations).
-category: extraction
-domain: research-administration
-status: stable
-tags: [rfp, rfa, foa, nofo, grants, udm, structured-extraction, json]
-audience: [ingest-pipelines, data-engineers, sponsored-programs-staff]
-created: 2026-04-18
-updated: 2026-04-18
 ---
-
 # RFP Structured Extraction — UDM JSON
 
 > **Purpose:** Extract every structured requirement and scalar metadata field from any federal funding announcement (RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, or program solicitation) into a single JSON document conforming to this component's Unified Data Model (UDM) schema.

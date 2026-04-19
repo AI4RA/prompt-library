@@ -1,0 +1,47 @@
+{
+  "name": "prompt-library",
+  "owner": {
+    "name": "AI4RA",
+    "url": "https://github.com/AI4RA"
+  },
+  "metadata": {
+    "description": "AI4RA research-administration prompt library — skills and agents derived from canonical prompts."
+  },
+  "plugins": [
+    {
+      "name": "document-type-classifier-udm",
+      "source": "./components/document-type-classifier-udm",
+      "description": "Classifies a research-administration document into one of a controlled 14-code vocabulary (solicitation, proposal_narrative, biosketch, current_pending, facilities, data_mgmt, letter_support, budget, budget_justification, award_notice, award_amendment, jit_response, closeout_letter, other) so upstream routing can dispatch to the correct extractor or reviewer. Use when a user uploads a grants-related document and asks \"what is this?\", when routing an incoming file through an ingest pipeline, or when triaging a mixed folder of proposal and award documents. Input is plain text or OCR markdown of the document (typically the first N pages, or the whole body for short files). Output is one small JSON object with document_type, confidence, a verbatim evidence excerpt, a one-sentence rationale, and a secondary_candidates array that is only populated when the classification is ambiguous. Sponsor-agnostic — an NIH NOA, an NSF NOA, and a DoE award letter all classify as award_notice. For extracting the structured contents of a document rather than identifying its type, use a type-specific extraction component.",
+      "version": "1.0.0",
+      "category": "classification"
+    },
+    {
+      "name": "nsf-award-notice-extraction-udm",
+      "source": "./components/nsf-award-notice-extraction-udm",
+      "description": "Extracts an NSF Award Notice (or amendment notice) into a single structured JSON object conforming to this library's Unified Data Model extension for research administration. Use when the input is an NSF-formatted Notice of Award — an initial obligation (Amendment 000) or any subsequent amendment — typically arriving as a PDF printed from Outlook. Also use when a user uploads an \"NSF NOA\", \"NSF award letter\", or \"NSF award notice\" and wants machine-readable output for ingest into a grants management system, database, or compliance workflow. Output is a flat JSON with identity scalars, funding scalars, indirect cost fields, recipient and budget-period objects, and eight categorized arrays (project personnel, sponsor contacts, budget categories, subawards, linked awards, terms and conditions, special conditions). For the human-readable summary form or for non-NSF award notices, use a different component.",
+      "version": "1.0.0",
+      "category": "extraction"
+    },
+    {
+      "name": "rfp-extraction",
+      "source": "./components/rfp-extraction",
+      "description": "Extracts a complete submission and eligibility checklist from a federal funding announcement (RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, program solicitation). Use when the user provides or references a funding announcement and wants a PI- or OSP-ready compliance checklist. Also use when the user mentions preparing a proposal and needs to know page limits, required documents, deadlines, or deviations from the agency's standard proposal guide.",
+      "version": "1.1.0",
+      "category": "extraction"
+    },
+    {
+      "name": "rfp-extraction-udm",
+      "source": "./components/rfp-extraction-udm",
+      "description": "Extracts a federal funding announcement (RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, or program solicitation) into a single structured JSON object conforming to this library's Unified Data Model extension. Use when the user wants machine-readable output — for ingest pipelines, database loading, compliance automation, or programmatic analysis — rather than a human-readable checklist. Output is a flat JSON with scalar opportunity metadata plus nine categorized requirement arrays (documents, formatting, review criteria, eligibility, budget constraints, compliance, submission requirements, special conditions, parent-guide deviations).",
+      "version": "1.0.0",
+      "category": "extraction"
+    },
+    {
+      "name": "sponsor-doc-defaults-udm",
+      "source": "./components/sponsor-doc-defaults-udm",
+      "description": "Emits the default set of documents a named research-funding sponsor requires for a standard full proposal — as a structured JSON list with per-document page limits, format specs, required vs. optional flags, per-person indicators, and conditional triggers. Use when a pre-award team needs to seed a proposal checklist before any solicitation-specific text is analyzed, when an ingest pipeline needs to know what NSF / NIH / DoE expects by default, or when a user asks \"what documents do I need to submit for an NSF full proposal?\". Input is a short block naming the sponsor (and optionally a division or institute); both natural language and a structured key-value block work. Output is one JSON object containing sponsor_name, sponsor_division, a knowledge_notes caveat string, and a document_requirements array of requirement objects. Uses a controlled 29-code vocabulary shared with sibling UDM components so downstream extractors and reviewers can dispatch on the code directly. For solicitation-specific modifications (overrides or net-new documents a specific program introduces), use solicitation-doc-modifications-udm with this component's output as input. When the sponsor is unrecognized, emits an empty requirements array and explains in knowledge_notes — never synthesizes a generic default list.",
+      "version": "1.0.0",
+      "category": "research"
+    }
+  ]
+}

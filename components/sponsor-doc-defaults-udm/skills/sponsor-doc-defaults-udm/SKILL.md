@@ -2,15 +2,7 @@
 name: sponsor-doc-defaults-udm
 version: 1.0.0
 description: Emits the default set of documents a named research-funding sponsor requires for a standard full proposal — as a structured JSON list with per-document page limits, format specs, required vs. optional flags, per-person indicators, and conditional triggers. Use when a pre-award team needs to seed a proposal checklist before any solicitation-specific text is analyzed, when an ingest pipeline needs to know what NSF / NIH / DoE expects by default, or when a user asks "what documents do I need to submit for an NSF full proposal?". Input is a short block naming the sponsor (and optionally a division or institute); both natural language and a structured key-value block work. Output is one JSON object containing sponsor_name, sponsor_division, a knowledge_notes caveat string, and a document_requirements array of requirement objects. Uses a controlled 29-code vocabulary shared with sibling UDM components so downstream extractors and reviewers can dispatch on the code directly. For solicitation-specific modifications (overrides or net-new documents a specific program introduces), use solicitation-doc-modifications-udm with this component's output as input. When the sponsor is unrecognized, emits an empty requirements array and explains in knowledge_notes — never synthesizes a generic default list.
-category: research
-domain: research-administration
-status: experimental
-tags: [sponsor, requirements, defaults, udm, research-administration, proposal-preparation]
-audience: [pre-award-staff, ingest-pipelines, proposal-checklist-builders]
-created: 2026-04-18
-updated: 2026-04-18
 ---
-
 # Sponsor Document Defaults — UDM
 
 > **Purpose:** Given a sponsor organization (and optional division or institute), emit the default set of documents that sponsor requires for a standard full proposal — the baseline checklist a pre-award team starts with before the specific solicitation narrows or expands it.
