@@ -1,0 +1,37 @@
+case: NSF Engineering Research Center adds Strategic Plan and Knowledge Transfer Plan
+source: "Synthetic NSF-style Engineering Research Center solicitation excerpt, constructed for this eval. Not a real NSF ERC program solicitation."
+source_url: null
+retrieved: 2026-04-19
+
+structural_features:
+  - synthetic-solicitation
+  - nsf-defaults-prior
+  - multi-page-solicitation-excerpt
+
+schema_features:
+  - net-new-only
+  - modifies-default-null
+  - other-code-with-distinctive-label
+  - page-limit-on-net-new
+  - format-spec-on-net-new
+
+validated_by: barrierobison
+validated_at: 2026-04-19
+validated_against_version: "1.0.0"
+
+notes: |
+  Net-new-only case. The solicitation introduces two documents that
+  are not in the NSF defaults: a Strategic Plan and a Knowledge
+  Transfer Plan. Neither corresponds to an existing default code;
+  both are emitted with code 'other' and distinctive labels, with
+  modifies_default: null.
+
+  The solicitation does not alter any PAPPG default document. The
+  expected output therefore contains exactly two entries, both
+  net-new.
+
+  This case exercises:
+    - the 'other'-code fallback with a descriptive label
+    - net-new entries carrying page_limit and format_spec
+    - the ordering rule (net-new documents listed in the order the
+      solicitation introduces them)

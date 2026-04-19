@@ -1,0 +1,32 @@
+{
+  "sponsor_name": "National Institutes of Health",
+  "sponsor_division": null,
+  "solicitation_id": "RFA-XX-25-SYN",
+  "solicitation_notes": "NIH Request for Applications using the R01 mechanism with an RFA-specific shorter Research Strategy page limit (6 pages) and one program-specific supplement (Milestones and Timeline). All other R01 application requirements remain unchanged per the RFA.",
+  "document_requirements": [
+    {
+      "code": "proposal_narrative",
+      "label": "Research Strategy",
+      "description": "Main technical body of the NIH application. The RFA shortens the R01 default page limit from 12 pages to 6 pages to reflect the exploratory scope. All other Research Strategy requirements, including Significance / Innovation / Approach subsections and embedded Preliminary Studies, are unchanged.",
+      "page_limit": 6,
+      "format_spec": "Required subsection headings: Significance, Innovation, Approach. Extensive Preliminary Studies are not expected under this RFA.",
+      "is_required": true,
+      "is_per_person": false,
+      "conditional_on": null,
+      "modifies_default": "proposal_narrative",
+      "source_excerpt": "The Research Strategy is limited to 6 pages, reflecting the exploratory scope of this RFA. Applicants should prioritize a well-defined hypothesis and a focused Approach; extensive Preliminary Studies are not expected."
+    },
+    {
+      "code": "other",
+      "label": "Milestones and Timeline",
+      "description": "Required RFA-specific supplement describing quantitative milestones for each Specific Aim, expected completion dates by quarter, go / no-go decision points, and contingency plans for missed milestones. Uploaded in the 'Other Attachments' slot and separate from the Research Strategy page limit.",
+      "page_limit": 2,
+      "format_spec": "Maximum 2 pages. Must address milestones by aim, quarterly completion dates, go/no-go decision points, and contingency plans.",
+      "is_required": true,
+      "is_per_person": false,
+      "conditional_on": null,
+      "modifies_default": null,
+      "source_excerpt": "All applications must include a Milestones and Timeline supplement of no more than 2 pages describing quantitative milestones for each Specific Aim, expected completion dates by quarter, go / no-go decision points, and contingency plans for milestones that are not met."
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+case: NSF Dear Colleague Letter tightens narrative and DMP
+source: "Synthetic NSF-style Dear Colleague Letter supplement, constructed for this eval. Not a real NSF DCL."
+source_url: null
+retrieved: 2026-04-19
+
+structural_features:
+  - synthetic-solicitation
+  - short-solicitation-text
+  - nsf-defaults-prior
+
+schema_features:
+  - modify-only
+  - page-limit-tightened
+  - page-limit-loosened
+  - format-spec-added
+  - modifies-default-targets-existing-code
+  - full-object-emission-on-modification
+
+validated_by: barrierobison
+validated_at: 2026-04-19
+validated_against_version: "1.0.0"
+
+notes: |
+  Modify-only case. The solicitation tightens the NSF Project
+  Description from 15 pages to 10 pages, and expands the Data
+  Management Plan from 2 pages to 3 pages with a new required
+  subheading ("Sample and Specimen Sharing"). No net-new documents.
+
+  The sponsor-defaults prior is the NSF full-proposal defaults
+  (reusing the shape from sponsor-doc-defaults-udm's nsf-full-proposal
+  case). Only proposal_narrative and data_mgmt should appear in
+  the output; every other default passes through unchanged.
+
+  Each emitted entry carries the full field set — including fields
+  the solicitation does not touch (e.g., is_required, is_per_person,
+  conditional_on echo the default) — so that a downstream merge can
+  replace the default wholesale.
