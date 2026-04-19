@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "Any use of this repository — research, derivative components, downstream software, internal tooling, or production deployments — requires citation as described below. This citation requirement applies in addition to the obligations of the GNU GPL v3 and stands independent of them. A DOI will be added to this file once a Zenodo release is minted."
+title: "AI4RA Prompt Library"
+abstract: "Versioned, LLM-agnostic prompts, skills, and agents for research administration tasks (RFP extraction, award-notice parsing, document classification, sponsor-default checklists, and related components), with evaluation fixtures and a canonical-source-to-wrappers generation model."
+type: software
+authors:
+  - family-names: "Robison"
+    given-names: "Barrie"
+    affiliation: "University of Idaho"
+repository-code: "https://github.com/AI4RA/prompt-library"
+url: "https://github.com/AI4RA/prompt-library"
+license: GPL-3.0-or-later
+# Once a Zenodo release is minted, uncomment and fill the DOI and release date:
+# doi: "10.5281/zenodo.XXXXXXX"
+# date-released: "YYYY-MM-DD"
+# version: "1.0.0"

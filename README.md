@@ -49,3 +49,15 @@ To run it locally: `pip install pyyaml && python .github/scripts/lint_components
 ## Shared vocabulary
 
 See [`taxonomy.md`](taxonomy.md) for the canonical set of tags, categories, domains, and manifestation types. Prefer existing vocabulary; propose additions in the same PR that introduces a component needing them.
+
+## License and citation
+
+This repository is licensed under the [GNU General Public License v3.0](LICENSE).
+
+**Any use of this work requires citation.** This includes research publications, derivative components, downstream software, internal tooling, and production deployments. The citation requirement is a condition of use alongside — not in place of — the GPL's obligations.
+
+Machine-readable citation metadata lives in [`CITATION.cff`](CITATION.cff); GitHub renders a "Cite this repository" button in the sidebar that exports BibTeX and APA on demand. A DOI will be added once a Zenodo release is minted.
+
+When citing a specific state of the repository, pin to the commit SHA and the component version you used:
+
+> Robison, B. (2026). *AI4RA Prompt Library* (commit `<sha>`, component `<slug>` v`<version>`). https://github.com/AI4RA/prompt-library
