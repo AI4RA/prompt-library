@@ -1,0 +1,32 @@
+{
+  "sponsor_name": "National Science Foundation",
+  "sponsor_division": null,
+  "solicitation_id": "NSF 99-SYN-ERC",
+  "solicitation_notes": "Engineering Research Center program solicitation. Introduces two program-specific supplementary documents (Strategic Plan, Knowledge Transfer Plan) in addition to the standard PAPPG document set. The solicitation explicitly states these supplements do not modify PAPPG requirements; no modifications to defaults are emitted.",
+  "document_requirements": [
+    {
+      "code": "other",
+      "label": "Strategic Plan",
+      "description": "Program-specific supplementary document describing the proposed Center's vision, strategic goals, performance metrics, leadership structure, and the relationship between the research thrusts and the Center's long-term objectives. Not a PAPPG default; uploaded in the 'Other Supplementary Documents' slot.",
+      "page_limit": 5,
+      "format_spec": "Required subheadings: 'Vision and Goals', 'Performance Metrics', 'Leadership and Management Structure', 'Thrust Integration'. Maximum 5 pages.",
+      "is_required": true,
+      "is_per_person": false,
+      "conditional_on": null,
+      "modifies_default": null,
+      "source_excerpt": "A Strategic Plan of no more than 5 pages describing the proposed Center's vision, strategic goals, performance metrics, leadership structure, and the relationship between the research thrusts and the Center's long-term objectives. The plan must include the following required subheadings: \"Vision and Goals\", \"Performance Metrics\", \"Leadership and Management Structure\", and \"Thrust Integration\"."
+    },
+    {
+      "code": "other",
+      "label": "Knowledge Transfer Plan",
+      "description": "Program-specific supplementary document describing how research outcomes will be translated into practice: industrial partnerships, technology transfer mechanisms, workforce development activities, and intellectual property strategy. Not a PAPPG default; uploaded in the 'Other Supplementary Documents' slot.",
+      "page_limit": 3,
+      "format_spec": "Must name the proposed Industrial Advisory Board chair and describe the Center's process for engaging member companies. Maximum 3 pages.",
+      "is_required": true,
+      "is_per_person": false,
+      "conditional_on": null,
+      "modifies_default": null,
+      "source_excerpt": "A Knowledge Transfer Plan of no more than 3 pages describing how research outcomes will be translated into practice, including industrial partnerships, technology transfer mechanisms, workforce development activities, and intellectual property strategy. The plan must name the proposed Industrial Advisory Board chair and describe the Center's process for engaging member companies."
+    }
+  ]
+}

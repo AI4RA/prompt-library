@@ -1,0 +1,37 @@
+case: NIH RFA shortens Research Strategy and adds Milestones and Timeline
+source: "Synthetic NIH-style Request for Applications excerpt, constructed for this eval. Not a real NIH RFA."
+source_url: null
+retrieved: 2026-04-19
+
+structural_features:
+  - synthetic-solicitation
+  - nih-r01-defaults-prior
+  - rfa-style-framing
+
+schema_features:
+  - mixed-modify-and-net-new
+  - page-limit-tightened-on-proposal-narrative
+  - net-new-supplement-with-code-other
+  - ordering-modifications-first-then-net-new
+  - full-object-emission-on-modification
+  - distinct-label-from-sponsor-label
+
+validated_by: barrierobison
+validated_at: 2026-04-19
+validated_against_version: "1.0.0"
+
+notes: |
+  Mixed case. The solicitation:
+    1. Modifies proposal_narrative (NIH 'Research Strategy') from 12
+       pages to 6 pages, explaining that the RFA targets exploratory
+       work suited to a shorter narrative.
+    2. Adds a net-new 'Milestones and Timeline' supplement not present
+       in the NIH R01 defaults.
+
+  The sponsor-defaults prior uses the NIH R01 defaults (a subset of the
+  sponsor-doc-defaults-udm nih-r01 case). The solicitation_notes field
+  should call out that the RFA frames its narrative limit explicitly as
+  a modification.
+
+  Ordering: the modification appears first in document_requirements,
+  the net-new supplement appears second.

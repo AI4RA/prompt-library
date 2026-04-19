@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/solicitation-doc-modifications-udm/schema.json",
+  "title": "Solicitation Document Modifications — UDM Output",
+  "description": "Single JSON object listing solicitation-specific modifications to a sponsor's default document requirements and any net-new documents the solicitation introduces. Consumes the output shape of sponsor-doc-defaults-udm as a prior and pairs with it to form a two-pass requirements pipeline.",
+  "version": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sponsor_name",
+    "sponsor_division",
+    "solicitation_id",
+    "solicitation_notes",
+    "document_requirements"
+  ],
+  "properties": {
+    "sponsor_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Sponsor as carried forward from the sponsor-defaults input. Echo the value verbatim so downstream merging can key on it."
+    },
+    "sponsor_division": {
+      "type": ["string", "null"],
+      "description": "Division, directorate, institute, or center as carried forward from the sponsor-defaults input. Null when the caller did not provide one."
+    },
+    "solicitation_id": {
+      "type": ["string", "null"],
+      "description": "The sponsor's printed identifier for the solicitation (e.g., 'NSF 24-507', 'PAR-24-123', 'DE-FOA-0003100'). Null when the solicitation text does not expose one."
+    },
+    "solicitation_notes": {
+      "type": ["string", "null"],
+      "description": "Free-text caveats: which version of the solicitation was analyzed, sections that could not be resolved, or program families the solicitation belongs to. Null when no caveats apply."
+    },
+    "document_requirements": {
+      "type": "array",
+      "description": "Array of document requirement entries. Each entry is either a modification to a default (modifies_default set to the code of the default it overrides) or a net-new document the solicitation introduces (modifies_default null). Defaults that the solicitation leaves unchanged are not emitted — a downstream merge should treat absent codes as pass-through.",
+      "items": { "$ref": "#/$defs/documentRequirement" }
+    }
+  },
+  "$defs": {
+    "documentCode": {
+      "type": "string",
+      "enum": [
+        "cover_sheet",
+        "cover_letter",
+        "project_summary",
+        "project_narrative",
+        "proposal_narrative",
+        "specific_aims",
+        "references_cited",
+        "biosketch",
+        "current_pending",
+        "collaborators_and_affiliations",
+        "facilities",
+        "equipment",
+        "budget",
+        "budget_justification",
+        "data_mgmt",
+        "postdoc_mentoring",
+        "mentoring_plan",
+        "results_prior_support",
+        "resource_sharing",
+        "authentication_key_resources",
+        "leadership_plan",
+        "human_subjects",
+        "vertebrate_animals",
+        "select_agent",
+        "inclusion_enrollment_report",
+        "letter_support",
+        "letter_collaboration",
+        "letter_of_intent",
+        "other"
+      ],
+      "description": "Controlled document-code vocabulary shared with sibling UDM components (sponsor-doc-defaults-udm, document-type-classifier-udm, proposal-completeness-review-udm). Use 'other' with a descriptive label when no enumerated code fits and consider proposing a new code in a follow-up PR."
+    },
+    "documentRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "label",
+        "description",
+        "page_limit",
+        "format_spec",
+        "is_required",
+        "is_per_person",
+        "conditional_on",
+        "modifies_default",
+        "source_excerpt"
+      ],
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/documentCode"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The solicitation's printed label for the document. Prefer the solicitation's term over a generic one. When the solicitation only changes one attribute (e.g., page limit) and reuses the sponsor's label, echo the sponsor label here."
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "One or two sentences explaining what the document is, using the solicitation's framing. When the entry is a modification, emphasize the delta from the default."
+        },
+        "page_limit": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Page limit as stated in the solicitation. For a modification, this is the solicitation's page limit (which may be tighter or looser than the default). For a net-new document, this is the solicitation's limit or null when unstated."
+        },
+        "format_spec": {
+          "type": ["string", "null"],
+          "description": "Formatting constraints the solicitation imposes (font, line spacing, margins, required subheadings, file type, template). Null when the solicitation does not specify constraints beyond the sponsor's general rules."
+        },
+        "is_required": {
+          "type": "boolean",
+          "description": "True when the solicitation requires this document. False only when the solicitation explicitly marks it optional. Conditionally-required documents set is_required=true and populate conditional_on."
+        },
+        "is_per_person": {
+          "type": "boolean",
+          "description": "True when the solicitation requires one instance per senior person. Echo the default's per-person flag when the solicitation does not speak to it."
+        },
+        "conditional_on": {
+          "type": ["string", "null"],
+          "description": "Short English description of the condition that makes this requirement apply, when the requirement is conditional. Null when unconditional."
+        },
+        "modifies_default": {
+          "oneOf": [
+            { "$ref": "#/$defs/documentCode" },
+            { "type": "null" }
+          ],
+          "description": "When this entry modifies a sponsor default, the code of the default it overrides. Null when this entry is a net-new document introduced by the solicitation. Downstream merging replaces the default with this entry when set; when null, the entry is appended."
+        },
+        "source_excerpt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Verbatim text from the solicitation grounding the modification or the new requirement. Short — a sentence or two. Quote exactly; do not paraphrase. If the solicitation uses a table or bulleted list, quote the relevant row or bullet."
+        }
+      }
+    }
+  }
+}

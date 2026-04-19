@@ -1,0 +1,32 @@
+{
+  "sponsor_name": "National Science Foundation",
+  "sponsor_division": null,
+  "solicitation_id": "NSF DCL-SYN-01",
+  "solicitation_notes": "Dear Colleague Letter supplement modifying two PAPPG defaults (Project Description page limit, Data Management Plan page limit and required subheading). The DCL explicitly states no additional documents are introduced and no other PAPPG requirements are modified.",
+  "document_requirements": [
+    {
+      "code": "proposal_narrative",
+      "label": "Project Description",
+      "description": "Main technical body of the proposal. The Focused Investigator Awards DCL shortens the PAPPG default page limit from 15 pages to 10 pages; all other PAPPG requirements, including the embedded treatment of Results from Prior NSF Support, are unchanged.",
+      "page_limit": 10,
+      "format_spec": "PAPPG font, line-spacing, and margin rules apply. Results from Prior NSF Support and broader-impacts activities are embedded within this page limit.",
+      "is_required": true,
+      "is_per_person": false,
+      "conditional_on": null,
+      "modifies_default": "proposal_narrative",
+      "source_excerpt": "Project Description. The Project Description must not exceed 10 pages. All other PAPPG requirements for the Project Description, including the treatment of Results from Prior NSF Support within the page limit, remain unchanged."
+    },
+    {
+      "code": "data_mgmt",
+      "label": "Data Management Plan",
+      "description": "Supplementary document describing data types, standards, access, sharing, and archiving. The Focused Investigator Awards DCL expands the PAPPG default page limit from 2 pages to 3 pages and adds a required 'Sample and Specimen Sharing' subheading covering physical samples, voucher specimens, and associated metadata.",
+      "page_limit": 3,
+      "format_spec": "Maximum 3 pages. Required subheading: 'Sample and Specimen Sharing' addressing disposition of physical samples, voucher specimens, and associated metadata. Standard PAPPG DMP elements remain required.",
+      "is_required": true,
+      "is_per_person": false,
+      "conditional_on": null,
+      "modifies_default": "data_mgmt",
+      "source_excerpt": "Data Management Plan. The Data Management Plan must not exceed 3 pages and must include a required subheading titled \"Sample and Specimen Sharing\" addressing the disposition of physical samples, voucher specimens, and associated metadata."
+    }
+  ]
+}
