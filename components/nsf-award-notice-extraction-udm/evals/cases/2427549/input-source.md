@@ -6,7 +6,7 @@
 **Program:** PD 23-221Y Growing Research Access for Nationally Transformative Equity and Diversity
 **Source document:** PDF printed from the NSF Award Notice email sent Tuesday, September 10, 2024 at 9:41 AM PDT from `jgosey@nsf.gov` to University of Idaho Office of Sponsored Programs (`osp@uidaho.edu`).
 
-The source PDF is not committed to this repository (it contains recipient-identifying information and is part of a live award). The validated `expected.json` was produced from the document in `/Users/barrierobison/Documents/Presentations/APLU/DOCSJuly2025/DEMO1_AWARDLETTER.pdf` on 2026-04-18.
+The source PDF is not committed to this repository (it contains recipient-identifying information and is part of a live award). The validated `expected.json` was produced from an NSF award notice PDF used in the APLU DOCS July 2025 demo, on 2026-04-18.
 
 ## Known characteristics preserved in `expected.json`
 

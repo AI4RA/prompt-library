@@ -1,22 +1,30 @@
 #!/usr/bin/env python3
-"""Generate award × field agreement heatmaps from a Vandalizer-crossref summary.json.
+"""Generate award × field accuracy heatmaps from an extraction-accuracy summary.json.
 
-Produces two PNGs per invocation:
-  - `charts/agreement_scalars_<mode>.png`  — scalar fields
-  - `charts/agreement_budget_<mode>.png`   — NSF-format budget line items
+Produces up to four PNGs per invocation, partitioned by the validation state
+of each ground-truth case:
 
-Cell coloring (both heatmaps):
-  - Green ramp for agreement rate when both sides emitted a value
-  - Light orange when only OpenERA emitted
-  - Light blue when only Vandalizer emitted
-  - Gray when neither emitted
+  Validated cases (treated as ground truth, reported as accuracy):
+  - `charts/accuracy_scalars_<mode>.png`
+  - `charts/accuracy_budget_<mode>.png`
+
+  In-progress cases (reference produced by automated pipeline, reported as agreement):
+  - `charts/agreement_scalars_<mode>_in_progress.png`
+  - `charts/agreement_budget_<mode>_in_progress.png`
+
+Empty partitions are skipped.
+
+Cell coloring (all heatmaps):
+  - Green ramp for correct/agree rate when both sides emitted a value
+  - Light orange when extractor emitted but reference did not (hallucinated)
+  - Light blue when reference emitted but extractor did not (missing)
+  - Gray when neither emitted (correct_absent)
 
 Cell text:
-  - "5/5", "3/4" agreement counts when comparable
-  - "OE" or "V" for one-sided
-  - "—" when neither
-
-Vandalizer is NOT ground truth. The heatmap shows *agreement*, not correctness.
+  - "5/5", "3/4" correct-replicate counts when comparable
+  - "E<N>" for extractor-only replicate count
+  - "R<N>" for reference-only replicate count
+  - "—" when neither emitted
 """
 
 from __future__ import annotations
@@ -33,9 +41,9 @@ import numpy as np
 # ── Colors ──────────────────────────────────────────────────────────────
 
 AGREE_CMAP = plt.get_cmap("RdYlGn")   # red → yellow → green
-COLOR_OE_ONLY = "#ffd4a3"             # soft orange
-COLOR_VAN_ONLY = "#a8d5e2"            # soft blue
-COLOR_BOTH_NULL = "#e8e8e8"           # light gray
+COLOR_HALLUCINATED = "#ffd4a3"        # soft orange — extractor emitted, reference null
+COLOR_MISSING = "#a8d5e2"             # soft blue — reference emitted, extractor null
+COLOR_CORRECT_ABSENT = "#e8e8e8"      # light gray — both null
 COLOR_EDGE = "#ffffff"
 
 
@@ -53,37 +61,39 @@ def load_run(summary_path: Path, mode: str) -> dict:
     )
 
 
+def filter_awards(run: dict, validation_state: str) -> list[dict]:
+    """Return per_award entries matching a validation state."""
+    if validation_state == "validated":
+        return [a for a in run["per_award"] if a.get("validation_state") == "validated"]
+    return [a for a in run["per_award"] if a.get("validation_state", "in_progress") != "validated"]
+
+
 # ── Matrix assembly ─────────────────────────────────────────────────────
 
 
-def build_scalar_matrix(run: dict, min_coverage: int = 1):
+def build_scalar_matrix(awards: list[dict], field_rollup: list[dict], min_coverage: int = 1):
     """Return (awards, fields, cells) where cells[i][j] is a dict with
-    {'agree_rate': float|None, 'n_agree': int, 'n_compared': int,
-     'kind': 'agree'|'oe_only'|'van_only'|'none'}."""
-    # Fields = scalar field_rollup slots, sorted by cross-award agreement desc.
-    rollup_by_field = {r["field"]: r for r in run["field_rollup"]}
-    # Keep only fields with *some* comparable data across awards.
+    {'correct_rate': float|None, 'n_correct': int, 'n_compared': int,
+     'kind': 'correct'|'hallucinated'|'missing'|'none'}."""
+    rollup_by_field = {r["field"]: r for r in field_rollup}
     field_names = [
-        r["field"] for r in run["field_rollup"]
+        r["field"] for r in field_rollup
         if (r.get("n_compared") or 0) >= min_coverage
     ]
-    # Sort fields by agreement desc, Nones last.
     def _sort_key(f):
-        pct = rollup_by_field[f]["agreement_pct"]
+        pct = rollup_by_field[f]["accuracy_pct"]
         return (-(pct if pct is not None else -1), f)
     field_names.sort(key=_sort_key)
 
-    awards = run["per_award"]
-    # Sort awards by mean agreement across comparable fields, desc.
     def _award_score(a):
         vals = []
         for f in field_names:
             fs = a["fields"].get(f, {})
-            na = fs.get("n_agree", 0)
-            nd = fs.get("n_disagree", 0)
-            n = na + nd
+            nc = fs.get("n_correct", 0)
+            ni = fs.get("n_incorrect", 0)
+            n = nc + ni
             if n:
-                vals.append(na / n)
+                vals.append(nc / n)
         return sum(vals) / len(vals) if vals else 0.0
     awards = sorted(awards, key=_award_score, reverse=True)
 
@@ -93,52 +103,48 @@ def build_scalar_matrix(run: dict, min_coverage: int = 1):
         for j, f in enumerate(field_names):
             fs = a["fields"].get(f)
             if not fs:
-                cells[i][j] = {"kind": "none", "n_agree": 0, "n_compared": 0,
-                               "agree_rate": None}
+                cells[i][j] = {"kind": "none", "n_correct": 0, "n_compared": 0,
+                               "correct_rate": None}
                 continue
-            n_agree = fs.get("n_agree", 0)
-            n_dis = fs.get("n_disagree", 0)
-            n_comp = n_agree + n_dis
-            rep_vals = fs.get("openera", []) or []
-            van_val = fs.get("van")
-            n_reps = len(rep_vals) if rep_vals else a.get("n_replicates", 0)
-            n_oe_only = sum(1 for v in rep_vals if v is not None and van_val is None)
-            n_van_only = sum(1 for v in rep_vals if v is None and van_val is not None)
+            n_correct = fs.get("n_correct", 0)
+            n_incorrect = fs.get("n_incorrect", 0)
+            n_comp = n_correct + n_incorrect
+            n_halluc = fs.get("n_hallucinated", 0)
+            n_missing = fs.get("n_missing", 0)
+            n_reps = a.get("n_replicates", 0)
             if n_comp:
                 cells[i][j] = {
-                    "kind": "agree",
-                    "n_agree": n_agree,
+                    "kind": "correct",
+                    "n_correct": n_correct,
                     "n_compared": n_comp,
-                    "agree_rate": n_agree / n_comp,
+                    "correct_rate": n_correct / n_comp,
                 }
-            elif n_oe_only > 0 and n_van_only == 0:
-                cells[i][j] = {"kind": "oe_only", "n_agree": n_oe_only,
-                               "n_compared": n_reps, "agree_rate": None}
-            elif n_van_only > 0 and n_oe_only == 0:
-                cells[i][j] = {"kind": "van_only", "n_agree": n_van_only,
-                               "n_compared": n_reps, "agree_rate": None}
+            elif n_halluc > 0 and n_missing == 0:
+                cells[i][j] = {"kind": "hallucinated", "n_correct": n_halluc,
+                               "n_compared": n_reps, "correct_rate": None}
+            elif n_missing > 0 and n_halluc == 0:
+                cells[i][j] = {"kind": "missing", "n_correct": n_missing,
+                               "n_compared": n_reps, "correct_rate": None}
             else:
-                cells[i][j] = {"kind": "none", "n_agree": 0,
-                               "n_compared": 0, "agree_rate": None}
+                cells[i][j] = {"kind": "none", "n_correct": 0,
+                               "n_compared": 0, "correct_rate": None}
     return awards, field_names, cells
 
 
-def build_budget_matrix(run: dict):
+def build_budget_matrix(awards: list[dict], budget_rollup: list[dict]):
     """Same cell shape as build_scalar_matrix, but for budget slots."""
-    # Slots = union across awards, sorted by a stable NSF-budget order.
-    rollup_by_slot = {r["slot"]: r for r in run["budget_rollup"]}
+    rollup_by_slot = {r["slot"]: r for r in budget_rollup}
     slots = list(rollup_by_slot.keys())
     slots.sort(key=_budget_slot_order)
 
-    awards = run["per_award"]
     def _award_score(a):
         vals = []
         for s in slots:
             bl = a["budget_lines"].get(s, {})
-            n_agree = bl.get("n_agree", 0)
+            n_correct = bl.get("n_correct", 0)
             n_comp = bl.get("n_compared", 0)
             if n_comp:
-                vals.append(n_agree / n_comp)
+                vals.append(n_correct / n_comp)
         return sum(vals) / len(vals) if vals else 0.0
     awards = sorted(awards, key=_award_score, reverse=True)
 
@@ -149,28 +155,28 @@ def build_budget_matrix(run: dict):
             bl = a["budget_lines"].get(s)
             n_reps = a.get("n_replicates", 0)
             if not bl:
-                cells[i][j] = {"kind": "none", "n_agree": 0,
-                               "n_compared": 0, "agree_rate": None}
+                cells[i][j] = {"kind": "none", "n_correct": 0,
+                               "n_compared": 0, "correct_rate": None}
                 continue
             n_comp = bl.get("n_compared", 0)
-            n_oe = bl.get("n_oe_only", 0)
-            n_van = bl.get("n_van_only", 0)
+            n_halluc = bl.get("n_hallucinated", 0)
+            n_missing = bl.get("n_missing", 0)
             if n_comp:
                 cells[i][j] = {
-                    "kind": "agree",
-                    "n_agree": bl.get("n_agree", 0),
+                    "kind": "correct",
+                    "n_correct": bl.get("n_correct", 0),
                     "n_compared": n_comp,
-                    "agree_rate": bl.get("n_agree", 0) / n_comp,
+                    "correct_rate": bl.get("n_correct", 0) / n_comp,
                 }
-            elif n_oe and not n_van:
-                cells[i][j] = {"kind": "oe_only", "n_agree": n_oe,
-                               "n_compared": n_reps, "agree_rate": None}
-            elif n_van and not n_oe:
-                cells[i][j] = {"kind": "van_only", "n_agree": n_van,
-                               "n_compared": n_reps, "agree_rate": None}
+            elif n_halluc and not n_missing:
+                cells[i][j] = {"kind": "hallucinated", "n_correct": n_halluc,
+                               "n_compared": n_reps, "correct_rate": None}
+            elif n_missing and not n_halluc:
+                cells[i][j] = {"kind": "missing", "n_correct": n_missing,
+                               "n_compared": n_reps, "correct_rate": None}
             else:
-                cells[i][j] = {"kind": "none", "n_agree": 0,
-                               "n_compared": 0, "agree_rate": None}
+                cells[i][j] = {"kind": "none", "n_correct": 0,
+                               "n_compared": 0, "correct_rate": None}
     return awards, slots, cells
 
 
@@ -192,28 +198,28 @@ def _budget_slot_order(slot: str) -> tuple:
 
 def _cell_color(cell: dict) -> tuple:
     kind = cell["kind"]
-    if kind == "agree":
-        return AGREE_CMAP(cell["agree_rate"])
-    if kind == "oe_only":
-        return COLOR_OE_ONLY
-    if kind == "van_only":
-        return COLOR_VAN_ONLY
-    return COLOR_BOTH_NULL
+    if kind == "correct":
+        return AGREE_CMAP(cell["correct_rate"])
+    if kind == "hallucinated":
+        return COLOR_HALLUCINATED
+    if kind == "missing":
+        return COLOR_MISSING
+    return COLOR_CORRECT_ABSENT
 
 
 def _cell_text(cell: dict) -> str:
     kind = cell["kind"]
-    if kind == "agree":
-        return f"{cell['n_agree']}/{cell['n_compared']}"
-    if kind == "oe_only":
-        return f"OE{cell['n_agree']}"
-    if kind == "van_only":
-        return f"V{cell['n_agree']}"
+    if kind == "correct":
+        return f"{cell['n_correct']}/{cell['n_compared']}"
+    if kind == "hallucinated":
+        return f"E{cell['n_correct']}"
+    if kind == "missing":
+        return f"R{cell['n_correct']}"
     return "—"
 
 
 def _cell_text_color(cell: dict) -> str:
-    if cell["kind"] == "agree" and cell["agree_rate"] < 0.4:
+    if cell["kind"] == "correct" and cell["correct_rate"] < 0.4:
         return "white"
     return "black"
 
@@ -279,12 +285,12 @@ def render_heatmap(
 
     # Legend
     legend_handles = [
-        mpatches.Patch(color=AGREE_CMAP(1.0), label="100% agree"),
-        mpatches.Patch(color=AGREE_CMAP(0.6), label="partial agree"),
-        mpatches.Patch(color=AGREE_CMAP(0.0), label="0% agree"),
-        mpatches.Patch(color=COLOR_OE_ONLY, label="OpenERA only"),
-        mpatches.Patch(color=COLOR_VAN_ONLY, label="Vandalizer only"),
-        mpatches.Patch(color=COLOR_BOTH_NULL, label="neither"),
+        mpatches.Patch(color=AGREE_CMAP(1.0), label="100% correct"),
+        mpatches.Patch(color=AGREE_CMAP(0.6), label="partial"),
+        mpatches.Patch(color=AGREE_CMAP(0.0), label="0% correct"),
+        mpatches.Patch(color=COLOR_HALLUCINATED, label="extractor-only (E)"),
+        mpatches.Patch(color=COLOR_MISSING, label="reference-only (R)"),
+        mpatches.Patch(color=COLOR_CORRECT_ABSENT, label="both absent"),
     ]
     ax.legend(
         handles=legend_handles,
@@ -303,6 +309,57 @@ def render_heatmap(
 # ── CLI ─────────────────────────────────────────────────────────────────
 
 
+def _plot_partition(
+    run: dict,
+    awards: list[dict],
+    partition_summary: dict,
+    *,
+    mode: str,
+    out_dir: Path,
+    filename_kind: str,         # "accuracy" | "agreement"
+    filename_suffix: str,       # "" | "_in_progress"
+    label_noun: str,            # "accuracy" | "agreement"
+    reference_label: str,       # "ground truth" | "reference"
+) -> None:
+    if not awards:
+        print(f"skip: no {filename_suffix or 'validated'} cases for mode={mode}")
+        return
+
+    # Scalars
+    awards_s, fields, cells_s = build_scalar_matrix(awards, partition_summary["field_rollup"])
+    overall_s = partition_summary["overall_accuracy_pct"]
+    subtitle_s = (
+        f"{len(awards)} cases ({filename_suffix.lstrip('_').replace('_', ' ') or 'validated'}) · "
+        f"overall {overall_s:.1f}% {label_noun} on replicates where both sides emit a value. "
+        if overall_s is not None else
+        f"{len(awards)} cases · no replicate pairs had values on both sides."
+    )
+    render_heatmap(
+        awards_s, fields, cells_s,
+        col_label_for=lambda f: f,
+        title=f"Scalar-field {label_noun} vs. {reference_label}  ({mode})",
+        subtitle=subtitle_s,
+        out_path=out_dir / f"{filename_kind}_scalars_{mode}{filename_suffix}.png",
+    )
+
+    # Budget
+    awards_b, slots, cells_b = build_budget_matrix(awards, partition_summary["budget_rollup"])
+    overall_b = partition_summary["budget_overall_accuracy_pct"]
+    subtitle_b = (
+        f"{len(awards)} cases · overall {overall_b:.1f}% {label_noun} on replicates where both "
+        f"sides emit a budget line."
+        if overall_b is not None else
+        f"{len(awards)} cases · no budget slots had values on both sides."
+    )
+    render_heatmap(
+        awards_b, slots, cells_b,
+        col_label_for=lambda s: s,
+        title=f"Budget-line {label_noun} vs. {reference_label}  ({mode})",
+        subtitle=subtitle_b,
+        out_path=out_dir / f"{filename_kind}_budget_{mode}{filename_suffix}.png",
+    )
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--summary", required=True,
@@ -318,34 +375,21 @@ def main() -> int:
                if args.out_dir else summary_path.parent / "charts")
 
     run = load_run(summary_path, args.mode)
-    matched = run["matched_awards"]
-    overall_scalar = run["overall_agreement_pct"]
-    overall_budget = run["budget_overall_agreement_pct"]
 
-    # Scalars
-    awards_s, fields, cells_s = build_scalar_matrix(run)
-    render_heatmap(
-        awards_s, fields, cells_s,
-        col_label_for=lambda f: f,
-        title=f"Scalar-field agreement with Vandalizer  ({args.mode})",
-        subtitle=(
-            f"{matched} awards matched · overall {overall_scalar:.1f}% where both systems emit a value. "
-            f"Vandalizer is not ground truth — green = the two systems agreed across replicates."
-        ),
-        out_path=out_dir / f"agreement_scalars_{args.mode}.png",
+    validated = filter_awards(run, "validated")
+    in_progress = filter_awards(run, "in_progress")
+
+    _plot_partition(
+        run, validated, run["validated"],
+        mode=args.mode, out_dir=out_dir,
+        filename_kind="accuracy", filename_suffix="",
+        label_noun="accuracy", reference_label="ground truth",
     )
-
-    # Budget
-    awards_b, slots, cells_b = build_budget_matrix(run)
-    render_heatmap(
-        awards_b, slots, cells_b,
-        col_label_for=lambda s: s,
-        title=f"Budget-line agreement with Vandalizer  ({args.mode})",
-        subtitle=(
-            f"{matched} awards matched · overall {overall_budget:.1f}% where both systems emit a line. "
-            f"Orange = OpenERA emitted the line but Vandalizer did not (often totals rows H/I/J/L)."
-        ),
-        out_path=out_dir / f"agreement_budget_{args.mode}.png",
+    _plot_partition(
+        run, in_progress, run["in_progress"],
+        mode=args.mode, out_dir=out_dir,
+        filename_kind="agreement", filename_suffix="_in_progress",
+        label_noun="agreement", reference_label="reference (pending validation)",
     )
     return 0
 

@@ -13,7 +13,7 @@
     "pdf_concurrency": 3,
     "structured_output": "json_object",
     "json_schema_file": null,
-    "reuse_ocr_from": "/Users/barrierobison/Documents/Administration/AICoordination2026/OpenERA-Eval/NSFAwards/outputs/nsf-udm-gpt-oss-120b-dots-r5",
+    "reuse_ocr_from": "NSFAwards/outputs/nsf-udm-gpt-oss-120b-dots-r5",
     "prompt_file": "components/nsf-award-notice-extraction-udm/prompt.md"
   },
   "headline": {

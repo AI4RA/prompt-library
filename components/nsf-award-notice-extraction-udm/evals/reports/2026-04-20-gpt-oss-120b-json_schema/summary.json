@@ -12,8 +12,8 @@
     "pdf_count": 28,
     "pdf_concurrency": 3,
     "structured_output": "json_schema",
-    "json_schema_file": "/Users/barrierobison/Documents/Administration/AICoordination2026/AI4RAPromptLibrary/components/nsf-award-notice-extraction-udm/schema.json",
-    "reuse_ocr_from": "/Users/barrierobison/Documents/Administration/AICoordination2026/OpenERA-Eval/NSFAwards/outputs/nsf-udm-gpt-oss-120b-dots-r5",
+    "json_schema_file": "components/nsf-award-notice-extraction-udm/schema.json",
+    "reuse_ocr_from": "NSFAwards/outputs/nsf-udm-gpt-oss-120b-dots-r5",
     "prompt_file": "components/nsf-award-notice-extraction-udm/prompt.md"
   },
   "headline": {

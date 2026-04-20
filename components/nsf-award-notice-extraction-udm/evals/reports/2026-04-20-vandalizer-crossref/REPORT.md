@@ -1,42 +1,46 @@
-# OpenERA vs. Vandalizer — cross-system agreement
+# Extraction accuracy — NSF Award Notice Extraction (UDM)
 
-**Generated:** 2026-04-20T19:21:18Z  
-**Vandalizer results loaded:** 20 distinct awards  
+**Generated:** 2026-04-20T20:04:37Z  
+**Ground-truth cases:** 20 (0 validated, 24 awaiting validation)  
 **Schema:** `components/nsf-award-notice-extraction-udm/schema.json`
 
-> **Not ground truth.** Vandalizer is a separate AI extraction system. Where the two systems agree we have high confidence the value is correct; where they disagree the document is ambiguous or one system is wrong. Treat this as a *second opinion*, not a truth signal.
+> **Ground-truth source.** Cases marked `validated` are human-verified extractions used as truth. Cases marked `in_progress` are awaiting human verification — the reference values come from an automated second-opinion pipeline, so they serve as an agreement signal rather than an accuracy signal. Validation state is tracked in per-case `metadata.yaml` and partitioned below.
 
-## 1. Headline — agreement heatmaps
+## 1. Headline — accuracy on validated cases
 
-Both heatmaps use the **`json_schema`** run. Rows are awards (sorted by that row's mean agreement), columns are fields (sorted by cross-award agreement). Cell text = `agree / compared` over replicates. **Green** = both systems emitted a value and they matched; **orange** = OpenERA emitted but Vandalizer did not; **blue** = Vandalizer emitted but OpenERA did not; **gray** = neither emitted.
+_No cases have completed human validation yet. Every case currently falls into the in-progress partition in §2. As you validate cases (flip `validation_state: validated` in their `metadata.yaml`), they will appear here._
+
+## 2. Pending validation — agreement on in-progress cases
+
+These 24 cases are still awaiting human verification. Numbers below measure **agreement with the automated reference pipeline**, not accuracy. Use them to spot candidate-for-review items — where the extractor and the reference differ, one of them is wrong.
 
 ### Scalar fields
 
-24 awards matched · overall **97.8%** agreement where both systems emit a value (2088/2134 replicate-field pairs).
+24 in-progress cases · overall **97.8%** agreement (2088/2134 replicate-field pairs).
 
-![scalar-field agreement heatmap](charts/agreement_scalars_json_schema.png)
+![scalar-field agreement heatmap — in progress](charts/agreement_scalars_json_schema_in_progress.png)
 
-### Budget line items (NSF-format A–M)
+### Budget line items
 
-Comparison is by `(code, subcode)` — both systems target the same UDM shape. Overall **98.8%** agreement where both emit a line (2574/2605 replicate-slot pairs). Most orange cells are totals rows (H/I/J/L) OpenERA itemizes explicitly but Vandalizer does not.
+Overall **98.8%** budget-line agreement (2574/2605 replicate-slot pairs).
 
-![budget-line agreement heatmap](charts/agreement_budget_json_schema.png)
+![budget-line agreement heatmap — in progress](charts/agreement_budget_json_schema_in_progress.png)
 
-## 2. Headline — agreement by run mode
+## 3. Headline by run mode
 
-| run / mode | matched awards | scalar compared / agree | scalar agreement | budget compared / agree | budget agreement |
+| run / mode | matched cases | scalar compared / correct | scalar accuracy | budget compared / correct | budget accuracy |
 |---|---|---|---|---|---|
-| `none` | 24 / 28 openera docs | 1848 / 1900 | **97.3%** | 2578 / 2660 | **96.9%** |
-| `json_object` | 24 / 28 openera docs | 1916 / 1952 | **98.2%** | 2615 / 2658 | **98.4%** |
-| `json_schema` | 24 / 28 openera docs | 2088 / 2134 | **97.8%** | 2574 / 2605 | **98.8%** |
+| `none` | 24 of 28 source docs (0 validated, 24 in progress) | 1848 / 1900 | **97.3%** | 2578 / 2660 | **96.9%** |
+| `json_object` | 24 of 28 source docs (0 validated, 24 in progress) | 1916 / 1952 | **98.2%** | 2615 / 2658 | **98.4%** |
+| `json_schema` | 24 of 28 source docs (0 validated, 24 in progress) | 2088 / 2134 | **97.8%** | 2574 / 2605 | **98.8%** |
 
-## 3. Scalar-field disagreement examples — `json_schema`
+## 4. Incorrect-extraction examples — `json_schema`
 
-Up to 5 examples per field. When you see these, ask: was the document ambiguous, did Vandalizer extract the wrong thing, or did OpenERA?
+Up to 5 examples per field where the extractor produced a value different from the reference. Includes both validated (definite errors) and in-progress (candidate errors) cases.
 
-### `cfda_name` — 84% agreement  (95/113)
+### `cfda_name` — 84%  (95/113)
 
-| award | vandalizer | openera | vandalizer raw | openera raw |
+| award | truth | extractor | truth raw | extractor raw |
 |---|---|---|---|---|
 | 2441918 | `engineering grants (predominant source of funding for sefa reporting)` | `engineering grants (predominant source for sefa reporting)` | Engineering Grants (Predominant source of funding for SEFA r | Engineering Grants (Predominant source for SEFA reporting) |
 | 2514552 | `geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources` | `geosciences (predominant source of funding for sefa reporting); education and human resources` | Geosciences (Predominant source of funding for SEFA reportin | Geosciences (Predominant source of funding for SEFA reportin |
@@ -44,9 +48,9 @@ Up to 5 examples per field. When you see these, ask: was the document ambiguous,
 | 2514552 | `geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources` | `geosciences (predominant source of funding for sefa reporting); education and human resources` | Geosciences (Predominant source of funding for SEFA reportin | Geosciences (Predominant source of funding for SEFA reportin |
 | 2514552 | `geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources` | `geosciences (predominant source of funding for sefa reporting); education and human resources` | Geosciences (Predominant source of funding for SEFA reportin | Geosciences (Predominant source of funding for SEFA reportin |
 
-### `is_collaborative_research` — 91% agreement  (107/118)
+### `is_collaborative_research` — 91%  (107/118)
 
-| award | vandalizer | openera | vandalizer raw | openera raw |
+| award | truth | extractor | truth raw | extractor raw |
 |---|---|---|---|---|
 | 2531886 | `False` | `True` | False | True |
 | 2531886 | `False` | `True` | False | True |
@@ -54,9 +58,9 @@ Up to 5 examples per field. When you see these, ask: was the document ambiguous,
 | 2531886 | `False` | `True` | False | True |
 | 2531886 | `False` | `True` | False | True |
 
-### `award_title` — 92% agreement  (108/117)
+### `award_title` — 92%  (108/117)
 
-| award | vandalizer | openera | vandalizer raw | openera raw |
+| award | truth | extractor | truth raw | extractor raw |
 |---|---|---|---|---|
 | 2511003 | `equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.` | `equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training` | Equipment: MRI: Track 1 Acquisition of Element AVITI System  | Equipment: MRI: Track 1 Acquisition of Element A VITI System |
 | 2511003 | `equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.` | `equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training` | Equipment: MRI: Track 1 Acquisition of Element AVITI System  | Equipment: MRI: Track 1 Acquisition of Element A VITI System |
@@ -64,9 +68,9 @@ Up to 5 examples per field. When you see these, ask: was the document ambiguous,
 | 2511003 | `equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.` | `equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training` | Equipment: MRI: Track 1 Acquisition of Element AVITI System  | Equipment: MRI: Track 1 Acquisition of Element A VITI System |
 | 2511003 | `equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.` | `equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training` | Equipment: MRI: Track 1 Acquisition of Element AVITI System  | Equipment: MRI: Track 1 Acquisition of Element A VITI System |
 
-### `cfda_number` — 95% agreement  (107/113)
+### `cfda_number` — 95%  (107/113)
 
-| award | vandalizer | openera | vandalizer raw | openera raw |
+| award | truth | extractor | truth raw | extractor raw |
 |---|---|---|---|---|
 | 2514552 | `47.050` | `47.050, 47.076` | 47.050 | 47.050, 47.076 |
 | 2514552 | `47.050` | `47.050; 47.076` | 47.050 | 47.050; 47.076 |
@@ -74,18 +78,16 @@ Up to 5 examples per field. When you see these, ask: was the document ambiguous,
 | 2514552 | `47.050` | `47.050, 47.076` | 47.050 | 47.050, 47.076 |
 | 2514552 | `47.050` | `47.050; 47.076` | 47.050 | 47.050; 47.076 |
 
-### `funding_opportunity_number` — 98% agreement  (111/113)
+### `funding_opportunity_number` — 98%  (111/113)
 
-| award | vandalizer | openera | vandalizer raw | openera raw |
+| award | truth | extractor | truth raw | extractor raw |
 |---|---|---|---|---|
 | 2527135 | `nsf 25-509` | `25-509` | NSF 25-509 | 25-509 |
 | 2316126 | `nsf 22-633` | `22-633` | NSF 22-633 | 22-633 |
 
-## 4. Appendix — per-field rollup tables across modes
+## 5. Appendix — per-field rollup tables across modes
 
-Scalar fields where both systems provided a value. Columns show **agree / compared** per mode.
-
-<details><summary>Scalar field agreement by mode</summary>
+<details><summary>Scalar field accuracy/agreement by mode</summary>
 
 | field | `none` | `json_object` | `json_schema` |
 |---|---|---|---|
@@ -123,49 +125,49 @@ Scalar fields where both systems provided a value. Columns show **agree / compar
 
 </details>
 
-<details><summary>Scalar one-sided nulls (coverage asymmetry)</summary>
+<details><summary>One-sided emissions (coverage asymmetry)</summary>
 
-Cases where one system extracted a value and the other returned null.
+Extractor emitted a value where truth/reference has null (**hallucinated**) vs. truth/reference has a value the extractor emitted as null (**missing**). Per mode.
 
-| field | `none` OE-null / van-null | `json_object` OE-null / van-null | `json_schema` OE-null / van-null |
+| field | `none` halluc. / missing | `json_object` halluc. / missing | `json_schema` halluc. / missing |
 |---|---|---|---|
 | `sponsor_award_number` | — | — | — |
 | `award_status` | — | — | — |
 | `proposal_number` | — | — | — |
-| `amendment_type` | 0 / 120 | 0 / 120 | 0 / 118 |
-| `amendment_date` | 0 / 20 | 0 / 9 | — |
-| `amendment_description` | 0 / 120 | 0 / 120 | 0 / 118 |
-| `award_received_date` | 0 / 20 | 0 / 20 | 0 / 20 |
-| `start_date` | 120 / 0 | 120 / 0 | 99 / 0 |
-| `end_date` | 120 / 0 | 120 / 0 | 99 / 0 |
-| `total_intended_amount` | 115 / 0 | 115 / 0 | 2 / 5 |
-| `expenditure_limitation` | — | — | 0 / 1 |
-| `indirect_cost_base` | 0 / 114 | 0 / 113 | 0 / 103 |
-| `fees` | 85 / 0 | 0 / 35 | 1 / 35 |
-| `cfda_name` | 5 / 0 | 5 / 0 | 5 / 0 |
-| `cfda_number` | 5 / 0 | 5 / 0 | 5 / 0 |
+| `amendment_type` | 120 / 0 | 120 / 0 | 118 / 0 |
+| `amendment_date` | 20 / 0 | 9 / 0 | — |
+| `amendment_description` | 120 / 0 | 120 / 0 | 118 / 0 |
+| `award_received_date` | 20 / 0 | 20 / 0 | 20 / 0 |
+| `start_date` | 0 / 120 | 0 / 120 | 0 / 99 |
+| `end_date` | 0 / 120 | 0 / 120 | 0 / 99 |
+| `total_intended_amount` | 0 / 115 | 0 / 115 | 5 / 2 |
+| `expenditure_limitation` | — | — | 1 / 0 |
+| `indirect_cost_base` | 114 / 0 | 113 / 0 | 103 / 0 |
+| `fees` | 0 / 85 | 35 / 0 | 35 / 1 |
+| `cfda_name` | 0 / 5 | 0 / 5 | 0 / 5 |
+| `cfda_number` | 0 / 5 | 0 / 5 | 0 / 5 |
 | `is_collaborative_research` | 0 / 0 | 0 / 0 | 0 / 0 |
-| `award_title` | 5 / 0 | 5 / 0 | 1 / 0 |
-| `funding_opportunity_number` | 5 / 0 | 5 / 0 | 5 / 0 |
+| `award_title` | 0 / 5 | 0 / 5 | 0 / 1 |
+| `funding_opportunity_number` | 0 / 5 | 0 / 5 | 0 / 5 |
 | `award_id` | 0 / 0 | 0 / 0 | 0 / 0 |
 | `award_number` | 0 / 0 | 0 / 0 | 0 / 0 |
 | `sponsor_name` | 0 / 0 | 0 / 0 | 0 / 0 |
 | `managing_division` | 0 / 0 | 0 / 0 | 0 / 0 |
 | `award_instrument` | 0 / 0 | 0 / 0 | 0 / 0 |
-| `is_research_and_development` | 5 / 0 | 5 / 0 | 5 / 0 |
-| `funding_opportunity_title` | 5 / 0 | 5 / 0 | 5 / 0 |
+| `is_research_and_development` | 0 / 5 | 0 / 5 | 0 / 5 |
+| `funding_opportunity_title` | 0 / 5 | 0 / 5 | 0 / 5 |
 | `amendment_number` | 0 / 0 | 0 / 0 | 0 / 0 |
-| `award_date` | 28 / 0 | 43 / 0 | 37 / 0 |
-| `amount_obligated_this_amendment` | 0 / 5 | 0 / 5 | 3 / 5 |
-| `total_obligated_to_date` | 108 / 0 | 108 / 0 | 6 / 9 |
-| `cost_share_approved_amount` | 4 / 10 | 22 / 7 | 56 / 8 |
-| `indirect_cost_rate_percent` | 0 / 25 | 0 / 25 | 3 / 25 |
+| `award_date` | 0 / 28 | 0 / 43 | 0 / 37 |
+| `amount_obligated_this_amendment` | 5 / 0 | 5 / 0 | 5 / 3 |
+| `total_obligated_to_date` | 0 / 108 | 0 / 108 | 9 / 6 |
+| `cost_share_approved_amount` | 10 / 4 | 7 / 22 | 8 / 56 |
+| `indirect_cost_rate_percent` | 25 / 0 | 25 / 0 | 25 / 3 |
 
 </details>
 
-<details><summary>Budget-line agreement by mode</summary>
+<details><summary>Budget-line accuracy/agreement by mode</summary>
 
-Rows are NSF-format `code.subcode` slots. Columns show **agree / compared** replicate-slot pairs per mode.
+Rows are NSF-format `code.subcode` slots. Columns show **correct / compared** replicate-slot pairs per mode.
 
 | slot | `none` | `json_object` | `json_schema` |
 |---|---|---|---|
@@ -206,11 +208,12 @@ Rows are NSF-format `code.subcode` slots. Columns show **agree / compared** repl
 
 ## Methodology
 
-- **Matching.** OpenERA PDFs are matched to Vandalizer results by the tuple `(award_number, amendment_number)`, majority-voted across replicates. This matters for amendment series: three PDFs may share an award_number but represent the base award, Mod 1, and Mod 2 respectively; matching on award_number alone would falsely align all three to one Vandalizer extraction.
+- **Matching.** Source documents are matched to ground-truth cases by the tuple `(award_number, amendment_number)`, majority-voted across replicates. This matters for amendment series: three source documents may share an `award_number` but represent the base award, Mod 1, and Mod 2 respectively.
+- **Validation partition.** Each ground-truth case carries a sibling `<results-N>.meta.yaml` file with `validation_state: validated | in_progress`. Validated cases feed the §1 headline; in-progress cases feed the §2 appendix. As cases are validated, they migrate from §2 to §1 without any code change.
+- **Scoring.** Every (award × field × replicate) tuple is assigned exactly one of: `correct`, `incorrect`, `hallucinated` (extractor emitted; truth null), `missing` (truth emitted; extractor null), `correct_absent` (both null). Accuracy percentages use `correct / (correct + incorrect)` — i.e., only replicates where both sides emit a value. Hallucination and missing counts are surfaced separately (orange/blue cells in the heatmaps, §5 in the appendix tables).
 - **Scalar scope.** All top-level scalar fields declared in the UDM schema.
-- **Budget scope.** The `budget_categories` array is compared by `(code, subcode)` — both systems already emit native UDM shape, so no label mapping is required. The top-level `fees` scalar is also scored. Nested objects (`recipient_organization`, `current_budget_period`) and other arrays (`project_personnel`, `subawards`, `terms_and_conditions`, `special_conditions`) remain out of scope for this pass.
+- **Budget scope.** The `budget_categories` array is compared by `(code, subcode)` — both sides already emit native UDM shape, so no label mapping is required. The top-level `fees` scalar is also scored. Nested objects (`recipient_organization`, `current_budget_period`) and other arrays (`project_personnel`, `subawards`, `terms_and_conditions`, `special_conditions`) remain out of scope for this pass.
 - **Normalization.** Currency (`$584,845` → `584845`), percentages (`50.0000%` → `50.0`), US dates (`08/18/2025` → `2025-08-18`) are coerced. `"N/A"`, `""`, and `null` are all treated as null.
-- **Denominator.** Every agreement percentage uses only replicates where *both* systems produced a non-null value for that field / budget slot. One-sided emissions are surfaced separately (orange / blue cells in the heatmaps, appendix §4 for the table equivalents) so they do not penalize agreement.
 
 **Comparison script:** `scripts/compare_to_vandalizer.py`  
-**Plotter:** `scripts/plot_vandalizer_heatmaps.py` (in this repo) reads `summary.json` and writes the PNGs under `charts/`. Regenerate with `python scripts/plot_vandalizer_heatmaps.py --summary <path>/summary.json --mode json_schema`.
+**Plotter:** `scripts/plot_vandalizer_heatmaps.py` (in the prompt-library repo) reads `summary.json` and writes the PNGs under `charts/`. Regenerate with `python scripts/plot_vandalizer_heatmaps.py --summary <path>/summary.json --mode json_schema`.
