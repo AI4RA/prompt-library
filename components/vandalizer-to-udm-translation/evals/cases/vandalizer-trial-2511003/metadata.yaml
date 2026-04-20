@@ -1,0 +1,58 @@
+case: Vandalizer trial — FAIN 2511003 / MRI Track 1 AVITI System
+award_number: "2511003"
+amendment_number: "000"  # defaulted by translator; Vandalizer does not extract amendment metadata
+award_instrument: Standard Grant
+sponsor: National Science Foundation
+managing_division: DBI
+funding_opportunity_number: NSF 23-519
+funding_opportunity_title: "Major Research Instrumentation Program"
+cfda_number: "47.074"
+award_date: 2025-08-18
+period_of_performance:
+  start: 2025-09-15
+  end: 2028-08-31
+
+structural_features:
+  - vandalizer-trial-extraction
+  - amendment-000-initial-obligation-defaulted
+  - standard-grant-single-period
+  - single-prime-no-subaward
+  - all-copis-at-recipient-institution
+  - rd-award
+  - zero-cost-share
+  - fifty-percent-mtdc-indirect-rate-inferred-absent
+  - equipment-dominated-budget
+
+schema_features:
+  - translator-defaults-for-missing-amendment-metadata
+  - recipient-org-legal-name-only-no-address-no-uei
+  - sponsor-contacts-empty-all-na
+  - terms-and-conditions-empty-all-na
+  - special-conditions-empty-by-design
+  - subaward-inference-negative-no-external-copi
+  - source-provenance-populated
+  - fees-scalar-zero
+  - review-annotations-empty-yellow-highlight-na
+
+runtime_inputs:
+  source_document: "extraction-NSF Extract Trial-2026-04-20.json"
+  extracted_at: null
+  upstream_extractor_version: null
+
+validated_by: barrierobison
+validated_at: 2026-04-20
+validated_against_version: "0.1.0"
+schema_version: "1.1.0"
+
+notes: |
+  First case for the vandalizer-to-udm-translation component. Exercises the
+  core mapping table against a real Vandalizer extraction of an NSF Standard
+  Grant Amendment 000 notice (MRI: Track 1, FAIN 2511003, August 2025) with
+  all Co-PIs at the same institution as the PI. Negative test for subaward
+  inference: G.Subawards = 0 AND no Co-PI at a non-recipient institution, so
+  subawards is []. All three sponsor-contact blocks and the three terms-and-
+  conditions source fields come through as "N/A", producing empty arrays.
+  Indirect cost base cannot be determined because the Vandalizer input has
+  "Modified Total Direct Costs" = "N/A" — indirect_cost_base emits null even
+  though the rate is 50%. The yellow-highlight review field is "N/A", so
+  source_provenance.review_annotations is [].
