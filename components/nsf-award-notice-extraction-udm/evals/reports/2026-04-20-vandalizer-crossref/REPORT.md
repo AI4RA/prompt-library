@@ -1,7 +1,8 @@
 # Extraction accuracy — NSF Award Notice Extraction (UDM)
 
-**Generated:** 2026-04-20T20:04:37Z  
-**Ground-truth cases:** 20 (0 validated, 24 awaiting validation)  
+**Generated:** 2026-04-20T20:32:54Z  
+**Ground-truth corpus:** 20 distinct (award, amendment) cases at `real/nsf_awards/extractions`  
+**Headline run (`json_schema`):** matched 24 source docs (0 validated, 24 in progress)  
 **Schema:** `components/nsf-award-notice-extraction-udm/schema.json`
 
 > **Ground-truth source.** Cases marked `validated` are human-verified extractions used as truth. Cases marked `in_progress` are awaiting human verification — the reference values come from an automated second-opinion pipeline, so they serve as an agreement signal rather than an accuracy signal. Validation state is tracked in per-case `metadata.yaml` and partitioned below.
