@@ -55,17 +55,21 @@ Switching the same request from `json_object` to `json_schema: {strict: true, sc
 
 This is the result the prompt's output contract was *asking for*. `json_schema` turns the contract from a request into a constraint the gateway enforces.
 
-## Finding 3 — `json_schema` can truncate at the token cap
+## Finding 3 — `json_schema` can rarely truncate on outlier documents
 
-Two of the 140 replicates (1.4%) under `json_schema` failed as `parse_error`. Both hit the completion-token cap (`completion_tokens: 16384 == cap`) and got truncated mid-string:
+Two of the 140 replicates (1.4%) under `json_schema` failed as `parse_error`. Both hit the completion-token cap (`completion_tokens: 16384 == cap`) and got truncated mid-string, and both were replicates of the same document:
 
 - `Strickland 2021` replicate 2: `Expecting ',' delimiter: line 3575 column 39` — truncated at 16384 tokens
 - `Strickland 2021` replicate 3: `Unterminated string starting at: line 2689 column 3` — truncated at 16384 tokens
 
-This is not a structured-output failure. The other three replicates of the same document succeeded cleanly (2 of them used 8–12k tokens). It's a reminder that strict-schema generation can't abbreviate: if the schema declares 8 required arrays and the notice has 50 budget line items, the model has to emit them all. Two mitigations:
+This is not a structured-output failure. The other three replicates of the same document succeeded cleanly (two used 8–12k tokens). p95 completion length across the whole 140-replicate run was 10367 tokens; the 16k cap does not bind for the median document. The Strickland 2021 truncations are **outlier behavior on one long doc**, not a systemic issue with `json_schema`.
 
-1. **Raise `max_tokens`.** 32768 is the obvious fix — gpt-oss-120b's p95 under `json_schema` was 10367 tokens, so the cap rarely binds, but the worst cases benefit from headroom.
-2. **Monitor cap hits.** The `completion_tokens: n_over_80pct_of_cap` counter in `analyze_run.py`'s summary.json surfaces this early.
+We verified this by re-running the same matrix at `max_tokens=32768`: cap truncations went to zero, but the 32k budget traded 2 truncations for 9 `ReadTimeout` failures as the longer generation budget let hard docs hang past the client's 240s timeout. Net success rate went **down** (138/140 → 130/140). For this task, at this gateway, `max_tokens=16384` is a reasonable operating point — the 1.4% outlier truncation rate is lower than the transient-timeout rate exposed by a higher budget.
+
+**Operational recommendations:**
+
+1. Leave `max_tokens=16384` for gpt-oss-120b + this schema.
+2. Use `analyze_run.py`'s `completion_tokens.n_over_80pct_of_cap` counter to detect if a specific document class starts systematically pressuring the cap — that's the signal to raise it (and the client timeout alongside).
 
 ## Finding 4 — latency and token cost are roughly free
 
@@ -75,7 +79,7 @@ Across the three modes, p50 chat latency was 62.7–66.9s and p50 completion tok
 
 1. **If your component ships a `schema.json`, wire it to `response_format: json_schema` at call time.** The shape contract in the prompt body becomes a gateway-enforced constraint instead of a suggestion the model may rephrase.
 2. **Do not assume `json_object` does anything useful.** For well-behaved models it's a no-op; for worse-behaved models (e.g. `openai/gpt-oss-20b`, where our preliminary probe found `json_object` returned *invalid* JSON) it can actively mislead.
-3. **Budget completion tokens generously.** `json_schema` prevents the model from taking shortcuts that the prompt-only path would have allowed (e.g. an abbreviated budget array). Bump `max_tokens` to 32k when you adopt it.
+3. **Measure before raising `max_tokens`.** The intuition that strict-schema generation needs a bigger budget is not free — a larger budget lets hard documents hang longer against the client timeout and can trade truncations for timeouts (see Finding 3). Treat 16k as a working default for this task and raise only when the 80%-of-cap counter shows real pressure.
 4. **Test `json_schema` per model, not per gateway.** Mindrouter passes the constraint through; the model either honors it or doesn't. In a separate probe we saw `llama3.3:70b` truncate mid-strict-JSON and `openai/gpt-oss-20b` fail `json_object`. The next ablation should quantify this across the portability slate.
 
 ## Reproduction
@@ -104,4 +108,4 @@ See each per-mode report for the full run-level headline, schema-validation deta
 
 - **Portability.** Repeat this ablation on `qwen2.5:72b`, `microsoft/phi-4`, and `openai/gpt-oss-20b`. The probe suggests `json_schema` enforcement varies per model.
 - **Prompt-only vs `json_schema` on a prompt that spells out exact key names.** Roughly half of baseline's ignoring-extras 55.7% → 100% gap is naming drift that a more explicit prompt could have closed. Worth measuring how much of the remaining gap is type/shape errors vs naming.
-- **Cap hits at higher max_tokens.** Re-run `json_schema` with `--max-tokens 32768` to confirm the 2 truncations disappear.
+- **Harness client hardening.** A 32k re-run showed that lifting `max_tokens` alone surfaces a latency/timeout interaction (Finding 3). If future work wants to eliminate the 1.4% truncation rate, the fix is a combined bump of `max_tokens` + `httpx` client timeout + lower `pdf-concurrency` to reduce Mindrouter queue depth — not `max_tokens` alone.
