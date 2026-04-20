@@ -1,0 +1,100 @@
+site_name: AI4RA Prompt Library
+site_description: Versioned prompts, skills, and agents for AI-for-research-administration applications.
+site_url: https://ai4ra.github.io/prompt-library/
+repo_url: https://github.com/AI4RA/prompt-library
+repo_name: AI4RA/prompt-library
+edit_uri: edit/main/
+
+copyright: Copyright &copy; 2026 AI4RA — Apache License 2.0
+
+theme:
+  name: material
+  language: en
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/filter.js
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+nav:
+  - Home: index.md
+  - Browse:
+      - By category: browse/by-category.md
+      - By domain: browse/by-domain.md
+      - By status: browse/by-status.md
+      - By tag: browse/by-tag.md
+  - Components:
+      - Index: components/index.md
+      - document-type-classifier-udm: components/document-type-classifier-udm.md
+      - nsf-award-notice-extraction-udm: components/nsf-award-notice-extraction-udm.md
+      - nsf-budget-justification-udm: components/nsf-budget-justification-udm.md
+      - rfp-extraction: components/rfp-extraction.md
+      - rfp-extraction-udm: components/rfp-extraction-udm.md
+      - solicitation-doc-modifications-udm: components/solicitation-doc-modifications-udm.md
+      - sponsor-doc-defaults-udm: components/sponsor-doc-defaults-udm.md
+      - vandalizer-to-udm-translation: components/vandalizer-to-udm-translation.md
+  - Taxonomy: taxonomy.md
+  - About: about.md
+  - Contributing: contributing.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/AI4RA

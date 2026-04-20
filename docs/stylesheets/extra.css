@@ -1,0 +1,98 @@
+/* AI4RA Prompt Library — extras */
+
+/* Component filter table */
+.component-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin: 1rem 0 1.25rem;
+  align-items: center;
+}
+.component-filter input,
+.component-filter select {
+  padding: .45rem .6rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 4px;
+  font-size: .85rem;
+  background: var(--md-default-bg-color);
+  color: var(--md-default-fg-color);
+}
+.component-filter input {
+  flex: 1 1 16rem;
+  min-width: 12rem;
+}
+.component-filter select {
+  flex: 0 0 auto;
+}
+.component-filter .count {
+  color: var(--md-default-fg-color--light);
+  font-size: .85rem;
+  margin-left: auto;
+}
+
+table.component-table {
+  width: 100%;
+  font-size: .85rem;
+}
+table.component-table th {
+  white-space: nowrap;
+  text-align: left;
+}
+table.component-table td.tags {
+  color: var(--md-default-fg-color--light);
+  font-size: .75rem;
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-block;
+  padding: .1rem .45rem;
+  border-radius: 10px;
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+.status-badge.stable       { background: #dcfce7; color: #14532d; }
+.status-badge.experimental { background: #fef3c7; color: #713f12; }
+.status-badge.deprecated   { background: #fee2e2; color: #7f1d1d; }
+
+/* Category / domain chips */
+.chip {
+  display: inline-block;
+  padding: .08rem .45rem;
+  border-radius: 10px;
+  background: var(--md-default-fg-color--lightest);
+  color: var(--md-default-fg-color);
+  font-size: .72rem;
+  margin-right: .25rem;
+}
+
+/* Fact grid on component pages */
+.fact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: .6rem 1rem;
+  margin: .5rem 0 1.25rem;
+  padding: .75rem 1rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 6px;
+  background: var(--md-code-bg-color);
+}
+.fact-grid .fact { display: flex; flex-direction: column; gap: .15rem; }
+.fact-grid .fact .label {
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--md-default-fg-color--light);
+}
+.fact-grid .fact .value { font-size: .9rem; }
+
+/* Hidden row helper for filter */
+.component-row.hidden { display: none; }
+
+/* Dark mode adjustments for chips/badges */
+[data-md-color-scheme="slate"] .status-badge.stable       { background: #14532d; color: #dcfce7; }
+[data-md-color-scheme="slate"] .status-badge.experimental { background: #713f12; color: #fef3c7; }
+[data-md-color-scheme="slate"] .status-badge.deprecated   { background: #7f1d1d; color: #fee2e2; }

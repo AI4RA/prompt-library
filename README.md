@@ -2,6 +2,8 @@
 
 Versioned storage and evaluation data for prompts, skills, agents, and related components used across AI4RA applications.
 
+**Browse the library:** [https://ai4ra.github.io/prompt-library/](https://ai4ra.github.io/prompt-library/) (filterable by category, domain, status, tag — built automatically from this repo on every push to `main`).
+
 ## Layout
 
 Each component is a directory under `components/` named by a short slug. A component represents a single *task* (e.g., "extract a submission checklist from an RFP") and may have multiple platform-specific *manifestations*:
@@ -42,9 +44,22 @@ When you re-run evals after a version bump and the expected output is still corr
 
 ## CI
 
-A GitHub Actions workflow ([`.github/workflows/lint.yml`](.github/workflows/lint.yml)) runs [`.github/scripts/lint_components.py`](.github/scripts/lint_components.py) on every PR and push to `main`. It checks that each component has `README.md` + `CHANGELOG.md`, that every manifestation has valid YAML frontmatter with the required fields, that `version` is semver, that `category` / `domain` / `status` values exist in `taxonomy.md`, and that all manifestations under one component share the same `version` (lockstep).
+Two GitHub Actions workflows run on pushes to `main`:
 
-To run it locally: `pip install pyyaml && python .github/scripts/lint_components.py`.
+- [`lint.yml`](.github/workflows/lint.yml) runs [`lint_components.py`](.github/scripts/lint_components.py) on every PR and push. It checks that each component has `README.md` + `CHANGELOG.md`, that every manifestation has valid YAML frontmatter with the required fields, that `version` is semver, that `category` / `domain` / `status` values exist in `taxonomy.md`, and that all manifestations under one component share the same `version` (lockstep). To run it locally: `pip install pyyaml && python .github/scripts/lint_components.py`.
+- [`pages.yml`](.github/workflows/pages.yml) regenerates the browsable [documentation site](https://ai4ra.github.io/prompt-library/) and deploys it to GitHub Pages on every push to `main` that touches `components/`, `docs/`, `taxonomy.md`, the generator script, or MkDocs config.
+
+## Documentation site
+
+The [browsable site](https://ai4ra.github.io/prompt-library/) is generated from this repo — each component page is built from its `README.md`, `prompt.md`, `schema.json`, `CHANGELOG.md`, and eval metadata. There is no duplicated content; edit the component and the site updates on the next push.
+
+Build locally:
+
+```bash
+pip install -r requirements-docs.txt
+python scripts/build_docs.py
+mkdocs serve       # http://127.0.0.1:8000/
+```
 
 ## Shared vocabulary
 
