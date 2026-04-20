@@ -67,7 +67,11 @@ markdown_extensions:
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist:
@@ -99,6 +103,7 @@ nav:
       - sponsor-doc-defaults-udm: components/sponsor-doc-defaults-udm.md
       - vandalizer-to-udm-translation: components/vandalizer-to-udm-translation.md
   - Taxonomy: taxonomy.md
+  - Ecosystem: ecosystem.md
   - About: about.md
   - Contributing: contributing.md
 
