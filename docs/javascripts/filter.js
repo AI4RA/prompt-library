@@ -4,7 +4,7 @@
     const table = document.getElementById(tableId);
     if (!table) return;
 
-    const rows = Array.from(table.querySelectorAll("tbody tr.component-row"));
+    const rows = Array.from(table.querySelectorAll(".component-row"));
     const qInput = container.querySelector("input.q");
     const catSel = container.querySelector("select.category");
     const domSel = container.querySelector("select.domain");

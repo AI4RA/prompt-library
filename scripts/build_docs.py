@@ -333,7 +333,7 @@ def render_index(components: list[Component]) -> str:
     domain_options = "".join(opt(d) for d in domains)
     status_options = "".join(opt(s) for s in statuses)
 
-    rows = []
+    cards = []
     for c in sorted(components, key=lambda x: x.slug):
         search_blob = " ".join(
             [c.slug, c.name, c.short_description, c.category, c.domain, c.status]
@@ -341,26 +341,30 @@ def render_index(components: list[Component]) -> str:
             + c.audience
         )
         manifs = ", ".join(c.manifestations)
-        tags_html = " ".join(chip(t) for t in c.tags)
-        row = (
-            f'<tr class="component-row" '
+        tags_html = " ".join(chip(t) for t in c.tags) if c.tags else ""
+        description = html_escape(c.short_description) if c.short_description else ""
+        card = (
+            f'<a href="components/{c.slug}/" class="component-card component-row" '
             f'data-search="{html_escape(search_blob)}" '
             f'data-category="{html_escape(c.category)}" '
             f'data-domain="{html_escape(c.domain)}" '
             f'data-status="{html_escape(c.status)}">'
-            f'<td><a href="components/{c.slug}/"><code>{html_escape(c.slug)}</code></a><br>'
-            f'<small>{html_escape(c.short_description)}</small></td>'
-            f'<td>{chip(c.category)}</td>'
-            f'<td>{chip(c.domain)}</td>'
-            f'<td>{status_badge(c.status)}</td>'
-            f'<td><code>{html_escape(c.version)}</code></td>'
-            f'<td>{html_escape(manifs)}</td>'
-            f'<td class="tags">{tags_html}</td>'
-            f'</tr>'
+            f'<header>'
+            f'<h3><code>{html_escape(c.slug)}</code></h3>'
+            f'{status_badge(c.status)}'
+            f'</header>'
+            f'<p class="description">{description}</p>'
+            f'<div class="meta">'
+            f'{chip(c.category)}{chip(c.domain)}'
+            f'<span class="version">v{html_escape(c.version)}</span>'
+            f'<span class="manifs">{html_escape(manifs)}</span>'
+            f'</div>'
+            + (f'<div class="tags">{tags_html}</div>' if tags_html else '')
+            + f'</a>'
         )
-        rows.append(row)
+        cards.append(card)
 
-    rows_html = "\n".join(rows)
+    cards_html = "\n".join(cards)
 
     return f"""# AI4RA Prompt Library
 
@@ -382,22 +386,9 @@ Start by filtering below, or jump to:
   <span class="count"></span>
 </div>
 
-<table class="component-table" id="all-components" markdown="0">
-  <thead>
-    <tr>
-      <th>Component</th>
-      <th>Category</th>
-      <th>Domain</th>
-      <th>Status</th>
-      <th>Version</th>
-      <th>Manifestations</th>
-      <th>Tags</th>
-    </tr>
-  </thead>
-  <tbody>
-{rows_html}
-  </tbody>
-</table>
+<div class="component-grid" id="all-components" markdown="0">
+{cards_html}
+</div>
 """
 
 
