@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-04-20T17:58:28Z",
+  "generated_at": "2026-04-20T18:06:01Z",
   "schema_path": "/Users/barrierobison/Documents/Administration/AICoordination2026/AI4RAPromptLibrary/components/nsf-award-notice-extraction-udm/schema.json",
   "vandalizer_dir": "/Users/barrierobison/Documents/Administration/AICoordination2026/OpenERA-Eval/NSFAwards/VandalizerExtractWorkflow",
-  "vandalizer_count": 15,
+  "vandalizer_count": 20,
   "runs": [
     {
       "run_name": "none",
-      "matched_awards": 19,
+      "matched_awards": 24,
       "total_openera_docs": 28,
-      "total_vandalizer_awards": 15,
+      "total_vandalizer_awards": 20,
       "overall_agreement_pct": 97.3,
-      "n_compared_total": 1492,
-      "n_agree_total": 1452,
+      "n_compared_total": 1900,
+      "n_agree_total": 1848,
       "field_rollup": [
         {
           "field": "sponsor_award_number",
@@ -21,7 +21,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 0,
-          "n_both_null": 95,
+          "n_both_null": 120,
           "examples": []
         },
         {
@@ -32,7 +32,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 0,
-          "n_both_null": 95,
+          "n_both_null": 120,
           "examples": []
         },
         {
@@ -43,7 +43,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 0,
-          "n_both_null": 95,
+          "n_both_null": 120,
           "examples": []
         },
         {
@@ -53,7 +53,7 @@
           "n_disagree": 0,
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
-          "n_openera_has_van_null": 95,
+          "n_openera_has_van_null": 120,
           "n_both_null": 0,
           "examples": []
         },
@@ -65,7 +65,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 20,
-          "n_both_null": 75,
+          "n_both_null": 100,
           "examples": []
         },
         {
@@ -75,7 +75,7 @@
           "n_disagree": 0,
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
-          "n_openera_has_van_null": 95,
+          "n_openera_has_van_null": 120,
           "n_both_null": 0,
           "examples": []
         },
@@ -87,7 +87,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 20,
-          "n_both_null": 75,
+          "n_both_null": 100,
           "examples": []
         },
         {
@@ -96,7 +96,7 @@
           "n_agree": 0,
           "n_disagree": 0,
           "agreement_pct": null,
-          "n_openera_null_van_has": 95,
+          "n_openera_null_van_has": 120,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
           "examples": []
@@ -107,7 +107,7 @@
           "n_agree": 0,
           "n_disagree": 0,
           "agreement_pct": null,
-          "n_openera_null_van_has": 95,
+          "n_openera_null_van_has": 120,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
           "examples": []
@@ -118,7 +118,7 @@
           "n_agree": 0,
           "n_disagree": 0,
           "agreement_pct": null,
-          "n_openera_null_van_has": 90,
+          "n_openera_null_van_has": 115,
           "n_openera_has_van_null": 0,
           "n_both_null": 5,
           "examples": []
@@ -131,7 +131,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 0,
-          "n_both_null": 95,
+          "n_both_null": 120,
           "examples": []
         },
         {
@@ -141,7 +141,7 @@
           "n_disagree": 0,
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
-          "n_openera_has_van_null": 89,
+          "n_openera_has_van_null": 114,
           "n_both_null": 6,
           "examples": []
         },
@@ -151,17 +151,17 @@
           "n_agree": 0,
           "n_disagree": 0,
           "agreement_pct": null,
-          "n_openera_null_van_has": 60,
+          "n_openera_null_van_has": 85,
           "n_openera_has_van_null": 0,
           "n_both_null": 35,
           "examples": []
         },
         {
           "field": "cfda_name",
-          "n_compared": 90,
-          "n_agree": 77,
-          "n_disagree": 13,
-          "agreement_pct": 85.6,
+          "n_compared": 115,
+          "n_agree": 96,
+          "n_disagree": 19,
+          "agreement_pct": 83.5,
           "n_openera_null_van_has": 5,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
@@ -209,63 +209,11 @@
           ]
         },
         {
-          "field": "is_collaborative_research",
-          "n_compared": 95,
-          "n_agree": 84,
-          "n_disagree": 11,
-          "agreement_pct": 88.4,
-          "n_openera_null_van_has": 0,
-          "n_openera_has_van_null": 0,
-          "n_both_null": 0,
-          "examples": [
-            {
-              "award": "2531886",
-              "pdf": "2531886 Stickland FFY24",
-              "van": false,
-              "van_raw": false,
-              "openera": true,
-              "openera_raw": true
-            },
-            {
-              "award": "2531886",
-              "pdf": "2531886 Stickland FFY24",
-              "van": false,
-              "van_raw": false,
-              "openera": true,
-              "openera_raw": true
-            },
-            {
-              "award": "2531886",
-              "pdf": "2531886 Stickland FFY24",
-              "van": false,
-              "van_raw": false,
-              "openera": true,
-              "openera_raw": true
-            },
-            {
-              "award": "2531886",
-              "pdf": "2531886 Stickland FFY24",
-              "van": false,
-              "van_raw": false,
-              "openera": true,
-              "openera_raw": true
-            },
-            {
-              "award": "2531886",
-              "pdf": "2531886 Stickland FFY24",
-              "van": false,
-              "van_raw": false,
-              "openera": true,
-              "openera_raw": true
-            }
-          ]
-        },
-        {
           "field": "cfda_number",
-          "n_compared": 90,
-          "n_agree": 82,
-          "n_disagree": 8,
-          "agreement_pct": 91.1,
+          "n_compared": 115,
+          "n_agree": 103,
+          "n_disagree": 12,
+          "agreement_pct": 89.6,
           "n_openera_null_van_has": 5,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
@@ -313,11 +261,63 @@
           ]
         },
         {
+          "field": "is_collaborative_research",
+          "n_compared": 120,
+          "n_agree": 109,
+          "n_disagree": 11,
+          "agreement_pct": 90.8,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            }
+          ]
+        },
+        {
           "field": "award_title",
-          "n_compared": 90,
-          "n_agree": 85,
+          "n_compared": 115,
+          "n_agree": 110,
           "n_disagree": 5,
-          "agreement_pct": 94.4,
+          "agreement_pct": 95.7,
           "n_openera_null_van_has": 5,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
@@ -366,10 +366,10 @@
         },
         {
           "field": "funding_opportunity_number",
-          "n_compared": 90,
-          "n_agree": 87,
-          "n_disagree": 3,
-          "agreement_pct": 96.7,
+          "n_compared": 115,
+          "n_agree": 110,
+          "n_disagree": 5,
+          "agreement_pct": 95.7,
           "n_openera_null_van_has": 5,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
@@ -397,13 +397,29 @@
               "van_raw": "NSF 22-633",
               "openera": "22-633",
               "openera_raw": "22-633"
+            },
+            {
+              "award": "2131837",
+              "pdf": "Strickland 2021",
+              "van": "nsf 21-505",
+              "van_raw": "NSF 21-505",
+              "openera": "21-505",
+              "openera_raw": "21-505"
+            },
+            {
+              "award": "2131837",
+              "pdf": "Strickland 2021",
+              "van": "nsf 21-505",
+              "van_raw": "NSF 21-505",
+              "openera": "21-505",
+              "openera_raw": "21-505"
             }
           ]
         },
         {
           "field": "award_id",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 120,
+          "n_agree": 120,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -413,8 +429,8 @@
         },
         {
           "field": "award_number",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 120,
+          "n_agree": 120,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -424,8 +440,8 @@
         },
         {
           "field": "sponsor_name",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 120,
+          "n_agree": 120,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -435,8 +451,8 @@
         },
         {
           "field": "managing_division",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 120,
+          "n_agree": 120,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -446,8 +462,8 @@
         },
         {
           "field": "award_instrument",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 120,
+          "n_agree": 120,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -457,8 +473,8 @@
         },
         {
           "field": "is_research_and_development",
-          "n_compared": 90,
-          "n_agree": 90,
+          "n_compared": 115,
+          "n_agree": 115,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 5,
@@ -468,8 +484,8 @@
         },
         {
           "field": "funding_opportunity_title",
-          "n_compared": 90,
-          "n_agree": 90,
+          "n_compared": 115,
+          "n_agree": 115,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 5,
@@ -479,8 +495,8 @@
         },
         {
           "field": "amendment_number",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 120,
+          "n_agree": 120,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -490,19 +506,19 @@
         },
         {
           "field": "award_date",
-          "n_compared": 73,
-          "n_agree": 73,
+          "n_compared": 92,
+          "n_agree": 92,
           "n_disagree": 0,
           "agreement_pct": 100.0,
-          "n_openera_null_van_has": 22,
+          "n_openera_null_van_has": 28,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
           "examples": []
         },
         {
           "field": "amount_obligated_this_amendment",
-          "n_compared": 90,
-          "n_agree": 90,
+          "n_compared": 115,
+          "n_agree": 115,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -516,44 +532,44 @@
           "n_agree": 2,
           "n_disagree": 0,
           "agreement_pct": 100.0,
-          "n_openera_null_van_has": 88,
+          "n_openera_null_van_has": 108,
           "n_openera_has_van_null": 0,
-          "n_both_null": 5,
+          "n_both_null": 10,
           "examples": []
         },
         {
           "field": "cost_share_approved_amount",
-          "n_compared": 87,
-          "n_agree": 87,
+          "n_compared": 106,
+          "n_agree": 106,
           "n_disagree": 0,
           "agreement_pct": 100.0,
-          "n_openera_null_van_has": 3,
-          "n_openera_has_van_null": 5,
+          "n_openera_null_van_has": 4,
+          "n_openera_has_van_null": 10,
           "n_both_null": 0,
           "examples": []
         },
         {
           "field": "indirect_cost_rate_percent",
-          "n_compared": 35,
-          "n_agree": 35,
+          "n_compared": 55,
+          "n_agree": 55,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 25,
-          "n_both_null": 35,
+          "n_both_null": 40,
           "examples": []
         }
       ],
-      "per_award_count": 19
+      "per_award_count": 24
     },
     {
       "run_name": "json_object",
-      "matched_awards": 19,
+      "matched_awards": 24,
       "total_openera_docs": 28,
-      "total_vandalizer_awards": 15,
-      "overall_agreement_pct": 98.0,
-      "n_compared_total": 1528,
-      "n_agree_total": 1497,
+      "total_vandalizer_awards": 20,
+      "overall_agreement_pct": 98.2,
+      "n_compared_total": 1952,
+      "n_agree_total": 1916,
       "field_rollup": [
         {
           "field": "sponsor_award_number",
@@ -563,7 +579,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 0,
-          "n_both_null": 95,
+          "n_both_null": 120,
           "examples": []
         },
         {
@@ -574,7 +590,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 0,
-          "n_both_null": 95,
+          "n_both_null": 120,
           "examples": []
         },
         {
@@ -585,7 +601,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 0,
-          "n_both_null": 95,
+          "n_both_null": 120,
           "examples": []
         },
         {
@@ -595,7 +611,7 @@
           "n_disagree": 0,
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
-          "n_openera_has_van_null": 95,
+          "n_openera_has_van_null": 120,
           "n_both_null": 0,
           "examples": []
         },
@@ -606,8 +622,8 @@
           "n_disagree": 0,
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
-          "n_openera_has_van_null": 6,
-          "n_both_null": 89,
+          "n_openera_has_van_null": 9,
+          "n_both_null": 111,
           "examples": []
         },
         {
@@ -617,7 +633,7 @@
           "n_disagree": 0,
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
-          "n_openera_has_van_null": 95,
+          "n_openera_has_van_null": 120,
           "n_both_null": 0,
           "examples": []
         },
@@ -629,7 +645,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 20,
-          "n_both_null": 75,
+          "n_both_null": 100,
           "examples": []
         },
         {
@@ -638,7 +654,7 @@
           "n_agree": 0,
           "n_disagree": 0,
           "agreement_pct": null,
-          "n_openera_null_van_has": 95,
+          "n_openera_null_van_has": 120,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
           "examples": []
@@ -649,7 +665,7 @@
           "n_agree": 0,
           "n_disagree": 0,
           "agreement_pct": null,
-          "n_openera_null_van_has": 95,
+          "n_openera_null_van_has": 120,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
           "examples": []
@@ -660,7 +676,7 @@
           "n_agree": 0,
           "n_disagree": 0,
           "agreement_pct": null,
-          "n_openera_null_van_has": 90,
+          "n_openera_null_van_has": 115,
           "n_openera_has_van_null": 0,
           "n_both_null": 5,
           "examples": []
@@ -673,7 +689,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 0,
-          "n_both_null": 95,
+          "n_both_null": 120,
           "examples": []
         },
         {
@@ -683,16 +699,16 @@
           "n_disagree": 0,
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
-          "n_openera_has_van_null": 89,
-          "n_both_null": 6,
+          "n_openera_has_van_null": 113,
+          "n_both_null": 7,
           "examples": []
         },
         {
           "field": "cfda_name",
-          "n_compared": 90,
-          "n_agree": 80,
-          "n_disagree": 10,
-          "agreement_pct": 88.9,
+          "n_compared": 115,
+          "n_agree": 100,
+          "n_disagree": 15,
+          "agreement_pct": 87.0,
           "n_openera_null_van_has": 5,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
@@ -741,10 +757,10 @@
         },
         {
           "field": "is_collaborative_research",
-          "n_compared": 95,
-          "n_agree": 85,
+          "n_compared": 120,
+          "n_agree": 110,
           "n_disagree": 10,
-          "agreement_pct": 89.5,
+          "agreement_pct": 91.7,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
@@ -793,10 +809,10 @@
         },
         {
           "field": "award_title",
-          "n_compared": 90,
-          "n_agree": 85,
+          "n_compared": 115,
+          "n_agree": 110,
           "n_disagree": 5,
-          "agreement_pct": 94.4,
+          "agreement_pct": 95.7,
           "n_openera_null_van_has": 5,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
@@ -845,10 +861,10 @@
         },
         {
           "field": "cfda_number",
-          "n_compared": 90,
-          "n_agree": 85,
+          "n_compared": 115,
+          "n_agree": 110,
           "n_disagree": 5,
-          "agreement_pct": 94.4,
+          "agreement_pct": 95.7,
           "n_openera_null_van_has": 5,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
@@ -897,10 +913,10 @@
         },
         {
           "field": "funding_opportunity_number",
-          "n_compared": 90,
-          "n_agree": 89,
+          "n_compared": 115,
+          "n_agree": 114,
           "n_disagree": 1,
-          "agreement_pct": 98.9,
+          "agreement_pct": 99.1,
           "n_openera_null_van_has": 5,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
@@ -917,8 +933,8 @@
         },
         {
           "field": "award_id",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 120,
+          "n_agree": 120,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -928,8 +944,8 @@
         },
         {
           "field": "award_number",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 120,
+          "n_agree": 120,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -939,8 +955,8 @@
         },
         {
           "field": "sponsor_name",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 120,
+          "n_agree": 120,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -950,8 +966,8 @@
         },
         {
           "field": "managing_division",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 120,
+          "n_agree": 120,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -961,8 +977,8 @@
         },
         {
           "field": "award_instrument",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 120,
+          "n_agree": 120,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -972,8 +988,8 @@
         },
         {
           "field": "is_research_and_development",
-          "n_compared": 90,
-          "n_agree": 90,
+          "n_compared": 115,
+          "n_agree": 115,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 5,
@@ -983,8 +999,8 @@
         },
         {
           "field": "funding_opportunity_title",
-          "n_compared": 90,
-          "n_agree": 90,
+          "n_compared": 115,
+          "n_agree": 115,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 5,
@@ -994,8 +1010,8 @@
         },
         {
           "field": "amendment_number",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 120,
+          "n_agree": 120,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -1005,19 +1021,19 @@
         },
         {
           "field": "award_date",
-          "n_compared": 64,
-          "n_agree": 64,
+          "n_compared": 77,
+          "n_agree": 77,
           "n_disagree": 0,
           "agreement_pct": 100.0,
-          "n_openera_null_van_has": 31,
+          "n_openera_null_van_has": 43,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
           "examples": []
         },
         {
           "field": "amount_obligated_this_amendment",
-          "n_compared": 90,
-          "n_agree": 90,
+          "n_compared": 115,
+          "n_agree": 115,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -1031,37 +1047,37 @@
           "n_agree": 2,
           "n_disagree": 0,
           "agreement_pct": 100.0,
-          "n_openera_null_van_has": 88,
+          "n_openera_null_van_has": 108,
           "n_openera_has_van_null": 0,
-          "n_both_null": 5,
+          "n_both_null": 10,
           "examples": []
         },
         {
           "field": "cost_share_approved_amount",
-          "n_compared": 72,
-          "n_agree": 72,
+          "n_compared": 88,
+          "n_agree": 88,
           "n_disagree": 0,
           "agreement_pct": 100.0,
-          "n_openera_null_van_has": 18,
-          "n_openera_has_van_null": 3,
-          "n_both_null": 2,
+          "n_openera_null_van_has": 22,
+          "n_openera_has_van_null": 7,
+          "n_both_null": 3,
           "examples": []
         },
         {
           "field": "indirect_cost_rate_percent",
-          "n_compared": 35,
-          "n_agree": 35,
+          "n_compared": 55,
+          "n_agree": 55,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 25,
-          "n_both_null": 35,
+          "n_both_null": 40,
           "examples": []
         },
         {
           "field": "fees",
-          "n_compared": 60,
-          "n_agree": 60,
+          "n_compared": 85,
+          "n_agree": 85,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -1070,16 +1086,16 @@
           "examples": []
         }
       ],
-      "per_award_count": 19
+      "per_award_count": 24
     },
     {
       "run_name": "json_schema",
-      "matched_awards": 19,
+      "matched_awards": 24,
       "total_openera_docs": 28,
-      "total_vandalizer_awards": 15,
-      "overall_agreement_pct": 97.6,
-      "n_compared_total": 1707,
-      "n_agree_total": 1666,
+      "total_vandalizer_awards": 20,
+      "overall_agreement_pct": 97.8,
+      "n_compared_total": 2134,
+      "n_agree_total": 2088,
       "field_rollup": [
         {
           "field": "sponsor_award_number",
@@ -1089,7 +1105,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 0,
-          "n_both_null": 95,
+          "n_both_null": 118,
           "examples": []
         },
         {
@@ -1100,7 +1116,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 0,
-          "n_both_null": 95,
+          "n_both_null": 118,
           "examples": []
         },
         {
@@ -1111,7 +1127,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 0,
-          "n_both_null": 95,
+          "n_both_null": 118,
           "examples": []
         },
         {
@@ -1121,7 +1137,7 @@
           "n_disagree": 0,
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
-          "n_openera_has_van_null": 95,
+          "n_openera_has_van_null": 118,
           "n_both_null": 0,
           "examples": []
         },
@@ -1133,7 +1149,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 0,
-          "n_both_null": 95,
+          "n_both_null": 118,
           "examples": []
         },
         {
@@ -1143,7 +1159,7 @@
           "n_disagree": 0,
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
-          "n_openera_has_van_null": 95,
+          "n_openera_has_van_null": 118,
           "n_both_null": 0,
           "examples": []
         },
@@ -1155,7 +1171,7 @@
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 20,
-          "n_both_null": 75,
+          "n_both_null": 98,
           "examples": []
         },
         {
@@ -1165,8 +1181,8 @@
           "n_disagree": 0,
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
-          "n_openera_has_van_null": 0,
-          "n_both_null": 95,
+          "n_openera_has_van_null": 1,
+          "n_both_null": 117,
           "examples": []
         },
         {
@@ -1176,16 +1192,16 @@
           "n_disagree": 0,
           "agreement_pct": null,
           "n_openera_null_van_has": 0,
-          "n_openera_has_van_null": 82,
-          "n_both_null": 13,
+          "n_openera_has_van_null": 103,
+          "n_both_null": 15,
           "examples": []
         },
         {
           "field": "cfda_name",
-          "n_compared": 90,
-          "n_agree": 77,
-          "n_disagree": 13,
-          "agreement_pct": 85.6,
+          "n_compared": 113,
+          "n_agree": 95,
+          "n_disagree": 18,
+          "agreement_pct": 84.1,
           "n_openera_null_van_has": 5,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
@@ -1234,10 +1250,10 @@
         },
         {
           "field": "is_collaborative_research",
-          "n_compared": 95,
-          "n_agree": 84,
+          "n_compared": 118,
+          "n_agree": 107,
           "n_disagree": 11,
-          "agreement_pct": 88.4,
+          "agreement_pct": 90.7,
           "n_openera_null_van_has": 0,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
@@ -1286,10 +1302,10 @@
         },
         {
           "field": "award_title",
-          "n_compared": 94,
-          "n_agree": 85,
+          "n_compared": 117,
+          "n_agree": 108,
           "n_disagree": 9,
-          "agreement_pct": 90.4,
+          "agreement_pct": 92.3,
           "n_openera_null_van_has": 1,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
@@ -1338,10 +1354,10 @@
         },
         {
           "field": "cfda_number",
-          "n_compared": 90,
-          "n_agree": 84,
+          "n_compared": 113,
+          "n_agree": 107,
           "n_disagree": 6,
-          "agreement_pct": 93.3,
+          "agreement_pct": 94.7,
           "n_openera_null_van_has": 5,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
@@ -1390,10 +1406,10 @@
         },
         {
           "field": "funding_opportunity_number",
-          "n_compared": 90,
-          "n_agree": 88,
+          "n_compared": 113,
+          "n_agree": 111,
           "n_disagree": 2,
-          "agreement_pct": 97.8,
+          "agreement_pct": 98.2,
           "n_openera_null_van_has": 5,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
@@ -1418,8 +1434,8 @@
         },
         {
           "field": "award_id",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 118,
+          "n_agree": 118,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -1429,8 +1445,8 @@
         },
         {
           "field": "award_number",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 118,
+          "n_agree": 118,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -1440,8 +1456,8 @@
         },
         {
           "field": "sponsor_name",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 118,
+          "n_agree": 118,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -1451,8 +1467,8 @@
         },
         {
           "field": "managing_division",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 118,
+          "n_agree": 118,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -1462,8 +1478,8 @@
         },
         {
           "field": "award_instrument",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 118,
+          "n_agree": 118,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -1473,8 +1489,8 @@
         },
         {
           "field": "is_research_and_development",
-          "n_compared": 90,
-          "n_agree": 90,
+          "n_compared": 113,
+          "n_agree": 113,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 5,
@@ -1484,8 +1500,8 @@
         },
         {
           "field": "funding_opportunity_title",
-          "n_compared": 90,
-          "n_agree": 90,
+          "n_compared": 113,
+          "n_agree": 113,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 5,
@@ -1495,8 +1511,8 @@
         },
         {
           "field": "amendment_number",
-          "n_compared": 95,
-          "n_agree": 95,
+          "n_compared": 118,
+          "n_agree": 118,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 0,
@@ -1506,41 +1522,41 @@
         },
         {
           "field": "award_date",
-          "n_compared": 65,
-          "n_agree": 65,
+          "n_compared": 81,
+          "n_agree": 81,
           "n_disagree": 0,
           "agreement_pct": 100.0,
-          "n_openera_null_van_has": 30,
+          "n_openera_null_van_has": 37,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
           "examples": []
         },
         {
           "field": "start_date",
-          "n_compared": 18,
-          "n_agree": 18,
+          "n_compared": 19,
+          "n_agree": 19,
           "n_disagree": 0,
           "agreement_pct": 100.0,
-          "n_openera_null_van_has": 77,
+          "n_openera_null_van_has": 99,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
           "examples": []
         },
         {
           "field": "end_date",
-          "n_compared": 18,
-          "n_agree": 18,
+          "n_compared": 19,
+          "n_agree": 19,
           "n_disagree": 0,
           "agreement_pct": 100.0,
-          "n_openera_null_van_has": 77,
+          "n_openera_null_van_has": 99,
           "n_openera_has_van_null": 0,
           "n_both_null": 0,
           "examples": []
         },
         {
           "field": "amount_obligated_this_amendment",
-          "n_compared": 87,
-          "n_agree": 87,
+          "n_compared": 110,
+          "n_agree": 110,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 3,
@@ -1550,8 +1566,8 @@
         },
         {
           "field": "total_intended_amount",
-          "n_compared": 88,
-          "n_agree": 88,
+          "n_compared": 111,
+          "n_agree": 111,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 2,
@@ -1561,41 +1577,41 @@
         },
         {
           "field": "total_obligated_to_date",
-          "n_compared": 84,
-          "n_agree": 84,
+          "n_compared": 102,
+          "n_agree": 102,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 6,
-          "n_openera_has_van_null": 4,
+          "n_openera_has_van_null": 9,
           "n_both_null": 1,
           "examples": []
         },
         {
           "field": "cost_share_approved_amount",
-          "n_compared": 45,
-          "n_agree": 45,
+          "n_compared": 52,
+          "n_agree": 52,
           "n_disagree": 0,
           "agreement_pct": 100.0,
-          "n_openera_null_van_has": 45,
-          "n_openera_has_van_null": 5,
-          "n_both_null": 0,
+          "n_openera_null_van_has": 56,
+          "n_openera_has_van_null": 8,
+          "n_both_null": 2,
           "examples": []
         },
         {
           "field": "indirect_cost_rate_percent",
-          "n_compared": 34,
-          "n_agree": 34,
+          "n_compared": 50,
+          "n_agree": 50,
           "n_disagree": 0,
           "agreement_pct": 100.0,
-          "n_openera_null_van_has": 1,
+          "n_openera_null_van_has": 3,
           "n_openera_has_van_null": 25,
-          "n_both_null": 35,
+          "n_both_null": 40,
           "examples": []
         },
         {
           "field": "fees",
-          "n_compared": 59,
-          "n_agree": 59,
+          "n_compared": 82,
+          "n_agree": 82,
           "n_disagree": 0,
           "agreement_pct": 100.0,
           "n_openera_null_van_has": 1,
@@ -1604,7 +1620,7 @@
           "examples": []
         }
       ],
-      "per_award_count": 19
+      "per_award_count": 24
     }
   ]
 }
