@@ -1,0 +1,1610 @@
+{
+  "generated_at": "2026-04-20T17:58:28Z",
+  "schema_path": "/Users/barrierobison/Documents/Administration/AICoordination2026/AI4RAPromptLibrary/components/nsf-award-notice-extraction-udm/schema.json",
+  "vandalizer_dir": "/Users/barrierobison/Documents/Administration/AICoordination2026/OpenERA-Eval/NSFAwards/VandalizerExtractWorkflow",
+  "vandalizer_count": 15,
+  "runs": [
+    {
+      "run_name": "none",
+      "matched_awards": 19,
+      "total_openera_docs": 28,
+      "total_vandalizer_awards": 15,
+      "overall_agreement_pct": 97.3,
+      "n_compared_total": 1492,
+      "n_agree_total": 1452,
+      "field_rollup": [
+        {
+          "field": "sponsor_award_number",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 95,
+          "examples": []
+        },
+        {
+          "field": "award_status",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 95,
+          "examples": []
+        },
+        {
+          "field": "proposal_number",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 95,
+          "examples": []
+        },
+        {
+          "field": "amendment_type",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 95,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "amendment_date",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 20,
+          "n_both_null": 75,
+          "examples": []
+        },
+        {
+          "field": "amendment_description",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 95,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "award_received_date",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 20,
+          "n_both_null": 75,
+          "examples": []
+        },
+        {
+          "field": "start_date",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 95,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "end_date",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 95,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "total_intended_amount",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 90,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 5,
+          "examples": []
+        },
+        {
+          "field": "expenditure_limitation",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 95,
+          "examples": []
+        },
+        {
+          "field": "indirect_cost_base",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 89,
+          "n_both_null": 6,
+          "examples": []
+        },
+        {
+          "field": "fees",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 60,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 35,
+          "examples": []
+        },
+        {
+          "field": "cfda_name",
+          "n_compared": 90,
+          "n_agree": 77,
+          "n_disagree": 13,
+          "agreement_pct": 85.6,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources",
+              "van_raw": "Geosciences (Predominant source of funding for SEFA reporting), 47.076 Education and Human Resources",
+              "openera": "geosciences (predominant source of funding for sefa reporting)",
+              "openera_raw": "Geosciences (Predominant source of funding for SEFA reporting)"
+            },
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources",
+              "van_raw": "Geosciences (Predominant source of funding for SEFA reporting), 47.076 Education and Human Resources",
+              "openera": "geosciences (predominant source of funding for sefa reporting); education and human resources",
+              "openera_raw": "Geosciences (Predominant source of funding for SEFA reporting); Education and Human Resources"
+            },
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources",
+              "van_raw": "Geosciences (Predominant source of funding for SEFA reporting), 47.076 Education and Human Resources",
+              "openera": "geosciences (predominant source of funding for sefa reporting)",
+              "openera_raw": "Geosciences (Predominant source of funding for SEFA reporting)"
+            },
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources",
+              "van_raw": "Geosciences (Predominant source of funding for SEFA reporting), 47.076 Education and Human Resources",
+              "openera": "geosciences (predominant source of funding for sefa reporting)",
+              "openera_raw": "Geosciences (Predominant source of funding for SEFA reporting)"
+            },
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources",
+              "van_raw": "Geosciences (Predominant source of funding for SEFA reporting), 47.076 Education and Human Resources",
+              "openera": "geosciences (predominant source of funding for sefa reporting), education and human resources",
+              "openera_raw": "Geosciences (Predominant source of funding for SEFA reporting), Education and Human Resources"
+            }
+          ]
+        },
+        {
+          "field": "is_collaborative_research",
+          "n_compared": 95,
+          "n_agree": 84,
+          "n_disagree": 11,
+          "agreement_pct": 88.4,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            }
+          ]
+        },
+        {
+          "field": "cfda_number",
+          "n_compared": 90,
+          "n_agree": 82,
+          "n_disagree": 8,
+          "agreement_pct": 91.1,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "47.050",
+              "van_raw": "47.050",
+              "openera": "47.050, 47.076",
+              "openera_raw": "47.050, 47.076"
+            },
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "47.050",
+              "van_raw": "47.050",
+              "openera": "47.050, 47.076",
+              "openera_raw": "47.050, 47.076"
+            },
+            {
+              "award": "2514552",
+              "pdf": "NSF_2514552",
+              "van": "47.050",
+              "van_raw": "47.050",
+              "openera": "47.050, 47.076",
+              "openera_raw": "47.050, 47.076"
+            },
+            {
+              "award": "2514552",
+              "pdf": "NSF_2514552",
+              "van": "47.050",
+              "van_raw": "47.050",
+              "openera": "47.050; 47.076",
+              "openera_raw": "47.050; 47.076"
+            },
+            {
+              "award": "2514552",
+              "pdf": "NSF_2514552",
+              "van": "47.050",
+              "van_raw": "47.050",
+              "openera": "47.050, 47.076",
+              "openera_raw": "47.050, 47.076"
+            }
+          ]
+        },
+        {
+          "field": "award_title",
+          "n_compared": 90,
+          "n_agree": 85,
+          "n_disagree": 5,
+          "agreement_pct": 94.4,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2511003",
+              "pdf": "2511003 Hendricks 2025",
+              "van": "equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.",
+              "van_raw": "Equipment: MRI: Track 1 Acquisition of Element AVITI System to Enable Multi-Omics Research and Research Training.",
+              "openera": "equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training",
+              "openera_raw": "Equipment: MRI: Track 1 Acquisition of Element A VITI System to Enable Multi-Omics Research and Research Training"
+            },
+            {
+              "award": "2511003",
+              "pdf": "2511003 Hendricks 2025",
+              "van": "equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.",
+              "van_raw": "Equipment: MRI: Track 1 Acquisition of Element AVITI System to Enable Multi-Omics Research and Research Training.",
+              "openera": "equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training",
+              "openera_raw": "Equipment: MRI: Track 1 Acquisition of Element A VITI System to Enable Multi-Omics Research and Research Training"
+            },
+            {
+              "award": "2511003",
+              "pdf": "2511003 Hendricks 2025",
+              "van": "equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.",
+              "van_raw": "Equipment: MRI: Track 1 Acquisition of Element AVITI System to Enable Multi-Omics Research and Research Training.",
+              "openera": "equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training",
+              "openera_raw": "Equipment: MRI: Track 1 Acquisition of Element A VITI System to Enable Multi-Omics Research and Research Training"
+            },
+            {
+              "award": "2511003",
+              "pdf": "2511003 Hendricks 2025",
+              "van": "equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.",
+              "van_raw": "Equipment: MRI: Track 1 Acquisition of Element AVITI System to Enable Multi-Omics Research and Research Training.",
+              "openera": "equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training",
+              "openera_raw": "Equipment: MRI: Track 1 Acquisition of Element A VITI System to Enable Multi-Omics Research and Research Training"
+            },
+            {
+              "award": "2511003",
+              "pdf": "2511003 Hendricks 2025",
+              "van": "equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.",
+              "van_raw": "Equipment: MRI: Track 1 Acquisition of Element AVITI System to Enable Multi-Omics Research and Research Training.",
+              "openera": "equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training",
+              "openera_raw": "Equipment: MRI: Track 1 Acquisition of Element A VITI System to Enable Multi-Omics Research and Research Training"
+            }
+          ]
+        },
+        {
+          "field": "funding_opportunity_number",
+          "n_compared": 90,
+          "n_agree": 87,
+          "n_disagree": 3,
+          "agreement_pct": 96.7,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2441530",
+              "pdf": "2441530 Shiyi Chen FFY2024",
+              "van": "nsf 22-586",
+              "van_raw": "NSF 22-586",
+              "openera": "22-586",
+              "openera_raw": "22-586"
+            },
+            {
+              "award": "2441530",
+              "pdf": "2441530 Shiyi Chen FFY2024",
+              "van": "nsf 22-586",
+              "van_raw": "NSF 22-586",
+              "openera": "22-586",
+              "openera_raw": "22-586"
+            },
+            {
+              "award": "2316126",
+              "pdf": "Alessa 2023",
+              "van": "nsf 22-633",
+              "van_raw": "NSF 22-633",
+              "openera": "22-633",
+              "openera_raw": "22-633"
+            }
+          ]
+        },
+        {
+          "field": "award_id",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "award_number",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "sponsor_name",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "managing_division",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "award_instrument",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "is_research_and_development",
+          "n_compared": 90,
+          "n_agree": 90,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "funding_opportunity_title",
+          "n_compared": 90,
+          "n_agree": 90,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "amendment_number",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "award_date",
+          "n_compared": 73,
+          "n_agree": 73,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 22,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "amount_obligated_this_amendment",
+          "n_compared": 90,
+          "n_agree": 90,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 5,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "total_obligated_to_date",
+          "n_compared": 2,
+          "n_agree": 2,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 88,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 5,
+          "examples": []
+        },
+        {
+          "field": "cost_share_approved_amount",
+          "n_compared": 87,
+          "n_agree": 87,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 3,
+          "n_openera_has_van_null": 5,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "indirect_cost_rate_percent",
+          "n_compared": 35,
+          "n_agree": 35,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 25,
+          "n_both_null": 35,
+          "examples": []
+        }
+      ],
+      "per_award_count": 19
+    },
+    {
+      "run_name": "json_object",
+      "matched_awards": 19,
+      "total_openera_docs": 28,
+      "total_vandalizer_awards": 15,
+      "overall_agreement_pct": 98.0,
+      "n_compared_total": 1528,
+      "n_agree_total": 1497,
+      "field_rollup": [
+        {
+          "field": "sponsor_award_number",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 95,
+          "examples": []
+        },
+        {
+          "field": "award_status",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 95,
+          "examples": []
+        },
+        {
+          "field": "proposal_number",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 95,
+          "examples": []
+        },
+        {
+          "field": "amendment_type",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 95,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "amendment_date",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 6,
+          "n_both_null": 89,
+          "examples": []
+        },
+        {
+          "field": "amendment_description",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 95,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "award_received_date",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 20,
+          "n_both_null": 75,
+          "examples": []
+        },
+        {
+          "field": "start_date",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 95,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "end_date",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 95,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "total_intended_amount",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 90,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 5,
+          "examples": []
+        },
+        {
+          "field": "expenditure_limitation",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 95,
+          "examples": []
+        },
+        {
+          "field": "indirect_cost_base",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 89,
+          "n_both_null": 6,
+          "examples": []
+        },
+        {
+          "field": "cfda_name",
+          "n_compared": 90,
+          "n_agree": 80,
+          "n_disagree": 10,
+          "agreement_pct": 88.9,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources",
+              "van_raw": "Geosciences (Predominant source of funding for SEFA reporting), 47.076 Education and Human Resources",
+              "openera": "geosciences (predominant source of funding for sefa reporting)",
+              "openera_raw": "Geosciences (Predominant source of funding for SEFA reporting)"
+            },
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources",
+              "van_raw": "Geosciences (Predominant source of funding for SEFA reporting), 47.076 Education and Human Resources",
+              "openera": "geosciences (predominant source of funding for sefa reporting)",
+              "openera_raw": "Geosciences (Predominant source of funding for SEFA reporting)"
+            },
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources",
+              "van_raw": "Geosciences (Predominant source of funding for SEFA reporting), 47.076 Education and Human Resources",
+              "openera": "geosciences (predominant source of funding for sefa reporting); education and human resources",
+              "openera_raw": "Geosciences (Predominant source of funding for SEFA reporting); Education and Human Resources"
+            },
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources",
+              "van_raw": "Geosciences (Predominant source of funding for SEFA reporting), 47.076 Education and Human Resources",
+              "openera": "geosciences (predominant source of funding for sefa reporting)",
+              "openera_raw": "Geosciences (Predominant source of funding for SEFA reporting)"
+            },
+            {
+              "award": "2514552",
+              "pdf": "NSF_2514552",
+              "van": "geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources",
+              "van_raw": "Geosciences (Predominant source of funding for SEFA reporting), 47.076 Education and Human Resources",
+              "openera": "geosciences (predominant source of funding for sefa reporting)",
+              "openera_raw": "Geosciences (Predominant source of funding for SEFA reporting)"
+            }
+          ]
+        },
+        {
+          "field": "is_collaborative_research",
+          "n_compared": 95,
+          "n_agree": 85,
+          "n_disagree": 10,
+          "agreement_pct": 89.5,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            }
+          ]
+        },
+        {
+          "field": "award_title",
+          "n_compared": 90,
+          "n_agree": 85,
+          "n_disagree": 5,
+          "agreement_pct": 94.4,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2511003",
+              "pdf": "2511003 Hendricks 2025",
+              "van": "equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.",
+              "van_raw": "Equipment: MRI: Track 1 Acquisition of Element AVITI System to Enable Multi-Omics Research and Research Training.",
+              "openera": "equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training",
+              "openera_raw": "Equipment: MRI: Track 1 Acquisition of Element A VITI System to Enable Multi-Omics Research and Research Training"
+            },
+            {
+              "award": "2511003",
+              "pdf": "2511003 Hendricks 2025",
+              "van": "equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.",
+              "van_raw": "Equipment: MRI: Track 1 Acquisition of Element AVITI System to Enable Multi-Omics Research and Research Training.",
+              "openera": "equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training",
+              "openera_raw": "Equipment: MRI: Track 1 Acquisition of Element A VITI System to Enable Multi-Omics Research and Research Training"
+            },
+            {
+              "award": "2511003",
+              "pdf": "2511003 Hendricks 2025",
+              "van": "equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.",
+              "van_raw": "Equipment: MRI: Track 1 Acquisition of Element AVITI System to Enable Multi-Omics Research and Research Training.",
+              "openera": "equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training",
+              "openera_raw": "Equipment: MRI: Track 1 Acquisition of Element A VITI System to Enable Multi-Omics Research and Research Training"
+            },
+            {
+              "award": "2511003",
+              "pdf": "2511003 Hendricks 2025",
+              "van": "equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.",
+              "van_raw": "Equipment: MRI: Track 1 Acquisition of Element AVITI System to Enable Multi-Omics Research and Research Training.",
+              "openera": "equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training",
+              "openera_raw": "Equipment: MRI: Track 1 Acquisition of Element A VITI System to Enable Multi-Omics Research and Research Training"
+            },
+            {
+              "award": "2511003",
+              "pdf": "2511003 Hendricks 2025",
+              "van": "equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.",
+              "van_raw": "Equipment: MRI: Track 1 Acquisition of Element AVITI System to Enable Multi-Omics Research and Research Training.",
+              "openera": "equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training",
+              "openera_raw": "Equipment: MRI: Track 1 Acquisition of Element A VITI System to Enable Multi-Omics Research and Research Training"
+            }
+          ]
+        },
+        {
+          "field": "cfda_number",
+          "n_compared": 90,
+          "n_agree": 85,
+          "n_disagree": 5,
+          "agreement_pct": 94.4,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "47.050",
+              "van_raw": "47.050",
+              "openera": "47.050; 47.076",
+              "openera_raw": "47.050; 47.076"
+            },
+            {
+              "award": "2514552",
+              "pdf": "NSF_2514552",
+              "van": "47.050",
+              "van_raw": "47.050",
+              "openera": "47.050, 47.076",
+              "openera_raw": "47.050, 47.076"
+            },
+            {
+              "award": "2514552",
+              "pdf": "NSF_2514552",
+              "van": "47.050",
+              "van_raw": "47.050",
+              "openera": "47.050; 47.076",
+              "openera_raw": "47.050; 47.076"
+            },
+            {
+              "award": "2514552",
+              "pdf": "NSF_2514552",
+              "van": "47.050",
+              "van_raw": "47.050",
+              "openera": "47.050; 47.076",
+              "openera_raw": "47.050; 47.076"
+            },
+            {
+              "award": "2314616",
+              "pdf": "Nuismer 2023",
+              "van": "47.074",
+              "van_raw": "47.074",
+              "openera": "47.074, 47.049, 47.083",
+              "openera_raw": "47.074, 47.049, 47.083"
+            }
+          ]
+        },
+        {
+          "field": "funding_opportunity_number",
+          "n_compared": 90,
+          "n_agree": 89,
+          "n_disagree": 1,
+          "agreement_pct": 98.9,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2527135",
+              "pdf": "2527135 Nuismer 2025",
+              "van": "nsf 25-509",
+              "van_raw": "NSF 25-509",
+              "openera": "25-509",
+              "openera_raw": "25-509"
+            }
+          ]
+        },
+        {
+          "field": "award_id",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "award_number",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "sponsor_name",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "managing_division",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "award_instrument",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "is_research_and_development",
+          "n_compared": 90,
+          "n_agree": 90,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "funding_opportunity_title",
+          "n_compared": 90,
+          "n_agree": 90,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "amendment_number",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "award_date",
+          "n_compared": 64,
+          "n_agree": 64,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 31,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "amount_obligated_this_amendment",
+          "n_compared": 90,
+          "n_agree": 90,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 5,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "total_obligated_to_date",
+          "n_compared": 2,
+          "n_agree": 2,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 88,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 5,
+          "examples": []
+        },
+        {
+          "field": "cost_share_approved_amount",
+          "n_compared": 72,
+          "n_agree": 72,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 18,
+          "n_openera_has_van_null": 3,
+          "n_both_null": 2,
+          "examples": []
+        },
+        {
+          "field": "indirect_cost_rate_percent",
+          "n_compared": 35,
+          "n_agree": 35,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 25,
+          "n_both_null": 35,
+          "examples": []
+        },
+        {
+          "field": "fees",
+          "n_compared": 60,
+          "n_agree": 60,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 35,
+          "n_both_null": 0,
+          "examples": []
+        }
+      ],
+      "per_award_count": 19
+    },
+    {
+      "run_name": "json_schema",
+      "matched_awards": 19,
+      "total_openera_docs": 28,
+      "total_vandalizer_awards": 15,
+      "overall_agreement_pct": 97.6,
+      "n_compared_total": 1707,
+      "n_agree_total": 1666,
+      "field_rollup": [
+        {
+          "field": "sponsor_award_number",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 95,
+          "examples": []
+        },
+        {
+          "field": "award_status",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 95,
+          "examples": []
+        },
+        {
+          "field": "proposal_number",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 95,
+          "examples": []
+        },
+        {
+          "field": "amendment_type",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 95,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "amendment_date",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 95,
+          "examples": []
+        },
+        {
+          "field": "amendment_description",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 95,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "award_received_date",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 20,
+          "n_both_null": 75,
+          "examples": []
+        },
+        {
+          "field": "expenditure_limitation",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 95,
+          "examples": []
+        },
+        {
+          "field": "indirect_cost_base",
+          "n_compared": 0,
+          "n_agree": 0,
+          "n_disagree": 0,
+          "agreement_pct": null,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 82,
+          "n_both_null": 13,
+          "examples": []
+        },
+        {
+          "field": "cfda_name",
+          "n_compared": 90,
+          "n_agree": 77,
+          "n_disagree": 13,
+          "agreement_pct": 85.6,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2441918",
+              "pdf": "2441918 Cai FFY24",
+              "van": "engineering grants (predominant source of funding for sefa reporting)",
+              "van_raw": "Engineering Grants (Predominant source of funding for SEFA reporting)",
+              "openera": "engineering grants (predominant source for sefa reporting)",
+              "openera_raw": "Engineering Grants (Predominant source for SEFA reporting)"
+            },
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources",
+              "van_raw": "Geosciences (Predominant source of funding for SEFA reporting), 47.076 Education and Human Resources",
+              "openera": "geosciences (predominant source of funding for sefa reporting); education and human resources",
+              "openera_raw": "Geosciences (Predominant source of funding for SEFA reporting); Education and Human Resources"
+            },
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources",
+              "van_raw": "Geosciences (Predominant source of funding for SEFA reporting), 47.076 Education and Human Resources",
+              "openera": "geosciences (predominant source of funding for sefa reporting)",
+              "openera_raw": "Geosciences (Predominant source of funding for SEFA reporting)"
+            },
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources",
+              "van_raw": "Geosciences (Predominant source of funding for SEFA reporting), 47.076 Education and Human Resources",
+              "openera": "geosciences (predominant source of funding for sefa reporting); education and human resources",
+              "openera_raw": "Geosciences (Predominant source of funding for SEFA reporting); Education and Human Resources"
+            },
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "geosciences (predominant source of funding for sefa reporting), 47.076 education and human resources",
+              "van_raw": "Geosciences (Predominant source of funding for SEFA reporting), 47.076 Education and Human Resources",
+              "openera": "geosciences (predominant source of funding for sefa reporting); education and human resources",
+              "openera_raw": "Geosciences (Predominant source of funding for SEFA reporting); Education and Human Resources"
+            }
+          ]
+        },
+        {
+          "field": "is_collaborative_research",
+          "n_compared": 95,
+          "n_agree": 84,
+          "n_disagree": 11,
+          "agreement_pct": 88.4,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            },
+            {
+              "award": "2531886",
+              "pdf": "2531886 Stickland FFY24",
+              "van": false,
+              "van_raw": false,
+              "openera": true,
+              "openera_raw": true
+            }
+          ]
+        },
+        {
+          "field": "award_title",
+          "n_compared": 94,
+          "n_agree": 85,
+          "n_disagree": 9,
+          "agreement_pct": 90.4,
+          "n_openera_null_van_has": 1,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2511003",
+              "pdf": "2511003 Hendricks 2025",
+              "van": "equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.",
+              "van_raw": "Equipment: MRI: Track 1 Acquisition of Element AVITI System to Enable Multi-Omics Research and Research Training.",
+              "openera": "equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training",
+              "openera_raw": "Equipment: MRI: Track 1 Acquisition of Element A VITI System to Enable Multi-Omics Research and Research Training"
+            },
+            {
+              "award": "2511003",
+              "pdf": "2511003 Hendricks 2025",
+              "van": "equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.",
+              "van_raw": "Equipment: MRI: Track 1 Acquisition of Element AVITI System to Enable Multi-Omics Research and Research Training.",
+              "openera": "equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training",
+              "openera_raw": "Equipment: MRI: Track 1 Acquisition of Element A VITI System to Enable Multi-Omics Research and Research Training"
+            },
+            {
+              "award": "2511003",
+              "pdf": "2511003 Hendricks 2025",
+              "van": "equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.",
+              "van_raw": "Equipment: MRI: Track 1 Acquisition of Element AVITI System to Enable Multi-Omics Research and Research Training.",
+              "openera": "equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training",
+              "openera_raw": "Equipment: MRI: Track 1 Acquisition of Element A VITI System to Enable Multi-Omics Research and Research Training"
+            },
+            {
+              "award": "2511003",
+              "pdf": "2511003 Hendricks 2025",
+              "van": "equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.",
+              "van_raw": "Equipment: MRI: Track 1 Acquisition of Element AVITI System to Enable Multi-Omics Research and Research Training.",
+              "openera": "equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training",
+              "openera_raw": "Equipment: MRI: Track 1 Acquisition of Element A VITI System to Enable Multi-Omics Research and Research Training"
+            },
+            {
+              "award": "2511003",
+              "pdf": "2511003 Hendricks 2025",
+              "van": "equipment: mri: track 1 acquisition of element aviti system to enable multi-omics research and research training.",
+              "van_raw": "Equipment: MRI: Track 1 Acquisition of Element AVITI System to Enable Multi-Omics Research and Research Training.",
+              "openera": "equipment: mri: track 1 acquisition of element a viti system to enable multi-omics research and research training",
+              "openera_raw": "Equipment: MRI: Track 1 Acquisition of Element A VITI System to Enable Multi-Omics Research and Research Training"
+            }
+          ]
+        },
+        {
+          "field": "cfda_number",
+          "n_compared": 90,
+          "n_agree": 84,
+          "n_disagree": 6,
+          "agreement_pct": 93.3,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "47.050",
+              "van_raw": "47.050",
+              "openera": "47.050, 47.076",
+              "openera_raw": "47.050, 47.076"
+            },
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "47.050",
+              "van_raw": "47.050",
+              "openera": "47.050; 47.076",
+              "openera_raw": "47.050; 47.076"
+            },
+            {
+              "award": "2514552",
+              "pdf": "2514552 Ma 2025",
+              "van": "47.050",
+              "van_raw": "47.050",
+              "openera": "47.050, 47.076",
+              "openera_raw": "47.050, 47.076"
+            },
+            {
+              "award": "2514552",
+              "pdf": "NSF_2514552",
+              "van": "47.050",
+              "van_raw": "47.050",
+              "openera": "47.050, 47.076",
+              "openera_raw": "47.050, 47.076"
+            },
+            {
+              "award": "2514552",
+              "pdf": "NSF_2514552",
+              "van": "47.050",
+              "van_raw": "47.050",
+              "openera": "47.050; 47.076",
+              "openera_raw": "47.050; 47.076"
+            }
+          ]
+        },
+        {
+          "field": "funding_opportunity_number",
+          "n_compared": 90,
+          "n_agree": 88,
+          "n_disagree": 2,
+          "agreement_pct": 97.8,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": [
+            {
+              "award": "2527135",
+              "pdf": "2527135 Nuismer 2025",
+              "van": "nsf 25-509",
+              "van_raw": "NSF 25-509",
+              "openera": "25-509",
+              "openera_raw": "25-509"
+            },
+            {
+              "award": "2316126",
+              "pdf": "Alessa 2023",
+              "van": "nsf 22-633",
+              "van_raw": "NSF 22-633",
+              "openera": "22-633",
+              "openera_raw": "22-633"
+            }
+          ]
+        },
+        {
+          "field": "award_id",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "award_number",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "sponsor_name",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "managing_division",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "award_instrument",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "is_research_and_development",
+          "n_compared": 90,
+          "n_agree": 90,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "funding_opportunity_title",
+          "n_compared": 90,
+          "n_agree": 90,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 5,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "amendment_number",
+          "n_compared": 95,
+          "n_agree": 95,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 0,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "award_date",
+          "n_compared": 65,
+          "n_agree": 65,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 30,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "start_date",
+          "n_compared": 18,
+          "n_agree": 18,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 77,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "end_date",
+          "n_compared": 18,
+          "n_agree": 18,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 77,
+          "n_openera_has_van_null": 0,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "amount_obligated_this_amendment",
+          "n_compared": 87,
+          "n_agree": 87,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 3,
+          "n_openera_has_van_null": 5,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "total_intended_amount",
+          "n_compared": 88,
+          "n_agree": 88,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 2,
+          "n_openera_has_van_null": 5,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "total_obligated_to_date",
+          "n_compared": 84,
+          "n_agree": 84,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 6,
+          "n_openera_has_van_null": 4,
+          "n_both_null": 1,
+          "examples": []
+        },
+        {
+          "field": "cost_share_approved_amount",
+          "n_compared": 45,
+          "n_agree": 45,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 45,
+          "n_openera_has_van_null": 5,
+          "n_both_null": 0,
+          "examples": []
+        },
+        {
+          "field": "indirect_cost_rate_percent",
+          "n_compared": 34,
+          "n_agree": 34,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 1,
+          "n_openera_has_van_null": 25,
+          "n_both_null": 35,
+          "examples": []
+        },
+        {
+          "field": "fees",
+          "n_compared": 59,
+          "n_agree": 59,
+          "n_disagree": 0,
+          "agreement_pct": 100.0,
+          "n_openera_null_van_has": 1,
+          "n_openera_has_van_null": 35,
+          "n_both_null": 0,
+          "examples": []
+        }
+      ],
+      "per_award_count": 19
+    }
+  ]
+}
