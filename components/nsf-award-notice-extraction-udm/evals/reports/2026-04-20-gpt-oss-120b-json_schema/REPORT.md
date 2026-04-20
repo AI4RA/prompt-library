@@ -20,7 +20,7 @@
 
 ## 2. Structural validity (JSON Schema)
 
-Validated every replicate against [`../../schema.json`](../../schema.json) with `jsonschema` (Draft 2020-12).
+Validated every replicate against [`../../../schema.json`](../../../schema.json) with `jsonschema` (Draft 2020-12).
 
 - **Strict pass rate:** 138/138 (100.0%)
 - **Pass rate ignoring top-level extra keys:** 138/138 (100.0%) — this isolates structural/type errors from naming drift.

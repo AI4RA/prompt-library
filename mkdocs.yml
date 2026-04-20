@@ -83,7 +83,15 @@ nav:
   - Components:
       - Index: components/index.md
       - document-type-classifier-udm: components/document-type-classifier-udm.md
-      - nsf-award-notice-extraction-udm: components/nsf-award-notice-extraction-udm.md
+      - nsf-award-notice-extraction-udm:
+          - Overview: components/nsf-award-notice-extraction-udm.md
+          - Reports:
+              - Index: components/nsf-award-notice-extraction-udm/reports/index.md
+              - 2026-04-20-vandalizer-crossref: components/nsf-award-notice-extraction-udm/reports/2026-04-20-vandalizer-crossref/index.md
+              - 2026-04-20-structured-outputs-ablation: components/nsf-award-notice-extraction-udm/reports/2026-04-20-structured-outputs-ablation/index.md
+              - 2026-04-20-gpt-oss-120b-json_schema: components/nsf-award-notice-extraction-udm/reports/2026-04-20-gpt-oss-120b-json_schema/index.md
+              - 2026-04-20-gpt-oss-120b-json_object: components/nsf-award-notice-extraction-udm/reports/2026-04-20-gpt-oss-120b-json_object/index.md
+              - 2026-04-18-gpt-oss-120b-dots-r5: components/nsf-award-notice-extraction-udm/reports/2026-04-18-gpt-oss-120b-dots-r5/index.md
       - nsf-budget-justification-udm: components/nsf-budget-justification-udm.md
       - rfp-extraction: components/rfp-extraction.md
       - rfp-extraction-udm: components/rfp-extraction-udm.md

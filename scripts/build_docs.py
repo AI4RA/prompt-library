@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import sys
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -69,6 +70,16 @@ class EvalCase:
 
 
 @dataclass
+class EvalReport:
+    run_id: str
+    path: Path
+    body: str
+    title: str
+    chart_files: list[Path] = field(default_factory=list)
+    has_summary_json: bool = False
+
+
+@dataclass
 class Component:
     slug: str
     path: Path
@@ -80,6 +91,7 @@ class Component:
     has_skill: bool
     has_agent: bool
     eval_cases: list[EvalCase]
+    eval_reports: list[EvalReport] = field(default_factory=list)
 
     @property
     def name(self) -> str:
@@ -190,6 +202,28 @@ def load_component(path: Path) -> Component | None:
                 )
             )
 
+    reports_dir = path / "evals" / "reports"
+    reports: list[EvalReport] = []
+    if reports_dir.is_dir():
+        for r in sorted(p for p in reports_dir.iterdir() if p.is_dir()):
+            report_md = r / "REPORT.md"
+            if not report_md.is_file():
+                continue
+            body_text = report_md.read_text(encoding="utf-8")
+            title = _extract_h1(body_text) or r.name
+            charts_dir = r / "charts"
+            chart_files = sorted(charts_dir.iterdir()) if charts_dir.is_dir() else []
+            reports.append(
+                EvalReport(
+                    run_id=r.name,
+                    path=r,
+                    body=body_text,
+                    title=title,
+                    chart_files=chart_files,
+                    has_summary_json=(r / "summary.json").is_file(),
+                )
+            )
+
     return Component(
         slug=path.name,
         path=path,
@@ -201,7 +235,16 @@ def load_component(path: Path) -> Component | None:
         has_skill=has_skill,
         has_agent=has_agent,
         eval_cases=cases,
+        eval_reports=reports,
     )
+
+
+def _extract_h1(markdown: str) -> str | None:
+    for raw in markdown.splitlines():
+        line = raw.strip()
+        if line.startswith("# "):
+            return line[2:].strip()
+    return None
 
 
 def discover_components() -> list[Component]:
@@ -316,6 +359,73 @@ def rewrite_relative_links(
         return f"[{text}]({component_base})"
 
     return MD_LINK_RE.sub(rewrite, markdown)
+
+
+def rewrite_report_links(
+    markdown: str,
+    component: "Component",
+    report: "EvalReport",
+    sibling_run_ids: set[str],
+) -> str:
+    """Rewrite relative links inside a REPORT.md for placement at
+    `docs/components/<slug>/reports/<run-id>/index.md`.
+
+    - `charts/<file>` → unchanged (files are copied alongside the rendered page)
+    - `../<other-run-id>/REPORT.md` where <other-run-id> is a sibling report →
+      `../<other-run-id>/index.md` (MkDocs sibling page)
+    - Any other relative path → absolute GitHub blob/tree URL, resolved from the
+      report's filesystem location (`components/<slug>/evals/reports/<run-id>/`).
+    - URLs (`http://`, `https://`, `mailto:`, anchors `#...`) → unchanged.
+    """
+
+    report_fs_base = Path("components") / component.slug / "evals" / "reports" / report.run_id
+
+    def rewrite(match: re.Match[str]) -> str:
+        text = match.group(1)
+        url = match.group(2).strip()
+
+        if url.startswith(("http://", "https://", "mailto:", "#")):
+            return match.group(0)
+
+        # Charts live alongside the rendered page — leave them untouched.
+        if url.startswith("charts/") or url == "charts":
+            return match.group(0)
+
+        # Sibling report cross-link.
+        if url.startswith("../"):
+            rest = url[3:]
+            head = rest.split("/", 1)
+            sibling = head[0]
+            tail = head[1] if len(head) > 1 else ""
+            if sibling in sibling_run_ids and tail in ("REPORT.md", "", "index.md"):
+                return f"[{text}](../{sibling}/index.md)"
+
+        # Everything else: resolve the path against the report's FS location
+        # and emit a GitHub URL.
+        trimmed = url.rstrip("/")
+        is_dir_link = url.endswith("/")
+        resolved = _resolve_relative(report_fs_base, trimmed)
+        kind = "tree" if is_dir_link else "blob"
+        href = f"{REPO_URL}/{kind}/{BRANCH}/{resolved.as_posix()}"
+        return f"[{text}]({href})"
+
+    return MD_LINK_RE.sub(rewrite, markdown)
+
+
+def _resolve_relative(base: Path, rel: str) -> Path:
+    """Resolve a relative path against a base repo-relative directory, without
+    touching the filesystem. Returns a repo-relative Path."""
+    parts = list(base.parts) + [p for p in rel.split("/") if p]
+    out: list[str] = []
+    for p in parts:
+        if p == "." or p == "":
+            continue
+        if p == "..":
+            if out:
+                out.pop()
+            continue
+        out.append(p)
+    return Path(*out) if out else Path(".")
 
 
 # --- page generators ------------------------------------------------------
@@ -491,23 +601,40 @@ def render_component_page(c: Component, component_slugs: set[str]) -> str:
         sections.append("")
 
     # Evals
-    if c.eval_cases:
+    if c.eval_cases or c.eval_reports:
         sections.append("## Evals")
-        sections.append(
-            f"Reference cases under [`evals/cases/`]({REPO_URL}/tree/{BRANCH}/components/{c.slug}/evals/cases)."
-        )
-        sections.append("")
-        for case in c.eval_cases:
-            case_link = f"{REPO_URL}/tree/{BRANCH}/components/{c.slug}/evals/cases/{case.slug}"
-            summary = case.metadata.get("case") or case.metadata.get("notes", "").strip().splitlines()[0] if case.metadata else ""
-            artifact_bits = []
-            if case.has_input:
-                artifact_bits.append("input")
-            if case.has_expected:
-                artifact_bits.append("expected")
-            artifacts = ", ".join(artifact_bits) if artifact_bits else "no artifacts"
-            sections.append(f"- [`{case.slug}`]({case_link}) — {html_escape(summary)} _(artifacts: {artifacts})_")
-        sections.append("")
+
+        if c.eval_cases:
+            sections.append("### Reference cases")
+            sections.append(
+                f"Golden cases under [`evals/cases/`]({REPO_URL}/tree/{BRANCH}/components/{c.slug}/evals/cases)."
+            )
+            sections.append("")
+            for case in c.eval_cases:
+                case_link = f"{REPO_URL}/tree/{BRANCH}/components/{c.slug}/evals/cases/{case.slug}"
+                summary = case.metadata.get("case") or case.metadata.get("notes", "").strip().splitlines()[0] if case.metadata else ""
+                artifact_bits = []
+                if case.has_input:
+                    artifact_bits.append("input")
+                if case.has_expected:
+                    artifact_bits.append("expected")
+                artifacts = ", ".join(artifact_bits) if artifact_bits else "no artifacts"
+                sections.append(f"- [`{case.slug}`]({case_link}) — {html_escape(summary)} _(artifacts: {artifacts})_")
+            sections.append("")
+
+        if c.eval_reports:
+            sections.append("### Evaluation reports")
+            sections.append(
+                "Full evaluation runs — tables, charts, and findings rendered inline. "
+                f"Source under [`evals/reports/`]({REPO_URL}/tree/{BRANCH}/components/{c.slug}/evals/reports)."
+            )
+            sections.append("")
+            # Newest first (run_ids start with ISO dates).
+            for report in sorted(c.eval_reports, key=lambda r: r.run_id, reverse=True):
+                sections.append(
+                    f"- [`{report.run_id}`]({c.slug}/reports/{report.run_id}/index.md) — {html_escape(report.title)}"
+                )
+            sections.append("")
 
     # Changelog
     if c.changelog.strip():
@@ -562,6 +689,122 @@ def render_grouped(
     return "\n".join(lines)
 
 
+def render_report_page(c: Component, report: EvalReport) -> str:
+    """Produce the MkDocs page content for a single evaluation report."""
+    sibling_run_ids = {r.run_id for r in c.eval_reports}
+    body = rewrite_report_links(report.body, c, report, sibling_run_ids)
+
+    source_note = (
+        f"_Source: [`evals/reports/{report.run_id}/REPORT.md`]"
+        f"({REPO_URL}/blob/{BRANCH}/components/{c.slug}/evals/reports/{report.run_id}/REPORT.md). "
+        f"Component: [`{c.slug}`](../../../{c.slug}.md)._"
+    )
+
+    # Splice the source note in after the first H1 so the component back-link is visible
+    # without displacing the authored title.
+    lines = body.splitlines()
+    out_lines: list[str] = []
+    inserted = False
+    for line in lines:
+        out_lines.append(line)
+        if not inserted and line.strip().startswith("# "):
+            out_lines.append("")
+            out_lines.append(source_note)
+            inserted = True
+    if not inserted:
+        out_lines.insert(0, source_note)
+        out_lines.insert(1, "")
+    return "\n".join(out_lines).rstrip() + "\n"
+
+
+def render_reports_index(c: Component) -> str:
+    lines = [
+        f"# {c.slug} — evaluation reports",
+        "",
+        f"Evaluation runs for the [`{c.slug}`](../../{c.slug}.md) component. "
+        "Each report is a full run: tables, charts, and findings.",
+        "",
+    ]
+    for report in sorted(c.eval_reports, key=lambda r: r.run_id, reverse=True):
+        lines.append(
+            f"- [`{report.run_id}`]({report.run_id}/index.md) — {report.title}"
+        )
+    lines.append("")
+    return "\n".join(lines)
+
+
+# --- mkdocs.yml nav regeneration ------------------------------------------
+
+
+def render_components_nav(components: list[Component]) -> str:
+    """Build the `Components:` nav block as a YAML fragment. The fragment is
+    spliced into mkdocs.yml in place of the existing `- Components:` entry."""
+    out: list[str] = []
+    out.append("  - Components:")
+    out.append("      - Index: components/index.md")
+    for c in sorted(components, key=lambda x: x.slug):
+        if c.eval_reports:
+            out.append(f"      - {c.slug}:")
+            out.append(f"          - Overview: components/{c.slug}.md")
+            out.append(f"          - Reports:")
+            out.append(
+                f"              - Index: components/{c.slug}/reports/index.md"
+            )
+            for report in sorted(c.eval_reports, key=lambda r: r.run_id, reverse=True):
+                out.append(
+                    f"              - {report.run_id}: "
+                    f"components/{c.slug}/reports/{report.run_id}/index.md"
+                )
+        else:
+            out.append(f"      - {c.slug}: components/{c.slug}.md")
+    return "\n".join(out) + "\n"
+
+
+def splice_mkdocs_nav(components: list[Component]) -> None:
+    """Regenerate the `- Components:` block inside mkdocs.yml so the nav
+    includes per-component report pages. Leaves all other YAML content
+    (comments, ordering, other nav entries) untouched."""
+    mkdocs_yml = REPO_ROOT / "mkdocs.yml"
+    text = mkdocs_yml.read_text(encoding="utf-8")
+    lines = text.splitlines(keepends=True)
+
+    # Find the `  - Components:` line under `nav:`
+    start_idx = None
+    for i, line in enumerate(lines):
+        if line.rstrip() == "  - Components:":
+            start_idx = i
+            break
+    if start_idx is None:
+        sys.stderr.write(
+            "warning: could not find `  - Components:` in mkdocs.yml; nav not updated\n"
+        )
+        return
+
+    # The Components block ends at the next line that is either:
+    #   - a sibling top-level nav entry (`  - `), OR
+    #   - a new top-level YAML key (col-0 letter followed by ':'), OR
+    #   - EOF.
+    end_idx = len(lines)
+    for j in range(start_idx + 1, len(lines)):
+        stripped = lines[j].rstrip()
+        if not stripped:
+            continue
+        # Sibling nav entry at the same indent level.
+        if stripped.startswith("  - ") and not stripped.startswith("      "):
+            end_idx = j
+            break
+        # A new top-level key (e.g. `extra:`).
+        if stripped and lines[j][0].isalpha() and stripped.endswith(":"):
+            end_idx = j
+            break
+
+    new_block = render_components_nav(components)
+    new_text = "".join(lines[:start_idx]) + new_block + "".join(lines[end_idx:])
+
+    if new_text != text:
+        mkdocs_yml.write_text(new_text, encoding="utf-8")
+
+
 def render_taxonomy() -> str:
     src = REPO_ROOT / "taxonomy.md"
     if not src.is_file():
@@ -599,6 +842,25 @@ def main() -> int:
     write(DOCS_DIR / "components" / "index.md", render_component_index(components))
     for c in components:
         write(DOCS_DIR / "components" / f"{c.slug}.md", render_component_page(c, component_slugs))
+
+        # Reports: fully regenerate the per-component reports tree so removed
+        # reports don't linger.
+        reports_root = DOCS_DIR / "components" / c.slug / "reports"
+        if reports_root.exists():
+            shutil.rmtree(reports_root)
+        if c.eval_reports:
+            reports_root.mkdir(parents=True, exist_ok=True)
+            write(reports_root / "index.md", render_reports_index(c))
+            for report in c.eval_reports:
+                report_dir = reports_root / report.run_id
+                report_dir.mkdir(parents=True, exist_ok=True)
+                write(report_dir / "index.md", render_report_page(c, report))
+                if report.chart_files:
+                    charts_out = report_dir / "charts"
+                    charts_out.mkdir(parents=True, exist_ok=True)
+                    for chart in report.chart_files:
+                        if chart.is_file():
+                            shutil.copy2(chart, charts_out / chart.name)
 
     write(
         DOCS_DIR / "browse" / "by-category.md",
@@ -641,6 +903,8 @@ def main() -> int:
         ),
     )
     write(DOCS_DIR / "taxonomy.md", render_taxonomy())
+
+    splice_mkdocs_nav(components)
 
     print(f"Wrote docs to {DOCS_DIR}")
     return 0
