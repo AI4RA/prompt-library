@@ -30,17 +30,97 @@
   margin-left: auto;
 }
 
-table.component-table {
-  width: 100%;
+/* Card grid — used on the home page in place of a wide 7-column table */
+.component-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+  gap: 1rem;
+  margin: 0 0 2rem;
+}
+
+a.component-card {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+  padding: 1rem 1.1rem 1.05rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 8px;
+  background: var(--md-default-bg-color);
+  color: inherit !important;
+  text-decoration: none !important;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+a.component-card:hover,
+a.component-card:focus-visible {
+  border-color: var(--md-accent-fg-color);
+  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, .18);
+  transform: translateY(-1px);
+}
+
+a.component-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin: 0;
+}
+a.component-card h3 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.3;
+  font-weight: 600;
+}
+a.component-card h3 code {
+  background: transparent;
+  padding: 0;
+  font-size: 1rem;
+  color: var(--md-typeset-a-color);
+}
+a.component-card:hover h3 code,
+a.component-card:focus-visible h3 code {
+  text-decoration: underline;
+}
+
+a.component-card .description {
+  margin: 0;
   font-size: .85rem;
-}
-table.component-table th {
-  white-space: nowrap;
-  text-align: left;
-}
-table.component-table td.tags {
+  line-height: 1.5;
   color: var(--md-default-fg-color--light);
+  /* Limit to ~4 lines to keep cards uniform; content still fully visible on the detail page */
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+a.component-card .meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .35rem;
   font-size: .75rem;
+  color: var(--md-default-fg-color--light);
+  margin-top: auto;  /* push meta/tags to the bottom for consistent card height */
+}
+a.component-card .meta .version {
+  font-family: var(--md-code-font-family, monospace);
+  background: var(--md-code-bg-color);
+  padding: .05rem .4rem;
+  border-radius: 10px;
+}
+a.component-card .meta .manifs {
+  color: var(--md-default-fg-color--light);
+  font-size: .72rem;
+}
+
+a.component-card .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem;
+}
+a.component-card .tags .chip {
+  font-size: .68rem;
+  background: var(--md-code-bg-color);
 }
 
 /* Status badges */
