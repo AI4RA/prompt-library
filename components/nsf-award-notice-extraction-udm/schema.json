@@ -3,7 +3,7 @@
   "$id": "https://github.com/AI4RA/prompt-library/components/nsf-award-notice-extraction-udm/schema.json",
   "title": "NSF Award Notice Extraction — UDM Output",
   "description": "Flat JSON contract for an NSF Award Notice (or amendment notice) extracted to the Unified Data Model as extended for research administration. One JSON object per notice. Amendment 000 represents the initial award; subsequent amendment numbers represent modifications to an existing award. The ingest service decides whether to create an Award record or an AwardModification record based on amendment_number.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -150,6 +150,10 @@
       "type": ["string", "null"],
       "enum": ["MTDC", "TDC", "TFFA", "SWB", "Other", null],
       "description": "Indirect cost base. 'MTDC' = Modified Total Direct Costs, 'TDC' = Total Direct Costs, 'TFFA' = Total Federal Funds Awarded, 'SWB' = Salaries and Wages Base. Use 'Other' when the base does not match these codes."
+    },
+    "fees": {
+      "type": ["number", "null"],
+      "description": "USD fees line on the NSF-format budget, when printed as a distinct row outside categories A–M (some NSF budget tables print a 'Fees' row between J and L). Plain number; 0 when explicitly stated as zero; null when absent from the notice."
     },
     "recipient_organization": {
       "type": "object",
@@ -446,6 +450,72 @@
             "type": ["string", "null"],
             "description": "Section of the notice from which the condition was extracted (e.g., 'Amendment Description', 'General Terms and Conditions')."
           }
+        }
+      }
+    },
+    "source_provenance": {
+      "type": ["object", "null"],
+      "description": "Optional metadata describing how this UDM object was produced. Downstream ingest can use it for audit trails, cache keys, re-processing decisions, and surfacing reviewer annotations. Populated by direct extractors (prompt/skill) or by translators that convert a different extractor's output into this UDM shape. Absent / null when no provenance is recorded.",
+      "additionalProperties": false,
+      "required": ["extractor"],
+      "properties": {
+        "extractor": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the system that produced this UDM object (e.g., 'nsf-award-notice-extraction-udm', 'vandalizer-to-udm-translation', 'manual-entry')."
+        },
+        "extractor_version": {
+          "type": ["string", "null"],
+          "description": "Version of the extractor (semver), when known."
+        },
+        "source_document": {
+          "type": ["string", "null"],
+          "description": "Identifier (filename, URI, or hash) of the upstream source document the extractor processed. Do not include recipient PII beyond what downstream systems already hold."
+        },
+        "upstream_extractor": {
+          "type": ["string", "null"],
+          "description": "For translators only: the name of the upstream extractor whose output was translated into this UDM object (e.g., 'Vandalizer')."
+        },
+        "upstream_extractor_version": {
+          "type": ["string", "null"],
+          "description": "Version identifier of the upstream extractor, when known."
+        },
+        "extracted_at": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "ISO-8601 timestamp when the extraction (or translation) was performed."
+        },
+        "review_annotations": {
+          "type": "array",
+          "description": "Free-form reviewer signals carried through from the upstream extractor or added during translation. Captures things like 'fields highlighted for review' or 'low-confidence regions' without constraining downstream workflows to a fixed taxonomy. Emit [] when none.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label"],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Short human-readable name for the annotation (e.g., 'highlighted-yellow', 'low-confidence', 'manual-override')."
+              },
+              "value": {
+                "type": ["string", "null"],
+                "description": "Annotation payload, when the annotation carries data (e.g., the verbatim text of a highlighted region)."
+              },
+              "target_field": {
+                "type": ["string", "null"],
+                "description": "JSON Pointer or dotted path indicating which UDM field the annotation applies to. Null when the annotation is document-level."
+              },
+              "description": {
+                "type": ["string", "null"],
+                "description": "Optional longer-form notes."
+              }
+            }
+          }
+        },
+        "notes": {
+          "type": ["string", "null"],
+          "description": "Free-form note field for provenance details that do not fit the structured fields above."
         }
       }
     }
