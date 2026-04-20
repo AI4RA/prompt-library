@@ -1,13 +1,13 @@
 ---
 name: nsf-award-notice-extraction-udm
-version: 1.0.0
+version: 1.1.0
 category: extraction
 domain: research-administration
 status: stable
 tags: [nsf, award, notice, noa, amendment, udm, structured-extraction, json]
 audience: [ingest-pipelines, sponsored-programs-staff]
 created: 2026-04-18
-updated: 2026-04-18
+updated: 2026-04-20
 ---
 
 # NSF Award Notice Structured Extraction — UDM JSON
@@ -60,6 +60,7 @@ The same schema applies in both cases. Do not emit different shapes for initial 
 - `cost_share_approved_amount` — emit `0` (not null) when the notice explicitly states no cost share is approved.
 - `indirect_cost_rate_percent` — plain number without `%`. `38.0000%` → `38.0`. When the notice lists multiple rates (tiered), emit the primary rate and document additional rates in `special_conditions`.
 - `indirect_cost_base` — map stated base to the schema enum: "Modified Total Direct Costs" → `"MTDC"`; "Total Direct Costs" → `"TDC"`; "Total Federal Funds Awarded" → `"TFFA"`; "Salaries and Wages" → `"SWB"`. Otherwise `"Other"`.
+- `fees` — USD fees line when the NSF budget table prints a distinct "Fees" row between category J and the Amount of this Request (category L). Plain number. Emit `0` when explicitly printed as zero; `null` when the row is absent from the notice. Do NOT also emit this value as a `budget_categories` entry (the UDM budget code enum is A–M only).
 - `award_received_date` — ISO date the recipient received the notice, taken from the email header (`Date:` line). Use the date in the email's destination timezone. Null when absent.
 
 ### Recipient organization
@@ -170,6 +171,18 @@ For each entry:
 - `category` — from the schema enum.
 - `action_required` — `true` when the condition requires the recipient to take an action (written policies, separate ledgers, prior approval, submission, etc.).
 - `source_section` — the section of the notice from which the condition was extracted (e.g., `"Amendment Description"`, `"General Terms and Conditions"`).
+
+### Source provenance
+
+`source_provenance` is optional. When the runtime supplies a source document identifier (filename, URI, or hash) or expects an audit trail, populate:
+
+- `extractor`: `"nsf-award-notice-extraction-udm"`
+- `extractor_version`: this prompt's version (`"1.1.0"`)
+- `source_document`: the identifier the runtime provided (do not invent one)
+- `extracted_at`: the current timestamp, when the runtime provides a clock
+- `review_annotations`: `[]` unless the runtime hands in reviewer signals to carry through
+
+Omit the object (emit `null`) when no provenance information is available. Do not fabricate extractor metadata.
 
 ### Extraction procedure
 

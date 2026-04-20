@@ -1,7 +1,7 @@
 ---
 name: nsf-award-notice-extraction-udm
-version: 1.0.0
-description: Extracts an NSF Award Notice (or amendment notice) into a single structured JSON object conforming to this library's Unified Data Model extension for research administration. Use when the input is an NSF-formatted Notice of Award — an initial obligation (Amendment 000) or any subsequent amendment — typically arriving as a PDF printed from Outlook. Also use when a user uploads an "NSF NOA", "NSF award letter", or "NSF award notice" and wants machine-readable output for ingest into a grants management system, database, or compliance workflow. Output is a flat JSON with identity scalars, funding scalars, indirect cost fields, recipient and budget-period objects, and eight categorized arrays (project personnel, sponsor contacts, budget categories, subawards, linked awards, terms and conditions, special conditions). For the human-readable summary form or for non-NSF award notices, use a different component.
+version: 1.1.0
+description: Extracts an NSF Award Notice (or amendment notice) into a single structured JSON object conforming to this library's Unified Data Model extension for research administration. Use when the input is an NSF-formatted Notice of Award — an initial obligation (Amendment 000) or any subsequent amendment — typically arriving as a PDF printed from Outlook. Also use when a user uploads an "NSF NOA", "NSF award letter", or "NSF award notice" and wants machine-readable output for ingest into a grants management system, database, or compliance workflow. Output is a flat JSON with identity scalars, funding scalars, indirect cost fields, recipient and budget-period objects, eight categorized arrays (project personnel, sponsor contacts, budget categories, subawards, linked awards, terms and conditions, special conditions), a top-level fees scalar, and an optional source_provenance audit object. For the human-readable summary form or for non-NSF award notices, use a different component.
 ---
 
 # NSF Award Notice Structured Extraction — UDM JSON Skill
@@ -24,8 +24,8 @@ Emit exactly one JSON object. No preamble, no commentary, no markdown outside th
 The object contains:
 
 - **Identity scalars:** `award_id`, `award_number` (FAIN), `sponsor_award_number`, `award_title`, `sponsor_name`, `managing_division`, `award_instrument`, `award_status`, `is_research_and_development`, `is_collaborative_research`, `funding_opportunity_number`, `funding_opportunity_title`, `cfda_number`, `cfda_name`, `proposal_number`, `amendment_number`, `amendment_type`, `amendment_date`, `amendment_description`
-- **Date and funding scalars:** `award_date`, `award_received_date`, `start_date`, `end_date`, `amount_obligated_this_amendment`, `total_intended_amount`, `total_obligated_to_date`, `cost_share_approved_amount`, `expenditure_limitation`, `indirect_cost_rate_percent`, `indirect_cost_base`
-- **Nested objects:** `recipient_organization` (legal name, address, email, UEI), `current_budget_period` (period_number, start/end dates, direct/indirect cost, obligated amount)
+- **Date and funding scalars:** `award_date`, `award_received_date`, `start_date`, `end_date`, `amount_obligated_this_amendment`, `total_intended_amount`, `total_obligated_to_date`, `cost_share_approved_amount`, `expenditure_limitation`, `indirect_cost_rate_percent`, `indirect_cost_base`, `fees`
+- **Nested objects:** `recipient_organization` (legal name, address, email, UEI), `current_budget_period` (period_number, start/end dates, direct/indirect cost, obligated amount), optional `source_provenance` (extractor identity, version, source document id, reviewer annotations)
 - **Eight required arrays** (always present, emit `[]` when empty): `project_personnel`, `sponsor_contacts`, `budget_categories`, `subawards`, `linked_awards`, `terms_and_conditions`, `special_conditions`
 
 See `schema.json` in this component for the authoritative definition.
@@ -41,8 +41,10 @@ Both produce the same output shape. The ingest service uses `amendment_number` t
 - **Indirect cost rate:** plain number, no `%`. `38.0000%` → `38.0`.
 - **Indirect cost base:** map verbatim phrase to enum — "Modified Total Direct Costs" → `"MTDC"`, "Total Direct Costs" → `"TDC"`, "Total Federal Funds Awarded" → `"TFFA"`, "Salaries and Wages" → `"SWB"`, otherwise `"Other"`.
 - **Cost share:** emit `0` (not null) when the notice explicitly says no cost share.
+- **Fees:** populate the top-level `fees` scalar when the NSF budget prints a distinct Fees row between J and L. Do not also emit a `budget_categories` entry for it (code enum is A–M only).
 - **Received date:** use the email header's `Date:` line (the notice is typically a printed email). Null when absent.
 - **Sponsor name:** always the full name (e.g., `"National Science Foundation"`). Do not abbreviate.
+- **Source provenance:** populate the optional `source_provenance` object when the runtime supplies a source document identifier or expects an audit trail (extractor name, version, source document id, timestamp). Emit `null` when no provenance info is available.
 
 ## Budget categories
 

@@ -2,7 +2,7 @@
 
 Extracts an NSF Award Notice (initial obligation or amendment) into a single JSON object conforming to this library's Unified Data Model extension. Designed for the NSF notice format that arrives as a PDF printed from Outlook after OSP receipt — the email header, boxed notice body, and NSF-format 18-category budget table.
 
-**Current version:** 1.0.0
+**Current version:** 1.1.0
 **Category:** extraction
 **Domain:** research-administration
 **Status:** stable
@@ -30,8 +30,8 @@ A PDF (or pasted text) of an NSF Award Notice. Typical structure:
 A single JSON object with:
 
 - **Identity scalars** — award number, title, sponsor, managing division, instrument, amendment info, funding opportunity, CFDA
-- **Date and funding scalars** — period of performance, obligations, cost share, indirect cost rate and base
-- **Nested objects** — `recipient_organization`, `current_budget_period`
+- **Date and funding scalars** — period of performance, obligations, cost share, indirect cost rate and base, `fees`
+- **Nested objects** — `recipient_organization`, `current_budget_period`, optional `source_provenance`
 - **Eight arrays** (always present; `[]` when empty) — `project_personnel`, `sponsor_contacts`, `budget_categories`, `subawards`, `linked_awards`, `terms_and_conditions`, `special_conditions`
 
 See [`schema.json`](schema.json) for the authoritative definition and [`prompt.md`](prompt.md) for the extraction rules the prompt follows.
