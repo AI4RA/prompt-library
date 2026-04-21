@@ -40,7 +40,7 @@ These are the upstream observations recorded in this repo as of **2026-04-21**:
 
 | Upstream | Branch | Observed commit |
 | --- | --- | --- |
-| `AI4RA/evaluation-data-sets` | `main` | `7aad223b196dd567759d6b9e2bacc93649dd5c62` |
+| `AI4RA/evaluation-data-sets` | `main` | `85c2d11d5f4d808b218716e90f590b1863bdffde` |
 | `ui-insight/AI4RA-UDM` | `main` | `9e85e44cf181dbb54c573cde2a89df2a287af2d0` |
 
 The values above are mirrored in `component_catalog.json` so downstream tools do not have to scrape this page.

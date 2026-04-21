@@ -13,7 +13,7 @@ triad:
     url: https://github.com/AI4RA/evaluation-data-sets
     observed_ref:
       branch: main
-      commit: 7aad223b196dd567759d6b9e2bacc93649dd5c62
+      commit: 85c2d11d5f4d808b218716e90f590b1863bdffde
       observed_at: 2026-04-21
   evaluation_harness:
     repo: AI4RA/evaluation-harness

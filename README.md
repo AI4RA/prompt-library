@@ -96,7 +96,7 @@ The current triad alignment in this repo was refreshed against these observed up
 | Upstream | Branch | Observed commit |
 | --- | --- | --- |
 | `AI4RA/evaluation-harness` | `main` | `dac0da434efd871a154b4a019a1bede7b94b1a81` |
-| `AI4RA/evaluation-data-sets` | `main` | `7aad223b196dd567759d6b9e2bacc93649dd5c62` |
+| `AI4RA/evaluation-data-sets` | `main` | `85c2d11d5f4d808b218716e90f590b1863bdffde` |
 | `ui-insight/AI4RA-UDM` | `main` | `9e85e44cf181dbb54c573cde2a89df2a287af2d0` |
 
 These refs are recorded in [`component_catalog.json`](component_catalog.json) so downstream consumers do not have to infer cross-repo assumptions from floating `main` links.
