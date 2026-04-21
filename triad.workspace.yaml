@@ -1,0 +1,72 @@
+schema_version: 1
+workspace_name: ai4ra-evaluation-triad
+current_repository: AI4RA/prompt-library
+
+repositories:
+  - github: AI4RA/prompt-library
+    role: prompt-library
+    owns:
+      - prompts
+      - skills
+      - agents
+      - schemas
+      - component contracts
+    local_checkout_hints:
+      sibling_dir_names:
+        - AI4RAPromptLibrary
+        - prompt-library
+    human_surface: README.md
+    machine_surface: component_catalog.json
+    agent_guides:
+      - AGENTS.md
+      - CLAUDE.md
+  - github: AI4RA/evaluation-data-sets
+    role: evaluation-data-sets
+    owns:
+      - datasets
+      - artifacts
+      - scoring references
+    local_checkout_hints:
+      sibling_dir_names:
+        - AI4RA-Evaluation-Data-Sets
+        - evaluation-data-sets
+    human_surface: README.md
+    machine_surface: dataset_catalog.json
+    agent_guides:
+      - AGENTS.md
+      - CLAUDE.md
+  - github: AI4RA/evaluation-harness
+    role: evaluation-harness
+    owns:
+      - evaluation execution
+      - provenance capture
+      - vendored prompt snapshots
+      - run artifacts
+    local_checkout_hints:
+      sibling_dir_names:
+        - AI4RA-Evaluation-Harness
+        - evaluation-harness
+    human_surface: README.md
+    machine_surface: harness_catalog.json
+    agent_guides:
+      - AGENTS.md
+      - CLAUDE.md
+
+shared_foundation:
+  - github: ui-insight/AI4RA-UDM
+    role: shared-udm-foundation
+    local_checkout_hints:
+      sibling_dir_names:
+        - AI4RA-UDM
+        - ui-insight-AI4RA-UDM
+    notes:
+      - repo-local contracts that align to UDM semantics are not automatically the shared UDM contract
+
+coordination_policy:
+  open_sibling_repo_when:
+    - a contract or schema crosses repository boundaries
+    - a dataset id, validation policy, or scoring surface changes
+    - vendored prompt snapshots or harness registration behavior must be refreshed
+    - observed upstream refs need to be re-pinned
+  pin_external_refs_as: observed commit SHAs
+  sync_human_and_machine_surfaces: true

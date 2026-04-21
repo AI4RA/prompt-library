@@ -15,6 +15,10 @@ A change in one leg often implies a change in the others. Human-facing docs in t
 
 **Machine-readable discovery:** [`component_catalog.json`](component_catalog.json)
 
+## Triad Navigation
+
+For cross-repo work, start with [`TRIAD.md`](TRIAD.md), [`triad.workspace.yaml`](triad.workspace.yaml), and [`AGENTS.md`](AGENTS.md). Tools that prefer `CLAUDE.md` can use the mirrored guidance there. Default to this repository first, then open the sibling repos only when the task crosses a contract, validation, or observed-ref boundary.
+
 ## What lives here
 
 Each component is a directory under `components/` named by a short slug. A component represents a single task and may expose one or more manifestations:
@@ -105,7 +109,7 @@ These refs are recorded in [`component_catalog.json`](component_catalog.json) so
 
 This repository is licensed under the [GNU General Public License v3.0](LICENSE).
 
-**Any use of this work requires citation.** This includes research publications, derivative components, downstream software, internal tooling, and production deployments. The citation requirement is a condition of use alongside — not in place of — the GPL's obligations.
+Please cite this work when you use it in research publications, derivative components, downstream software, internal tooling, or production deployments. Citation guidance is documented here and in [`CITATION.cff`](CITATION.cff); the repository's binding license terms remain those of the GPL.
 
 Machine-readable citation metadata lives in [`CITATION.cff`](CITATION.cff). When citing a specific state of the repository, pin to the commit SHA and the component version you used:
 

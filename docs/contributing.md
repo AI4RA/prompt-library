@@ -2,6 +2,10 @@
 
 This site is generated directly from the [`AI4RA/prompt-library`](https://github.com/AI4RA/prompt-library) repository. When you add or change a component, keep the human-facing docs and machine-facing catalog aligned in the same change.
 
+## Triad Coordination Surfaces
+
+If a change may affect datasets, harness wiring, or shared UDM semantics, read the root [`TRIAD.md`](https://github.com/AI4RA/prompt-library/blob/main/TRIAD.md), [`triad.workspace.yaml`](https://github.com/AI4RA/prompt-library/blob/main/triad.workspace.yaml), and [`AGENTS.md`](https://github.com/AI4RA/prompt-library/blob/main/AGENTS.md) before you edit component metadata. They spell out when to stay local to this repo and when to pull the sibling repos into scope.
+
 ## Adding a new component
 
 1. Pick a lowercase, hyphenated slug under `components/`.
