@@ -19,9 +19,14 @@
       }
     },
     "evaluation_harness": {
-      "repo": null,
-      "url": null,
-      "notes": "Harness consumers should treat component_catalog.json as the primary machine-readable discovery surface for prompt-library components, manifestations, repo-local contracts, and triad dependency notes."
+      "repo": "AI4RA/evaluation-harness",
+      "url": "https://github.com/AI4RA/evaluation-harness",
+      "observed_ref": {
+        "branch": "main",
+        "commit": "dac0da434efd871a154b4a019a1bede7b94b1a81",
+        "observed_at": "2026-04-21"
+      },
+      "notes": "Harness consumers should treat component_catalog.json as the primary machine-readable discovery surface for prompt-library components, manifestations, repo-local contracts, and triad dependency notes, and treat AI4RA/evaluation-harness `harness_catalog.json` as the harness-side discovery surface for execution capabilities and current integration scope."
     },
     "shared_udm": {
       "repo": "ui-insight/AI4RA-UDM",

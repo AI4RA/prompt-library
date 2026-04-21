@@ -6,7 +6,7 @@ This repository is the prompt-library leg of the AI4RA evaluation triad:
 
 - `AI4RA/prompt-library` — prompts, skills, agents, schemas, and component contracts
 - `AI4RA/evaluation-data-sets` — datasets, artifacts, and scoring references
-- evaluation harness — discovers components and datasets, runs evaluation campaigns, and publishes run artifacts
+- [`AI4RA/evaluation-harness`](https://github.com/AI4RA/evaluation-harness) — discovers components and datasets, runs evaluation campaigns, and publishes run artifacts
 - `ui-insight/AI4RA-UDM` — shared UDM foundation where applicable
 
 A change in one leg often implies a change in the others. Human-facing docs in this repo should line up with the machine-readable catalog so harness consumers are not forced to infer contract scope from prose.
@@ -95,6 +95,7 @@ The current triad alignment in this repo was refreshed against these observed up
 
 | Upstream | Branch | Observed commit |
 | --- | --- | --- |
+| `AI4RA/evaluation-harness` | `main` | `dac0da434efd871a154b4a019a1bede7b94b1a81` |
 | `AI4RA/evaluation-data-sets` | `main` | `7aad223b196dd567759d6b9e2bacc93649dd5c62` |
 | `ui-insight/AI4RA-UDM` | `main` | `9e85e44cf181dbb54c573cde2a89df2a287af2d0` |
 

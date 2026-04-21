@@ -1,6 +1,6 @@
 # About the AI4RA Prompt Library
 
-The AI4RA Prompt Library is a versioned store of prompts, skills, agents, schemas, and component contracts for research-administration work. It is the prompt-library leg of the AI4RA evaluation triad: the evaluation harness discovers components here, pairs them with datasets from `AI4RA/evaluation-data-sets`, and applies the shared `ui-insight/AI4RA-UDM` foundation where a component is UDM-aligned.
+The AI4RA Prompt Library is a versioned store of prompts, skills, agents, schemas, and component contracts for research-administration work. It is the prompt-library leg of the AI4RA evaluation triad: [`AI4RA/evaluation-harness`](https://github.com/AI4RA/evaluation-harness) discovers components here, pairs them with datasets from `AI4RA/evaluation-data-sets`, and applies the shared `ui-insight/AI4RA-UDM` foundation where a component is UDM-aligned.
 
 ## What's in a component
 
@@ -25,7 +25,7 @@ Start with [`component_catalog.json`](https://github.com/AI4RA/prompt-library/bl
 - output-contract format and scope
 - evaluation posture, including last fully evaluated version
 - related components and harness notes
-- observed upstream refs for `AI4RA/evaluation-data-sets` and `ui-insight/AI4RA-UDM`
+- observed upstream refs for `AI4RA/evaluation-harness`, `AI4RA/evaluation-data-sets`, and `ui-insight/AI4RA-UDM`
 
 The catalog exists so harness consumers do not have to infer repo-level semantics from README prose alone.
 

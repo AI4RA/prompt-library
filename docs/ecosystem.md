@@ -8,7 +8,7 @@ The AI4RA evaluation ecosystem is a coordinated triad plus a shared schema found
 flowchart LR
     PL["AI4RA/prompt-library<br/><i>prompts · skills · agents · schemas</i>"]
     DS["AI4RA/evaluation-data-sets<br/><i>datasets · artifacts · scoring refs</i>"]
-    HARNESS["evaluation harness<br/><i>discovery · execution · scoring</i>"]
+    HARNESS["AI4RA/evaluation-harness<br/><i>discovery · execution · scoring</i>"]
     UDM["ui-insight/AI4RA-UDM<br/><i>shared data-model foundation</i>"]
     REPORTS["evaluation reports<br/><i>published evidence</i>"]
 
@@ -36,9 +36,9 @@ Solid arrows are concrete data flows. Dotted arrows show semantic alignment to t
 
 **What it is not.** The prompt catalog or the runtime that executes components.
 
-### Evaluation harness
+### `AI4RA/evaluation-harness`
 
-**What it is.** The runner layer of the triad. It discovers components from `component_catalog.json`, discovers datasets from `dataset_catalog.json`, executes evaluation campaigns, validates outputs against the declared contract surfaces, scores results, and publishes run artifacts back into the prompt library.
+**What it is.** The runner layer of the triad. It discovers components from `component_catalog.json`, discovers datasets from `dataset_catalog.json`, executes evaluation campaigns, validates outputs against the declared contract surfaces, scores results, and publishes run artifacts back into the prompt library. Its repo-level [`harness_catalog.json`](https://github.com/AI4RA/evaluation-harness/blob/main/harness_catalog.json) is the machine-readable discovery surface for current harness capabilities and integration scope.
 
 **What it is not.** The source-of-truth location for component contracts or dataset provenance. Those stay in their respective repos.
 
@@ -58,7 +58,7 @@ Solid arrows are concrete data flows. Dotted arrows show semantic alignment to t
 
 ## Cross-repo contract pinning
 
-This repo records observed upstream refs in [`component_catalog.json`](https://github.com/AI4RA/prompt-library/blob/main/component_catalog.json) so cross-repo links are not silently interpreted as “whatever is on `main` today.” When a change depends on `AI4RA/evaluation-data-sets` or `ui-insight/AI4RA-UDM`, update the observed ref and the human documentation in the same change.
+This repo records observed upstream refs in [`component_catalog.json`](https://github.com/AI4RA/prompt-library/blob/main/component_catalog.json) so cross-repo links are not silently interpreted as “whatever is on `main` today.” When a change depends on `AI4RA/evaluation-harness`, `AI4RA/evaluation-data-sets`, or `ui-insight/AI4RA-UDM`, update the observed ref and the human documentation in the same change.
 
 ## Typical change flows
 
