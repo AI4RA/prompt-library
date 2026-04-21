@@ -20,7 +20,7 @@ triad:
     url: https://github.com/AI4RA/evaluation-harness
     observed_ref:
       branch: main
-      commit: dac0da434efd871a154b4a019a1bede7b94b1a81
+      commit: 02a7583abdade86877f9f1b4a70fde078f982d40
       observed_at: 2026-04-21
     notes: >
       Harness consumers should treat component_catalog.json as the primary

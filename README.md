@@ -95,7 +95,7 @@ The current triad alignment in this repo was refreshed against these observed up
 
 | Upstream | Branch | Observed commit |
 | --- | --- | --- |
-| `AI4RA/evaluation-harness` | `main` | `dac0da434efd871a154b4a019a1bede7b94b1a81` |
+| `AI4RA/evaluation-harness` | `main` | `02a7583abdade86877f9f1b4a70fde078f982d40` |
 | `AI4RA/evaluation-data-sets` | `main` | `85c2d11d5f4d808b218716e90f590b1863bdffde` |
 | `ui-insight/AI4RA-UDM` | `main` | `9e85e44cf181dbb54c573cde2a89df2a287af2d0` |
 
