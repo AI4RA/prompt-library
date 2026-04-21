@@ -35,7 +35,7 @@ See `schema.json` in this component for the authoritative definition.
 
 `solicitation`, `proposal_narrative`, `biosketch`, `current_pending`, `facilities`, `data_mgmt`, `letter_support`, `budget`, `budget_justification`, `award_notice`, `award_amendment`, `jit_response`, `closeout_letter`, `other`.
 
-These codes are shared with sibling UDM components so classifier output can route directly into them.
+These codes are shared with sibling prompt-library components so classifier output can route directly into UDM-oriented workflows without a second vocabulary map.
 
 ## Key rules
 

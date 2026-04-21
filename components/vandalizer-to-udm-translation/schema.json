@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/vandalizer-to-udm-translation/schema.json",
+  "title": "Vandalizer -> UDM NSF Award Notice Translation Output",
+  "description": "Local wrapper schema for the vandalizer-to-udm-translation component. The output contract delegates to the repo-local nsf-award-notice-extraction-udm schema so downstream consumers can validate translator output from this component directory without inferring the target schema from prose alone.",
+  "version": "0.1.0",
+  "target_component": "nsf-award-notice-extraction-udm",
+  "target_component_version": "1.1.0",
+  "allOf": [
+    {
+      "$ref": "../nsf-award-notice-extraction-udm/schema.json"
+    }
+  ]
+}

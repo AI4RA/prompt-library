@@ -71,7 +71,7 @@
         "letter_of_intent",
         "other"
       ],
-      "description": "Controlled document-code vocabulary shared with sibling UDM components (sponsor-doc-defaults-udm, document-type-classifier-udm, proposal-completeness-review-udm). Use 'other' with a descriptive label when no enumerated code fits and consider proposing a new code in a follow-up PR."
+      "description": "Controlled document-code vocabulary shared with sibling prompt-library components (sponsor-doc-defaults-udm, document-type-classifier-udm, proposal-completeness-review-udm). Use 'other' with a descriptive label when no enumerated code fits and consider proposing a new code in a follow-up PR."
     },
     "documentRequirement": {
       "type": "object",

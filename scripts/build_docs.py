@@ -39,8 +39,10 @@ except ImportError:
 REPO_ROOT = Path(__file__).resolve().parents[1]
 COMPONENTS_DIR = REPO_ROOT / "components"
 DOCS_DIR = REPO_ROOT / "docs"
+CATALOG_PATH = REPO_ROOT / "component_catalog.json"
 REPO_URL = "https://github.com/AI4RA/prompt-library"
 BRANCH = "main"
+SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 
 
 # --- frontmatter + component model ----------------------------------------
@@ -139,6 +141,27 @@ class Component:
         if self.has_agent:
             m.append("agent")
         return m
+
+    @property
+    def last_fully_evaluated_version(self) -> str | None:
+        min_parsed: tuple[int, int, int] | None = None
+        for case in self.eval_cases:
+            validated = case.metadata.get("validated_against_version")
+            if not isinstance(validated, str) or not SEMVER_RE.match(validated):
+                continue
+            parsed = tuple(int(part) for part in validated.split("."))
+            if min_parsed is None or parsed < min_parsed:
+                min_parsed = parsed
+        if min_parsed is None:
+            return None
+        return ".".join(str(part) for part in min_parsed)
+
+    @property
+    def current_version_is_fully_evaluated(self) -> bool:
+        return bool(
+            self.last_fully_evaluated_version
+            and self.last_fully_evaluated_version == self.version
+        )
 
     @property
     def short_description(self) -> str:
@@ -256,6 +279,24 @@ def discover_components() -> list[Component]:
         if c is not None:
             comps.append(c)
     return comps
+
+
+def load_component_catalog() -> dict[str, dict]:
+    if not CATALOG_PATH.is_file():
+        return {}
+    try:
+        payload = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        sys.stderr.write(f"warning: component catalog is not valid JSON: {exc}\n")
+        return {}
+    components = payload.get("components")
+    if not isinstance(components, list):
+        return {}
+    return {
+        entry["slug"]: entry
+        for entry in components
+        if isinstance(entry, dict) and isinstance(entry.get("slug"), str)
+    }
 
 
 # --- rendering helpers ----------------------------------------------------
@@ -478,13 +519,15 @@ def render_index(components: list[Component]) -> str:
 
     return f"""# AI4RA Prompt Library
 
-Versioned LLM components — prompts, skills, and agents — for research-administration work. Author a task once, reuse it across raw-prompt, Claude Skill, and agent manifestations without drift.
+Versioned prompts, skills, agents, schemas, and component contracts for research-administration work.
+
+This repository is the prompt-library leg of the AI4RA evaluation triad. The evaluation harness discovers components here, pairs them with datasets from [`AI4RA/evaluation-data-sets`](https://github.com/AI4RA/evaluation-data-sets), and uses the shared [`ui-insight/AI4RA-UDM`](https://github.com/ui-insight/AI4RA-UDM) foundation where a component is UDM-aligned. Contract scope is recorded per component in [`component_catalog.json`]({REPO_URL}/blob/{BRANCH}/component_catalog.json).
 
 Start by filtering below, or jump to:
 
 - [Browse by category](browse/by-category.md) · [by domain](browse/by-domain.md) · [by status](browse/by-status.md) · [by tag](browse/by-tag.md)
-- [About](about.md) · [Taxonomy](taxonomy.md) · [Contributing](contributing.md)
-- Source: [`AI4RA/prompt-library`]({REPO_URL}) · Canonical UDM: [`ui-insight/AI4RA-UDM`](https://github.com/ui-insight/AI4RA-UDM)
+- [Contracts](contracts.md) · [About](about.md) · [Taxonomy](taxonomy.md) · [Contributing](contributing.md)
+- Source: [`AI4RA/prompt-library`]({REPO_URL}) · Machine discovery: [`component_catalog.json`]({REPO_URL}/blob/{BRANCH}/component_catalog.json)
 
 ## Browse all components
 
@@ -506,20 +549,23 @@ def render_component_index(components: list[Component]) -> str:
     lines = [
         "# Components",
         "",
-        "Alphabetical index of every component. Use the [home page](../index.md) for filtering.",
+        "Alphabetical index of every component. Use the [home page](../index.md) for filtering and [`component_catalog.json`](https://github.com/AI4RA/prompt-library/blob/main/component_catalog.json) for machine-readable discovery.",
         "",
-        "| Component | Category | Domain | Status | Version |",
-        "| --- | --- | --- | --- | --- |",
+        "| Component | Category | Domain | Status | Version | Last Fully Evaluated |",
+        "| --- | --- | --- | --- | --- | --- |",
     ]
     for c in sorted(components, key=lambda x: x.slug):
+        last_eval = c.last_fully_evaluated_version or "none"
         lines.append(
-            f"| [`{c.slug}`]({c.slug}.md) | {c.category} | {c.domain} | {c.status} | `{c.version}` |"
+            f"| [`{c.slug}`]({c.slug}.md) | {c.category} | {c.domain} | {c.status} | `{c.version}` | `{last_eval}` |"
         )
     lines.append("")
     return "\n".join(lines)
 
 
-def render_component_page(c: Component, component_slugs: set[str]) -> str:
+def render_component_page(
+    c: Component, component_slugs: set[str], catalog_by_slug: dict[str, dict]
+) -> str:
     manifest_links = [
         f"[`prompt.md`]({repo_link(c.path / 'prompt.md')})",
     ]
@@ -528,10 +574,18 @@ def render_component_page(c: Component, component_slugs: set[str]) -> str:
     if c.has_agent:
         manifest_links.append(f"[`agent/AGENT.md`]({repo_link(c.path / 'agent' / 'AGENT.md')})")
 
+    last_eval = c.last_fully_evaluated_version or "none"
+    eval_state = (
+        "current"
+        if c.current_version_is_fully_evaluated
+        else (f"behind ({last_eval} validated)" if c.last_fully_evaluated_version else "no validated eval cases")
+    )
     fact_rows = [
         ("Slug", f"<code>{html_escape(c.slug)}</code>"),
         ("Version", f"<code>{html_escape(c.version)}</code>"),
         ("Status", status_badge(c.status)),
+        ("Last fully evaluated", f"<code>{html_escape(last_eval)}</code>"),
+        ("Eval state", html_escape(eval_state)),
         ("Category", chip(c.category)),
         ("Domain", chip(c.domain)),
         ("Manifestations", ", ".join(c.manifestations)),
@@ -572,6 +626,82 @@ def render_component_page(c: Component, component_slugs: set[str]) -> str:
     sections.append(tags_block + audience_block)
     sections.append("**Manifestations in repo:** " + " · ".join(manifest_links) + "\n")
     sections.append(readme_body.strip())
+
+    catalog_entry = catalog_by_slug.get(c.slug, {})
+    output_contract = (
+        catalog_entry.get("contracts", {}).get("output", {})
+        if isinstance(catalog_entry, dict)
+        else {}
+    )
+    triad = catalog_entry.get("triad_integration", {}) if isinstance(catalog_entry, dict) else {}
+    related_components = catalog_entry.get("related_components", []) if isinstance(catalog_entry, dict) else []
+
+    if output_contract:
+        format_name = output_contract.get("format", "unknown")
+        scope = output_contract.get("scope", "unknown")
+        validation_surfaces = output_contract.get("validation_surfaces", [])
+        schema_entrypoints = output_contract.get("schema_entrypoints", [])
+        sections.append("## Contract scope")
+        sections.append(
+            f"- Output format: `{html_escape(str(format_name))}`"
+        )
+        sections.append(
+            f"- Contract scope: `{html_escape(str(scope))}`"
+        )
+        if validation_surfaces:
+            joined = ", ".join(f"`{surface}`" for surface in validation_surfaces)
+            sections.append(f"- Validation surfaces: {joined}")
+        if schema_entrypoints:
+            joined = ", ".join(f"`{pointer}`" for pointer in schema_entrypoints)
+            sections.append(f"- Schema entrypoints: {joined}")
+        notes = output_contract.get("notes")
+        if notes:
+            sections.append(f"- Notes: {notes}")
+        sections.append(
+            f"- Machine-readable catalog entry: [`component_catalog.json`]({REPO_URL}/blob/{BRANCH}/component_catalog.json)"
+        )
+        sections.append("")
+
+    if triad or related_components:
+        sections.append("## Triad integration")
+        udm_alignment = triad.get("udm_alignment", {}) if isinstance(triad, dict) else {}
+        if udm_alignment:
+            status = udm_alignment.get("status", "unknown")
+            notes = udm_alignment.get("notes", "")
+            sections.append(
+                f"- UDM alignment: `{html_escape(str(status))}`"
+                + (f" — {notes}" if notes else "")
+            )
+        evaluation_datasets = triad.get("evaluation_datasets", []) if isinstance(triad, dict) else []
+        if evaluation_datasets:
+            for dataset in evaluation_datasets:
+                dataset_id = dataset.get("dataset_id", "unknown")
+                relationship = dataset.get("relationship", "related")
+                notes = dataset.get("notes", "")
+                sections.append(
+                    f"- Evaluation dataset: `{html_escape(str(dataset_id))}` ({html_escape(str(relationship))})"
+                    + (f" — {notes}" if notes else "")
+                )
+        else:
+            sections.append(
+                "- Evaluation datasets: no shared `evaluation-data-sets` catalog entry recorded yet; current references are repo-local eval artifacts."
+            )
+        harness_notes = triad.get("harness_notes")
+        if harness_notes:
+            sections.append(f"- Harness notes: {harness_notes}")
+        if related_components:
+            for related in related_components:
+                slug = related.get("slug")
+                relationship = related.get("relationship", "related")
+                notes = related.get("notes", "")
+                label = (
+                    f"[`{slug}`]({slug}.md)" if isinstance(slug, str) and slug in component_slugs else f"`{slug}`"
+                )
+                sections.append(
+                    f"- Related component: {label} ({html_escape(str(relationship))})"
+                    + (f" — {notes}" if notes else "")
+                )
+        sections.append("")
 
     # Prompt body (collapsible)
     prompt_clean = rewrite_relative_links(
@@ -837,11 +967,15 @@ def main() -> int:
         print(f"  - {c.slug} ({c.category}/{c.domain}/{c.status}, v{c.version})")
 
     component_slugs = {c.slug for c in components}
+    catalog_by_slug = load_component_catalog()
 
     write(DOCS_DIR / "index.md", render_index(components))
     write(DOCS_DIR / "components" / "index.md", render_component_index(components))
     for c in components:
-        write(DOCS_DIR / "components" / f"{c.slug}.md", render_component_page(c, component_slugs))
+        write(
+            DOCS_DIR / "components" / f"{c.slug}.md",
+            render_component_page(c, component_slugs, catalog_by_slug),
+        )
 
         # Reports: fully regenerate the per-component reports tree so removed
         # reports don't linger.
@@ -886,7 +1020,7 @@ def main() -> int:
         DOCS_DIR / "browse" / "by-status.md",
         render_grouped(
             "Browse by status",
-            "Components grouped by lifecycle status: `stable` has been validated against evals and is safe to depend on; `experimental` is under active development and the output contract may change.",
+            "Components grouped by lifecycle status: `stable` means the contract is intended for downstream use and has validated reference coverage, but you should still pin versions and check each component's last fully evaluated version. `experimental` is under active development and the output contract may change.",
             components,
             "status",
             component_slugs,

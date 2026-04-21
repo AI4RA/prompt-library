@@ -1,0 +1,269 @@
+catalog_version: "1.0"
+
+triad:
+  summary: >
+    This repository is the prompt-library leg of the AI4RA evaluation triad.
+    It defines prompts, skills, agents, schemas, and repo-local component
+    contracts; AI4RA/evaluation-data-sets supplies datasets and scoring
+    references; the evaluation harness discovers both catalogs and runs the
+    evaluations; and ui-insight/AI4RA-UDM supplies the shared data-model
+    foundation where applicable.
+  evaluation_datasets:
+    repo: AI4RA/evaluation-data-sets
+    url: https://github.com/AI4RA/evaluation-data-sets
+    observed_ref:
+      branch: main
+      commit: 7aad223b196dd567759d6b9e2bacc93649dd5c62
+      observed_at: 2026-04-21
+  evaluation_harness:
+    repo: null
+    url: null
+    notes: >
+      Harness consumers should treat component_catalog.json as the primary
+      machine-readable discovery surface for prompt-library components,
+      manifestations, repo-local contracts, and triad dependency notes.
+  shared_udm:
+    repo: ui-insight/AI4RA-UDM
+    url: https://github.com/ui-insight/AI4RA-UDM
+    observed_ref:
+      branch: main
+      commit: 9e85e44cf181dbb54c573cde2a89df2a287af2d0
+      observed_at: 2026-04-21
+
+shared_contracts:
+  taxonomy:
+    path: taxonomy.md
+    role: controlled_vocabulary
+  catalog_overrides:
+    path: component_catalog_overrides.yaml
+    role: curated_triad_metadata_source
+  catalog_json:
+    path: component_catalog.json
+    role: primary_machine_discovery_surface
+  docs_generator:
+    path: scripts/build_docs.py
+    role: generated_docs_from_component_state
+  catalog_generator:
+    path: scripts/build_component_catalog.py
+    role: generated_component_catalog
+  lint:
+    path: .github/scripts/lint_components.py
+    role: repo_consistency_checks
+  template:
+    path: templates/new-component
+    role: new_component_scaffold
+
+components:
+  document-type-classifier-udm:
+    output_contract:
+      format: json_object
+      scope: repo_local_shared_component_vocabulary
+      notes: >
+        Repo-local routing contract. The document_type enum is shared with
+        sibling prompt-library components and ingest pipelines, but it is not a
+        shared AI4RA-UDM table or externally versioned schema.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Treat prompt.md as the canonical invocation surface, validate output
+        against schema.json, and use the repo-local eval cases as the current
+        reference set until a shared dataset entry is registered.
+      udm_alignment:
+        status: repo_local_shared_component_vocabulary
+        notes: >
+          The classifier supports UDM-oriented routing workflows, but its enum
+          is maintained in this repo as a local cross-component contract rather
+          than in the shared UDM repository.
+    related_components:
+      - slug: sponsor-doc-defaults-udm
+        relationship: shares_document_code_vocabulary
+        notes: The classifier emits codes that downstream sponsor/defaults workflows recognize.
+      - slug: solicitation-doc-modifications-udm
+        relationship: shares_document_code_vocabulary
+        notes: Shared code values let solicitation outputs route by the same document labels.
+
+  nsf-award-notice-extraction-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local extraction schema aligned to shared AI4RA-UDM award and
+        modification semantics. This schema is not itself the canonical shared
+        UDM repository contract.
+    triad_integration:
+      evaluation_datasets:
+        - dataset_id: real.nsf_awards
+          relationship: aligned_ground_truth_dataset
+          notes: >
+            The evaluation-data-sets repo carries authorized, de-identified NSF
+            award extractions in the same task family and is the main external
+            dataset counterpart for this component.
+      harness_notes: >
+        Prefer prompt.md as the canonical prompt manifestation, validate output
+        against schema.json, and pair evaluations with real.nsf_awards when the
+        harness needs de-identified external ground truth.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          Field meanings track shared UDM award concepts, but the JSON extraction
+          surface and several convenience fields are defined locally in this repo.
+    related_components:
+      - slug: vandalizer-to-udm-translation
+        relationship: owns_target_schema
+        notes: The translator delegates its output contract to this schema.
+
+  nsf-budget-justification-udm:
+    output_contract:
+      format: json_array
+      scope: repo_local_sponsor_specific_contract
+      schema_entrypoints:
+        - "#/$defs/input"
+        - "#/$defs/output"
+      notes: >
+        Sponsor-specific repo-local contract. The schema defines both the input
+        budget object and the output eight-section NSF narrative array; it is
+        not a shared UDM schema.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate inputs against #/$defs/input and outputs against #/$defs/output.
+        Current reference coverage is repo-local synthetic eval data rather than
+        a shared evaluation-data-sets entry.
+      udm_alignment:
+        status: repo_local_sponsor_specific_contract
+        notes: >
+          The component can feed UDM-backed proposal workflows, but its section
+          structure is an NSF-specific drafting contract maintained locally here.
+    related_components:
+      - slug: sponsor-doc-defaults-udm
+        relationship: downstream_of_requirement_discovery
+        notes: Sponsor defaults identify budget_justification as a required deliverable.
+      - slug: solicitation-doc-modifications-udm
+        relationship: downstream_of_requirement_overrides
+        notes: Solicitation overrides may tighten page limits or add justification-specific instructions.
+
+  rfp-extraction:
+    output_contract:
+      format: markdown_checklist
+      scope: repo_local_human_readable_contract
+      notes: >
+        Human-readable markdown checklist contract. There is no JSON Schema; the
+        contract is defined by prompt.md plus expected.md golden outputs.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Treat prompt.md as canonical. Score against expected.md golden outputs
+        and pin versions carefully because the current component version is ahead
+        of the last fully revalidated eval case.
+      udm_alignment:
+        status: repo_local_human_readable_contract
+        notes: >
+          This component is the human-facing sibling to rfp-extraction-udm. It
+          supports the same task family but does not define a shared UDM schema.
+    related_components:
+      - slug: rfp-extraction-udm
+        relationship: sibling_human_vs_structured_outputs
+        notes: Both components cover the same solicitation task family in different output forms.
+
+  rfp-extraction-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local structured extraction schema for funding announcements. It
+        aligns to shared UDM opportunity semantics but remains a prompt-library
+        contract rather than a direct copy of the shared UDM repo.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json and treat the paired
+        rfp-extraction component as the human-readable sibling for the same task.
+        External dataset-catalog registration for this task family is not yet in place.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          Scalar and requirement-row meanings are UDM-oriented, but the flat JSON
+          extraction surface and categorized requirement arrays are defined locally.
+    related_components:
+      - slug: rfp-extraction
+        relationship: sibling_human_vs_structured_outputs
+        notes: Same source task family, different output contracts.
+
+  solicitation-doc-modifications-udm:
+    output_contract:
+      format: json_object
+      scope: repo_local_requirements_diff_contract
+      notes: >
+        Repo-local solicitation-diff contract. Although the component name
+        carries -udm, the schema is a prompt-library document-requirements diff
+        surface rather than a shared AI4RA-UDM schema.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Invoke only after resolving sponsor-doc-defaults-udm, then merge the diff
+        onto the defaults by code/modifies_default semantics. Current eval coverage
+        is repo-local synthetic cases.
+      udm_alignment:
+        status: repo_local_requirements_diff_contract
+        notes: >
+          The output feeds UDM-backed proposal workflows, but the requirement-diff
+          semantics and code list are maintained locally in prompt-library.
+    related_components:
+      - slug: sponsor-doc-defaults-udm
+        relationship: depends_on_upstream_prior
+        notes: The solicitation diff requires sponsor defaults as an input prior.
+      - slug: document-type-classifier-udm
+        relationship: shares_document_code_vocabulary
+        notes: Both use the same repo-local document code vocabulary.
+
+  sponsor-doc-defaults-udm:
+    output_contract:
+      format: json_object
+      scope: repo_local_sponsor_defaults_contract
+      notes: >
+        Repo-local sponsor-defaults contract. The schema is designed for prompt
+        composition and downstream checklist assembly, not as a shared UDM repo schema.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Use this component as the sponsor prior for solicitation-doc-modifications-udm.
+        Validate output against schema.json and treat repo-local synthetic eval cases
+        as the current reference set.
+      udm_alignment:
+        status: repo_local_sponsor_defaults_contract
+        notes: >
+          The requirement codes are shared locally across prompt-library
+          components and can map into UDM-backed systems, but the contract itself
+          is maintained only in this repo.
+    related_components:
+      - slug: solicitation-doc-modifications-udm
+        relationship: paired_two_pass_pipeline
+        notes: Defaults feed the solicitation-specific diff pass.
+      - slug: document-type-classifier-udm
+        relationship: shares_document_code_vocabulary
+        notes: Document codes are intentionally kept interoperable across the repo.
+
+  vandalizer-to-udm-translation:
+    output_contract:
+      format: json_object
+      scope: delegated_repo_local_schema
+      notes: >
+        Translator wrapper contract. The local schema delegates to
+        nsf-award-notice-extraction-udm/schema.json so downstream consumers have
+        a concrete contract surface inside this component directory.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Treat this as a transformation component, not a source-of-truth extractor.
+        Validate output against the local wrapper schema and remember that missing
+        fields default to null or documented defaults based on the upstream
+        Vandalizer payload.
+      udm_alignment:
+        status: delegated_repo_local_schema
+        notes: >
+          Output aligns to the repo-local NSF award notice extraction schema, which
+          itself is UDM-aligned but maintained in prompt-library.
+    related_components:
+      - slug: nsf-award-notice-extraction-udm
+        relationship: delegates_output_schema_to
+        notes: This translator's output contract is the award-notice schema.

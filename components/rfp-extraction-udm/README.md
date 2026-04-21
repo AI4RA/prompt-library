@@ -1,6 +1,6 @@
 # RFP Extraction — UDM JSON
 
-Extracts any federal funding announcement (RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, or program solicitation) into a single JSON object conforming to this library's Unified Data Model extension. Companion to [`rfp-extraction`](../rfp-extraction/), which produces the human-readable checklist form from the same source.
+Extracts any federal funding announcement (RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, or program solicitation) into a single JSON object conforming to this repo's UDM-aligned extraction contract. Companion to [`rfp-extraction`](../rfp-extraction/), which produces the human-readable checklist form from the same source.
 
 **Current version:** 1.0.0
 **Category:** extraction
@@ -21,7 +21,7 @@ A single JSON object with two layers:
 - **Nine requirement arrays**, each always present (`[]` when empty):
   - `required_documents`, `formatting`, `review_criteria`, `eligibility`, `budget_constraints`, `compliance`, `submission_requirements`, `special_conditions`, `pappg_deviations`
 
-Every requirement entry shares a single shape: `label`, `code`, `description`, `page_limit`, `format_spec`, `is_required`, `source_section`, `structured_rule_type`, `structured_rule_value`. See [`schema.json`](schema.json) for the authoritative definition and [`prompt.md`](prompt.md) for the encoding rules the extractor follows (date formats, currency, multi-round handling, structured rule types, etc.).
+Every requirement entry shares a single shape: `label`, `code`, `description`, `page_limit`, `format_spec`, `is_required`, `source_section`, `structured_rule_type`, `structured_rule_value`. See [`schema.json`](schema.json) for the authoritative definition and [`prompt.md`](prompt.md) for the encoding rules the extractor follows (date formats, currency, multi-round handling, structured rule types, etc.). The schema is repo-local and UDM-aligned rather than a checked-in copy of the shared UDM repo.
 
 ## Relationship to `rfp-extraction`
 

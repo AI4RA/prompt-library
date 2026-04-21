@@ -8,6 +8,7 @@ Extracts a comprehensive submission and eligibility checklist from any federal f
 **Domain:** research-administration
 **Status:** stable
 **Manifestations:** prompt, skill, agent
+**Output contract:** `prompt.md` plus `evals/cases/*/expected.md` golden outputs
 
 ## Inputs
 

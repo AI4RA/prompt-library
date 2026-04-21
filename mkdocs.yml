@@ -1,11 +1,11 @@
 site_name: AI4RA Prompt Library
-site_description: Versioned prompts, skills, and agents for AI-for-research-administration applications.
+site_description: Versioned prompts, skills, agents, schemas, and component contracts for AI-for-research-administration applications.
 site_url: https://ai4ra.github.io/prompt-library/
 repo_url: https://github.com/AI4RA/prompt-library
 repo_name: AI4RA/prompt-library
 edit_uri: edit/main/
 
-copyright: Copyright &copy; 2026 AI4RA — Apache License 2.0
+copyright: Copyright &copy; 2026 AI4RA — GNU GPL v3.0
 
 theme:
   name: material
@@ -103,6 +103,7 @@ nav:
       - sponsor-doc-defaults-udm: components/sponsor-doc-defaults-udm.md
       - vandalizer-to-udm-translation: components/vandalizer-to-udm-translation.md
   - Taxonomy: taxonomy.md
+  - Contracts: contracts.md
   - Ecosystem: ecosystem.md
   - About: about.md
   - Contributing: contributing.md

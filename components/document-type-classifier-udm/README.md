@@ -49,7 +49,7 @@ See [`schema.json`](schema.json) for the authoritative definition.
 | `closeout_letter` | Closeout notification or final report package |
 | `other` | None of the above |
 
-The `code` values here are shared with other UDM components. `solicitation` is what `solicitation-doc-modifications-udm` classifies on; `award_notice` / `award_amendment` gate `award-document-extraction-udm`; the proposal-component codes (`biosketch`, `current_pending`, `facilities`, `data_mgmt`, `letter_support`, `budget_justification`) align with `sponsor-doc-defaults-udm`.
+The `code` values here are shared with other prompt-library components used in UDM-oriented pipelines. `solicitation` is what `solicitation-doc-modifications-udm` classifies on; `award_notice` / `award_amendment` gate `award-document-extraction-udm`; the proposal-component codes (`biosketch`, `current_pending`, `facilities`, `data_mgmt`, `letter_support`, `budget_justification`) align with `sponsor-doc-defaults-udm`.
 
 ## Manifestations
 

@@ -1,37 +1,60 @@
 # About the AI4RA Prompt Library
 
-The AI4RA Prompt Library is a versioned store of LLM components — prompts, skills, and agents — designed for research-administration work. Components here are authored once and reused across AI4RA applications so the same underlying task (for example, "extract structure from an NSF award notice") stays consistent regardless of which client — raw prompt, Claude Skill, or agent — invokes it.
+The AI4RA Prompt Library is a versioned store of prompts, skills, agents, schemas, and component contracts for research-administration work. It is the prompt-library leg of the AI4RA evaluation triad: the evaluation harness discovers components here, pairs them with datasets from `AI4RA/evaluation-data-sets`, and applies the shared `ui-insight/AI4RA-UDM` foundation where a component is UDM-aligned.
 
 ## What's in a component
 
-Every component lives under `components/<slug>/` and ships with:
+Every component lives under `components/<slug>/` and may ship with:
 
-- **`README.md`** — human-readable overview: what it does, inputs, outputs, relationship to other components, provenance.
-- **`prompt.md`** — the canonical, LLM-agnostic prompt body with YAML frontmatter describing the component (name, version, category, domain, status, tags, audience, dates).
-- **`CHANGELOG.md`** — version history. Per-component semver; bumped in lockstep across all manifestations when the component changes.
-- **`schema.json`** (when the output contract is structured) — JSON Schema (draft 2020-12) describing the emitted shape.
-- **`skill/SKILL.md`** (optional) — Claude Skill manifestation with trigger description.
-- **`agent/AGENT.md`** (optional) — subagent or agent manifestation.
-- **`evals/cases/<case>/`** — golden input/output pairs with metadata.
+- `README.md` — human-readable overview, scope, provenance, and relationships.
+- `prompt.md` — canonical prompt body plus YAML frontmatter.
+- `skill/SKILL.md` — Claude Skill manifestation, when present.
+- `agent/AGENT.md` — agent/subagent manifestation, when present.
+- `schema.json` — structured contract for machine validation, when present.
+- `CHANGELOG.md` — per-component semver history.
+- `evals/cases/<case>/` — golden cases with validation metadata.
+- `evals/reports/<run-id>/` — published evaluation runs, when available.
 
-Components share a controlled vocabulary for `category`, `domain`, and `manifestations` — see the [Taxonomy](taxonomy.md) page.
+Components share controlled vocabulary for `category`, `domain`, and `status`; see the [Taxonomy](taxonomy.md) page.
 
-## Relationship to the canonical UDM
+## Machine-readable discovery
 
-Many components produce JSON that ingests into a **Unified Data Model (UDM)**-conformant store. The canonical UDM — a relational schema covering Award, Modification, AwardBudget, Subaward, and related research-administration tables — lives at [`ui-insight/AI4RA-UDM`](https://github.com/ui-insight/AI4RA-UDM). This library does not redefine the UDM; its per-component `schema.json` files are *output contracts* aligned with the UDM's semantics. Schema changes with UDM implications are discussed in issues on that repo before landing here.
+Start with [`component_catalog.json`](https://github.com/AI4RA/prompt-library/blob/main/component_catalog.json). It records:
 
-## Versioning
+- manifestations present for each component
+- output-contract format and scope
+- evaluation posture, including last fully evaluated version
+- related components and harness notes
+- observed upstream refs for `AI4RA/evaluation-data-sets` and `ui-insight/AI4RA-UDM`
 
-Each component is versioned independently using semver:
+The catalog exists so harness consumers do not have to infer repo-level semantics from README prose alone.
 
-| Bump | Meaning |
-| --- | --- |
-| **MAJOR** | Output contract breaks — fields dropped or renamed, required-field changes, enum narrowing. |
-| **MINOR** | Backward-compatible additions — new optional fields, new enum values, new manifestations. |
-| **PATCH** | Wording or clarity — no behavior change expected. |
+## Contract scope
 
-The `version` field in every manifestation's YAML frontmatter, the header in `README.md`, and the `schema.json` `version` field are kept in lockstep.
+This repo uses a few different contract classes, and the distinction matters:
+
+- **Repo-local contract** — owned entirely in this repository. Examples include human-readable markdown outputs and local JSON schemas that model sponsor defaults or solicitation diffs.
+- **UDM-aligned repo-local schema** — a local schema whose field meanings align with shared UDM concepts, but whose extraction surface is maintained here rather than in `ui-insight/AI4RA-UDM`.
+- **Delegated wrapper contract** — a component whose local schema explicitly delegates to another repo-local schema so downstream tools have a concrete contract surface without relying on prose.
+
+A `-udm` suffix signals UDM-oriented intent, not automatic ownership by the shared UDM repo.
+
+## Relationship to the shared UDM
+
+The canonical shared UDM lives at [`ui-insight/AI4RA-UDM`](https://github.com/ui-insight/AI4RA-UDM). This prompt library does not redefine that repository's role.
+
+Instead, components in this repo do one of three things:
+
+- align a local extraction schema to shared UDM semantics
+- maintain a repo-local vocabulary that supports UDM-oriented workflows
+- remain entirely repo-local because the contract is human-facing or sponsor-specific
+
+When a change has shared-UDM implications, contributors should update the prompt-library component, the catalog metadata, and the cross-repo notes together so the triad stays pinned to the same assumption set.
+
+## Versioning and evaluation posture
+
+Each component follows semver independently, and manifestations within one component stay in lockstep. Eval cases carry `validated_against_version`, which means a component can be `stable` while still having a current version that is ahead of its last fully revalidated golden set. The generated component pages surface that distinction directly.
 
 ## This site
 
-This site is generated directly from the contents of [the GitHub repository](https://github.com/AI4RA/prompt-library). Every component page is built from that component's files — no duplicated content. To propose a change, edit the component in the repo (see [Contributing](contributing.md)).
+This site is generated from the checked-in component files plus the repo-level catalog metadata. Edit the source component, regenerate the catalog/docs, and the site will stay aligned without copy-pasted documentation forks.

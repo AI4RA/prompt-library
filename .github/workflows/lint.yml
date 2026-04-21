@@ -20,4 +20,4 @@ jobs:
         run: pip install "pyyaml>=6.0"
 
       - name: Lint component frontmatter and structure
-        run: python .github/scripts/lint_components.py
+        run: python3 .github/scripts/lint_components.py

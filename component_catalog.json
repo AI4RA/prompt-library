@@ -1,0 +1,761 @@
+{
+  "catalog_version": "1.0",
+  "generated_from": "component_catalog_overrides.yaml",
+  "repo": {
+    "name": "AI4RA Prompt Library",
+    "slug": "AI4RA/prompt-library",
+    "default_branch": "main",
+    "machine_discovery_surface": "component_catalog.json"
+  },
+  "triad": {
+    "summary": "This repository is the prompt-library leg of the AI4RA evaluation triad. It defines prompts, skills, agents, schemas, and repo-local component contracts; AI4RA/evaluation-data-sets supplies datasets and scoring references; the evaluation harness discovers both catalogs and runs the evaluations; and ui-insight/AI4RA-UDM supplies the shared data-model foundation where applicable.",
+    "evaluation_datasets": {
+      "repo": "AI4RA/evaluation-data-sets",
+      "url": "https://github.com/AI4RA/evaluation-data-sets",
+      "observed_ref": {
+        "branch": "main",
+        "commit": "7aad223b196dd567759d6b9e2bacc93649dd5c62",
+        "observed_at": "2026-04-21"
+      }
+    },
+    "evaluation_harness": {
+      "repo": null,
+      "url": null,
+      "notes": "Harness consumers should treat component_catalog.json as the primary machine-readable discovery surface for prompt-library components, manifestations, repo-local contracts, and triad dependency notes."
+    },
+    "shared_udm": {
+      "repo": "ui-insight/AI4RA-UDM",
+      "url": "https://github.com/ui-insight/AI4RA-UDM",
+      "observed_ref": {
+        "branch": "main",
+        "commit": "9e85e44cf181dbb54c573cde2a89df2a287af2d0",
+        "observed_at": "2026-04-21"
+      }
+    }
+  },
+  "shared_contracts": {
+    "taxonomy": {
+      "path": "taxonomy.md",
+      "role": "controlled_vocabulary"
+    },
+    "catalog_overrides": {
+      "path": "component_catalog_overrides.yaml",
+      "role": "curated_triad_metadata_source"
+    },
+    "catalog_json": {
+      "path": "component_catalog.json",
+      "role": "primary_machine_discovery_surface"
+    },
+    "docs_generator": {
+      "path": "scripts/build_docs.py",
+      "role": "generated_docs_from_component_state"
+    },
+    "catalog_generator": {
+      "path": "scripts/build_component_catalog.py",
+      "role": "generated_component_catalog"
+    },
+    "lint": {
+      "path": ".github/scripts/lint_components.py",
+      "role": "repo_consistency_checks"
+    },
+    "template": {
+      "path": "templates/new-component",
+      "role": "new_component_scaffold"
+    }
+  },
+  "components": [
+    {
+      "component_id": "prompt.document-type-classifier-udm",
+      "slug": "document-type-classifier-udm",
+      "name": "document-type-classifier-udm",
+      "summary": "Classifies a research-administration document into a controlled type vocabulary so downstream pipelines can route it to the correct extractor or reviewer. One call in, one small JSON object out.",
+      "version": "1.0.0",
+      "category": "classification",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "classification",
+        "routing",
+        "triage",
+        "udm",
+        "research-administration",
+        "document-type"
+      ],
+      "audience": [
+        "ingest-pipelines",
+        "sponsored-programs-staff",
+        "routing-layer"
+      ],
+      "paths": {
+        "component_dir": "components/document-type-classifier-udm",
+        "readme": "components/document-type-classifier-udm/README.md",
+        "prompt": "components/document-type-classifier-udm/prompt.md",
+        "schema": "components/document-type-classifier-udm/schema.json",
+        "evals_dir": "components/document-type-classifier-udm/evals",
+        "eval_case_metadata_glob": "components/document-type-classifier-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/document-type-classifier-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/document-type-classifier-udm/prompt.md",
+          "version": "1.0.0",
+          "role": "canonical_prompt"
+        },
+        {
+          "type": "skill",
+          "path": "components/document-type-classifier-udm/skill/SKILL.md",
+          "version": "1.0.0",
+          "role": "claude_skill",
+          "description": "Classifies a research-administration document into one of a controlled 14-code vocabulary (solicitation, proposal_narrative, biosketch, current_pending, facilities, data_mgmt, letter_support, budget, budget_justification, award_notice, award_amendment, jit_response, closeout_letter, other) so upstream routing can dispatch to the correct extractor or reviewer. Use when a user uploads a grants-related document and asks \"what is this?\", when routing an incoming file through an ingest pipeline, or when triaging a mixed folder of proposal and award documents. Input is plain text or OCR markdown of the document (typically the first N pages, or the whole body for short files). Output is one small JSON object with document_type, confidence, a verbatim evidence excerpt, a one-sentence rationale, and a secondary_candidates array that is only populated when the classification is ambiguous. Sponsor-agnostic \u2014 an NIH NOA, an NSF NOA, and a DoE award letter all classify as award_notice. For extracting the structured contents of a document rather than identifying its type, use a type-specific extraction component."
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_shared_component_vocabulary",
+          "notes": "Repo-local routing contract. The document_type enum is shared with sibling prompt-library components and ingest pipelines, but it is not a shared AI4RA-UDM table or externally versioned schema.",
+          "schema_path": "components/document-type-classifier-udm/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema",
+            "golden_eval_cases"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 3,
+        "report_count": 0,
+        "last_fully_evaluated_version": "1.0.0",
+        "current_version_is_fully_evaluated": true
+      },
+      "related_components": [
+        {
+          "slug": "sponsor-doc-defaults-udm",
+          "relationship": "shares_document_code_vocabulary",
+          "notes": "The classifier emits codes that downstream sponsor/defaults workflows recognize."
+        },
+        {
+          "slug": "solicitation-doc-modifications-udm",
+          "relationship": "shares_document_code_vocabulary",
+          "notes": "Shared code values let solicitation outputs route by the same document labels."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Treat prompt.md as the canonical invocation surface, validate output against schema.json, and use the repo-local eval cases as the current reference set until a shared dataset entry is registered.",
+        "udm_alignment": {
+          "status": "repo_local_shared_component_vocabulary",
+          "notes": "The classifier supports UDM-oriented routing workflows, but its enum is maintained in this repo as a local cross-component contract rather than in the shared UDM repository."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.nsf-award-notice-extraction-udm",
+      "slug": "nsf-award-notice-extraction-udm",
+      "name": "nsf-award-notice-extraction-udm",
+      "summary": "Extracts an NSF Award Notice (initial obligation or amendment) into a single JSON object conforming to this repo's UDM-aligned extraction contract. Designed for the NSF notice format that arrives as a PDF printed from Outlook after OSP receipt \u2014 the email header, boxed notice body, and NSF-format 18-category budget table.",
+      "version": "1.1.0",
+      "category": "extraction",
+      "domain": "research-administration",
+      "status": "stable",
+      "tags": [
+        "nsf",
+        "award",
+        "notice",
+        "noa",
+        "amendment",
+        "udm",
+        "structured-extraction",
+        "json"
+      ],
+      "audience": [
+        "ingest-pipelines",
+        "sponsored-programs-staff"
+      ],
+      "paths": {
+        "component_dir": "components/nsf-award-notice-extraction-udm",
+        "readme": "components/nsf-award-notice-extraction-udm/README.md",
+        "prompt": "components/nsf-award-notice-extraction-udm/prompt.md",
+        "schema": "components/nsf-award-notice-extraction-udm/schema.json",
+        "evals_dir": "components/nsf-award-notice-extraction-udm/evals",
+        "eval_case_metadata_glob": "components/nsf-award-notice-extraction-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/nsf-award-notice-extraction-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/nsf-award-notice-extraction-udm/prompt.md",
+          "version": "1.1.0",
+          "role": "canonical_prompt"
+        },
+        {
+          "type": "skill",
+          "path": "components/nsf-award-notice-extraction-udm/skill/SKILL.md",
+          "version": "1.1.0",
+          "role": "claude_skill",
+          "description": "Extracts an NSF Award Notice (or amendment notice) into a single structured JSON object conforming to this repo's UDM-aligned extraction contract for research administration. Use when the input is an NSF-formatted Notice of Award \u2014 an initial obligation (Amendment 000) or any subsequent amendment \u2014 typically arriving as a PDF printed from Outlook. Also use when a user uploads an \"NSF NOA\", \"NSF award letter\", or \"NSF award notice\" and wants machine-readable output for ingest into a grants management system, database, or compliance workflow. Output is a flat JSON with identity scalars, funding scalars, indirect cost fields, recipient and budget-period objects, eight categorized arrays (project personnel, sponsor contacts, budget categories, subawards, linked awards, terms and conditions, special conditions), a top-level fees scalar, and an optional source_provenance audit object. For the human-readable summary form or for non-NSF award notices, use a different component."
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "shared_udm_semantics_repo_local_schema",
+          "notes": "Repo-local extraction schema aligned to shared AI4RA-UDM award and modification semantics. This schema is not itself the canonical shared UDM repository contract.",
+          "schema_path": "components/nsf-award-notice-extraction-udm/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema",
+            "golden_eval_cases",
+            "published_eval_reports"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 1,
+        "report_count": 5,
+        "last_fully_evaluated_version": "1.0.0",
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "vandalizer-to-udm-translation",
+          "relationship": "owns_target_schema",
+          "notes": "The translator delegates its output contract to this schema."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [
+          {
+            "dataset_id": "real.nsf_awards",
+            "relationship": "aligned_ground_truth_dataset",
+            "notes": "The evaluation-data-sets repo carries authorized, de-identified NSF award extractions in the same task family and is the main external dataset counterpart for this component."
+          }
+        ],
+        "harness_notes": "Prefer prompt.md as the canonical prompt manifestation, validate output against schema.json, and pair evaluations with real.nsf_awards when the harness needs de-identified external ground truth.",
+        "udm_alignment": {
+          "status": "shared_udm_semantics_repo_local_schema",
+          "notes": "Field meanings track shared UDM award concepts, but the JSON extraction surface and several convenience fields are defined locally in this repo."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.nsf-budget-justification-udm",
+      "slug": "nsf-budget-justification-udm",
+      "name": "nsf-budget-justification-udm",
+      "summary": "Drafts an NSF-format budget justification narrative from a structured budget object. Output is the eight canonical NSF sections (A..H) as an ordered array of section objects \u2014 one per section, each with a `key`, a fixed `title`, and `content` in narrative markdown. All eight sections are always emitted; zero-value categories produce a single-sentence content.",
+      "version": "1.0.0",
+      "category": "drafting",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "nsf",
+        "budget-justification",
+        "drafting",
+        "udm",
+        "research-administration",
+        "proposal-preparation"
+      ],
+      "audience": [
+        "pre-award-staff",
+        "proposal-developers",
+        "ingest-pipelines"
+      ],
+      "paths": {
+        "component_dir": "components/nsf-budget-justification-udm",
+        "readme": "components/nsf-budget-justification-udm/README.md",
+        "prompt": "components/nsf-budget-justification-udm/prompt.md",
+        "schema": "components/nsf-budget-justification-udm/schema.json",
+        "evals_dir": "components/nsf-budget-justification-udm/evals",
+        "eval_case_metadata_glob": "components/nsf-budget-justification-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/nsf-budget-justification-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/nsf-budget-justification-udm/prompt.md",
+          "version": "1.0.0",
+          "role": "canonical_prompt"
+        },
+        {
+          "type": "skill",
+          "path": "components/nsf-budget-justification-udm/skill/SKILL.md",
+          "version": "1.0.0",
+          "role": "claude_skill",
+          "description": "Drafts an NSF-format budget justification from a structured budget object. Input is a JSON budget (personnel detail, per-category per-year totals, indirect rate and base, and optional detail for equipment / travel / participant support / subawards / other direct costs). Output is an ordered JSON array of exactly eight section objects \u2014 the canonical NSF sections A through H (Senior Personnel, Other Personnel, Fringe Benefits, Equipment, Travel, Participant Support Costs, Other Direct Costs, Indirect Costs) \u2014 each with key, title, and a narrative markdown content field. All eight sections are always emitted; zero-value categories produce a single-sentence content stating no funds are requested. Use when pre-award staff need a first-draft budget justification to edit, when an ingest pipeline turns a structured budget into narrative for insertion into a proposal, or when a user wants to go from a budget spreadsheet to NSF-ready prose. First in an anticipated family \u2014 NIH, DoE, and foundation variants will ship as separate components; the output's eight-section shape is NSF-specific."
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_array",
+          "scope": "repo_local_sponsor_specific_contract",
+          "schema_entrypoints": [
+            "#/$defs/input",
+            "#/$defs/output"
+          ],
+          "notes": "Sponsor-specific repo-local contract. The schema defines both the input budget object and the output eight-section NSF narrative array; it is not a shared UDM schema.",
+          "schema_path": "components/nsf-budget-justification-udm/schema.json",
+          "validation_surfaces": [
+            "json_schema_entrypoints",
+            "golden_eval_cases"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 1,
+        "report_count": 0,
+        "last_fully_evaluated_version": "1.0.0",
+        "current_version_is_fully_evaluated": true
+      },
+      "related_components": [
+        {
+          "slug": "sponsor-doc-defaults-udm",
+          "relationship": "downstream_of_requirement_discovery",
+          "notes": "Sponsor defaults identify budget_justification as a required deliverable."
+        },
+        {
+          "slug": "solicitation-doc-modifications-udm",
+          "relationship": "downstream_of_requirement_overrides",
+          "notes": "Solicitation overrides may tighten page limits or add justification-specific instructions."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate inputs against #/$defs/input and outputs against #/$defs/output. Current reference coverage is repo-local synthetic eval data rather than a shared evaluation-data-sets entry.",
+        "udm_alignment": {
+          "status": "repo_local_sponsor_specific_contract",
+          "notes": "The component can feed UDM-backed proposal workflows, but its section structure is an NSF-specific drafting contract maintained locally here."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.rfp-extraction",
+      "slug": "rfp-extraction",
+      "name": "rfp-extraction",
+      "summary": "Extracts a comprehensive submission and eligibility checklist from any federal funding announcement \u2014 RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, or program solicitation. Output is a single markdown document with GFM checkboxes that PIs can use for proposal development and OSP staff can use for pre-submission compliance review.",
+      "version": "1.1.0",
+      "category": "extraction",
+      "domain": "research-administration",
+      "status": "stable",
+      "tags": [
+        "rfp",
+        "rfa",
+        "foa",
+        "nofo",
+        "grants",
+        "compliance",
+        "checklist"
+      ],
+      "audience": [
+        "principal-investigators",
+        "sponsored-programs-staff"
+      ],
+      "paths": {
+        "component_dir": "components/rfp-extraction",
+        "readme": "components/rfp-extraction/README.md",
+        "prompt": "components/rfp-extraction/prompt.md",
+        "schema": null,
+        "evals_dir": "components/rfp-extraction/evals",
+        "eval_case_metadata_glob": "components/rfp-extraction/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/rfp-extraction/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/rfp-extraction/prompt.md",
+          "version": "1.1.0",
+          "role": "canonical_prompt"
+        },
+        {
+          "type": "skill",
+          "path": "components/rfp-extraction/skill/SKILL.md",
+          "version": "1.1.0",
+          "role": "claude_skill",
+          "description": "Extracts a complete submission and eligibility checklist from a federal funding announcement (RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, program solicitation). Use when the user provides or references a funding announcement and wants a PI- or OSP-ready compliance checklist. Also use when the user mentions preparing a proposal and needs to know page limits, required documents, deadlines, or deviations from the agency's standard proposal guide."
+        },
+        {
+          "type": "agent",
+          "path": "components/rfp-extraction/agent/AGENT.md",
+          "version": "1.1.0",
+          "role": "agent_manifest",
+          "description": "Produces a comprehensive submission and eligibility checklist from a federal funding announcement (RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, or program solicitation). Use when the user provides a solicitation as a file path, URL, or pasted text and wants a PI-ready or OSP-compliance-ready checklist. The agent reads the source, extracts every requirement, distinguishes parent-guide defaults from solicitation-specific deviations, and writes the output as GFM-checkbox markdown."
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "markdown_checklist",
+          "scope": "repo_local_human_readable_contract",
+          "notes": "Human-readable markdown checklist contract. There is no JSON Schema; the contract is defined by prompt.md plus expected.md golden outputs.",
+          "schema_path": null,
+          "schema_entrypoints": [],
+          "validation_surfaces": [
+            "golden_eval_cases"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 1,
+        "report_count": 0,
+        "last_fully_evaluated_version": "1.0.0",
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "rfp-extraction-udm",
+          "relationship": "sibling_human_vs_structured_outputs",
+          "notes": "Both components cover the same solicitation task family in different output forms."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Treat prompt.md as canonical. Score against expected.md golden outputs and pin versions carefully because the current component version is ahead of the last fully revalidated eval case.",
+        "udm_alignment": {
+          "status": "repo_local_human_readable_contract",
+          "notes": "This component is the human-facing sibling to rfp-extraction-udm. It supports the same task family but does not define a shared UDM schema."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.rfp-extraction-udm",
+      "slug": "rfp-extraction-udm",
+      "name": "rfp-extraction-udm",
+      "summary": "Extracts any federal funding announcement (RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, or program solicitation) into a single JSON object conforming to this repo's UDM-aligned extraction contract. Companion to [`rfp-extraction`](../rfp-extraction/), which produces the human-readable checklist form from the same source.",
+      "version": "1.0.0",
+      "category": "extraction",
+      "domain": "research-administration",
+      "status": "stable",
+      "tags": [
+        "rfp",
+        "rfa",
+        "foa",
+        "nofo",
+        "grants",
+        "udm",
+        "structured-extraction",
+        "json"
+      ],
+      "audience": [
+        "ingest-pipelines",
+        "data-engineers",
+        "sponsored-programs-staff"
+      ],
+      "paths": {
+        "component_dir": "components/rfp-extraction-udm",
+        "readme": "components/rfp-extraction-udm/README.md",
+        "prompt": "components/rfp-extraction-udm/prompt.md",
+        "schema": "components/rfp-extraction-udm/schema.json",
+        "evals_dir": "components/rfp-extraction-udm/evals",
+        "eval_case_metadata_glob": "components/rfp-extraction-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/rfp-extraction-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/rfp-extraction-udm/prompt.md",
+          "version": "1.0.0",
+          "role": "canonical_prompt"
+        },
+        {
+          "type": "skill",
+          "path": "components/rfp-extraction-udm/skill/SKILL.md",
+          "version": "1.0.0",
+          "role": "claude_skill",
+          "description": "Extracts a federal funding announcement (RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, or program solicitation) into a single structured JSON object conforming to this repo's UDM-aligned extraction contract. Use when the user wants machine-readable output \u2014 for ingest pipelines, database loading, compliance automation, or programmatic analysis \u2014 rather than a human-readable checklist. Output is a flat JSON with scalar opportunity metadata plus nine categorized requirement arrays (documents, formatting, review criteria, eligibility, budget constraints, compliance, submission requirements, special conditions, parent-guide deviations)."
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "shared_udm_semantics_repo_local_schema",
+          "notes": "Repo-local structured extraction schema for funding announcements. It aligns to shared UDM opportunity semantics but remains a prompt-library contract rather than a direct copy of the shared UDM repo.",
+          "schema_path": "components/rfp-extraction-udm/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema",
+            "golden_eval_cases"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 1,
+        "report_count": 0,
+        "last_fully_evaluated_version": "1.0.0",
+        "current_version_is_fully_evaluated": true
+      },
+      "related_components": [
+        {
+          "slug": "rfp-extraction",
+          "relationship": "sibling_human_vs_structured_outputs",
+          "notes": "Same source task family, different output contracts."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON outputs against schema.json and treat the paired rfp-extraction component as the human-readable sibling for the same task. External dataset-catalog registration for this task family is not yet in place.",
+        "udm_alignment": {
+          "status": "shared_udm_semantics_repo_local_schema",
+          "notes": "Scalar and requirement-row meanings are UDM-oriented, but the flat JSON extraction surface and categorized requirement arrays are defined locally."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.solicitation-doc-modifications-udm",
+      "slug": "solicitation-doc-modifications-udm",
+      "name": "solicitation-doc-modifications-udm",
+      "summary": "Given a solicitation text and a sponsor's default document requirements, emit only the **diff**: modifications to the defaults and net-new documents the solicitation introduces. Each entry links back to the default it overrides (when applicable) via `modifies_default` and carries a verbatim `source_excerpt` from the solicitation.",
+      "version": "1.0.0",
+      "category": "extraction",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "solicitation",
+        "requirements",
+        "modifications",
+        "udm",
+        "research-administration",
+        "proposal-preparation"
+      ],
+      "audience": [
+        "pre-award-staff",
+        "ingest-pipelines",
+        "proposal-checklist-builders"
+      ],
+      "paths": {
+        "component_dir": "components/solicitation-doc-modifications-udm",
+        "readme": "components/solicitation-doc-modifications-udm/README.md",
+        "prompt": "components/solicitation-doc-modifications-udm/prompt.md",
+        "schema": "components/solicitation-doc-modifications-udm/schema.json",
+        "evals_dir": "components/solicitation-doc-modifications-udm/evals",
+        "eval_case_metadata_glob": "components/solicitation-doc-modifications-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/solicitation-doc-modifications-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/solicitation-doc-modifications-udm/prompt.md",
+          "version": "1.0.0",
+          "role": "canonical_prompt"
+        },
+        {
+          "type": "skill",
+          "path": "components/solicitation-doc-modifications-udm/skill/SKILL.md",
+          "version": "1.0.0",
+          "role": "claude_skill",
+          "description": "Given a solicitation text (markdown, typically OCR-derived) and a sponsor-defaults JSON object (the output of sponsor-doc-defaults-udm), emits the subset of document requirements the solicitation modifies and the net-new documents it introduces \u2014 as a structured JSON list. Use when a pre-award team has a baseline sponsor checklist and needs to adapt it to a specific program, when an ingest pipeline needs to resolve a solicitation's document requirements on top of a sponsor prior, or when a user asks \"what does this solicitation change or add beyond the sponsor defaults?\". Every entry links back to the default it overrides via modifies_default (null for net-new) and carries a verbatim source_excerpt grounding the modification. Output is one JSON object with sponsor_name / sponsor_division / solicitation_id / solicitation_notes / document_requirements \u2014 where document_requirements contains only the diff, not the full merged checklist. Uses the same controlled code vocabulary as sponsor-doc-defaults-udm. Pairs with sponsor-doc-defaults-udm to form a two-pass requirements pipeline."
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_requirements_diff_contract",
+          "notes": "Repo-local solicitation-diff contract. Although the component name carries -udm, the schema is a prompt-library document-requirements diff surface rather than a shared AI4RA-UDM schema.",
+          "schema_path": "components/solicitation-doc-modifications-udm/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema",
+            "golden_eval_cases"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 3,
+        "report_count": 0,
+        "last_fully_evaluated_version": "1.0.0",
+        "current_version_is_fully_evaluated": true
+      },
+      "related_components": [
+        {
+          "slug": "sponsor-doc-defaults-udm",
+          "relationship": "depends_on_upstream_prior",
+          "notes": "The solicitation diff requires sponsor defaults as an input prior."
+        },
+        {
+          "slug": "document-type-classifier-udm",
+          "relationship": "shares_document_code_vocabulary",
+          "notes": "Both use the same repo-local document code vocabulary."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Invoke only after resolving sponsor-doc-defaults-udm, then merge the diff onto the defaults by code/modifies_default semantics. Current eval coverage is repo-local synthetic cases.",
+        "udm_alignment": {
+          "status": "repo_local_requirements_diff_contract",
+          "notes": "The output feeds UDM-backed proposal workflows, but the requirement-diff semantics and code list are maintained locally in prompt-library."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.sponsor-doc-defaults-udm",
+      "slug": "sponsor-doc-defaults-udm",
+      "name": "sponsor-doc-defaults-udm",
+      "summary": "Given a sponsor organization (and optional division), emit the default set of documents that sponsor typically requires for a standard full proposal \u2014 as a structured list with page limits, format specs, required vs. optional flags, per-person indicators, and conditional triggers.",
+      "version": "1.0.0",
+      "category": "research",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "sponsor",
+        "requirements",
+        "defaults",
+        "udm",
+        "research-administration",
+        "proposal-preparation"
+      ],
+      "audience": [
+        "pre-award-staff",
+        "ingest-pipelines",
+        "proposal-checklist-builders"
+      ],
+      "paths": {
+        "component_dir": "components/sponsor-doc-defaults-udm",
+        "readme": "components/sponsor-doc-defaults-udm/README.md",
+        "prompt": "components/sponsor-doc-defaults-udm/prompt.md",
+        "schema": "components/sponsor-doc-defaults-udm/schema.json",
+        "evals_dir": "components/sponsor-doc-defaults-udm/evals",
+        "eval_case_metadata_glob": "components/sponsor-doc-defaults-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/sponsor-doc-defaults-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/sponsor-doc-defaults-udm/prompt.md",
+          "version": "1.0.0",
+          "role": "canonical_prompt"
+        },
+        {
+          "type": "skill",
+          "path": "components/sponsor-doc-defaults-udm/skill/SKILL.md",
+          "version": "1.0.0",
+          "role": "claude_skill",
+          "description": "Emits the default set of documents a named research-funding sponsor requires for a standard full proposal \u2014 as a structured JSON list with per-document page limits, format specs, required vs. optional flags, per-person indicators, and conditional triggers. Use when a pre-award team needs to seed a proposal checklist before any solicitation-specific text is analyzed, when an ingest pipeline needs to know what NSF / NIH / DoE expects by default, or when a user asks \"what documents do I need to submit for an NSF full proposal?\". Input is a short block naming the sponsor (and optionally a division or institute); both natural language and a structured key-value block work. Output is one JSON object containing sponsor_name, sponsor_division, a knowledge_notes caveat string, and a document_requirements array of requirement objects. Uses a controlled 29-code vocabulary shared with sibling prompt-library components so downstream extractors and reviewers can dispatch on the code directly. For solicitation-specific modifications (overrides or net-new documents a specific program introduces), use solicitation-doc-modifications-udm with this component's output as input. When the sponsor is unrecognized, emits an empty requirements array and explains in knowledge_notes \u2014 never synthesizes a generic default list."
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_sponsor_defaults_contract",
+          "notes": "Repo-local sponsor-defaults contract. The schema is designed for prompt composition and downstream checklist assembly, not as a shared UDM repo schema.",
+          "schema_path": "components/sponsor-doc-defaults-udm/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema",
+            "golden_eval_cases"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 3,
+        "report_count": 0,
+        "last_fully_evaluated_version": "1.0.0",
+        "current_version_is_fully_evaluated": true
+      },
+      "related_components": [
+        {
+          "slug": "solicitation-doc-modifications-udm",
+          "relationship": "paired_two_pass_pipeline",
+          "notes": "Defaults feed the solicitation-specific diff pass."
+        },
+        {
+          "slug": "document-type-classifier-udm",
+          "relationship": "shares_document_code_vocabulary",
+          "notes": "Document codes are intentionally kept interoperable across the repo."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Use this component as the sponsor prior for solicitation-doc-modifications-udm. Validate output against schema.json and treat repo-local synthetic eval cases as the current reference set.",
+        "udm_alignment": {
+          "status": "repo_local_sponsor_defaults_contract",
+          "notes": "The requirement codes are shared locally across prompt-library components and can map into UDM-backed systems, but the contract itself is maintained only in this repo."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.vandalizer-to-udm-translation",
+      "slug": "vandalizer-to-udm-translation",
+      "name": "vandalizer-to-udm-translation",
+      "summary": "Converts a Vandalizer NSF-extraction JSON object (flat key/value form) into a single JSON object conforming to the `nsf-award-notice-extraction-udm` schema. This is a pure transformation \u2014 no information is invented, and fields Vandalizer does not capture emit as `null` or documented defaults.",
+      "version": "0.1.0",
+      "category": "transformation",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "nsf",
+        "award",
+        "notice",
+        "udm",
+        "translation",
+        "vandalizer",
+        "structured-transformation",
+        "json"
+      ],
+      "audience": [
+        "ingest-pipelines",
+        "sponsored-programs-staff"
+      ],
+      "paths": {
+        "component_dir": "components/vandalizer-to-udm-translation",
+        "readme": "components/vandalizer-to-udm-translation/README.md",
+        "prompt": "components/vandalizer-to-udm-translation/prompt.md",
+        "schema": "components/vandalizer-to-udm-translation/schema.json",
+        "evals_dir": "components/vandalizer-to-udm-translation/evals",
+        "eval_case_metadata_glob": "components/vandalizer-to-udm-translation/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/vandalizer-to-udm-translation/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/vandalizer-to-udm-translation/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "delegated_repo_local_schema",
+          "notes": "Translator wrapper contract. The local schema delegates to nsf-award-notice-extraction-udm/schema.json so downstream consumers have a concrete contract surface inside this component directory.",
+          "schema_path": "components/vandalizer-to-udm-translation/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema",
+            "golden_eval_cases"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 1,
+        "report_count": 0,
+        "last_fully_evaluated_version": "0.1.0",
+        "current_version_is_fully_evaluated": true
+      },
+      "related_components": [
+        {
+          "slug": "nsf-award-notice-extraction-udm",
+          "relationship": "delegates_output_schema_to",
+          "notes": "This translator's output contract is the award-notice schema."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Treat this as a transformation component, not a source-of-truth extractor. Validate output against the local wrapper schema and remember that missing fields default to null or documented defaults based on the upstream Vandalizer payload.",
+        "udm_alignment": {
+          "status": "delegated_repo_local_schema",
+          "notes": "Output aligns to the repo-local NSF award notice extraction schema, which itself is UDM-aligned but maintained in prompt-library."
+        }
+      }
+    }
+  ]
+}

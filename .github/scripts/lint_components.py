@@ -13,6 +13,8 @@ Checks:
      semver. The component's "last fully evaluated version" is computed as the
      minimum across cases; if it trails the current version a WARNING is
      emitted (non-blocking).
+  7. component_catalog.json matches the generated catalog derived from
+     component manifests plus component_catalog_overrides.yaml.
 
 Errors exit 1. Warnings don't affect exit status. Both use GitHub Actions
 annotation format (::error or ::warning file=...::message).
@@ -21,6 +23,7 @@ annotation format (::error or ::warning file=...::message).
 from __future__ import annotations
 
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -29,6 +32,8 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[2]
 COMPONENTS_DIR = REPO_ROOT / "components"
 TAXONOMY_PATH = REPO_ROOT / "taxonomy.md"
+CATALOG_BUILD_SCRIPT = REPO_ROOT / "scripts" / "build_component_catalog.py"
+CATALOG_OUTPUT_PATH = REPO_ROOT / "component_catalog.json"
 
 MANIFESTATION_FILES = ["prompt.md", "skill/SKILL.md", "agent/AGENT.md", "system.md"]
 
@@ -295,6 +300,21 @@ def main() -> int:
         else:
             flag = "version unknown"
         print(f"  {slug}: {current_str} — {flag}")
+
+    if CATALOG_BUILD_SCRIPT.is_file():
+        result = subprocess.run(
+            [sys.executable, str(CATALOG_BUILD_SCRIPT), "--check"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            detail = (result.stderr or result.stdout).strip()
+            error(
+                CATALOG_OUTPUT_PATH,
+                detail or "component_catalog.json is missing or out of date.",
+            )
+            print(errors[-1])
 
     if errors:
         print(f"\nLint failed with {len(errors)} error(s).", file=sys.stderr)

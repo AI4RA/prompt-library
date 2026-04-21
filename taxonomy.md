@@ -37,6 +37,6 @@ Supported platform-specific forms of a component.
 
 Lifecycle stage of a component.
 
-- `experimental` — under active development, output contract may change
-- `stable` — validated against evals, safe for production use
+- `experimental` — under active development; output contract may change
+- `stable` — intended for downstream use and backed by validated reference coverage, but consumers should still pin versions and check the component's last fully evaluated version
 - `deprecated` — superseded; consult `README.md` for the replacement

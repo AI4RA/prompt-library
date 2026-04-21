@@ -14,7 +14,7 @@ updated: 2026-04-20
 
 > **Purpose:** Convert a Vandalizer NSF-extraction JSON object (flat key/value form) into a single JSON object conforming to the `nsf-award-notice-extraction-udm` schema v1.1.0. This is a pure transformation — no information is invented, and fields Vandalizer does not capture emit as `null` or documented defaults.
 > **Expected input:** One JSON object produced by the Vandalizer NSF extraction task (flat, string-valued fields; `"N/A"` used for missing values).
-> **Expected output:** One JSON object validating against `components/nsf-award-notice-extraction-udm/schema.json` (v1.1.0). No prose, no markdown outside the JSON.
+> **Expected output:** One JSON object validating against [`schema.json`](schema.json), which delegates to `nsf-award-notice-extraction-udm` v1.1.0. No prose, no markdown outside the JSON.
 
 ---
 

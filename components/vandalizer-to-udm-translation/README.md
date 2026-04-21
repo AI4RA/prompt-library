@@ -7,7 +7,7 @@ Converts a Vandalizer NSF-extraction JSON object (flat key/value form) into a si
 **Domain:** research-administration
 **Status:** experimental
 **Manifestations:** prompt
-**Output contract:** validates against [`../nsf-award-notice-extraction-udm/schema.json`](../nsf-award-notice-extraction-udm/schema.json) (v1.1.0)
+**Output contract:** see [`schema.json`](schema.json) (local wrapper delegating to `nsf-award-notice-extraction-udm` v1.1.0)
 
 ## Inputs
 
@@ -23,7 +23,7 @@ See [`evals/cases/vandalizer-trial-2511003/`](evals/cases/vandalizer-trial-25110
 
 ## Outputs
 
-A single JSON object conforming to `nsf-award-notice-extraction-udm` v1.1.0. See [`prompt.md`](prompt.md) for the field-by-field translation rules.
+A single JSON object conforming to the local [`schema.json`](schema.json) wrapper, which delegates to `nsf-award-notice-extraction-udm` v1.1.0. See [`prompt.md`](prompt.md) for the field-by-field translation rules.
 
 ## Scope and non-scope
 

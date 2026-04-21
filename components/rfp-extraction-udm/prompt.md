@@ -12,7 +12,7 @@ updated: 2026-04-18
 
 # RFP Structured Extraction — UDM JSON
 
-> **Purpose:** Extract every structured requirement and scalar metadata field from any federal funding announcement (RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, or program solicitation) into a single JSON document conforming to this component's Unified Data Model (UDM) schema.
+> **Purpose:** Extract every structured requirement and scalar metadata field from any federal funding announcement (RFP, RFA, FOA, NOFO, BAA, Dear Colleague Letter, or program solicitation) into a single JSON document conforming to this component's repo-local, UDM-aligned schema.
 > **Expected input:** Full text of the funding announcement.
 > **Expected output:** A single JSON object that validates against [`schema.json`](schema.json). No prose, no markdown outside the JSON itself.
 

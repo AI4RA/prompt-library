@@ -28,7 +28,7 @@ Each requirement object carries `code`, `label`, `description`, `page_limit`, `f
 
 ## Controlled `code` vocabulary
 
-The `code` field uses an enum shared with sibling UDM components so downstream extractors and reviewers can dispatch on it. Current codes:
+The `code` field uses an enum shared with sibling prompt-library components so downstream extractors and reviewers can dispatch on it. Current codes:
 
 `cover_sheet`, `cover_letter`, `project_summary`, `project_narrative`, `proposal_narrative`, `specific_aims`, `references_cited`, `biosketch`, `current_pending`, `collaborators_and_affiliations`, `facilities`, `equipment`, `budget`, `budget_justification`, `data_mgmt`, `postdoc_mentoring`, `mentoring_plan`, `results_prior_support`, `resource_sharing`, `authentication_key_resources`, `leadership_plan`, `human_subjects`, `vertebrate_animals`, `select_agent`, `inclusion_enrollment_report`, `letter_support`, `letter_collaboration`, `letter_of_intent`, `other`.
 

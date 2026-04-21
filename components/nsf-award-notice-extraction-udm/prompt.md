@@ -12,7 +12,7 @@ updated: 2026-04-20
 
 # NSF Award Notice Structured Extraction — UDM JSON
 
-> **Purpose:** Extract an NSF Award Notice (or subsequent amendment notice) into a single JSON object conforming to this component's Unified Data Model (UDM) schema. The ingest service decides whether the output creates an Award record or an AwardModification record based on `amendment_number`.
+> **Purpose:** Extract an NSF Award Notice (or subsequent amendment notice) into a single JSON object conforming to this component's repo-local, UDM-aligned schema. The ingest service decides whether the output creates an Award record or an AwardModification record based on `amendment_number`.
 > **Expected input:** A PDF-printed NSF Award Notice email. These documents are typically printed from Outlook after receipt and contain email headers, a boxed narrative header, recipient information, amendment information, award information, funding information, project personnel, NSF contact information, general terms and conditions citations, and an NSF-format budget table (categories A–M).
 > **Expected output:** A single JSON object that validates against [`schema.json`](schema.json). No prose, no markdown outside the JSON.
 

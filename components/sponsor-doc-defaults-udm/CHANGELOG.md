@@ -8,7 +8,7 @@ The `schema.json` version is kept in lockstep with the component version.
 
 - Initial version.
 - JSON Schema (`schema.json`) defining a single output object with `sponsor_name`, `sponsor_division`, `knowledge_notes`, and a `document_requirements` array.
-- Controlled 29-code vocabulary shared with sibling UDM components so downstream routing can dispatch on `code` directly.
+- Controlled 29-code vocabulary shared with sibling prompt-library components so downstream routing can dispatch on `code` directly.
 - Canonical prompt (`prompt.md`) covering NSF PAPPG defaults and NIH R-series defaults, with explicit rules for conditional requirements, per-person requirements, and the unknown-sponsor fallback (empty array + explanation in `knowledge_notes`).
 - Claude Skill manifestation (`skill/SKILL.md`) tuned for "what does sponsor X require" triggers.
 - Three golden eval cases: NSF full proposal, NIH R01, and an unrecognized sponsor (exercises the empty-requirements rule).
