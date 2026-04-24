@@ -23,6 +23,7 @@ This repository is the prompt-library leg of the AI4RA triad. It owns prompts, s
 - `component_catalog.json` is the repo-level machine discovery surface.
 - `component_catalog_overrides.yaml` is the editable source for repo-level triad metadata and observed upstream refs.
 - `components/<slug>/schema.json` is authoritative for that component's structured output contract when present.
+- `components/<slug>/workflows/<wf-slug>/manifest.yaml` is the authored source for a Vandalizer-workflow manifestation; the sibling `<wf-slug>.vandalizer.json` is generated and must not be hand-edited.
 - A `-udm` suffix in a component slug does not automatically mean the checked-in schema is the shared UDM contract from `ui-insight/AI4RA-UDM`.
 - Record contract scope explicitly as repo-local, UDM-aligned repo-local, delegated wrapper, or shared UDM backed.
 
@@ -51,6 +52,7 @@ Run the commands that match your change:
 
 ```bash
 python3 scripts/build_component_catalog.py
+python3 scripts/build_vandalizer_workflows.py
 python3 .github/scripts/lint_components.py
 python3 scripts/build_docs.py
 python3 -m mkdocs build --strict

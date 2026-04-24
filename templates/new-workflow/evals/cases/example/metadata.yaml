@@ -1,0 +1,38 @@
+# Case identity
+case: example-case-slug
+source: "Brief description of the source (e.g., 'NSF 26-508 solicitation budget workbook')"
+source_url: "https://..."
+retrieved: YYYY-MM-DD
+
+# Which structural features of the input this case exercises. Keep tags
+# short and reusable across cases so coverage gaps are easy to spot.
+structural_features:
+  - edge-case-1
+  - edge-case-2
+
+# Which workflow features this case exercises (step interactions, data
+# flow between steps, parameterization, prompt_inline overrides). Keep
+# these distinct from a component's schema_features — this field is about
+# workflow-level behavior, not the underlying prompt contract.
+workflow_features: []
+
+# Validation metadata — REQUIRED.
+#
+# validated_against_version: the WORKFLOW version at which expected.*
+#   was last human-validated. Distinct from component
+#   validated_against_version.
+# validated_by: the human who validated the expected output.
+# validated_at: ISO date of validation.
+# component_versions_at_validation: the resolved component pinned_version
+#   values at validation time. Captured for reproducibility so a future
+#   re-run can rebuild the exact prompt body that was evaluated.
+validated_by: your-handle
+validated_at: YYYY-MM-DD
+validated_against_version: "1.0.0"
+component_versions_at_validation:
+  component-slug: "1.0.0"
+
+# Optional free-form notes on what was confirmed, what was surprising,
+# what should be re-checked on the next revalidation pass.
+notes: |
+  ...
