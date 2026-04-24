@@ -50,7 +50,6 @@ def parse_semver(value: str | None) -> tuple[int, int, int] | None:
 @dataclass
 class Workflow:
     slug: str
-    component_slug: str | None  # None for top-level multi-component orchestrations
     manifest_path: Path
     manifest: dict
 
@@ -67,7 +66,6 @@ class Component:
     eval_case_count: int
     eval_report_count: int
     last_fully_evaluated_version: str | None
-    workflows: list[Workflow]
 
     @property
     def name(self) -> str:
@@ -141,7 +139,6 @@ def load_component(path: Path) -> Component | None:
     last_fully_evaluated_version = compute_last_fully_evaluated_version(path)
     eval_case_count = count_case_dirs(path / "evals" / "cases")
     eval_report_count = count_case_dirs(path / "evals" / "reports")
-    workflows = discover_component_workflows(path)
 
     return Component(
         slug=path.name,
@@ -154,23 +151,14 @@ def load_component(path: Path) -> Component | None:
         eval_case_count=eval_case_count,
         eval_report_count=eval_report_count,
         last_fully_evaluated_version=last_fully_evaluated_version,
-        workflows=workflows,
     )
 
 
-def discover_component_workflows(component_dir: Path) -> list[Workflow]:
-    return _discover_workflows_in(component_dir / "workflows", component_slug=component_dir.name)
-
-
-def discover_top_level_workflows() -> list[Workflow]:
-    return _discover_workflows_in(WORKFLOWS_DIR, component_slug=None)
-
-
-def _discover_workflows_in(workflows_dir: Path, component_slug: str | None) -> list[Workflow]:
-    if not workflows_dir.is_dir():
+def discover_workflows() -> list[Workflow]:
+    if not WORKFLOWS_DIR.is_dir():
         return []
     workflows: list[Workflow] = []
-    for wf_dir in sorted(p for p in workflows_dir.iterdir() if p.is_dir()):
+    for wf_dir in sorted(p for p in WORKFLOWS_DIR.iterdir() if p.is_dir()):
         manifest_path = wf_dir / "manifest.yaml"
         if not manifest_path.is_file():
             continue
@@ -178,12 +166,7 @@ def _discover_workflows_in(workflows_dir: Path, component_slug: str | None) -> l
         if not isinstance(manifest, dict):
             continue
         workflows.append(
-            Workflow(
-                slug=wf_dir.name,
-                component_slug=component_slug,
-                manifest_path=manifest_path,
-                manifest=manifest,
-            )
+            Workflow(slug=wf_dir.name, manifest_path=manifest_path, manifest=manifest)
         )
     return workflows
 
@@ -338,7 +321,6 @@ def build_workflow_entry(workflow: Workflow, overrides: dict) -> dict:
 def build_component_entry(component: Component, overrides: dict) -> dict:
     current_version = component.version
     last_eval = component.last_fully_evaluated_version
-    workflow_overrides = (overrides.get("workflows") or {})
     return {
         "component_id": f"prompt.{component.slug}",
         "slug": component.slug,
@@ -371,10 +353,6 @@ def build_component_entry(component: Component, overrides: dict) -> dict:
                 bool(last_eval) and last_eval == current_version
             ),
         },
-        "workflows": [
-            build_workflow_entry(workflow, workflow_overrides.get(workflow.slug) or {})
-            for workflow in component.workflows
-        ],
         "related_components": overrides.get("related_components", []),
         "triad_integration": overrides["triad_integration"],
     }
@@ -401,23 +379,13 @@ def build_catalog() -> dict:
             + ", ".join(extra_overrides)
         )
 
-    for component in components:
-        workflow_overrides = (override_components[component.slug].get("workflows") or {})
-        discovered = {w.slug for w in component.workflows}
-        extra_wf = sorted(set(workflow_overrides) - discovered)
-        if extra_wf:
-            raise ValueError(
-                f"component_catalog_overrides.yaml lists unknown workflows under "
-                f"{component.slug}: {', '.join(extra_wf)}"
-            )
-
-    top_level_workflows = discover_top_level_workflows()
-    top_level_overrides = (overrides.get("workflows") or {})
-    extra_tl = sorted(set(top_level_overrides) - {w.slug for w in top_level_workflows})
-    if extra_tl:
+    workflows = discover_workflows()
+    workflow_overrides = (overrides.get("workflows") or {})
+    extra_wf = sorted(set(workflow_overrides) - {w.slug for w in workflows})
+    if extra_wf:
         raise ValueError(
-            "component_catalog_overrides.yaml top-level 'workflows:' lists unknown "
-            f"workflows: {', '.join(extra_tl)}"
+            "component_catalog_overrides.yaml 'workflows:' lists unknown "
+            f"workflows: {', '.join(extra_wf)}"
         )
 
     return {
@@ -436,8 +404,8 @@ def build_catalog() -> dict:
             for component in components
         ],
         "workflows": [
-            build_workflow_entry(workflow, top_level_overrides.get(workflow.slug) or {})
-            for workflow in top_level_workflows
+            build_workflow_entry(workflow, workflow_overrides.get(workflow.slug) or {})
+            for workflow in workflows
         ],
     }
 

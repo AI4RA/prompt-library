@@ -1,12 +1,12 @@
 # NSF Budget Spreadsheet Justification — Vandalizer Workflow
 
-Single-step Vandalizer workflow that delivers the [nsf-budget-spreadsheet-justification-udm](../../) component as an uploadable `.vandalizer.json`. The workflow reads an NSF-style proposal budget workbook (or extracted workbook evidence) supplied as the step input and emits the eight-section NSF budget-justification JSON array that validates against [components/nsf-budget-justification-udm/schema.json](../../../nsf-budget-justification-udm/schema.json) at `#/$defs/output`.
+Single-step Vandalizer workflow that delivers the [nsf-budget-spreadsheet-justification-udm](../../components/nsf-budget-spreadsheet-justification-udm/) component as an uploadable `.vandalizer.json`. The workflow reads an NSF-style proposal budget workbook (or extracted workbook evidence) supplied as the step input and emits the eight-section NSF budget-justification JSON array that validates against [components/nsf-budget-justification-udm/schema.json](../../components/nsf-budget-justification-udm/schema.json) at `#/$defs/output`.
 
 **Workflow version:** 1.0.0
 **Vandalizer schema version:** 2
 **Status:** experimental
 **Components manifested:** nsf-budget-spreadsheet-justification-udm@1.0.0
-**Eval posture:** inherited from [components/nsf-budget-spreadsheet-justification-udm/evals](../../evals/)
+**Eval posture:** inherited from [components/nsf-budget-spreadsheet-justification-udm/evals](../../components/nsf-budget-spreadsheet-justification-udm/evals/)
 
 ## What this workflow does
 

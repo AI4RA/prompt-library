@@ -14,13 +14,13 @@
 
 ## Components
 
-- [slug@version](../../../components/<slug>/) — [role this component plays in the workflow]
+- [slug@version](../../components/<slug>/) — [role this component plays in the workflow]
 
-For multi-component workflows, list every component the workflow manifests and describe how the steps compose them.
+For workflows that pin several components, list every one and describe how the steps compose them.
 
 ## Eval posture
 
-**If inherited:** "Evals inherit from [components/<slug>/evals](../../../components/<slug>/evals/) because this workflow is a 1:1 repackaging of that component's canonical prompt. No workflow-local cases are required."
+**If inherited:** "Evals inherit from [components/<slug>/evals](../../components/<slug>/evals/) because this workflow is a 1:1 repackaging of that component's canonical prompt. No workflow-local cases are required."
 
 **If workflow-local:** "This workflow defines its own eval cases under [evals/](evals/) because [reason: multi-step orchestration, parameterization, or prompt override]. Cases validate the workflow as a whole, not the underlying component prompt."
 

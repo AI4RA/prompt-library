@@ -144,7 +144,6 @@
         "last_fully_evaluated_version": "1.0.0",
         "current_version_is_fully_evaluated": true
       },
-      "workflows": [],
       "related_components": [
         {
           "slug": "sponsor-doc-defaults-udm",
@@ -235,7 +234,6 @@
         "last_fully_evaluated_version": "1.0.0",
         "current_version_is_fully_evaluated": false
       },
-      "workflows": [],
       "related_components": [
         {
           "slug": "vandalizer-to-udm-translation",
@@ -318,7 +316,6 @@
         "last_fully_evaluated_version": null,
         "current_version_is_fully_evaluated": false
       },
-      "workflows": [],
       "related_components": [
         {
           "slug": "nsf-budget-justification-udm",
@@ -408,7 +405,6 @@
         "last_fully_evaluated_version": "1.0.0",
         "current_version_is_fully_evaluated": true
       },
-      "workflows": [],
       "related_components": [
         {
           "slug": "sponsor-doc-defaults-udm",
@@ -490,7 +486,6 @@
         "last_fully_evaluated_version": null,
         "current_version_is_fully_evaluated": false
       },
-      "workflows": [],
       "related_components": [
         {
           "slug": "nsf-budget-justification-udm",
@@ -572,35 +567,6 @@
         "last_fully_evaluated_version": null,
         "current_version_is_fully_evaluated": false
       },
-      "workflows": [
-        {
-          "slug": "nsf-budget-spreadsheet-justification",
-          "name": "NSF Budget Spreadsheet Justification (UDM)",
-          "description": "Read an NSF-style proposal budget workbook (or extracted workbook evidence) and emit a JSON array of eight NSF budget-justification sections (A–H) that validates against components/nsf-budget-justification-udm/schema.json at #/$defs/output.",
-          "workflow_version": "1.0.0",
-          "status": "experimental",
-          "vandalizer_schema_version": 2,
-          "paths": {
-            "workflow_dir": "components/nsf-budget-spreadsheet-justification-udm/workflows/nsf-budget-spreadsheet-justification",
-            "manifest": "components/nsf-budget-spreadsheet-justification-udm/workflows/nsf-budget-spreadsheet-justification/manifest.yaml",
-            "export": "components/nsf-budget-spreadsheet-justification-udm/workflows/nsf-budget-spreadsheet-justification/nsf-budget-spreadsheet-justification.vandalizer.json",
-            "readme": "components/nsf-budget-spreadsheet-justification-udm/workflows/nsf-budget-spreadsheet-justification/README.md",
-            "changelog": "components/nsf-budget-spreadsheet-justification-udm/workflows/nsf-budget-spreadsheet-justification/CHANGELOG.md"
-          },
-          "components_manifested": [
-            "nsf-budget-spreadsheet-justification-udm"
-          ],
-          "steps": {
-            "step_count": 1,
-            "task_count": 1,
-            "output_step_name": "Draft eight-section NSF budget justification"
-          },
-          "evaluation": {
-            "posture": "inherited",
-            "source": "components/nsf-budget-spreadsheet-justification-udm/evals"
-          }
-        }
-      ],
       "related_components": [
         {
           "slug": "nsf-budget-justification-udm",
@@ -693,7 +659,6 @@
         "last_fully_evaluated_version": "1.0.0",
         "current_version_is_fully_evaluated": false
       },
-      "workflows": [],
       "related_components": [
         {
           "slug": "rfp-extraction-udm",
@@ -779,7 +744,6 @@
         "last_fully_evaluated_version": "1.0.0",
         "current_version_is_fully_evaluated": true
       },
-      "workflows": [],
       "related_components": [
         {
           "slug": "rfp-extraction",
@@ -863,7 +827,6 @@
         "last_fully_evaluated_version": "1.0.0",
         "current_version_is_fully_evaluated": true
       },
-      "workflows": [],
       "related_components": [
         {
           "slug": "sponsor-doc-defaults-udm",
@@ -952,7 +915,6 @@
         "last_fully_evaluated_version": "1.0.0",
         "current_version_is_fully_evaluated": true
       },
-      "workflows": [],
       "related_components": [
         {
           "slug": "solicitation-doc-modifications-udm",
@@ -1035,7 +997,6 @@
         "last_fully_evaluated_version": "0.1.0",
         "current_version_is_fully_evaluated": true
       },
-      "workflows": [],
       "related_components": [
         {
           "slug": "nsf-award-notice-extraction-udm",
@@ -1081,6 +1042,33 @@
       "evaluation": {
         "posture": "workflow_local",
         "source": "workflows/nsf-budget-justification-multistep/evals"
+      }
+    },
+    {
+      "slug": "nsf-budget-spreadsheet-justification",
+      "name": "NSF Budget Spreadsheet Justification (UDM)",
+      "description": "Read an NSF-style proposal budget workbook (or extracted workbook evidence) and emit a JSON array of eight NSF budget-justification sections (A–H) that validates against components/nsf-budget-justification-udm/schema.json at #/$defs/output.",
+      "workflow_version": "1.0.0",
+      "status": "experimental",
+      "vandalizer_schema_version": 2,
+      "paths": {
+        "workflow_dir": "workflows/nsf-budget-spreadsheet-justification",
+        "manifest": "workflows/nsf-budget-spreadsheet-justification/manifest.yaml",
+        "export": "workflows/nsf-budget-spreadsheet-justification/nsf-budget-spreadsheet-justification.vandalizer.json",
+        "readme": "workflows/nsf-budget-spreadsheet-justification/README.md",
+        "changelog": "workflows/nsf-budget-spreadsheet-justification/CHANGELOG.md"
+      },
+      "components_manifested": [
+        "nsf-budget-spreadsheet-justification-udm"
+      ],
+      "steps": {
+        "step_count": 1,
+        "task_count": 1,
+        "output_step_name": "Draft eight-section NSF budget justification"
+      },
+      "evaluation": {
+        "posture": "inherited",
+        "source": "components/nsf-budget-spreadsheet-justification-udm/evals"
       }
     }
   ]

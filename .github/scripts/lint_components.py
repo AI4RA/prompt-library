@@ -15,8 +15,8 @@ Checks:
      emitted (non-blocking).
   7. component_catalog.json matches the generated catalog derived from
      component manifests plus component_catalog_overrides.yaml.
-  8. Each components/<slug>/workflows/<wf-slug>/ has README.md, CHANGELOG.md,
-     and a generated <wf-slug>.vandalizer.json export.
+  8. Each workflows/<wf-slug>/ has README.md, CHANGELOG.md, and a generated
+     <wf-slug>.vandalizer.json export.
   9. scripts/build_vandalizer_workflows.py --check passes (enforces manifest
      validity, pinned component versions, prompt_ref resolution, and
      idempotent exports).
@@ -36,7 +36,7 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 COMPONENTS_DIR = REPO_ROOT / "components"
-TOP_LEVEL_WORKFLOWS_DIR = REPO_ROOT / "workflows"
+WORKFLOWS_DIR = REPO_ROOT / "workflows"
 TAXONOMY_PATH = REPO_ROOT / "taxonomy.md"
 CATALOG_BUILD_SCRIPT = REPO_ROOT / "scripts" / "build_component_catalog.py"
 CATALOG_OUTPUT_PATH = REPO_ROOT / "component_catalog.json"
@@ -220,12 +220,11 @@ def check_eval_validation(
     return min_version_str
 
 
-def check_workflow(workflow_dir: Path, parent_label: str) -> dict | None:
+def check_workflow(workflow_dir: Path) -> dict | None:
     """
     Validate a single workflow directory. Returns a summary dict for the
     final status table, or None when the directory does not look like a
-    workflow (no manifest.yaml). parent_label is the component slug for
-    component-scoped workflows, or 'workflows' for top-level orchestrations.
+    workflow (no manifest.yaml).
 
     Manifest-content validation (required fields, pinned component versions,
     prompt_ref resolution) is owned by scripts/build_vandalizer_workflows.py
@@ -236,7 +235,7 @@ def check_workflow(workflow_dir: Path, parent_label: str) -> dict | None:
         return None
 
     slug = workflow_dir.name
-    label = f"{parent_label}/{slug}"
+    label = f"workflows/{slug}"
 
     for required in ["README.md", "CHANGELOG.md"]:
         if not (workflow_dir / required).is_file():
@@ -285,20 +284,12 @@ def check_workflow(workflow_dir: Path, parent_label: str) -> dict | None:
     }
 
 
-def check_component_workflows(component_dir: Path) -> list[dict]:
-    return _check_workflows_in(component_dir / "workflows", parent_label=component_dir.name)
-
-
-def check_top_level_workflows() -> list[dict]:
-    return _check_workflows_in(TOP_LEVEL_WORKFLOWS_DIR, parent_label="workflows")
-
-
-def _check_workflows_in(workflows_dir: Path, parent_label: str) -> list[dict]:
-    if not workflows_dir.is_dir():
+def check_workflows() -> list[dict]:
+    if not WORKFLOWS_DIR.is_dir():
         return []
     results: list[dict] = []
-    for wf_dir in sorted(p for p in workflows_dir.iterdir() if p.is_dir()):
-        summary = check_workflow(wf_dir, parent_label)
+    for wf_dir in sorted(p for p in WORKFLOWS_DIR.iterdir() if p.is_dir()):
+        summary = check_workflow(wf_dir)
         if summary is not None:
             results.append(summary)
     return results
@@ -369,15 +360,11 @@ def main() -> int:
         return 0
 
     component_status: list[tuple[str, str | None, str | None]] = []
-    workflow_status: list[tuple[str, dict]] = []
     for component_dir in component_dirs:
         current, last = check_component(component_dir, taxonomy)
         component_status.append((component_dir.name, current, last))
-        for wf in check_component_workflows(component_dir):
-            workflow_status.append((component_dir.name, wf))
 
-    for wf in check_top_level_workflows():
-        workflow_status.append(("workflows", wf))
+    workflow_status: list[dict] = check_workflows()
 
     for w in warnings:
         print(w)
@@ -401,13 +388,13 @@ def main() -> int:
     if workflow_status:
         print()
         print("Workflow status:")
-        for component_slug, wf in workflow_status:
+        for wf in workflow_status:
             version = wf["workflow_version"] or "?"
             pin_summary = ", ".join(
                 f"{s}@{v}" for s, v in wf["pinned_versions"].items()
             ) or "no-pins"
             print(
-                f"  {component_slug}/{wf['slug']}: v{version} "
+                f"  workflows/{wf['slug']}: v{version} "
                 f"({wf['posture']} evals, pins {pin_summary})"
             )
 

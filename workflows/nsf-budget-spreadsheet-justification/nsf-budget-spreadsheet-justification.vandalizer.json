@@ -31,7 +31,7 @@
       "validation_plan": [],
       "validation_inputs": [],
       "x_ai4ra": {
-        "workflow_source": "components/nsf-budget-spreadsheet-justification-udm/workflows/nsf-budget-spreadsheet-justification/manifest.yaml",
+        "workflow_source": "workflows/nsf-budget-spreadsheet-justification/manifest.yaml",
         "workflow_version": "1.0.0",
         "status": "experimental",
         "components": [

@@ -2,15 +2,11 @@
 """
 Build Vandalizer workflow exports from authored manifest.yaml files.
 
-Each manifest.yaml under:
-  - components/<slug>/workflows/<name>/manifest.yaml   (single-component)
-  - workflows/<name>/manifest.yaml                     (multi-component)
-
-is compiled into a sibling <name>.vandalizer.json that can be uploaded
-directly into Vandalizer. The generated JSON carries an x_ai4ra
-provenance block (workflow source path, workflow version, pinned
-component versions, and prompt content hashes) so a downloaded export
-can be traced back to this repository.
+Every manifest.yaml under workflows/<wf-slug>/ is compiled into a sibling
+<wf-slug>.vandalizer.json that can be uploaded directly into Vandalizer.
+The generated JSON carries an x_ai4ra provenance block (workflow source
+path, workflow version, pinned component versions, and prompt content
+hashes) so a downloaded export can be traced back to this repository.
 
 Use `--check` to verify checked-in JSON files match a fresh build.
 Use `--workflow <path>` to restrict to a single manifest.yaml.
@@ -65,11 +61,9 @@ def slice_prompt_body(prompt_md: str, from_section: str) -> str:
 
 
 def discover_manifests() -> list[Path]:
-    paths: list[Path] = []
-    if COMPONENTS_DIR.is_dir():
-        paths.extend(sorted(COMPONENTS_DIR.glob("*/workflows/*/manifest.yaml")))
-    if WORKFLOWS_DIR.is_dir():
-        paths.extend(sorted(WORKFLOWS_DIR.glob("*/manifest.yaml")))
+    if not WORKFLOWS_DIR.is_dir():
+        return []
+    paths = sorted(WORKFLOWS_DIR.glob("*/manifest.yaml"))
     return [p for p in paths if TEMPLATES_DIR not in p.parents]
 
 
