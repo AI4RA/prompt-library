@@ -257,6 +257,89 @@
       }
     },
     {
+      "component_id": "prompt.nsf-budget-justification-render-udm",
+      "slug": "nsf-budget-justification-render-udm",
+      "name": "nsf-budget-justification-render-udm",
+      "summary": "Renders a reviewed eight-section NSF budget-justification array into Word-pasteable Markdown and HTML strings. The component is the formatting tail of a multi-step budget-justification pipeline: it does not draft, review, or reinterpret content — it transforms the structured array into two presentation forms that paste cleanly into a Microsoft Word document.",
+      "version": "1.0.0",
+      "category": "transformation",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "nsf",
+        "budget-justification",
+        "render",
+        "format",
+        "markdown",
+        "html",
+        "word",
+        "udm",
+        "research-administration",
+        "proposal-preparation"
+      ],
+      "audience": [
+        "pre-award-staff",
+        "proposal-developers"
+      ],
+      "paths": {
+        "component_dir": "components/nsf-budget-justification-render-udm",
+        "readme": "components/nsf-budget-justification-render-udm/README.md",
+        "prompt": "components/nsf-budget-justification-render-udm/prompt.md",
+        "schema": "components/nsf-budget-justification-render-udm/schema.json",
+        "evals_dir": "components/nsf-budget-justification-render-udm/evals",
+        "eval_case_metadata_glob": "components/nsf-budget-justification-render-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/nsf-budget-justification-render-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/nsf-budget-justification-render-udm/prompt.md",
+          "version": "1.0.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_sponsor_specific_contract",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "notes": "Word-pasteable rendering of the NSF eight-section budget-justification array. Emits a JSON object with parallel `markdown` and `html` strings of the same content. The component owns its own output schema; input validation delegates to the eight-section array contract owned by nsf-budget-justification-udm at #/$defs/output.",
+          "schema_path": "components/nsf-budget-justification-render-udm/schema.json",
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "nsf-budget-justification-review-udm",
+          "relationship": "upstream_input_supplier",
+          "notes": "Consumes the polished eight-section array emitted by the review step."
+        },
+        {
+          "slug": "nsf-budget-justification-udm",
+          "relationship": "delegates_input_contract",
+          "notes": "Input validates against the eight-section output contract owned by the drafting component."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Invoke after the review step that produced a polished eight-section array. Validate input against components/nsf-budget-justification-udm/schema.json at #/$defs/output and validate output against this component's schema.json. The component is deterministic in intent (no fabrication, no paraphrase), so golden cases should compare expected and actual renderings strictly.",
+        "udm_alignment": {
+          "status": "repo_local_sponsor_specific_contract",
+          "notes": "The rendering surface is NSF-specific (section labels, sub-subheading conventions under Section G) and prompt-library repo-local; it is not part of the shared AI4RA-UDM contract."
+        }
+      }
+    },
+    {
       "component_id": "prompt.nsf-budget-justification-review-udm",
       "slug": "nsf-budget-justification-review-udm",
       "name": "nsf-budget-justification-review-udm",
@@ -326,6 +409,11 @@
           "slug": "nsf-budget-spreadsheet-ingest-udm",
           "relationship": "upstream_input_supplier",
           "notes": "When available, the ingest component's structured budget is supplied as additional review context."
+        },
+        {
+          "slug": "nsf-budget-justification-render-udm",
+          "relationship": "downstream_renderer",
+          "notes": "The render component consumes the polished eight-section array and emits Word-pasteable Markdown and HTML."
         }
       ],
       "triad_integration": {
@@ -1018,8 +1106,8 @@
     {
       "slug": "nsf-budget-justification-multistep",
       "name": "NSF Budget Justification (Multi-step)",
-      "description": "Three-step NSF budget-justification pipeline. Step 1 normalizes an NSF-style proposal budget workbook into a structured budget object. Step 2 drafts the eight NSF budget-justification sections (A–H) from that structured budget. Step 3 reviews and polishes the drafted array for section-placement errors, missing disclosures, fabricated figures, and NSF-framing consistency. The final output validates against components/nsf-budget-justification-udm/schema.json at #/$defs/output.",
-      "workflow_version": "1.0.0",
+      "description": "Four-step NSF budget-justification pipeline. Step 1 normalizes an NSF-style proposal budget workbook into a structured budget object. Step 2 drafts the eight NSF budget-justification sections (A–H) from that structured budget. Step 3 reviews and polishes the drafted array for section-placement errors, missing disclosures, fabricated figures, and NSF-framing consistency. Step 4 renders the reviewed array into Word-pasteable Markdown and HTML strings. The final output validates against components/nsf-budget-justification-render-udm/schema.json.",
+      "workflow_version": "2.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -1032,12 +1120,13 @@
       "components_manifested": [
         "nsf-budget-spreadsheet-ingest-udm",
         "nsf-budget-justification-udm",
-        "nsf-budget-justification-review-udm"
+        "nsf-budget-justification-review-udm",
+        "nsf-budget-justification-render-udm"
       ],
       "steps": {
-        "step_count": 3,
-        "task_count": 3,
-        "output_step_name": "Review and polish the drafted array"
+        "step_count": 4,
+        "task_count": 4,
+        "output_step_name": "Render reviewed array into Word-pasteable Markdown and HTML"
       },
       "evaluation": {
         "posture": "workflow_local",

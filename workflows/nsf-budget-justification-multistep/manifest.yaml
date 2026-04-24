@@ -5,19 +5,20 @@
 #
 # This is the first multi-component orchestration in the repo. It lives
 # under the top-level workflows/ directory (not under a single component's
-# workflows/ subdirectory) because it pins three separate components.
+# workflows/ subdirectory) because it pins four separate components.
 
 name: NSF Budget Justification (Multi-step)
 description: >
-  Three-step NSF budget-justification pipeline. Step 1 normalizes an
+  Four-step NSF budget-justification pipeline. Step 1 normalizes an
   NSF-style proposal budget workbook into a structured budget object.
   Step 2 drafts the eight NSF budget-justification sections (A–H) from
   that structured budget. Step 3 reviews and polishes the drafted array
   for section-placement errors, missing disclosures, fabricated figures,
-  and NSF-framing consistency. The final output validates against
-  components/nsf-budget-justification-udm/schema.json at #/$defs/output.
+  and NSF-framing consistency. Step 4 renders the reviewed array into
+  Word-pasteable Markdown and HTML strings. The final output validates
+  against components/nsf-budget-justification-render-udm/schema.json.
 
-workflow_version: 1.0.0
+workflow_version: 2.0.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ai4ra-prompt-library
@@ -30,6 +31,8 @@ components:
   - slug: nsf-budget-justification-udm
     pinned_version: 1.0.0
   - slug: nsf-budget-justification-review-udm
+    pinned_version: 1.0.0
+  - slug: nsf-budget-justification-render-udm
     pinned_version: 1.0.0
 
 steps:
@@ -50,12 +53,20 @@ steps:
           from_section: "## Prompt"
 
   - name: Review and polish the drafted array
-    is_output: true
     tasks:
       - name: nsf-budget-justification-review-udm
         input_source: step_input
         prompt_ref:
           component: nsf-budget-justification-review-udm
+          from_section: "## Prompt"
+
+  - name: Render reviewed array into Word-pasteable Markdown and HTML
+    is_output: true
+    tasks:
+      - name: nsf-budget-justification-render-udm
+        input_source: step_input
+        prompt_ref:
+          component: nsf-budget-justification-render-udm
           from_section: "## Prompt"
 
 evals:

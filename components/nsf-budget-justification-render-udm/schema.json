@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/nsf-budget-justification-render-udm/schema.json",
+  "title": "NSF Budget Justification Render — Output Contract",
+  "description": "Word-pasteable rendering of the eight-section NSF budget-justification array. Emits a single JSON object with parallel Markdown and HTML strings of the same content. The Markdown string is intended for direct paste into a Word document (markdown symbols visible; user applies heading styles manually); the HTML string is intended for Word's Paste Special -> HTML path, which preserves heading and paragraph structure automatically.",
+  "version": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["markdown", "html"],
+  "properties": {
+    "markdown": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Markdown rendering of the eight-section budget justification. Section titles render as level-1 ATX headings ('# Section A: Senior Personnel'). Section content is inserted verbatim from the input array, including any sub-subheadings (typically '###' under Section G). Exactly one blank line separates the section heading from its content and one blank line separates adjacent sections. The string ends with a single trailing newline."
+    },
+    "html": {
+      "type": "string",
+      "minLength": 1,
+      "description": "HTML fragment rendering of the same eight sections. Section titles render as <h1>; sub-subheadings within Section G render as <h2>; paragraphs render as <p>; markdown lists render as <ul>/<ol> with <li> items; bold/italic/code as <strong>/<em>/<code>; markdown tables as <table><thead><tbody>. No <html>, <body>, <div>, <style>, class, or id wrappers — the fragment is intended to paste inline via Word's Paste Special -> HTML path."
+    }
+  }
+}
