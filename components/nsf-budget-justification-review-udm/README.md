@@ -1,6 +1,6 @@
 # NSF Budget Justification Review — UDM
 
-Validates and polishes a drafted NSF budget-justification array against its source structured budget and NSF narrative conventions. The component is the QA half of a multi-step budget-justification pipeline: it checks section completeness and ordering, fixes misplaced content (for example graduate tuition in the wrong section), ensures required NSF disclosures are present, and consolidates terminology across sections.
+Validates and polishes a drafted NSF budget-justification array against its source structured budget and NSF narrative conventions. The component is the QA step of the multi-step budget-justification pipeline: it checks section completeness and ordering, fixes misplaced content (for example graduate tuition in the wrong section), ensures required NSF disclosures are present, and consolidates terminology across sections. Its revised array is the input to the downstream render step that emits Word-pasteable Markdown and HTML.
 
 **Current version:** 1.0.0
 **Category:** review
@@ -39,4 +39,4 @@ See [`evals/`](evals/). No golden cases are checked in yet; future cases should 
 
 ## Provenance
 
-Created 2026-04-24 to serve as the review step in the three-step `nsf-budget-justification-multistep` workflow, where it runs after spreadsheet ingestion and section drafting.
+Created 2026-04-24 to serve as the review step in the `nsf-budget-justification-multistep` workflow, where it runs after spreadsheet ingestion and section drafting and feeds the downstream render step.

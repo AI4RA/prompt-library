@@ -125,6 +125,41 @@ components:
         relationship: owns_target_schema
         notes: The translator delegates its output contract to this schema.
 
+  nsf-budget-justification-render-udm:
+    output_contract:
+      format: json_object
+      scope: repo_local_sponsor_specific_contract
+      schema_entrypoints:
+        - "#"
+      notes: >
+        Word-pasteable rendering of the NSF eight-section budget-justification
+        array. Emits a JSON object with parallel `markdown` and `html` strings
+        of the same content. The component owns its own output schema; input
+        validation delegates to the eight-section array contract owned by
+        nsf-budget-justification-udm at #/$defs/output.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Invoke after the review step that produced a polished eight-section
+        array. Validate input against
+        components/nsf-budget-justification-udm/schema.json at #/$defs/output
+        and validate output against this component's schema.json. The component
+        is deterministic in intent (no fabrication, no paraphrase), so golden
+        cases should compare expected and actual renderings strictly.
+      udm_alignment:
+        status: repo_local_sponsor_specific_contract
+        notes: >
+          The rendering surface is NSF-specific (section labels, sub-subheading
+          conventions under Section G) and prompt-library repo-local; it is
+          not part of the shared AI4RA-UDM contract.
+    related_components:
+      - slug: nsf-budget-justification-review-udm
+        relationship: upstream_input_supplier
+        notes: Consumes the polished eight-section array emitted by the review step.
+      - slug: nsf-budget-justification-udm
+        relationship: delegates_input_contract
+        notes: Input validates against the eight-section output contract owned by the drafting component.
+
   nsf-budget-justification-review-udm:
     output_contract:
       format: json_array
@@ -159,6 +194,9 @@ components:
       - slug: nsf-budget-spreadsheet-ingest-udm
         relationship: upstream_input_supplier
         notes: When available, the ingest component's structured budget is supplied as additional review context.
+      - slug: nsf-budget-justification-render-udm
+        relationship: downstream_renderer
+        notes: The render component consumes the polished eight-section array and emits Word-pasteable Markdown and HTML.
 
   nsf-budget-justification-udm:
     output_contract:
