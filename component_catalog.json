@@ -259,6 +259,88 @@
       }
     },
     {
+      "component_id": "prompt.nsf-budget-justification-review-udm",
+      "slug": "nsf-budget-justification-review-udm",
+      "name": "nsf-budget-justification-review-udm",
+      "summary": "Validates and polishes a drafted NSF budget-justification array against its source structured budget and NSF narrative conventions. The component is the QA half of a multi-step budget-justification pipeline: it checks section completeness and ordering, fixes misplaced content (for example graduate tuition in the wrong section), ensures required NSF disclosures are present, and consolidates terminology across sections.",
+      "version": "1.0.0",
+      "category": "review",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "nsf",
+        "budget-justification",
+        "review",
+        "polish",
+        "udm",
+        "research-administration",
+        "proposal-preparation"
+      ],
+      "audience": [
+        "pre-award-staff",
+        "proposal-developers",
+        "qa-reviewers"
+      ],
+      "paths": {
+        "component_dir": "components/nsf-budget-justification-review-udm",
+        "readme": "components/nsf-budget-justification-review-udm/README.md",
+        "prompt": "components/nsf-budget-justification-review-udm/prompt.md",
+        "schema": null,
+        "evals_dir": "components/nsf-budget-justification-review-udm/evals",
+        "eval_case_metadata_glob": "components/nsf-budget-justification-review-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/nsf-budget-justification-review-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/nsf-budget-justification-review-udm/prompt.md",
+          "version": "1.0.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_array",
+          "scope": "delegated_repo_local_schema",
+          "schema_path": "components/nsf-budget-justification-udm/schema.json",
+          "schema_entrypoints": [
+            "#/$defs/output"
+          ],
+          "notes": "Review/polish wrapper over the NSF budget-justification output array. Accepts a drafted eight-section array (and optionally the structured budget input) and emits a revised array in the same contract. The component does not define a new schema; it delegates validation to nsf-budget-justification-udm.",
+          "validation_surfaces": [
+            "json_schema_entrypoints"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "workflows": [],
+      "related_components": [
+        {
+          "slug": "nsf-budget-justification-udm",
+          "relationship": "delegates_output_contract",
+          "notes": "Reviews and returns the same eight-section output array defined by the drafting component."
+        },
+        {
+          "slug": "nsf-budget-spreadsheet-ingest-udm",
+          "relationship": "upstream_input_supplier",
+          "notes": "When available, the ingest component's structured budget is supplied as additional review context."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Invoke after a drafting step that produced an eight-section array. Validate input and output against components/nsf-budget-justification-udm/schema.json at #/$defs/output. When the structured budget is supplied as additional context, it validates against #/$defs/input of the same schema.",
+        "udm_alignment": {
+          "status": "delegated_repo_local_schema",
+          "notes": "The review rubric (category placement, required NSF disclosures, zero-section handling) is a prompt-library repo-local contract, not a shared AI4RA-UDM schema."
+        }
+      }
+    },
+    {
       "component_id": "prompt.nsf-budget-justification-udm",
       "slug": "nsf-budget-justification-udm",
       "name": "nsf-budget-justification-udm",
@@ -345,6 +427,88 @@
         "udm_alignment": {
           "status": "repo_local_sponsor_specific_contract",
           "notes": "The component can feed UDM-backed proposal workflows, but its section structure is an NSF-specific drafting contract maintained locally here."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.nsf-budget-spreadsheet-ingest-udm",
+      "slug": "nsf-budget-spreadsheet-ingest-udm",
+      "name": "nsf-budget-spreadsheet-ingest-udm",
+      "summary": "Normalizes an NSF-style proposal budget workbook (or workbook-derived evidence) into the structured budget object consumed by `nsf-budget-justification-udm`. This component is the extraction half of a multi-step budget-justification pipeline: it isolates spreadsheet interpretation from narrative drafting so each responsibility can be prompted, versioned, and evaluated independently.",
+      "version": "1.0.0",
+      "category": "extraction",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "nsf",
+        "budget",
+        "spreadsheet-ingest",
+        "extraction",
+        "udm",
+        "research-administration",
+        "proposal-preparation"
+      ],
+      "audience": [
+        "pre-award-staff",
+        "proposal-developers",
+        "ingest-pipelines"
+      ],
+      "paths": {
+        "component_dir": "components/nsf-budget-spreadsheet-ingest-udm",
+        "readme": "components/nsf-budget-spreadsheet-ingest-udm/README.md",
+        "prompt": "components/nsf-budget-spreadsheet-ingest-udm/prompt.md",
+        "schema": null,
+        "evals_dir": "components/nsf-budget-spreadsheet-ingest-udm/evals",
+        "eval_case_metadata_glob": "components/nsf-budget-spreadsheet-ingest-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/nsf-budget-spreadsheet-ingest-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/nsf-budget-spreadsheet-ingest-udm/prompt.md",
+          "version": "1.0.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "delegated_repo_local_schema",
+          "schema_path": "components/nsf-budget-justification-udm/schema.json",
+          "schema_entrypoints": [
+            "#/$defs/input"
+          ],
+          "notes": "Spreadsheet-to-structured-budget extractor. Emits the input object consumed by nsf-budget-justification-udm. The component does not define a new schema; it delegates validation to nsf-budget-justification-udm at #/$defs/input.",
+          "validation_surfaces": [
+            "json_schema_entrypoints"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "workflows": [],
+      "related_components": [
+        {
+          "slug": "nsf-budget-justification-udm",
+          "relationship": "delegates_output_contract",
+          "notes": "Emits the structured budget object consumed by the drafting component."
+        },
+        {
+          "slug": "nsf-budget-spreadsheet-justification-udm",
+          "relationship": "sibling_multistep_vs_one_shot",
+          "notes": "Same spreadsheet interpretation task family; this component is the ingest step of a multi-step workflow, while nsf-budget-spreadsheet- justification-udm handles the whole pipeline in one shot."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Invoke with workbook-derived evidence, then validate the emitted JSON object against components/nsf-budget-justification-udm/schema.json at #/$defs/input. Current coverage is repo-local and does not yet include a shared evaluation-data-sets fixture.",
+        "udm_alignment": {
+          "status": "delegated_repo_local_schema",
+          "notes": "Spreadsheet interpretation is sponsor-specific and repo-local; the structured-budget output aligns to the existing nsf-budget- justification-udm input contract, which is itself UDM-aligned but maintained in prompt-library."
         }
       }
     },
@@ -886,6 +1050,37 @@
           "status": "delegated_repo_local_schema",
           "notes": "Output aligns to the repo-local NSF award notice extraction schema, which itself is UDM-aligned but maintained in prompt-library."
         }
+      }
+    }
+  ],
+  "workflows": [
+    {
+      "slug": "nsf-budget-justification-multistep",
+      "name": "NSF Budget Justification (Multi-step)",
+      "description": "Three-step NSF budget-justification pipeline. Step 1 normalizes an NSF-style proposal budget workbook into a structured budget object. Step 2 drafts the eight NSF budget-justification sections (A–H) from that structured budget. Step 3 reviews and polishes the drafted array for section-placement errors, missing disclosures, fabricated figures, and NSF-framing consistency. The final output validates against components/nsf-budget-justification-udm/schema.json at #/$defs/output.",
+      "workflow_version": "1.0.0",
+      "status": "experimental",
+      "vandalizer_schema_version": 2,
+      "paths": {
+        "workflow_dir": "workflows/nsf-budget-justification-multistep",
+        "manifest": "workflows/nsf-budget-justification-multistep/manifest.yaml",
+        "export": "workflows/nsf-budget-justification-multistep/nsf-budget-justification-multistep.vandalizer.json",
+        "readme": "workflows/nsf-budget-justification-multistep/README.md",
+        "changelog": "workflows/nsf-budget-justification-multistep/CHANGELOG.md"
+      },
+      "components_manifested": [
+        "nsf-budget-spreadsheet-ingest-udm",
+        "nsf-budget-justification-udm",
+        "nsf-budget-justification-review-udm"
+      ],
+      "steps": {
+        "step_count": 3,
+        "task_count": 3,
+        "output_step_name": "Review and polish the drafted array"
+      },
+      "evaluation": {
+        "posture": "workflow_local",
+        "source": "workflows/nsf-budget-justification-multistep/evals"
       }
     }
   ]

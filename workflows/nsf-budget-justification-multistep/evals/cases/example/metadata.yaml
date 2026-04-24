@@ -1,0 +1,38 @@
+# Case identity
+case: example-case-slug
+source: "Brief description of the workbook source (e.g., 'University of Idaho NSF budget template, three-year project')"
+source_url: "https://..."
+retrieved: YYYY-MM-DD
+
+# Which structural features of the input workbook this case exercises.
+# Keep tags short and reusable so coverage gaps are easy to spot.
+structural_features:
+  - edge-case-1
+  - edge-case-2
+
+# Which workflow behaviors this case exercises. These are pipeline-level
+# checks that no single component's evals can cover (step interaction,
+# intermediate-shape sensitivity, review-rubric hits).
+workflow_features: []
+
+# Validation metadata — REQUIRED.
+#
+# validated_against_version: the WORKFLOW version at which expected.*
+#   was last human-validated. Distinct from component validated_against_version.
+# validated_by: the human who validated the expected output.
+# validated_at: ISO date of validation.
+# component_versions_at_validation: the pinned component versions
+#   resolved at validation time. Captured for reproducibility so a
+#   future re-run can rebuild the exact prompts that were evaluated.
+validated_by: your-handle
+validated_at: YYYY-MM-DD
+validated_against_version: "1.0.0"
+component_versions_at_validation:
+  nsf-budget-spreadsheet-ingest-udm: "1.0.0"
+  nsf-budget-justification-udm: "1.0.0"
+  nsf-budget-justification-review-udm: "1.0.0"
+
+# Optional free-form notes on what was confirmed, what was surprising,
+# what should be re-checked on the next revalidation pass.
+notes: |
+  ...

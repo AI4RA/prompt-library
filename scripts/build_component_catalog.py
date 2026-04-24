@@ -24,6 +24,7 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 COMPONENTS_DIR = REPO_ROOT / "components"
+WORKFLOWS_DIR = REPO_ROOT / "workflows"
 OVERRIDES_PATH = REPO_ROOT / "component_catalog_overrides.yaml"
 OUTPUT_PATH = REPO_ROOT / "component_catalog.json"
 
@@ -49,7 +50,7 @@ def parse_semver(value: str | None) -> tuple[int, int, int] | None:
 @dataclass
 class Workflow:
     slug: str
-    component_slug: str
+    component_slug: str | None  # None for top-level multi-component orchestrations
     manifest_path: Path
     manifest: dict
 
@@ -158,7 +159,14 @@ def load_component(path: Path) -> Component | None:
 
 
 def discover_component_workflows(component_dir: Path) -> list[Workflow]:
-    workflows_dir = component_dir / "workflows"
+    return _discover_workflows_in(component_dir / "workflows", component_slug=component_dir.name)
+
+
+def discover_top_level_workflows() -> list[Workflow]:
+    return _discover_workflows_in(WORKFLOWS_DIR, component_slug=None)
+
+
+def _discover_workflows_in(workflows_dir: Path, component_slug: str | None) -> list[Workflow]:
     if not workflows_dir.is_dir():
         return []
     workflows: list[Workflow] = []
@@ -172,7 +180,7 @@ def discover_component_workflows(component_dir: Path) -> list[Workflow]:
         workflows.append(
             Workflow(
                 slug=wf_dir.name,
-                component_slug=component_dir.name,
+                component_slug=component_slug,
                 manifest_path=manifest_path,
                 manifest=manifest,
             )
@@ -403,6 +411,15 @@ def build_catalog() -> dict:
                 f"{component.slug}: {', '.join(extra_wf)}"
             )
 
+    top_level_workflows = discover_top_level_workflows()
+    top_level_overrides = (overrides.get("workflows") or {})
+    extra_tl = sorted(set(top_level_overrides) - {w.slug for w in top_level_workflows})
+    if extra_tl:
+        raise ValueError(
+            "component_catalog_overrides.yaml top-level 'workflows:' lists unknown "
+            f"workflows: {', '.join(extra_tl)}"
+        )
+
     return {
         "catalog_version": overrides["catalog_version"],
         "generated_from": str(OVERRIDES_PATH.relative_to(REPO_ROOT)),
@@ -417,6 +434,10 @@ def build_catalog() -> dict:
         "components": [
             build_component_entry(component, override_components[component.slug])
             for component in components
+        ],
+        "workflows": [
+            build_workflow_entry(workflow, top_level_overrides.get(workflow.slug) or {})
+            for workflow in top_level_workflows
         ],
     }
 
