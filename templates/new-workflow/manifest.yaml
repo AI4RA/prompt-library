@@ -22,17 +22,13 @@ updated: YYYY-MM-DD
 
 # Components this workflow manifests.
 #
-# A single-component workflow lives under
-#   components/<slug>/workflows/<workflow-name>/
-# and lists that one slug here.
+# Every workflow lives under workflows/<wf-slug>/ and lists each component
+# it pins — whether one (a 1:1 repackaging) or several (a multi-component
+# orchestration).
 #
-# A multi-component orchestration lives under the top-level
-#   workflows/<workflow-name>/
-# directory and lists every component slug it touches.
-#
-# pinned_version must match the referenced component's current
-# prompt.md frontmatter version, unless pinned_version_sha is set to
-# record an intentional lag behind the component.
+# pinned_version must match the referenced component's current prompt.md
+# frontmatter version, unless pinned_version_sha is set to record an
+# intentional lag behind the component.
 components:
   - slug: component-slug
     pinned_version: 1.0.0
