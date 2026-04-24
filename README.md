@@ -31,15 +31,24 @@ Each component is a directory under `components/` named by a short slug. A compo
 - `CHANGELOG.md` — per-component version history
 - `evals/` — golden cases and, where present, published run reports
 
+Workflows are a Vandalizer-shaped manifestation layered on top of components:
+
+- `components/<slug>/workflows/<wf-slug>/` — single-component workflows, owned by that component's lifecycle
+- `workflows/<wf-slug>/` — multi-component orchestrations pinning two or more components
+
+Each workflow directory has an authored `manifest.yaml` (source of truth, pins component version(s) and describes steps) and a generated `<wf-slug>.vandalizer.json` (the uploadable export, with an `x_ai4ra` provenance block). See [`templates/new-workflow/`](templates/new-workflow/) for the scaffold and [`docs/contracts.md`](docs/contracts.md) for the workflow lifecycle rules.
+
 ## Contract surfaces
 
 Harness and automation consumers should start with these surfaces, in this order:
 
-1. [`component_catalog.json`](component_catalog.json) — repo-level machine discovery surface for manifestations, contract scope, evaluation posture, related components, and observed upstream refs.
+1. [`component_catalog.json`](component_catalog.json) — repo-level machine discovery surface for components, workflows, manifestations, contract scope, evaluation posture, related components, and observed upstream refs.
 2. `components/<slug>/prompt.md` — canonical prompt manifestation.
 3. `components/<slug>/skill/SKILL.md` or `agent/AGENT.md` — runtime-specific manifestations when a caller needs them.
 4. `components/<slug>/schema.json` — authoritative structured-output contract when present.
 5. `components/<slug>/evals/cases/*/metadata.yaml` plus `expected.*` — golden-case validation surface.
+6. `components/<slug>/workflows/<wf-slug>/manifest.yaml` and `workflows/<wf-slug>/manifest.yaml` — authored Vandalizer-workflow sources, pinning one or more components.
+7. `<wf-slug>.vandalizer.json` sibling to each manifest — the generated export, carrying an `x_ai4ra` provenance block (workflow source path, pinned component versions, embedded-prompt SHA256). Never hand-edited.
 
 Important nuance: a component name that ends in `-udm` does **not** automatically mean the checked-in `schema.json` is the shared UDM contract from `ui-insight/AI4RA-UDM`. In this repo, many `-udm` components are repo-local extraction or routing contracts that align to shared UDM semantics without redefining the shared UDM itself. `component_catalog.json` records which contract scope applies per component.
 
@@ -69,10 +78,21 @@ That distinction matters:
 6. Register any new controlled vocabulary in [`taxonomy.md`](taxonomy.md).
 7. Regenerate docs so the site and catalog stay aligned.
 
+## Adding or updating a workflow
+
+1. Copy [`templates/new-workflow/`](templates/new-workflow/) into `components/<slug>/workflows/<wf-slug>/` for a single-component workflow, or into `workflows/<wf-slug>/` for a multi-component orchestration.
+2. Fill in `manifest.yaml` — set `workflow_version`, pin each referenced component at its current `prompt.md` version, describe steps (with `prompt_ref` pointing at the component's `## Prompt` section), and choose eval posture: `inherits_from: <path>` for a 1:1 repackaging, or `workflow_local: true` for any multi-step orchestration, parameterization, or prompt override.
+3. Run `python3 scripts/build_vandalizer_workflows.py` to generate the sibling `<wf-slug>.vandalizer.json`; never hand-edit the generated JSON.
+4. If the workflow has its own triad metadata (harness pairings, dataset coverage, specific harness notes), add an optional entry under the owning component's `workflows:` mapping in [`component_catalog_overrides.yaml`](component_catalog_overrides.yaml), or under the top-level `workflows:` mapping for multi-component orchestrations.
+5. Regenerate [`component_catalog.json`](component_catalog.json) so workflows surface in the machine-readable catalog.
+
+When a referenced component bumps MAJOR, the workflow must either re-pin (and bump its own MAJOR) or be marked retired in its manifest — the build script fails loudly on drift unless `pinned_version_sha` records an intentional lag.
+
 ## Local validation
 
 ```bash
 python3 scripts/build_component_catalog.py
+python3 scripts/build_vandalizer_workflows.py
 python3 .github/scripts/lint_components.py
 python3 scripts/build_docs.py
 python3 -m mkdocs build --strict
@@ -90,7 +110,7 @@ If `mkdocs` is already on `PATH`, the bare `mkdocs` command is equivalent; the `
 
 Two GitHub Actions workflows run on pushes to `main`:
 
-- [`lint.yml`](.github/workflows/lint.yml) checks component manifests, taxonomy usage, eval validation metadata, lockstep manifestation versions, and that [`component_catalog.json`](component_catalog.json) matches the generated catalog.
+- [`lint.yml`](.github/workflows/lint.yml) checks component manifests, taxonomy usage, eval validation metadata, lockstep manifestation versions, workflow directory structure, that [`component_catalog.json`](component_catalog.json) matches the generated catalog, and that every checked-in `<wf-slug>.vandalizer.json` matches a fresh build of its `manifest.yaml`.
 - [`pages.yml`](.github/workflows/pages.yml) regenerates [`component_catalog.json`](component_catalog.json), rebuilds generated docs from components, and publishes the MkDocs site.
 
 ## Observed upstream refs

@@ -6,7 +6,7 @@ The AI4RA evaluation ecosystem is a coordinated triad plus a shared schema found
 
 ```mermaid
 flowchart LR
-    PL["AI4RA/prompt-library<br/><i>prompts · skills · agents · schemas</i>"]
+    PL["AI4RA/prompt-library<br/><i>prompts · skills · agents · schemas · workflows</i>"]
     DS["AI4RA/evaluation-data-sets<br/><i>datasets · artifacts · scoring refs</i>"]
     HARNESS["AI4RA/evaluation-harness<br/><i>discovery · execution · scoring</i>"]
     UDM["ui-insight/AI4RA-UDM<br/><i>shared data-model foundation</i>"]
@@ -26,7 +26,7 @@ Solid arrows are concrete data flows. Dotted arrows show semantic alignment to t
 
 ### `AI4RA/prompt-library`
 
-**What it is.** The versioned catalog of prompts, skills, agents, schemas, and component contracts. Each component carries its own manifestations, changelog, and eval artifacts. The repo-level [`component_catalog.json`](https://github.com/AI4RA/prompt-library/blob/main/component_catalog.json) is the harness-facing discovery surface.
+**What it is.** The versioned catalog of prompts, skills, agents, schemas, component contracts, and Vandalizer workflows. Each component carries its own manifestations, changelog, and eval artifacts; workflows layer on top as authored `manifest.yaml` sources that generate uploadable `.vandalizer.json` exports. The repo-level [`component_catalog.json`](https://github.com/AI4RA/prompt-library/blob/main/component_catalog.json) is the harness-facing discovery surface and carries both components and workflows.
 
 **What it is not.** The dataset store. The scoring corpus. The canonical shared UDM repository.
 
