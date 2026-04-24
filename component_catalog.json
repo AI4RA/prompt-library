@@ -343,7 +343,7 @@
       "component_id": "prompt.nsf-budget-justification-review-udm",
       "slug": "nsf-budget-justification-review-udm",
       "name": "nsf-budget-justification-review-udm",
-      "summary": "Validates and polishes a drafted NSF budget-justification array against its source structured budget and NSF narrative conventions. The component is the QA half of a multi-step budget-justification pipeline: it checks section completeness and ordering, fixes misplaced content (for example graduate tuition in the wrong section), ensures required NSF disclosures are present, and consolidates terminology across sections.",
+      "summary": "Validates and polishes a drafted NSF budget-justification array against its source structured budget and NSF narrative conventions. The component is the QA step of the multi-step budget-justification pipeline: it checks section completeness and ordering, fixes misplaced content (for example graduate tuition in the wrong section), ensures required NSF disclosures are present, and consolidates terminology across sections. Its revised array is the input to the downstream render step that emits Word-pasteable Markdown and HTML.",
       "version": "1.0.0",
       "category": "review",
       "domain": "research-administration",
