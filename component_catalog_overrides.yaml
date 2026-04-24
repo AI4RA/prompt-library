@@ -59,6 +59,12 @@ shared_contracts:
   template:
     path: templates/new-component
     role: new_component_scaffold
+  workflow_template:
+    path: templates/new-workflow
+    role: new_workflow_scaffold
+  workflow_builder:
+    path: scripts/build_vandalizer_workflows.py
+    role: generated_vandalizer_workflow_exports
 
 components:
   document-type-classifier-udm:

@@ -12,6 +12,8 @@ This repository has both human-facing documentation and machine-facing contract 
 | `components/<slug>/agent/AGENT.md` | Agent manifestation when orchestration behavior is part of the contract. |
 | `components/<slug>/schema.json` | Structured output contract when the component has one. |
 | `components/<slug>/evals/cases/*/metadata.yaml` | Validation metadata, including `validated_against_version`. |
+| `components/<slug>/workflows/<wf-slug>/manifest.yaml` | Authored Vandalizer-workflow source. Declares workflow version, pinned component version(s), steps, and eval posture. |
+| `components/<slug>/workflows/<wf-slug>/<wf-slug>.vandalizer.json` | Generated Vandalizer export, rebuilt from the manifest. Carries an `x_ai4ra` provenance block (workflow source path, pinned component versions, embedded-prompt SHA256). Never hand-edited. |
 | [`taxonomy.md`](https://github.com/AI4RA/prompt-library/blob/main/taxonomy.md) | Controlled vocabulary for categories, domains, and lifecycle status. |
 
 ## Reading contract scope
@@ -23,6 +25,15 @@ The component catalog records contract scope explicitly because not every `-udm`
 - `delegated_repo_local_schema` means the local component exposes a wrapper contract that delegates to another repo-local schema.
 
 If a consumer needs the canonical shared UDM itself, the source of truth is [`ui-insight/AI4RA-UDM`](https://github.com/ui-insight/AI4RA-UDM), not a prompt-library component name.
+
+## Workflow manifestations
+
+A workflow is a Vandalizer-shaped manifestation of one or more components. Each `components/<slug>/workflows/<wf-slug>/` directory has an authored `manifest.yaml` (source of truth) and a generated `<wf-slug>.vandalizer.json` (the uploadable export). The two are kept consistent by `scripts/build_vandalizer_workflows.py`; CI runs the builder's `--check` mode via the lint script.
+
+- Manifests pin the component version(s) they manifest. A workflow MAJOR re-pins a component MAJOR; when the referenced component bumps MAJOR the workflow must re-pin and bump its own MAJOR, or be marked retired.
+- A workflow's eval posture is either **inherited** (1:1 repackaging of a component's canonical prompt — reuses the component's evals) or **workflow-local** (multi-step orchestration, parameterization, or prompt override — carries its own `evals/cases/` under the workflow directory).
+- The generated export's `x_ai4ra` block makes round-tripped exports traceable back to a specific prompt-library commit, including the SHA256 of each embedded prompt body.
+- Each component's `component_catalog.json` entry carries a `workflows: [...]` array summarizing discovered workflows. When a workflow needs its own triad notes (harness pairings, dataset coverage) it gets an optional entry under the component's `workflows:` mapping in `component_catalog_overrides.yaml`.
 
 ## Harness expectations
 

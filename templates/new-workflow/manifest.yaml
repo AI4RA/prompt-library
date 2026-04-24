@@ -1,0 +1,80 @@
+# Authored source for a Vandalizer workflow.
+#
+# The companion <workflow-name>.vandalizer.json is generated from this
+# file by scripts/build_vandalizer_workflows.py and committed alongside.
+# Never hand-edit the generated JSON — update this manifest and rebuild.
+
+# `name` is the Vandalizer display name (free-form, may contain spaces).
+# The workflow slug used for the generated filename and directory layout
+# comes from the parent directory name, not this field.
+name: Workflow Display Name
+description: >
+  One-sentence description of what the workflow does from the Vandalizer
+  operator's perspective: the input they supply, the output they receive,
+  and the problem it solves.
+
+workflow_version: 1.0.0
+vandalizer_schema_version: 2
+status: experimental
+owner: [name or handle]
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+
+# Components this workflow manifests.
+#
+# A single-component workflow lives under
+#   components/<slug>/workflows/<workflow-name>/
+# and lists that one slug here.
+#
+# A multi-component orchestration lives under the top-level
+#   workflows/<workflow-name>/
+# directory and lists every component slug it touches.
+#
+# pinned_version must match the referenced component's current
+# prompt.md frontmatter version, unless pinned_version_sha is set to
+# record an intentional lag behind the component.
+components:
+  - slug: component-slug
+    pinned_version: 1.0.0
+    # pinned_version_sha: <git sha of prompt.md at pinned version>
+
+# Ordered workflow steps. Each step contains one or more tasks that
+# Vandalizer executes. Set is_output: true on the step whose output is
+# the final deliverable for the operator.
+steps:
+  - name: Step display name
+    is_output: true
+    tasks:
+      - name: task-display-name
+        input_source: step_input
+        # prompt_ref points at a component's canonical prompt body.
+        # The build script opens components/<component>/prompt.md,
+        # slices from the heading named in from_section to the end of
+        # file, strips the heading line itself, and embeds the result
+        # verbatim into the generated Vandalizer export.
+        prompt_ref:
+          component: component-slug
+          from_section: "## Prompt"
+        # Alternative: inline a prompt override when a task needs a
+        # parameterized or task-specific variant that does not live in
+        # the component's canonical prompt.md. Exactly one of
+        # prompt_ref or prompt_inline must be set per task. Prefer
+        # prompt_ref whenever possible so provenance is automatic.
+        # prompt_inline: |
+        #   Full prompt body for this task only...
+
+# Eval posture for the workflow.
+#
+# inherits_from: <path>  — reuse another component's evals. Allowed
+#   only when this workflow is a 1:1 repackaging of that component's
+#   canonical prompt: one step, one task, prompt_ref pointing at the
+#   component's canonical body, no prompt_inline anywhere.
+#
+# workflow_local: true   — the workflow carries its own cases under
+#   evals/cases/. Required when the workflow adds multi-step
+#   orchestration, parameterization, or any prompt_inline override.
+#
+# Set exactly one of the two fields.
+evals:
+  inherits_from: components/component-slug/evals
+  # workflow_local: true

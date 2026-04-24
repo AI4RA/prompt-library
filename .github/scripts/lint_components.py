@@ -15,6 +15,11 @@ Checks:
      emitted (non-blocking).
   7. component_catalog.json matches the generated catalog derived from
      component manifests plus component_catalog_overrides.yaml.
+  8. Each components/<slug>/workflows/<wf-slug>/ has README.md, CHANGELOG.md,
+     and a generated <wf-slug>.vandalizer.json export.
+  9. scripts/build_vandalizer_workflows.py --check passes (enforces manifest
+     validity, pinned component versions, prompt_ref resolution, and
+     idempotent exports).
 
 Errors exit 1. Warnings don't affect exit status. Both use GitHub Actions
 annotation format (::error or ::warning file=...::message).
@@ -34,6 +39,7 @@ COMPONENTS_DIR = REPO_ROOT / "components"
 TAXONOMY_PATH = REPO_ROOT / "taxonomy.md"
 CATALOG_BUILD_SCRIPT = REPO_ROOT / "scripts" / "build_component_catalog.py"
 CATALOG_OUTPUT_PATH = REPO_ROOT / "component_catalog.json"
+WORKFLOW_BUILD_SCRIPT = REPO_ROOT / "scripts" / "build_vandalizer_workflows.py"
 
 MANIFESTATION_FILES = ["prompt.md", "skill/SKILL.md", "agent/AGENT.md", "system.md"]
 
@@ -213,6 +219,82 @@ def check_eval_validation(
     return min_version_str
 
 
+def check_workflow(workflow_dir: Path, component_slug: str) -> dict | None:
+    """
+    Validate a single workflow directory. Returns a summary dict for the
+    final status table, or None when the directory does not look like a
+    workflow (no manifest.yaml).
+
+    Manifest-content validation (required fields, pinned component versions,
+    prompt_ref resolution) is owned by scripts/build_vandalizer_workflows.py
+    and surfaced by the subprocess --check in main().
+    """
+    manifest_path = workflow_dir / "manifest.yaml"
+    if not manifest_path.is_file():
+        return None
+
+    slug = workflow_dir.name
+    label = f"{component_slug}/{slug}"
+
+    for required in ["README.md", "CHANGELOG.md"]:
+        if not (workflow_dir / required).is_file():
+            error(workflow_dir / required, f"Workflow '{label}' is missing {required}.")
+
+    export_path = workflow_dir / f"{slug}.vandalizer.json"
+    if not export_path.is_file():
+        error(
+            export_path,
+            f"Workflow '{label}' is missing generated export '{export_path.name}'. "
+            f"Run `python3 scripts/build_vandalizer_workflows.py` and commit.",
+        )
+
+    try:
+        manifest = yaml.safe_load(manifest_path.read_text()) or {}
+    except yaml.YAMLError as e:
+        error(manifest_path, f"Invalid YAML: {e}")
+        return None
+    if not isinstance(manifest, dict):
+        error(manifest_path, "manifest.yaml must be a YAML mapping.")
+        return None
+
+    workflow_version = manifest.get("workflow_version")
+    if not isinstance(workflow_version, str) or not SEMVER_RE.match(workflow_version):
+        workflow_version = None
+
+    evals = manifest.get("evals") or {}
+    if "inherits_from" in evals:
+        posture = "inherited"
+    elif evals.get("workflow_local"):
+        posture = "workflow-local"
+    else:
+        posture = "unknown"
+
+    pinned_versions = {
+        c.get("slug"): c.get("pinned_version")
+        for c in (manifest.get("components") or [])
+        if c.get("slug")
+    }
+
+    return {
+        "slug": slug,
+        "workflow_version": workflow_version,
+        "posture": posture,
+        "pinned_versions": pinned_versions,
+    }
+
+
+def check_component_workflows(component_dir: Path) -> list[dict]:
+    workflows_dir = component_dir / "workflows"
+    if not workflows_dir.is_dir():
+        return []
+    results: list[dict] = []
+    for wf_dir in sorted(p for p in workflows_dir.iterdir() if p.is_dir()):
+        summary = check_workflow(wf_dir, component_dir.name)
+        if summary is not None:
+            results.append(summary)
+    return results
+
+
 def check_component(
     component_dir: Path, taxonomy: dict[str, set[str]]
 ) -> tuple[str | None, str | None]:
@@ -278,9 +360,12 @@ def main() -> int:
         return 0
 
     component_status: list[tuple[str, str | None, str | None]] = []
+    workflow_status: list[tuple[str, dict]] = []
     for component_dir in component_dirs:
         current, last = check_component(component_dir, taxonomy)
         component_status.append((component_dir.name, current, last))
+        for wf in check_component_workflows(component_dir):
+            workflow_status.append((component_dir.name, wf))
 
     for w in warnings:
         print(w)
@@ -301,6 +386,19 @@ def main() -> int:
             flag = "version unknown"
         print(f"  {slug}: {current_str} — {flag}")
 
+    if workflow_status:
+        print()
+        print("Workflow status:")
+        for component_slug, wf in workflow_status:
+            version = wf["workflow_version"] or "?"
+            pin_summary = ", ".join(
+                f"{s}@{v}" for s, v in wf["pinned_versions"].items()
+            ) or "no-pins"
+            print(
+                f"  {component_slug}/{wf['slug']}: v{version} "
+                f"({wf['posture']} evals, pins {pin_summary})"
+            )
+
     if CATALOG_BUILD_SCRIPT.is_file():
         result = subprocess.run(
             [sys.executable, str(CATALOG_BUILD_SCRIPT), "--check"],
@@ -313,6 +411,21 @@ def main() -> int:
             error(
                 CATALOG_OUTPUT_PATH,
                 detail or "component_catalog.json is missing or out of date.",
+            )
+            print(errors[-1])
+
+    if WORKFLOW_BUILD_SCRIPT.is_file():
+        result = subprocess.run(
+            [sys.executable, str(WORKFLOW_BUILD_SCRIPT), "--check"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            detail = (result.stderr or result.stdout).strip()
+            error(
+                WORKFLOW_BUILD_SCRIPT,
+                detail or "Vandalizer workflow exports are missing or out of date.",
             )
             print(errors[-1])
 
