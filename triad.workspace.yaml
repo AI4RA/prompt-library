@@ -11,6 +11,7 @@ repositories:
       - agents
       - schemas
       - component contracts
+      - Vandalizer workflows
     local_checkout_hints:
       sibling_dir_names:
         - AI4RAPromptLibrary
