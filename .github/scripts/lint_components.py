@@ -36,6 +36,7 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 COMPONENTS_DIR = REPO_ROOT / "components"
+TOP_LEVEL_WORKFLOWS_DIR = REPO_ROOT / "workflows"
 TAXONOMY_PATH = REPO_ROOT / "taxonomy.md"
 CATALOG_BUILD_SCRIPT = REPO_ROOT / "scripts" / "build_component_catalog.py"
 CATALOG_OUTPUT_PATH = REPO_ROOT / "component_catalog.json"
@@ -219,11 +220,12 @@ def check_eval_validation(
     return min_version_str
 
 
-def check_workflow(workflow_dir: Path, component_slug: str) -> dict | None:
+def check_workflow(workflow_dir: Path, parent_label: str) -> dict | None:
     """
     Validate a single workflow directory. Returns a summary dict for the
     final status table, or None when the directory does not look like a
-    workflow (no manifest.yaml).
+    workflow (no manifest.yaml). parent_label is the component slug for
+    component-scoped workflows, or 'workflows' for top-level orchestrations.
 
     Manifest-content validation (required fields, pinned component versions,
     prompt_ref resolution) is owned by scripts/build_vandalizer_workflows.py
@@ -234,7 +236,7 @@ def check_workflow(workflow_dir: Path, component_slug: str) -> dict | None:
         return None
 
     slug = workflow_dir.name
-    label = f"{component_slug}/{slug}"
+    label = f"{parent_label}/{slug}"
 
     for required in ["README.md", "CHANGELOG.md"]:
         if not (workflow_dir / required).is_file():
@@ -284,12 +286,19 @@ def check_workflow(workflow_dir: Path, component_slug: str) -> dict | None:
 
 
 def check_component_workflows(component_dir: Path) -> list[dict]:
-    workflows_dir = component_dir / "workflows"
+    return _check_workflows_in(component_dir / "workflows", parent_label=component_dir.name)
+
+
+def check_top_level_workflows() -> list[dict]:
+    return _check_workflows_in(TOP_LEVEL_WORKFLOWS_DIR, parent_label="workflows")
+
+
+def _check_workflows_in(workflows_dir: Path, parent_label: str) -> list[dict]:
     if not workflows_dir.is_dir():
         return []
     results: list[dict] = []
     for wf_dir in sorted(p for p in workflows_dir.iterdir() if p.is_dir()):
-        summary = check_workflow(wf_dir, component_dir.name)
+        summary = check_workflow(wf_dir, parent_label)
         if summary is not None:
             results.append(summary)
     return results
@@ -366,6 +375,9 @@ def main() -> int:
         component_status.append((component_dir.name, current, last))
         for wf in check_component_workflows(component_dir):
             workflow_status.append((component_dir.name, wf))
+
+    for wf in check_top_level_workflows():
+        workflow_status.append(("workflows", wf))
 
     for w in warnings:
         print(w)

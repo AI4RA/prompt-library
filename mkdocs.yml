@@ -96,7 +96,9 @@ nav:
               - 2026-04-20-gpt-oss-120b-json_schema: components/nsf-award-notice-extraction-udm/reports/2026-04-20-gpt-oss-120b-json_schema/index.md
               - 2026-04-20-gpt-oss-120b-json_object: components/nsf-award-notice-extraction-udm/reports/2026-04-20-gpt-oss-120b-json_object/index.md
               - 2026-04-18-gpt-oss-120b-dots-r5: components/nsf-award-notice-extraction-udm/reports/2026-04-18-gpt-oss-120b-dots-r5/index.md
+      - nsf-budget-justification-review-udm: components/nsf-budget-justification-review-udm.md
       - nsf-budget-justification-udm: components/nsf-budget-justification-udm.md
+      - nsf-budget-spreadsheet-ingest-udm: components/nsf-budget-spreadsheet-ingest-udm.md
       - nsf-budget-spreadsheet-justification-udm: components/nsf-budget-spreadsheet-justification-udm.md
       - rfp-extraction: components/rfp-extraction.md
       - rfp-extraction-udm: components/rfp-extraction-udm.md

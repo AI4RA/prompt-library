@@ -125,6 +125,41 @@ components:
         relationship: owns_target_schema
         notes: The translator delegates its output contract to this schema.
 
+  nsf-budget-justification-review-udm:
+    output_contract:
+      format: json_array
+      scope: delegated_repo_local_schema
+      schema_path: components/nsf-budget-justification-udm/schema.json
+      schema_entrypoints:
+        - "#/$defs/output"
+      notes: >
+        Review/polish wrapper over the NSF budget-justification output array.
+        Accepts a drafted eight-section array (and optionally the structured
+        budget input) and emits a revised array in the same contract. The
+        component does not define a new schema; it delegates validation to
+        nsf-budget-justification-udm.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Invoke after a drafting step that produced an eight-section array.
+        Validate input and output against
+        components/nsf-budget-justification-udm/schema.json at #/$defs/output.
+        When the structured budget is supplied as additional context, it
+        validates against #/$defs/input of the same schema.
+      udm_alignment:
+        status: delegated_repo_local_schema
+        notes: >
+          The review rubric (category placement, required NSF disclosures,
+          zero-section handling) is a prompt-library repo-local contract,
+          not a shared AI4RA-UDM schema.
+    related_components:
+      - slug: nsf-budget-justification-udm
+        relationship: delegates_output_contract
+        notes: Reviews and returns the same eight-section output array defined by the drafting component.
+      - slug: nsf-budget-spreadsheet-ingest-udm
+        relationship: upstream_input_supplier
+        notes: When available, the ingest component's structured budget is supplied as additional review context.
+
   nsf-budget-justification-udm:
     output_contract:
       format: json_array
@@ -154,6 +189,44 @@ components:
       - slug: solicitation-doc-modifications-udm
         relationship: downstream_of_requirement_overrides
         notes: Solicitation overrides may tighten page limits or add justification-specific instructions.
+
+  nsf-budget-spreadsheet-ingest-udm:
+    output_contract:
+      format: json_object
+      scope: delegated_repo_local_schema
+      schema_path: components/nsf-budget-justification-udm/schema.json
+      schema_entrypoints:
+        - "#/$defs/input"
+      notes: >
+        Spreadsheet-to-structured-budget extractor. Emits the input object
+        consumed by nsf-budget-justification-udm. The component does not
+        define a new schema; it delegates validation to
+        nsf-budget-justification-udm at #/$defs/input.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Invoke with workbook-derived evidence, then validate the emitted
+        JSON object against
+        components/nsf-budget-justification-udm/schema.json at #/$defs/input.
+        Current coverage is repo-local and does not yet include a shared
+        evaluation-data-sets fixture.
+      udm_alignment:
+        status: delegated_repo_local_schema
+        notes: >
+          Spreadsheet interpretation is sponsor-specific and repo-local; the
+          structured-budget output aligns to the existing nsf-budget-
+          justification-udm input contract, which is itself UDM-aligned but
+          maintained in prompt-library.
+    related_components:
+      - slug: nsf-budget-justification-udm
+        relationship: delegates_output_contract
+        notes: Emits the structured budget object consumed by the drafting component.
+      - slug: nsf-budget-spreadsheet-justification-udm
+        relationship: sibling_multistep_vs_one_shot
+        notes: >
+          Same spreadsheet interpretation task family; this component is the
+          ingest step of a multi-step workflow, while nsf-budget-spreadsheet-
+          justification-udm handles the whole pipeline in one shot.
 
   nsf-budget-spreadsheet-justification-udm:
     output_contract:
