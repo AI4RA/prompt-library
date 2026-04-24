@@ -149,6 +149,39 @@ components:
         relationship: downstream_of_requirement_overrides
         notes: Solicitation overrides may tighten page limits or add justification-specific instructions.
 
+  nsf-budget-spreadsheet-justification-udm:
+    output_contract:
+      format: json_array
+      scope: delegated_repo_local_schema
+      schema_path: components/nsf-budget-justification-udm/schema.json
+      schema_entrypoints:
+        - "#/$defs/output"
+      notes: >
+        Spreadsheet-ingestion wrapper that emits the existing NSF budget
+        justification output array. The wrapper does not define a new output
+        schema; it delegates validation to nsf-budget-justification-udm.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Invoke with workbook-derived evidence or a workbook attachment, then
+        validate the emitted JSON array against
+        components/nsf-budget-justification-udm/schema.json at #/$defs/output.
+        Current coverage is repo-local and does not yet include a shared
+        evaluation-data-sets fixture.
+      udm_alignment:
+        status: delegated_repo_local_schema
+        notes: >
+          The component can feed UDM-backed proposal workflows, but its
+          spreadsheet interpretation and narrative output are sponsor-specific
+          prompt-library contracts rather than shared AI4RA-UDM schemas.
+    related_components:
+      - slug: nsf-budget-justification-udm
+        relationship: delegates_output_contract
+        notes: Emits the same eight-section output array validated by the structured-budget component schema.
+      - slug: sponsor-doc-defaults-udm
+        relationship: downstream_of_requirement_discovery
+        notes: Sponsor defaults identify budget_justification as a required deliverable.
+
   rfp-extraction:
     output_contract:
       format: markdown_checklist
