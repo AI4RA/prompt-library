@@ -1,0 +1,286 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/rfa-checklist-extraction-udm/schema.json",
+  "title": "RFA Checklist Extraction — UDM Output",
+  "description": "JSON contract for a Request-for-Applications (RFA/FOA/NOFO) distilled into the eight sections a pre-award office uses as a working checklist: Dates & Deadlines, Eligibility (institutions + individuals), Award Information, Application Components, Budget Requirements & Policies, Submission Details, Special Requirements, and Important Notes. Scalar fields populate a single RFA record; the structured arrays each drive a checklist section with strict de-duplication rules enforced by the prompt.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "rfa_title",
+    "sponsor_name",
+    "dates_and_deadlines",
+    "eligible_institutions",
+    "eligible_individuals",
+    "award_information",
+    "required_components",
+    "optional_components",
+    "budget_requirements",
+    "submission_details",
+    "special_requirements",
+    "important_notes"
+  ],
+  "properties": {
+    "rfa_id": {
+      "type": ["string", "null"],
+      "description": "Stable identifier for the announcement. When the sponsor publishes an opportunity number, use it prefixed with the sponsor code (e.g., 'NSF-26-508'). Null when no canonical identifier is available."
+    },
+    "rfa_number": {
+      "type": ["string", "null"],
+      "description": "Official announcement number as published by the sponsor (e.g., '26-508', 'PA-24-246', 'DE-FOA-0003117'). No prefix."
+    },
+    "rfa_title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Full title of the funding opportunity, including any track or component designation."
+    },
+    "sponsor_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Full name of the lead sponsoring agency (e.g., 'National Science Foundation'). Resolved downstream to Sponsor_Organization_ID."
+    },
+    "program_code": {
+      "type": ["string", "null"],
+      "description": "Sponsor's internal program or division code (e.g., 'NSF/TIP/ITE'). Null when not specified."
+    },
+    "announcement_url": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "description": "Canonical URL of the announcement on the sponsor's site."
+    },
+    "opportunity_number": {
+      "type": ["string", "null"],
+      "description": "Grants.gov or other portal opportunity ID, when distinct from rfa_number."
+    },
+    "cfda_number": {
+      "type": ["string", "null"],
+      "description": "CFDA / Assistance Listing number(s). Comma-separated when multiple (e.g., '47.070, 47.076')."
+    },
+    "dates_and_deadlines": {
+      "type": "array",
+      "description": "Populates the DATES & DEADLINES section. Include every unique date or time-bound event in the announcement, chronologically. Source for the Dates_Table field in the process-mapping workflow.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["item", "date_time"],
+        "properties": {
+          "item": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The event label exactly as stated in the document (e.g., 'Letter of Intent Due', 'Full Proposal Deadline', 'Award Notification')."
+          },
+          "date_time": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Full date plus any time and timezone as published (e.g., '2026-09-15 5:00 PM ET', '2026-10-01', 'Rolling'). Preserve the original granularity; do not invent precision."
+          },
+          "notes": {
+            "type": ["string", "null"],
+            "description": "Any conditions, round identifiers, or clarifications attached to this date (e.g., 'Track 1 only', 'Optional but encouraged'). Null when no notes."
+          }
+        }
+      }
+    },
+    "eligible_institutions": {
+      "type": "array",
+      "description": "Populates the Eligibility > Eligible Institutions subsection. One entry per distinct institution type or category stated by the sponsor. Always non-empty — use a single entry with a 'Not specified in this document' type rather than emitting [].",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Institution category label as stated (e.g., 'Institutions of Higher Education', 'Nonprofit Organizations Other Than Institutions of Higher Education', 'Small Businesses')."
+          },
+          "subcategory": {
+            "type": ["string", "null"],
+            "description": "More specific classification when given (e.g., 'R1 research universities', 'HBCUs', 'EPSCoR-eligible'). Null when the type has no subcategorization."
+          },
+          "examples": {
+            "type": ["string", "null"],
+            "description": "Sponsor-supplied examples that illustrate the category, as a short comma-separated list. Null when the announcement gives none."
+          },
+          "compliance_requirements": {
+            "type": ["string", "null"],
+            "description": "Registrations, certifications, or institutional prerequisites (e.g., 'SAM.gov registration required', 'Must be domestic'). Null when no institutional compliance terms are attached to this type."
+          }
+        }
+      }
+    },
+    "eligible_individuals": {
+      "type": "array",
+      "description": "Populates the Eligibility > Eligible Individuals subsection. One entry per distinct PI / key-personnel category. Include citizenship, career-stage, and prior-award restrictions here — not in Special Requirements.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Individual eligibility category (e.g., 'Principal Investigator', 'Early-Career Investigator', 'Co-Investigator')."
+          },
+          "criteria": {
+            "type": ["string", "null"],
+            "description": "Qualifying criteria the individual must meet (degree, career stage, appointment type). Null when the type has no stated criteria."
+          },
+          "compliance_requirements": {
+            "type": ["string", "null"],
+            "description": "Compliance items attached to the individual (e.g., 'ORCID required', 'NSF-approved mentoring plan'). Null when none."
+          },
+          "conditions": {
+            "type": ["string", "null"],
+            "description": "Restrictions, limits, or preferences (e.g., 'One nomination per institution', 'Not eligible if prior RFA-awarded'). Null when none."
+          }
+        }
+      }
+    },
+    "award_information": {
+      "type": "object",
+      "description": "Populates the AWARD INFORMATION section. This is the SOLE location for primary award parameters — the consolidator must not repeat these values in Budget Requirements. Source for Award_Duration, Amount_Per_Award, Number_Of_Awards, Anticipated_Award_Date in the process-mapping workflow.",
+      "additionalProperties": false,
+      "required": ["award_duration", "amount_per_award"],
+      "properties": {
+        "award_duration": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Anticipated award duration as stated (e.g., '3 years', 'Up to 5 years with option for 2-year extension'). Use 'Not specified in the document' only when truly absent."
+        },
+        "amount_per_award": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Amount per award including whether matching, indirect costs, or specific restrictions are bundled into the figure (e.g., '$500,000 total costs including indirect', '$250,000 direct costs per year')."
+        },
+        "number_of_awards": {
+          "type": ["string", "null"],
+          "description": "Anticipated number of awards as stated (e.g., '10-15', 'Subject to availability of funds'). Null ONLY when not specified."
+        },
+        "anticipated_award_date": {
+          "type": ["string", "null"],
+          "description": "Anticipated award date as stated; ISO date when the sponsor gives one, otherwise free text (e.g., 'Spring 2027'). Null when not specified."
+        }
+      }
+    },
+    "required_components": {
+      "type": "array",
+      "description": "Populates the REQUIRED subsection of APPLICATION COMPONENTS. One entry per distinct required proposal component. Always non-empty.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "description"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Component name as stated (e.g., 'Project Description', 'Biographical Sketch', 'Data Management Plan')."
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What the component must contain, in the sponsor's own terms."
+          },
+          "special_requirements": {
+            "type": ["string", "null"],
+            "description": "Page limits, font/margin rules, template requirements, or naming conventions specific to this component. Null when none."
+          }
+        }
+      }
+    },
+    "optional_components": {
+      "type": "array",
+      "description": "Populates the OPTIONAL subsection of APPLICATION COMPONENTS. Same item shape as required_components. Emit [] when none — the consolidator renders '[] -> single row stating Not specified in this document.' in the checklist.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "description"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "special_requirements": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "budget_requirements": {
+      "type": "object",
+      "description": "Populates the BUDGET REQUIREMENTS & POLICIES section. This is the SOLE location for detailed financial rules — the consolidator must not restate Award Amount or Duration here.",
+      "additionalProperties": false,
+      "required": ["funding_limits", "cost_sharing", "fa_policy", "allowable_costs", "unallowable_costs", "personnel_effort"],
+      "properties": {
+        "funding_limits": {
+          "type": ["string", "null"],
+          "description": "Total program funding, per-year caps, and category-specific limits not already covered by amount_per_award. Null when absent."
+        },
+        "cost_sharing": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status"],
+          "description": "Cost-sharing / matching rules. UDM_Column: CostShare.",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["Required", "Voluntary", "Prohibited", "Not Specified"],
+              "description": "Matches the Cost_Sharing enum from the process-mapping workflow. Quote the sponsor's language in details when anything other than 'Not Specified'."
+            },
+            "details": {
+              "type": ["string", "null"],
+              "description": "Type (cash / in-kind / third-party), rate, calculation basis, documentation, and source restrictions. Null when status is 'Prohibited' or 'Not Specified'."
+            }
+          }
+        },
+        "fa_policy": {
+          "type": ["string", "null"],
+          "description": "F&A/indirect cost policy: rate, base (MTDC / TDC / S&W), excluded categories, and documentation requirements. UDM_Column: IndirectRate. Null when absent."
+        },
+        "allowable_costs": {
+          "type": "array",
+          "description": "Categories explicitly called out as allowable with conditions. Empty array when none are explicitly enumerated (rely on default federal rules).",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "unallowable_costs": {
+          "type": "array",
+          "description": "Categories explicitly called out as unallowable or prohibited. Empty array when none are explicitly enumerated.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "personnel_effort": {
+          "type": ["string", "null"],
+          "description": "PI / key-personnel effort floor or ceiling, salary caps, student / postdoc support rules, and consultant limits. UDM_Column: Effort. Null when absent."
+        },
+        "other_considerations": {
+          "type": ["string", "null"],
+          "description": "Pre-award costs, program income, budget revisions, or sponsor-specific budget forms. Null when no such provisions appear."
+        }
+      }
+    },
+    "submission_details": {
+      "type": ["string", "null"],
+      "description": "Populates the SUBMISSION DETAILS section. Submission method and portal, technical/file-format requirements, file-naming conventions, and collaboration rules in one coherent paragraph. Null only when the announcement contains no submission guidance at all."
+    },
+    "special_requirements": {
+      "type": "array",
+      "description": "Populates the SPECIAL REQUIREMENTS section. Unique RFA aspects that do not belong in any other section (conference travel obligations, data-sharing beyond federal defaults, workshop participation). Empty array when none.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "important_notes": {
+      "type": "array",
+      "description": "Populates the IMPORTANT NOTES section. Critical warnings, common pitfalls, or essential context a reviewer would otherwise miss (e.g., 'One nomination per institution — coordinate with OSP before submission'). Empty array when none.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

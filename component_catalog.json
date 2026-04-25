@@ -677,6 +677,89 @@
       }
     },
     {
+      "component_id": "prompt.rfa-checklist-extraction-udm",
+      "slug": "rfa-checklist-extraction-udm",
+      "name": "rfa-checklist-extraction-udm",
+      "summary": "Extracts a federal funding announcement (RFA / FOA / NOFO / program solicitation) into a structured JSON object organized around the **eight-section pre-award checklist** that a sponsored-programs analyst actually uses when triaging a new opportunity. The shape enforces placement rules — award amount lives in `award_information` only, detailed financial rules in `budget_requirements` only — so downstream consolidation does not have to re-adjudicate where a fact belongs.",
+      "version": "0.1.0",
+      "category": "extraction",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "rfa",
+        "foa",
+        "nofo",
+        "grants",
+        "pre-award",
+        "checklist",
+        "udm",
+        "structured-extraction",
+        "json"
+      ],
+      "audience": [
+        "sponsored-programs-staff",
+        "pre-award-teams",
+        "ingest-pipelines"
+      ],
+      "paths": {
+        "component_dir": "components/rfa-checklist-extraction-udm",
+        "readme": "components/rfa-checklist-extraction-udm/README.md",
+        "prompt": "components/rfa-checklist-extraction-udm/prompt.md",
+        "schema": "components/rfa-checklist-extraction-udm/schema.json",
+        "evals_dir": "components/rfa-checklist-extraction-udm/evals",
+        "eval_case_metadata_glob": "components/rfa-checklist-extraction-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/rfa-checklist-extraction-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/rfa-checklist-extraction-udm/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "shared_udm_semantics_repo_local_schema",
+          "notes": "Repo-local eight-section pre-award checklist contract for funding announcements. Scalar opportunity metadata aligns with UDM opportunity semantics; the eight structured sections enforce the pre-award de-duplication placement rules (award amount only in award_information, detailed financial rules only in budget_requirements) at schema level.",
+          "schema_path": "components/rfa-checklist-extraction-udm/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "rfp-extraction-udm",
+          "relationship": "sibling_same_source_different_shape",
+          "notes": "Same document family (RFP / RFA / FOA / NOFO / BAA / DCL) with a different output shape — rfp-extraction-udm is a nine-array requirement-centric flat contract for ingest pipelines; rfa-checklist-extraction-udm is an eight-section pre-award checklist contract with placement rules enforced by the shape itself."
+        },
+        {
+          "slug": "rfp-extraction",
+          "relationship": "sibling_human_vs_structured_outputs",
+          "notes": "rfp-extraction produces the markdown checklist form for the same source family; the consolidator step downstream of rfa-checklist-extraction-udm renders an equivalent markdown checklist from the structured JSON."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON outputs against schema.json. Canonical single-call invocation surface is prompt.md. The companion top-level workflows/rfa-checklist-extraction Vandalizer workflow at v0.2.0 implements the same contract as a seven-task parallel Extraction pipeline (six section extractions plus a metadata extraction) followed by a Consolidation Prompt; campaign authors should record both single-call and post-consolidation signals when both are available.",
+        "udm_alignment": {
+          "status": "shared_udm_semantics_repo_local_schema",
+          "notes": "Scalar metadata (rfa_id, rfa_number, sponsor_name, cfda_number) follows rfp-extraction-udm conventions and resolves to UDM RFA and Sponsor_Organization entities. Leaf fields carry UDM column bindings: cost_sharing to CostShare, fa_policy to IndirectRate, personnel_effort to Effort. The eight-section shape itself is repo-local."
+        }
+      }
+    },
+    {
       "component_id": "prompt.rfp-extraction",
       "slug": "rfp-extraction",
       "name": "rfp-extraction",
@@ -837,6 +920,11 @@
           "slug": "rfp-extraction",
           "relationship": "sibling_human_vs_structured_outputs",
           "notes": "Same source task family, different output contracts."
+        },
+        {
+          "slug": "rfa-checklist-extraction-udm",
+          "relationship": "sibling_same_source_different_shape",
+          "notes": "Same document family, different output shape — rfp-extraction-udm is a nine-array requirement-centric flat contract; rfa-checklist-extraction-udm is an eight-section pre-award checklist contract."
         }
       ],
       "triad_integration": {
@@ -1158,6 +1246,33 @@
       "evaluation": {
         "posture": "inherited",
         "source": "components/nsf-budget-spreadsheet-justification-udm/evals"
+      }
+    },
+    {
+      "slug": "rfa-checklist-extraction",
+      "name": "RFA Checklist Extraction",
+      "description": "Uploads a federal funding announcement (RFA, FOA, NOFO, or program solicitation) and returns a single structured JSON object covering the eight checklist sections a pre-award office uses when triaging a new opportunity: dates and deadlines, eligible institutions, eligible individuals, award information, required and optional application components, budget requirements and policies, submission details, special requirements, and important notes. Output conforms to the rfa-checklist-extraction-udm component schema. The runtime mirrors the ui-insight/ProcessMapping rfa-checklist-extraction workflow: six parallel Extraction tasks (one per logical section) plus a seventh metadata Extraction for opportunity scalars, followed by a single Consolidation Prompt that emits the schema-conformant JSON.",
+      "workflow_version": "0.2.0",
+      "status": "experimental",
+      "vandalizer_schema_version": 2,
+      "paths": {
+        "workflow_dir": "workflows/rfa-checklist-extraction",
+        "manifest": "workflows/rfa-checklist-extraction/manifest.yaml",
+        "export": "workflows/rfa-checklist-extraction/rfa-checklist-extraction.vandalizer.json",
+        "readme": "workflows/rfa-checklist-extraction/README.md",
+        "changelog": "workflows/rfa-checklist-extraction/CHANGELOG.md"
+      },
+      "components_manifested": [
+        "rfa-checklist-extraction-udm"
+      ],
+      "steps": {
+        "step_count": 2,
+        "task_count": 8,
+        "output_step_name": "Consolidation"
+      },
+      "evaluation": {
+        "posture": "inherited",
+        "source": "components/rfa-checklist-extraction-udm/evals"
       }
     }
   ]
