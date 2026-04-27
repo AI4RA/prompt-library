@@ -527,4 +527,4 @@ steps:
           - No fact appears in two top-level sections.
 
 evals:
-  inherits_from: components/rfa-checklist-extraction-udm/evals
+  workflow_local: true
