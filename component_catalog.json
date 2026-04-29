@@ -677,6 +677,91 @@
       }
     },
     {
+      "component_id": "prompt.nsf-expense-allowability-check",
+      "slug": "nsf-expense-allowability-check",
+      "name": "nsf-expense-allowability-check",
+      "summary": "Reviews a single expense against NSF award terms, supplied budget evidence, and general sponsored-programs allowability criteria. The component turns the original checklist-style \"Expense-Allowability Check\" prompt into an evidence-grounded chat review with explicit rule checks, budget alignment, citations, follow-up actions, and a conservative final decision.",
+      "version": "1.0.0",
+      "category": "review",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "nsf",
+        "expense-allowability",
+        "post-award",
+        "compliance",
+        "budget",
+        "review",
+        "research-administration"
+      ],
+      "audience": [
+        "post-award-staff",
+        "sponsored-programs-staff",
+        "grant-accountants",
+        "principal-investigators"
+      ],
+      "paths": {
+        "component_dir": "components/nsf-expense-allowability-check",
+        "readme": "components/nsf-expense-allowability-check/README.md",
+        "prompt": "components/nsf-expense-allowability-check/prompt.md",
+        "schema": null,
+        "evals_dir": "components/nsf-expense-allowability-check/evals",
+        "eval_case_metadata_glob": "components/nsf-expense-allowability-check/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/nsf-expense-allowability-check/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/nsf-expense-allowability-check/prompt.md",
+          "version": "1.0.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "markdown_review",
+          "scope": "repo_local_human_readable_post_award_review_contract",
+          "notes": "Repo-local single-expense allowability review guidance for traditional chat interfaces. The prompt emits an evidence-backed Markdown decision, budget alignment, rule checks, follow-up actions, and confidence for NSF award expense review. It aligns to sponsored-project and budget semantics but is not a shared AI4RA-UDM schema and has no JSON output schema.",
+          "schema_path": null,
+          "schema_entrypoints": [],
+          "validation_surfaces": [
+            "golden_eval_cases"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 1,
+        "report_count": 0,
+        "last_fully_evaluated_version": "1.0.0",
+        "current_version_is_fully_evaluated": true
+      },
+      "related_components": [
+        {
+          "slug": "nsf-award-notice-extraction-udm",
+          "relationship": "upstream_award_terms_source",
+          "notes": "Award notice extractions can supply award period, sponsor terms, participant-support language, and indirect-cost terms."
+        },
+        {
+          "slug": "nsf-budget-justification-udm",
+          "relationship": "upstream_budget_context_source",
+          "notes": "Budget justification outputs can supply approved category rationale and line-item support for allowability checks."
+        },
+        {
+          "slug": "sponsor-doc-defaults-udm",
+          "relationship": "shares_sponsor_policy_context",
+          "notes": "Sponsor defaults can provide general NSF policy context when award-specific evidence does not supersede it."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Invoke with one expense snapshot plus award, budget, policy, and documentation evidence. Score the Markdown response against expected.md golden cases for decision label, budget alignment, rule-check coverage, evidence grounding, actionability, and non-fabrication. Golden cases should cover each decision value and should verify that the model does not fabricate award-specific caps, approvals, budget balances, participant-support account setup, or policy citations when those facts are missing from the supplied evidence.",
+        "udm_alignment": {
+          "status": "repo_local_human_readable_post_award_review_contract",
+          "notes": "The component uses UDM-style sponsored-project concepts such as award identifier, sponsor, budget category, participant support, indirect-cost treatment, and evidence-backed policy findings, but the human-readable output shape is maintained only in prompt-library."
+        }
+      }
+    },
+    {
       "component_id": "prompt.rfa-checklist-extraction-udm",
       "slug": "rfa-checklist-extraction-udm",
       "name": "rfa-checklist-extraction-udm",
@@ -1246,6 +1331,33 @@
       "evaluation": {
         "posture": "inherited",
         "source": "components/nsf-budget-spreadsheet-justification-udm/evals"
+      }
+    },
+    {
+      "slug": "nsf-expense-allowability-check",
+      "name": "NSF Expense Allowability Check",
+      "description": "Single-step Vandalizer workflow that reviews one expense against supplied NSF award, budget, policy, and documentation evidence, then emits a chat-ready allowability assessment.",
+      "workflow_version": "1.0.0",
+      "status": "experimental",
+      "vandalizer_schema_version": 2,
+      "paths": {
+        "workflow_dir": "workflows/nsf-expense-allowability-check",
+        "manifest": "workflows/nsf-expense-allowability-check/manifest.yaml",
+        "export": "workflows/nsf-expense-allowability-check/nsf-expense-allowability-check.vandalizer.json",
+        "readme": "workflows/nsf-expense-allowability-check/README.md",
+        "changelog": "workflows/nsf-expense-allowability-check/CHANGELOG.md"
+      },
+      "components_manifested": [
+        "nsf-expense-allowability-check"
+      ],
+      "steps": {
+        "step_count": 1,
+        "task_count": 1,
+        "output_step_name": "Review expense allowability"
+      },
+      "evaluation": {
+        "posture": "inherited",
+        "source": "components/nsf-expense-allowability-check/evals"
       }
     },
     {
