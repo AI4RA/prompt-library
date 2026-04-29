@@ -1,0 +1,49 @@
+# Case identity
+case: nsf-multi-round-solicitation-stub
+source: "Placeholder case shell — to be replaced with an authorized, de-identified NSF multi-round program solicitation that exercises cost-sharing prohibition, explicit allowable/unallowable enumeration, and a coordinator-deadline note."
+source_url: "https://www.nsf.gov/funding/"
+retrieved: 2026-04-25
+
+# Which structural features of the input announcement this case exercises.
+# Keep tags short and reusable so coverage gaps are easy to spot across cases.
+structural_features:
+  - cost-sharing-prohibited
+  - multi-round-deadlines
+  - explicit-unallowable-list
+  - coordinator-required
+
+# Workflow-level behaviors this case targets. These are pipeline-level
+# checks that no single component's evals can cover (cross-task de-dup,
+# the consolidator's cost_sharing rebuild, important_notes synthesis from
+# cross-section signals, validation-plan checks).
+workflow_features:
+  - cost_sharing_rebuild_prohibited_sets_details_null
+  - important_notes_synthesis_from_cross_section_signals
+  - cross_task_dedup_award_amount_only_in_award_information
+  - validation_plan_chk04_dedup_consistency
+
+# Validation metadata — REQUIRED.
+#
+# validated_against_version: the WORKFLOW version at which expected.*
+#   was last human-validated. Distinct from component
+#   validated_against_version.
+# validated_by: the human who validated the expected output.
+# validated_at: ISO date of validation.
+# component_versions_at_validation: the resolved component pinned_version
+#   values at validation time. Captured for reproducibility so a future
+#   re-run can rebuild the exact prompt body that was evaluated.
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-04-25
+validated_against_version: "0.2.0"
+component_versions_at_validation:
+  rfa-checklist-extraction-udm: "0.1.0"
+
+# Optional free-form notes on what was confirmed, what was surprising,
+# what should be re-checked on the next revalidation pass.
+notes: |
+  Scaffolded case shell only. The expected.json and input-source.md
+  artifacts will be added once an authorized, de-identified NSF multi-round
+  solicitation is selected and a sponsored-programs reviewer has produced
+  and validated the consolidated checklist output. This stub exists so the
+  workflow can declare workflow_local: true per docs/contracts.md while
+  the real case is being assembled in evaluation-data-sets.

@@ -32,6 +32,9 @@ TEMPLATES_DIR = REPO_ROOT / "templates"
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n(.*)$", re.DOTALL)
 
+DEFAULT_TASK_KIND = "Prompt"
+ALLOWED_TASK_KINDS = {"Prompt", "Extraction"}
+
 
 class BuildError(Exception):
     def __init__(self, manifest_path: Path, message: str):
@@ -132,6 +135,82 @@ def resolve_task_prompt(
     return body, slug, sha
 
 
+def build_embedded_search_set(task: dict, manifest_path: Path) -> dict:
+    """
+    Compile the manifest's `searchset:` block into the Vandalizer
+    `_embedded_search_set` payload that the importer reconstructs into a
+    SearchSet plus SearchSetItems on the target Vandalizer instance.
+    """
+    task_name = task.get("name", "<unnamed>")
+    searchset = task.get("searchset")
+    if not isinstance(searchset, dict):
+        raise BuildError(
+            manifest_path,
+            f"task {task_name!r} kind: Extraction requires a searchset block",
+        )
+    items = searchset.get("items")
+    if not isinstance(items, list) or not items:
+        raise BuildError(
+            manifest_path,
+            f"task {task_name!r} searchset.items must be a non-empty list",
+        )
+
+    title = searchset.get("title")
+    if not isinstance(title, str) or not title.strip():
+        raise BuildError(
+            manifest_path,
+            f"task {task_name!r} searchset.title must be a non-empty string",
+        )
+
+    built_items: list[dict] = []
+    seen_titles: set[str] = set()
+    for idx, item in enumerate(items):
+        if not isinstance(item, dict):
+            raise BuildError(
+                manifest_path,
+                f"task {task_name!r} searchset.items[{idx}] must be a mapping",
+            )
+        item_title = item.get("title")
+        searchphrase = item.get("searchphrase")
+        if not isinstance(item_title, str) or not item_title.strip():
+            raise BuildError(
+                manifest_path,
+                f"task {task_name!r} searchset.items[{idx}] missing title",
+            )
+        if not isinstance(searchphrase, str) or not searchphrase.strip():
+            raise BuildError(
+                manifest_path,
+                f"task {task_name!r} searchset.items[{idx}] missing searchphrase",
+            )
+        if item_title in seen_titles:
+            raise BuildError(
+                manifest_path,
+                f"task {task_name!r} searchset has duplicate item title {item_title!r}",
+            )
+        seen_titles.add(item_title)
+        enum_values = item.get("enum_values")
+        if enum_values is not None and not isinstance(enum_values, list):
+            raise BuildError(
+                manifest_path,
+                f"task {task_name!r} searchset.items[{idx}] enum_values must be a list or null",
+            )
+        built_items.append({
+            "searchphrase": searchphrase,
+            "searchtype": "extraction",
+            "title": item_title,
+            "is_optional": bool(item.get("is_optional", False)),
+            "enum_values": enum_values,
+        })
+
+    return {
+        "title": title,
+        "extraction_config": searchset.get("extraction_config", {}) or {},
+        "domain": searchset.get("domain"),
+        "cross_field_rules": searchset.get("cross_field_rules"),
+        "items": built_items,
+    }
+
+
 def validate_manifest(manifest: dict, manifest_path: Path) -> None:
     required = [
         "name",
@@ -188,6 +267,20 @@ def validate_manifest(manifest: dict, manifest_path: Path) -> None:
     if len(output_steps) > 1:
         raise BuildError(manifest_path, "at most one step may set is_output: true")
 
+    for step in steps:
+        for task in step.get("tasks", []) or []:
+            kind = task.get("kind", DEFAULT_TASK_KIND)
+            if kind not in ALLOWED_TASK_KINDS:
+                raise BuildError(
+                    manifest_path,
+                    f"task {task.get('name', '<unnamed>')!r} has unknown kind {kind!r}; "
+                    f"allowed: {sorted(ALLOWED_TASK_KINDS)}",
+                )
+
+    validation_plan = manifest.get("validation_plan", [])
+    if not isinstance(validation_plan, list):
+        raise BuildError(manifest_path, "validation_plan must be a list when present")
+
     evals = manifest.get("evals") or {}
     has_inherit = "inherits_from" in evals
     has_local = bool(evals.get("workflow_local"))
@@ -222,23 +315,26 @@ def build_workflow(manifest_path: Path) -> tuple[dict, Path]:
     for step in manifest["steps"]:
         built_tasks: list[dict] = []
         for task in step.get("tasks", []):
+            kind = task.get("kind", DEFAULT_TASK_KIND)
             body, source_slug, sha = resolve_task_prompt(task, manifest_path, declared_slugs)
             if source_slug and sha:
                 provenance[source_slug]["prompt_sha256"] = sha
-            built_tasks.append({
-                "name": "Prompt",
-                "data": {
-                    "name": task["name"],
-                    "prompt": body,
-                    "input_source": task.get("input_source", "step_input"),
-                },
-            })
+            task_data: dict = {
+                "name": task["name"],
+                "prompt": body,
+                "input_source": task.get("input_source", "step_input"),
+            }
+            if kind == "Extraction":
+                task_data["_embedded_search_set"] = build_embedded_search_set(task, manifest_path)
+            built_tasks.append({"name": kind, "data": task_data})
         built_steps.append({
             "name": step["name"],
             "data": {},
             "is_output": bool(step.get("is_output", False)),
             "tasks": built_tasks,
         })
+
+    validation_plan = manifest.get("validation_plan", []) or []
 
     description = manifest["description"]
     if isinstance(description, str):
@@ -258,7 +354,7 @@ def build_workflow(manifest_path: Path) -> tuple[dict, Path]:
             "input_config": {},
             "output_config": {},
             "resource_config": {},
-            "validation_plan": [],
+            "validation_plan": validation_plan,
             "validation_inputs": [],
             "x_ai4ra": {
                 "workflow_source": manifest_path.relative_to(REPO_ROOT).as_posix(),

@@ -322,6 +322,52 @@ components:
         relationship: sibling_human_vs_structured_outputs
         notes: Both components cover the same solicitation task family in different output forms.
 
+  rfa-checklist-extraction-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local eight-section pre-award checklist contract for funding
+        announcements. Scalar opportunity metadata aligns with UDM opportunity
+        semantics; the eight structured sections enforce the pre-award
+        de-duplication placement rules (award amount only in award_information,
+        detailed financial rules only in budget_requirements) at schema level.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. Canonical single-call
+        invocation surface is prompt.md. The companion top-level
+        workflows/rfa-checklist-extraction Vandalizer workflow at v0.2.0
+        implements the same contract as a seven-task parallel Extraction
+        pipeline (six section extractions plus a metadata extraction)
+        followed by a Consolidation Prompt; campaign authors should record
+        both single-call and post-consolidation signals when both are
+        available.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          Scalar metadata (rfa_id, rfa_number, sponsor_name, cfda_number)
+          follows rfp-extraction-udm conventions and resolves to UDM RFA and
+          Sponsor_Organization entities. Leaf fields carry UDM column bindings:
+          cost_sharing to CostShare, fa_policy to IndirectRate, personnel_effort
+          to Effort. The eight-section shape itself is repo-local.
+    related_components:
+      - slug: rfp-extraction-udm
+        relationship: sibling_same_source_different_shape
+        notes: >
+          Same document family (RFP / RFA / FOA / NOFO / BAA / DCL) with a
+          different output shape — rfp-extraction-udm is a nine-array
+          requirement-centric flat contract for ingest pipelines;
+          rfa-checklist-extraction-udm is an eight-section pre-award checklist
+          contract with placement rules enforced by the shape itself.
+      - slug: rfp-extraction
+        relationship: sibling_human_vs_structured_outputs
+        notes: >
+          rfp-extraction produces the markdown checklist form for the same
+          source family; the consolidator step downstream of
+          rfa-checklist-extraction-udm renders an equivalent markdown checklist
+          from the structured JSON.
+
   rfp-extraction-udm:
     output_contract:
       format: json_object
@@ -345,6 +391,12 @@ components:
       - slug: rfp-extraction
         relationship: sibling_human_vs_structured_outputs
         notes: Same source task family, different output contracts.
+      - slug: rfa-checklist-extraction-udm
+        relationship: sibling_same_source_different_shape
+        notes: >
+          Same document family, different output shape — rfp-extraction-udm is
+          a nine-array requirement-centric flat contract; rfa-checklist-extraction-udm
+          is an eight-section pre-award checklist contract.
 
   solicitation-doc-modifications-udm:
     output_contract:
