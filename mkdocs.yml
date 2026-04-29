@@ -101,6 +101,8 @@ nav:
       - nsf-budget-justification-udm: components/nsf-budget-justification-udm.md
       - nsf-budget-spreadsheet-ingest-udm: components/nsf-budget-spreadsheet-ingest-udm.md
       - nsf-budget-spreadsheet-justification-udm: components/nsf-budget-spreadsheet-justification-udm.md
+      - nsf-expense-allowability-check: components/nsf-expense-allowability-check.md
+      - rfa-checklist-extraction-udm: components/rfa-checklist-extraction-udm.md
       - rfp-extraction: components/rfp-extraction.md
       - rfp-extraction-udm: components/rfp-extraction-udm.md
       - solicitation-doc-modifications-udm: components/solicitation-doc-modifications-udm.md
