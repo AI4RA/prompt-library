@@ -6,7 +6,7 @@ Uploads a federal funding announcement (RFA / FOA / NOFO / program solicitation)
 **Vandalizer schema version:** 2
 **Status:** experimental
 **Components manifested:** `rfa-checklist-extraction-udm@0.1.0`
-**Eval posture:** inherited from [`components/rfa-checklist-extraction-udm/evals`](../../components/rfa-checklist-extraction-udm/evals/)
+**Eval posture:** workflow-local — see [`evals/`](evals/)
 
 ## What this workflow does
 
@@ -45,7 +45,11 @@ Carried into the Vandalizer export at the workflow level (mirrors the source Pro
 
 ## Eval posture
 
-Evals inherit from [`components/rfa-checklist-extraction-udm/evals`](../../components/rfa-checklist-extraction-udm/evals/) because the consolidation prompt is constructed to emit the same schema-conformant object as the canonical component prompt. No workflow-local cases are required at the v0.2.0 boundary; workflow-local cases will be added when the seven-step topology starts to drift from the canonical prompt's output behavior.
+Workflow-local — see [`evals/`](evals/). The runtime is **not** a 1:1 repackaging of the canonical component prompt: each Extraction task carries a focused per-section `prompt_inline` body and a single Consolidation Prompt rebuilds the nested `cost_sharing` object and synthesizes `important_notes` from cross-section signals, so per [`docs/contracts.md`](../../docs/contracts.md) workflow-local cases are required to cover behavior that emerges from the seven-task topology rather than the single-call surface.
+
+Workflow-local cases should target cross-task de-duplication, the consolidator's `cost_sharing: {status, details}` rebuild (especially the `details` → `null` rule when status is `Prohibited` / `Not Specified`), `important_notes` synthesis from cross-section signals, and the four `validation_plan` checks. The component-level evals at [`components/rfa-checklist-extraction-udm/evals/`](../../components/rfa-checklist-extraction-udm/evals/) remain the right signal for the component contract itself; record both signals in harness campaigns when both are available.
+
+The initial scaffolded case (`cases/nsf-multi-round-solicitation-stub/`) is a placeholder pending sponsored-programs review against an authorized, de-identified NSF multi-round solicitation; it should be replaced with the validated case before this workflow is promoted from `experimental` to `stable`.
 
 ## Building
 
