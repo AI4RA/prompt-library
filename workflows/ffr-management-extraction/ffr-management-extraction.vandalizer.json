@@ -1,0 +1,211 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "exported_at": "2026-04-30T00:00:00+00:00",
+  "exported_by": "ui-insight",
+  "items": [
+    {
+      "name": "FFR Management Extraction",
+      "description": "Uploads a federal award notice or agreement and returns a single structured JSON object covering the five buckets a sponsored-programs analyst uses when preparing FFR (SF-425) submissions: submission schedule, submission system and procedures, required financial data, compliance consequences, and preparation timeline. Output conforms to the ffr-management-extraction-udm component schema. The runtime mirrors the ui-insight/ProcessMapping ffr-management-extraction workflow (one Extraction task plus a Formatting/Consolidation task).",
+      "steps": [
+        {
+          "name": "Extraction",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-ffr-management",
+                "prompt": "You are extracting Federal Financial Report (FFR / SF-425)\nrequirements and post-award financial reporting obligations from a\nfederal award notice or agreement.\n\nBe 100% accurate. For each searchset item, return the value as the\ndocument states it. Quote dollar amounts and day-counts verbatim\n(\"90 days\", not \"three months\"). Use null when a field is not\npresent — never invent values.\n\nSearch the entire document with attention to sections titled\n\"Financial Reporting Requirements\", \"SF-425\", \"Federal Financial\nReport\", \"Payment Management System\", \"Reporting Schedule\", or\n\"Financial Monitoring\". Keywords to follow: FFR, SF-425, financial\nreport, PMS, expenditure, deadline, submit, days, budget period,\nproject end, liquidation, drawdown.\n\nFor submission_system_platform return one of: Payment Management\nSystem, ASAP, ACH, Grants.gov, Other. Use Other only when the\ndocument names a platform that is none of the listed values.\n\nEach searchset item maps to a top-level schema field used by the\ndownstream Consolidation Prompt; preserve sponsor terminology and\ndo not synthesize a preparation_timeline from generic best\npractices — populate that table only when the document itself\ndescribes a countdown.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "FFR Management Extraction",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": null,
+                  "items": [
+                    {
+                      "searchphrase": "Federal Award Identification Number (FAIN) printed on the award.",
+                      "searchtype": "extraction",
+                      "title": "award_number",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Principal Investigator full name printed on the award.",
+                      "searchtype": "extraction",
+                      "title": "pi_name",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Annual FFR due window (e.g., 90 or 120 days after each budget period end). Quote the document verbatim.",
+                      "searchtype": "extraction",
+                      "title": "annual_ffr_due",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Final FFR deadline after project end (e.g., 120 days after project end).",
+                      "searchtype": "extraction",
+                      "title": "final_ffr_due",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Interim financial reporting requirements when imposed.",
+                      "searchtype": "extraction",
+                      "title": "interim_reporting",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "SF-272 or cash transaction reporting requirements.",
+                      "searchtype": "extraction",
+                      "title": "cash_transaction_reporting",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Primary submission system / platform (one of Payment Management System, ASAP, ACH, Grants.gov, Other).",
+                      "searchtype": "extraction",
+                      "title": "submission_system_platform",
+                      "is_optional": false,
+                      "enum_values": [
+                        "Payment Management System",
+                        "ASAP",
+                        "ACH",
+                        "Grants.gov",
+                        "Other"
+                      ]
+                    },
+                    {
+                      "searchphrase": "Account, role, or registration prerequisites for accessing the platform.",
+                      "searchtype": "extraction",
+                      "title": "submission_system_access_requirements",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "eRA Commons integration details (NIH/HHS awards). Null otherwise.",
+                      "searchtype": "extraction",
+                      "title": "era_commons_integration",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Roles and responsibilities for who may submit (e.g., AOR-only).",
+                      "searchtype": "extraction",
+                      "title": "submission_authorization",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Flat list of required reporting category labels exactly as the document names them (Personnel, Fringe, Equipment, Subawards, Cost share, Program income, etc.).",
+                      "searchtype": "extraction",
+                      "title": "required_financial_data",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Document language describing penalties for late FFR submission.",
+                      "searchtype": "extraction",
+                      "title": "late_submission_penalties",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Document language describing payment-system or drawdown restrictions tied to non-compliance.",
+                      "searchtype": "extraction",
+                      "title": "account_restrictions",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Document language describing impact on future awards or competing renewals.",
+                      "searchtype": "extraction",
+                      "title": "impact_on_future_funding",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Document language describing supporting documentation or backup the recipient must retain.",
+                      "searchtype": "extraction",
+                      "title": "required_documentation",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Countdown of preparation milestones derived from the document's own pre-submission timing language. Empty when the document does not describe a countdown.",
+                      "searchtype": "extraction",
+                      "title": "preparation_timeline",
+                      "is_optional": true,
+                      "enum_values": null
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consolidation",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "ffr-management-consolidation",
+                "prompt": "You are assembling the FFR Management Extraction output. The input\nis the JSON fragment produced by the upstream Extraction task. Your\njob is to emit a single JSON object that validates against the\nffr-management-extraction-udm@0.1.0 schema.\n\nTop-level shape:\n{\n  \"award_number\": string|null,\n  \"pi_name\": string|null,\n  \"submission_schedule\": {\n    \"annual_ffr_due\": string|null,\n    \"final_ffr_due\": string|null,\n    \"interim_reporting\": string|null,\n    \"cash_transaction_reporting\": string|null\n  },\n  \"submission_system\": {\n    \"platform\": \"Payment Management System\"|\"ASAP\"|\"ACH\"|\"Grants.gov\"|\"Other\"|null,\n    \"access_requirements\": string|null,\n    \"era_commons_integration\": string|null,\n    \"submission_authorization\": string|null\n  },\n  \"required_financial_data\": string[],\n  \"compliance_consequences\": {\n    \"late_submission_penalties\": string|null,\n    \"account_restrictions\": string|null,\n    \"impact_on_future_funding\": string|null,\n    \"required_documentation\": string|null\n  },\n  \"preparation_timeline\": {milestone, days_before_period_end, action, owner}[]\n}\n\nRules:\n1. Map each Extraction searchset item to its corresponding\n   top-level schema field. submission_system_* items collapse into\n   the nested submission_system object; the four\n   compliance_consequences items collapse into that nested object;\n   the four submission_schedule items collapse into that nested\n   object.\n2. Normalize submission_system.platform to the closest enum value;\n   use Other only when the document explicitly names a platform\n   outside the enum list.\n3. preparation_timeline must be an array of objects. If the\n   extraction returned a string description, parse it into one or\n   more {milestone, days_before_period_end, action, owner} entries\n   only when the document itself describes a countdown. Otherwise\n   return an empty array.\n4. required_financial_data must be a flat list of category label\n   strings. Reject any nested objects.\n5. Use null for missing scalar fields; never invent values.\n6. Do not output any text outside the single JSON object.",
+                "input_source": "step_input"
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "check_id": "CHK-01",
+          "check_name": "Date format checks",
+          "check_type": "format",
+          "check_description": "Verify all dates and day-counts (annual FFR due, final FFR due, interim cadence) preserve the document's exact wording.",
+          "target_fields": [
+            "submission_schedule.annual_ffr_due",
+            "submission_schedule.final_ffr_due",
+            "submission_schedule.interim_reporting"
+          ],
+          "severity": "error"
+        },
+        {
+          "check_id": "CHK-02",
+          "check_name": "Deadline consistency",
+          "check_type": "consistency",
+          "check_description": "Verify final_ffr_due is consistent with annual_ffr_due (e.g., if annual is 90 days, final is at least 90 days; if document specifies different cadences, both are captured).",
+          "target_fields": [
+            "submission_schedule.annual_ffr_due",
+            "submission_schedule.final_ffr_due"
+          ],
+          "severity": "warning"
+        }
+      ],
+      "validation_inputs": [],
+      "x_ai4ra": {
+        "workflow_source": "workflows/ffr-management-extraction/manifest.yaml",
+        "workflow_version": "0.1.0",
+        "status": "experimental",
+        "components": [
+          {
+            "slug": "ffr-management-extraction-udm",
+            "version": "0.1.0"
+          }
+        ]
+      }
+    }
+  ]
+}

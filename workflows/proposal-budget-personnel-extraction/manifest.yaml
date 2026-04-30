@@ -1,0 +1,191 @@
+# Authored source for the Proposal Budget Personnel & Compliance Triggers
+# Vandalizer workflow.
+
+name: Proposal Budget Personnel & Compliance Requirements Extraction
+description: >
+  Uploads a proposal budget document (NSF-style budget tables / NIH PHS 398
+  / agency budget form) and returns a single structured JSON object covering
+  personnel identification (senior key, postdocs, grad students,
+  undergraduates, other personnel) and budget structure compliance triggers
+  (subaward recipients, equipment over $5,000, F&A rate and base, cost
+  sharing, total costs). Output conforms to the
+  proposal-budget-personnel-extraction-udm component schema. The runtime
+  mirrors the ui-insight/ProcessMapping
+  proposal-budget-personnel-extraction workflow (two parallel Extraction
+  tasks plus a Consolidation Prompt that derives the boolean compliance
+  triggers).
+
+workflow_version: 0.1.0
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-04-30
+updated: 2026-04-30
+
+components:
+  - slug: proposal-budget-personnel-extraction-udm
+    pinned_version: 0.1.0
+
+validation_plan:
+  - check_id: CHK-01
+    check_name: Personnel count consistency
+    check_type: consistency
+    check_description: Verify postdoc_count == len(postdoc_details), graduate_student_count == len(graduate_student_details), and that senior_key_personnel covers every PI/Co-PI named in budget_personnel.
+    target_fields:
+      - postdoc_count
+      - postdoc_details
+      - graduate_student_count
+      - graduate_student_details
+      - senior_key_personnel
+    severity: warning
+  - check_id: CHK-02
+    check_name: Boolean flag derivation
+    check_type: consistency
+    check_description: Verify the four derived booleans equal their corresponding list-length expressions (has_postdocs_or_grad_students = (postdoc_count > 0) OR (graduate_student_count > 0); mentoring_plan_required = has_postdocs_or_grad_students; has_subawards = len(subaward_recipients) > 0; has_equipment_over_5k = len(equipment_items) > 0).
+    target_fields:
+      - has_postdocs_or_grad_students
+      - mentoring_plan_required
+      - has_subawards
+      - has_equipment_over_5k
+    severity: warning
+  - check_id: CHK-03
+    check_name: Cost totals validation
+    check_type: arithmetic
+    check_description: Verify total_costs.total_project_cost == total_costs.total_direct_costs + total_costs.total_indirect_costs.
+    target_fields:
+      - total_costs
+    severity: error
+
+steps:
+  - name: Parallel Extraction
+    tasks:
+      - name: extract-personnel-identification
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          You are extracting all personnel listed in a proposal budget
+          document.
+
+          Be 100% accurate. Quote effort percentages and dollar amounts
+          verbatim. Use empty arrays when a category has no entries; never
+          invent personnel. Use "TBN" as the name for to-be-named
+          postdoc or graduate-student slots so per-person document
+          workflows can flag the missing-name dependency without dropping
+          the row.
+
+          Search Senior/Key Personnel, Other Personnel, Section A, Section
+          B, Salary and Wages, Personnel Justification.
+
+          The four derivable booleans (has_postdocs_or_grad_students,
+          mentoring_plan_required) will be computed by the downstream
+          Consolidation Prompt — do not set them here.
+        searchset:
+          title: Proposal Budget Personnel
+          domain: research-administration
+          items:
+            - title: senior_key_personnel
+              searchphrase: JSON array of {name, role, institution, effort, salary_requested} for senior/key personnel.
+            - title: postdoc_count
+              searchphrase: Integer count of postdoctoral researchers in the budget.
+            - title: postdoc_details
+              searchphrase: JSON array of {name, effort, salary_or_stipend} for postdoctoral researchers. Use "TBN" for unnamed slots.
+              is_optional: true
+            - title: graduate_student_count
+              searchphrase: Integer count of graduate research/teaching assistants in the budget.
+            - title: graduate_student_details
+              searchphrase: JSON array of {name, type, stipend, tuition_remission} where type is "RA" or "TA".
+              is_optional: true
+            - title: undergraduate_count
+              searchphrase: Integer count of undergraduate students in the budget.
+              is_optional: true
+            - title: other_personnel
+              searchphrase: JSON array of {role, cost} for other personnel (technicians, programmers, administrative staff).
+              is_optional: true
+            - title: total_personnel_cost
+              searchphrase: Total personnel costs including salary and fringe (decimal number).
+              is_optional: true
+
+      - name: extract-budget-structure-and-compliance-triggers
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          You are extracting the budget category structure and the
+          compliance-trigger inputs (subawards, equipment over $5,000,
+          travel, F&A rate and base, cost sharing, total costs) from a
+          proposal budget document.
+
+          Be 100% accurate. Equipment items below $5,000 do NOT belong in
+          equipment_items regardless of how the budget labels them. F&A
+          rate and base are two distinct fields ("42.5% MTDC" → rate:
+          "42.5%", base: "MTDC").
+
+          The boolean triggers (has_subawards, has_equipment_over_5k)
+          will be computed by the downstream Consolidation Prompt — do
+          not set them here.
+        searchset:
+          title: Proposal Budget Structure
+          domain: research-administration
+          items:
+            - title: budget_categories
+              searchphrase: JSON array of {category_name, amount, notes} for each budget category.
+            - title: subaward_recipients
+              searchphrase: JSON array of {institution_name, sub_pi_name, amount} for subaward/subcontract recipients. Empty array when none.
+              is_optional: true
+            - title: equipment_items
+              searchphrase: JSON array of {description, cost} for equipment items costing over $5,000 only.
+              is_optional: true
+            - title: travel_summary
+              searchphrase: Summary of travel costs including domestic and foreign travel amounts.
+              is_optional: true
+            - title: fa_rate
+              searchphrase: F&A (indirect cost) rate percentage as stated (e.g., "42.5%").
+              is_optional: true
+            - title: fa_base
+              searchphrase: Base for F&A rate calculation (MTDC, TDC, Salary & Wages).
+              is_optional: true
+              enum_values:
+                - MTDC
+                - TDC
+                - Salary & Wages
+            - title: cost_sharing
+              searchphrase: Cost sharing or matching amount and type if present in the budget.
+              is_optional: true
+            - title: total_costs
+              searchphrase: JSON object {total_direct_costs, total_indirect_costs, total_project_cost} (all decimal numbers).
+            - title: budget_periods
+              searchphrase: JSON array of {period_number, start_date, end_date, amount} for multi-year proposals. Empty array for single-period.
+              is_optional: true
+
+  - name: Consolidation
+    is_output: true
+    tasks:
+      - name: budget-personnel-consolidation
+        kind: Prompt
+        input_source: step_input
+        prompt_inline: |
+          You are assembling the Proposal Budget Personnel & Compliance
+          Triggers extraction output. The input is the JSON fragment
+          produced by the upstream parallel Extraction tasks.
+
+          Rules:
+          1. Pass-through every personnel and budget field verbatim.
+          2. Combine fa_rate and fa_base into a single fa_rate_and_base
+             object: {rate: <fa_rate>, base: <fa_base>}.
+          3. Derive the four boolean triggers:
+             - has_postdocs_or_grad_students = (postdoc_count > 0) OR
+               (graduate_student_count > 0)
+             - mentoring_plan_required = has_postdocs_or_grad_students
+               (for NSF; per agency policy otherwise — when the sponsor
+               is unknown, default to has_postdocs_or_grad_students)
+             - has_subawards = len(subaward_recipients) > 0
+             - has_equipment_over_5k = len(equipment_items) > 0
+          4. Verify cost-totals reconciliation: total_costs.total_project_cost
+             must equal total_costs.total_direct_costs +
+             total_costs.total_indirect_costs (CHK-03). When they do not
+             reconcile, preserve the document's reported values rather
+             than synthesizing.
+          5. Use null for missing scalar fields; never invent values.
+          6. Do not output any text outside the single JSON object.
+
+evals:
+  workflow_local: true

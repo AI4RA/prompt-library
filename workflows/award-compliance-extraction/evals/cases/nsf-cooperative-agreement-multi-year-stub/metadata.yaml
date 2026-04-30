@@ -1,0 +1,27 @@
+# Case identity
+case: nsf-cooperative-agreement-multi-year-stub
+source: "Placeholder case shell — to be replaced with an authorized, de-identified NSF cooperative agreement (multi-year, complex compliance calendar, non-trivial cost share, F&A rate stated as percent + base) that exercises the full two-block contract."
+source_url: "https://www.nsf.gov/funding/"
+retrieved: 2026-04-30
+
+structural_features:
+  - nsf-cooperative-agreement
+  - multi-year-budget-periods
+  - cost-share-required
+  - mtdc-fa-base
+  - high-risk-conditions
+
+workflow_features:
+  - calendar_merge_across_fragments
+  - audit_requirements_enum_normalization
+  - record_retention_enum_normalization
+  - cfr01_reconcile_budget_periods_to_total
+
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-04-30
+validated_against_version: "0.1.0"
+component_versions_at_validation:
+  award-compliance-extraction-udm: "0.1.0"
+
+notes: |
+  Scaffolded case shell only.

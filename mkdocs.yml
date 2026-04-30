@@ -86,7 +86,11 @@ nav:
       - By tag: browse/by-tag.md
   - Components:
       - Index: components/index.md
+      - award-compliance-extraction-udm: components/award-compliance-extraction-udm.md
       - document-type-classifier-udm: components/document-type-classifier-udm.md
+      - effort-reporting-extraction-udm: components/effort-reporting-extraction-udm.md
+      - ffr-management-extraction-udm: components/ffr-management-extraction-udm.md
+      - foa-checklist-extraction-udm: components/foa-checklist-extraction-udm.md
       - nsf-award-notice-extraction-udm:
           - Overview: components/nsf-award-notice-extraction-udm.md
           - Reports:
@@ -102,11 +106,15 @@ nav:
       - nsf-budget-spreadsheet-ingest-udm: components/nsf-budget-spreadsheet-ingest-udm.md
       - nsf-budget-spreadsheet-justification-udm: components/nsf-budget-spreadsheet-justification-udm.md
       - nsf-expense-allowability-check: components/nsf-expense-allowability-check.md
+      - prior-approval-extraction-udm: components/prior-approval-extraction-udm.md
+      - proposal-budget-personnel-extraction-udm: components/proposal-budget-personnel-extraction-udm.md
+      - proposal-document-completeness-udm: components/proposal-document-completeness-udm.md
       - rfa-checklist-extraction-udm: components/rfa-checklist-extraction-udm.md
       - rfp-extraction: components/rfp-extraction.md
       - rfp-extraction-udm: components/rfp-extraction-udm.md
       - solicitation-doc-modifications-udm: components/solicitation-doc-modifications-udm.md
       - sponsor-doc-defaults-udm: components/sponsor-doc-defaults-udm.md
+      - subaward-extraction-udm: components/subaward-extraction-udm.md
       - vandalizer-to-udm-translation: components/vandalizer-to-udm-translation.md
   - Taxonomy: taxonomy.md
   - Contracts: contracts.md

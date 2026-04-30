@@ -1,0 +1,29 @@
+# Case identity
+case: federal-award-rtc-stub
+source: "Placeholder case shell — to be replaced with an authorized, de-identified RTC-eligible federal award notice that exercises explicit equipment, foreign-travel, and PI-substitution approval thresholds plus documented expanded-authority waivers."
+source_url: "https://www.grants.gov/"
+retrieved: 2026-04-30
+
+structural_features:
+  - rtc-eligible
+  - explicit-equipment-threshold
+  - foreign-travel-approval
+  - pi-substitution-rule
+
+workflow_features:
+  - flat_to_nested_budget_approvals_collapse
+  - per_row_approval_procedures_normalization
+  - rtc_waivers_waived_only_rule
+  - validation_plan_chk01_threshold_format
+
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-04-30
+validated_against_version: "0.1.0"
+component_versions_at_validation:
+  prior-approval-extraction-udm: "0.1.0"
+
+notes: |
+  Scaffolded case shell only. The expected.json and input-source.md
+  artifacts will be added once an authorized, de-identified RTC-eligible
+  federal award notice is selected and a sponsored-programs reviewer has
+  produced and validated the consolidated JSON.

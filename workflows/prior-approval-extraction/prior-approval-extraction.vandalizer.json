@@ -1,0 +1,155 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "exported_at": "2026-04-30T00:00:00+00:00",
+  "exported_by": "ui-insight",
+  "items": [
+    {
+      "name": "Prior Approval Extraction",
+      "description": "Uploads a federal award notice or agreement and returns a single structured JSON object covering all prior-approval requirements: budget-related approvals, scope and timeline approvals, a normalized approval-procedures table (threshold, documentation, authority, timeline, consequences), and any Research Terms and Conditions waivers. Output conforms to the prior-approval-extraction-udm component schema. The runtime mirrors the ui-insight/ProcessMapping prior-approval-extraction workflow (one Extraction task plus a Formatting/Consolidation task).",
+      "steps": [
+        {
+          "name": "Extraction",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-prior-approvals",
+                "prompt": "You are extracting prior-approval requirements from a federal\naward document. Federal awards typically distinguish three\nfamilies of activities that require sponsor authorization before\nthey can occur: budget changes, scope/timeline changes, and\nadministrative changes (PI substitutions, foreign travel,\nsubawards, etc.).\n\nBe 100% accurate. For each searchset item, return the value as\nthe document states it. Quote dollar thresholds, percent\nthresholds, and day-counts verbatim (\"$25,000\", \"25%\", \"30\ndays\"). Use null when a field is not present — never invent\nvalues.\n\nSearch the entire document with attention to sections titled\n\"Prior Approval\", \"Pre-approval\", \"Written Approval\", \"Agency\nApproval\", \"2 CFR 200\", or \"Research Terms and Conditions\".\nKeywords to follow: prior approval, pre-approval, written\napproval, agency approval, permission, authorize, CFR 200, RTC,\nwaive, delegate, threshold.\n\nrtc_waivers is for waived approvals only — items the RTC or\nagency expanded authority lets the recipient handle without\nsponsor sign-off. Do not duplicate kept approvals there.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Prior Approval Extraction",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": null,
+                  "items": [
+                    {
+                      "searchphrase": "Federal Award Identification Number (FAIN) printed on the award.",
+                      "searchtype": "extraction",
+                      "title": "award_number",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Re-budgeting thresholds and restrictions requiring prior approval. Quote dollar/percent thresholds verbatim.",
+                      "searchtype": "extraction",
+                      "title": "rebudgeting_thresholds",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Equipment-purchase approval requirements (typically tied to a $ threshold).",
+                      "searchtype": "extraction",
+                      "title": "equipment_approvals",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Subcontracting / subaward approval requirements.",
+                      "searchtype": "extraction",
+                      "title": "subaward_approvals",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Requirements for PI or key-personnel changes (substitution, reduction in effort).",
+                      "searchtype": "extraction",
+                      "title": "pi_change_requirements",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "No-cost extension request requirements (notice period, supporting documentation, sponsor route).",
+                      "searchtype": "extraction",
+                      "title": "nce_requirements",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Foreign travel approval requirements when the award imposes them.",
+                      "searchtype": "extraction",
+                      "title": "foreign_travel_approvals",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Approval-procedures table with rows of {approval_type, threshold, documentation, authority, timeline, consequences}. Each row is one approval type.",
+                      "searchtype": "extraction",
+                      "title": "approval_procedures",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Research Terms and Conditions waivers and expanded-authority delegations the recipient can handle without sponsor sign-off.",
+                      "searchtype": "extraction",
+                      "title": "rtc_waivers",
+                      "is_optional": true,
+                      "enum_values": null
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consolidation",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "prior-approval-consolidation",
+                "prompt": "You are assembling the Prior Approval Extraction output. The\ninput is the JSON fragment produced by the upstream Extraction\ntask. Your job is to emit a single JSON object that validates\nagainst the prior-approval-extraction-udm@0.1.0 schema.\n\nTop-level shape:\n{\n  \"award_number\": string|null,\n  \"budget_approvals\": {\n    \"rebudgeting_thresholds\": string|null,\n    \"equipment_approvals\": string|null,\n    \"subaward_approvals\": string|null\n  },\n  \"scope_timeline_approvals\": {\n    \"pi_change_requirements\": string|null,\n    \"nce_requirements\": string|null,\n    \"foreign_travel_approvals\": string|null\n  },\n  \"approval_procedures\": {approval_type, threshold, documentation, authority, timeline, consequences}[],\n  \"rtc_waivers\": string[]\n}\n\nRules:\n1. Collapse the three rebudgeting/equipment/subaward searchset\n   items into the budget_approvals object, and the three\n   pi/nce/foreign-travel items into the scope_timeline_approvals\n   object.\n2. approval_procedures must be an array of objects, one per\n   approval type. Quote dollar thresholds and day-counts\n   verbatim. Each row needs at minimum approval_type populated.\n3. Per-row procedure mechanics belong on the row, not duplicated\n   in the narrative bucket. The bucket fields hold descriptive\n   narrative; procedural specifics (authority, timeline,\n   consequences) belong in approval_procedures.\n4. rtc_waivers is a flat list of strings naming waived approvals\n   only. Empty array when none are stated.\n5. Use null for missing scalar fields; never invent values.\n6. Do not output any text outside the single JSON object.",
+                "input_source": "step_input"
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "check_id": "CHK-01",
+          "check_name": "Threshold format validation",
+          "check_type": "format",
+          "check_description": "Verify dollar and percent thresholds in approval_procedures and budget_approvals preserve the document's exact wording.",
+          "target_fields": [
+            "approval_procedures",
+            "budget_approvals.rebudgeting_thresholds",
+            "budget_approvals.equipment_approvals"
+          ],
+          "severity": "warning"
+        },
+        {
+          "check_id": "CHK-02",
+          "check_name": "Approval procedure completeness",
+          "check_type": "completeness",
+          "check_description": "Verify every approval type called out in narrative buckets has a corresponding row in approval_procedures with at minimum approval_type and either threshold or documentation populated.",
+          "target_fields": [
+            "approval_procedures"
+          ],
+          "severity": "warning"
+        }
+      ],
+      "validation_inputs": [],
+      "x_ai4ra": {
+        "workflow_source": "workflows/prior-approval-extraction/manifest.yaml",
+        "workflow_version": "0.1.0",
+        "status": "experimental",
+        "components": [
+          {
+            "slug": "prior-approval-extraction-udm",
+            "version": "0.1.0"
+          }
+        ]
+      }
+    }
+  ]
+}

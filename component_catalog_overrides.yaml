@@ -516,3 +516,292 @@ components:
       - slug: nsf-award-notice-extraction-udm
         relationship: delegates_output_schema_to
         notes: This translator's output contract is the award-notice schema.
+
+  ffr-management-extraction-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local FFR (SF-425) post-award financial-reporting contract.
+        Five structured buckets (submission_schedule, submission_system,
+        required_financial_data, compliance_consequences,
+        preparation_timeline) plus award-identifying scalars that resolve
+        cleanly to UDM Award and Personnel.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. Canonical single-call
+        invocation surface is prompt.md. The companion top-level
+        workflows/ffr-management-extraction Vandalizer workflow at v0.1.0
+        implements the same contract as a single Extraction task plus a
+        Consolidation Prompt that collapses flat searchset items into the
+        nested submission_schedule, submission_system, and
+        compliance_consequences objects; campaign authors should record
+        both single-call and post-consolidation signals when both are
+        available.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          Scalar award_number and pi_name resolve to UDM Award.Federal_Award_ID
+          and Personnel.Full_Name; required_financial_data labels feed UDM
+          AwardBudget reporting categories; preparation_timeline supports
+          UDM Terms ingest. The five-bucket shape itself is repo-local.
+    related_components:
+      - slug: award-compliance-extraction-udm
+        relationship: drilldown_of
+        notes: >
+          award-compliance-extraction-udm.financial_management.ffr_requirements
+          is a one-line summary; this component drills into the full FFR
+          submission schedule, system, and preparation timeline.
+
+  prior-approval-extraction-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local prior-approval-tracking contract. Three logical buckets
+        (budget_approvals, scope_timeline_approvals, approval_procedures
+        table) plus an rtc_waivers list. Per-row entries resolve to UDM
+        Modification.Requires_Prior_Approval; subaward approvals resolve
+        to Subaward.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. Canonical single-call
+        invocation surface is prompt.md. The companion top-level
+        workflows/prior-approval-extraction Vandalizer workflow at v0.1.0
+        implements the same contract as a single Extraction task plus a
+        Consolidation Prompt that normalizes the approval_procedures table
+        into per-row objects; campaign authors should record both single-
+        call and post-consolidation signals when both are available.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          approval_procedures rows resolve to UDM Modification.Requires_Prior_Approval;
+          budget_approvals.subaward_approvals resolves to Subaward. The
+          three-bucket shape itself is repo-local.
+    related_components:
+      - slug: award-compliance-extraction-udm
+        relationship: drilldown_of
+        notes: >
+          award-compliance-extraction-udm.compliance_framework.prior_approval_requirements
+          is a categorized list only; this component drills into the
+          procedural mechanics (threshold / documentation / authority /
+          timeline / consequences) of each approval type.
+
+  effort-reporting-extraction-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local effort-reporting and personnel-compliance contract.
+        Captures the certification cadence, certification method (per
+        2 CFR 200.430(i)), PI commitments, per-person key-personnel
+        commitments table, cost-shared effort, governing regulation,
+        record retention, and referenced governing documents.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. Canonical single-call
+        invocation surface is prompt.md. The companion top-level
+        workflows/effort-reporting-extraction Vandalizer workflow at v0.1.0
+        implements the same contract as a single Extraction task plus a
+        Consolidation Prompt that normalizes the reporting_frequency and
+        certification_method enums and enforces the PI-mirror rule
+        between pi_committed_effort, pi_person_months, and the PI's row
+        in key_personnel_commitments.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          award_number / pi_name / project_title resolve to UDM Award and
+          Personnel; certification_method, pi_committed_effort,
+          pi_person_months, and per-row key_personnel_commitments resolve
+          to UDM Effort + ProjectRole; cost_shared_effort resolves to
+          CostShare.Committed_Amount; record_retention resolves to
+          Terms.Record_Retention_Years.
+
+  proposal-document-completeness-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local pre-award document-completeness gap-analysis contract.
+        Three layers (as-found inventory, sponsor requirements, gap
+        analysis) including a per-person document matrix and a
+        prioritized missing list ranked by severity. Designed to drive
+        sponsored-programs analyst "missing documents" messages back to
+        the PI.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. Canonical single-call
+        invocation surface is prompt.md. The companion top-level
+        workflows/proposal-document-completeness Vandalizer workflow at
+        v0.1.0 implements the contract as two parallel Extraction tasks
+        (proposal components inventory + sponsor requirements) plus a
+        Consolidation & Gap Analysis Prompt that joins the fragments,
+        derives present/triggered booleans, computes per-person and
+        per-subawardee missing lists, and ranks prioritized_missing.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          sponsor_name resolves to UDM Sponsor_Organization;
+          senior_key_personnel rows resolve to Personnel;
+          has_subawards: true triggers Subaward presence; the proposal
+          record itself resolves to Proposal.
+    related_components:
+      - slug: proposal-budget-personnel-extraction-udm
+        relationship: consumer_of
+        notes: >
+          Consumes senior_key_personnel, has_postdocs_or_grad_students,
+          and has_subawards from proposal-budget-personnel-extraction-udm
+          to compute conditional requirements.
+
+  award-compliance-extraction-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local post-award compliance and financial-overview contract.
+        Two main blocks (compliance_framework with a normalized
+        compliance calendar; financial_management with budget periods
+        and budget categories). Extensive UDM bindings across Award,
+        AwardBudget, AwardBudgetPeriod, AwardDeliverable, CostShare,
+        IndirectRate, Modification, and Terms.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. Canonical single-call
+        invocation surface is prompt.md. The companion top-level
+        workflows/award-compliance-extraction Vandalizer workflow at
+        v0.1.0 implements the contract as two parallel Extraction tasks
+        (compliance framework + financial management) plus a
+        Consolidation Prompt that merges/dedupes compliance_calendar
+        entries across both fragments and normalizes the audit_requirements
+        and record_retention enums.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          Broad UDM alignment via leaf-field column bindings (see prompt.md).
+          The two-block shape itself is repo-local.
+    related_components:
+      - slug: ffr-management-extraction-udm
+        relationship: drilldown_target
+        notes: >
+          financial_management.ffr_requirements is a summary; ffr-management-extraction-udm
+          is the deeper drilldown.
+      - slug: prior-approval-extraction-udm
+        relationship: drilldown_target
+        notes: >
+          compliance_framework.prior_approval_requirements is a category
+          list; prior-approval-extraction-udm is the deeper drilldown
+          into the procedural mechanics.
+
+  proposal-budget-personnel-extraction-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local pre-award budget-personnel and compliance-trigger
+        contract. Personnel listings (senior key, postdocs, grad students,
+        undergraduates, other) plus four derivable boolean triggers
+        (has_postdocs_or_grad_students, mentoring_plan_required,
+        has_subawards, has_equipment_over_5k) plus the budget structure
+        (categories, subawards, equipment over $5K, F&A rate and base
+        as a {rate, base} object, cost sharing, total costs, multi-year
+        periods).
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. Canonical single-call
+        invocation surface is prompt.md. The companion top-level
+        workflows/proposal-budget-personnel-extraction Vandalizer workflow
+        at v0.1.0 implements the contract as two parallel Extraction tasks
+        (personnel identification + budget structure) plus a Consolidation
+        Prompt that DERIVES the four boolean compliance triggers from
+        list lengths and combines fa_rate + fa_base into the nested
+        fa_rate_and_base object.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          senior_key_personnel rows resolve to Personnel; fa_rate_and_base
+          resolves to IndirectRate; cost_sharing resolves to CostShare.
+    related_components:
+      - slug: proposal-document-completeness-udm
+        relationship: producer_for
+        notes: >
+          Produces the four boolean triggers and senior_key_personnel
+          listing that proposal-document-completeness-udm consumes for
+          gap-analysis conditional requirements.
+
+  foa-checklist-extraction-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local 31-field FOA reference contract. Sibling of
+        rfa-checklist-extraction-udm with stronger emphasis on
+        evaluation criteria (with weights), multi-stage review process,
+        program goals, and submission-system / forms / page-limit
+        requirements. UDM bindings: foa_number to RFA.Opportunity_Number,
+        cfda_number to RFA.CFDA_Number, federal_agency to
+        Organization.Organization_Name, foa_title to RFA.RFA_Title.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. Canonical single-call
+        invocation surface is prompt.md. The companion top-level
+        workflows/foa-checklist-extraction Vandalizer workflow at v0.1.0
+        implements the contract as six parallel Extraction tasks plus a
+        Consolidation Prompt that assembles the 31-field schema and
+        enforces cross-field consistency (chronological critical_dates;
+        expected_awards * max(award_range) <= total_funding).
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          Scalar FOA-identifying fields resolve to UDM RFA and Organization.
+          The 31-field shape itself is repo-local.
+    related_components:
+      - slug: rfa-checklist-extraction-udm
+        relationship: sibling_same_source_different_shape
+        notes: >
+          Same source family (federal funding announcements) with a
+          different output cut. rfa-checklist-extraction-udm emphasizes
+          NSF/NIH solicitation triage with placement-rule de-duplication
+          across the eight checklist sections; foa-checklist-extraction-udm
+          emphasizes FOA review with strong evaluation-criteria,
+          review-process, and submission-system focus across its eight
+          reference sections.
+
+  subaward-extraction-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local subaward agreement contract. Six logical blocks (core
+        award / contacts / dates & monetary / financial policies /
+        reporting / compliance) covering nine deliverable sections used
+        for research-administration setup and ongoing monitoring of
+        subawards. Each contact is a {name, email, phone} object;
+        reporting requirements are typed arrays (technical, financial,
+        invention) with strict-inclusion criteria.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. Canonical single-call
+        invocation surface is prompt.md. The companion top-level
+        workflows/subaward-extraction Vandalizer workflow at v0.1.0
+        implements the contract as six parallel Extraction tasks plus a
+        Consolidation Prompt that composes 18 flat contact searchset
+        items into six structured {name, email, phone} objects,
+        normalizes the cost_type and invoicing_frequency enums, and
+        enforces the CFR-01 reconciliation between amount_funded,
+        total_direct_costs, and total_indirect_costs.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          Broad UDM alignment via leaf-field column bindings to Award,
+          Subaward, Organization, Personnel, ContactDetails, IndirectRate,
+          CostShare, AwardDeliverable, Modification, Terms, and
+          ConflictOfInterest (see prompt.md). The six-block shape itself
+          is repo-local.

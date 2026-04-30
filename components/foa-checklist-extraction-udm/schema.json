@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/foa-checklist-extraction-udm/schema.json",
+  "title": "FOA Checklist Extraction — UDM Output",
+  "description": "JSON contract for a Federal Funding Opportunity Announcement (FOA) distilled into the eight pre-award checklist sections a federal-grants office uses for FOA review: FOA summary, key dates, funding, eligibility, application components, evaluation process, program priorities, special requirements. Sibling of rfa-checklist-extraction-udm with stronger emphasis on evaluation-criteria, review-process, and submission-system fields.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "foa_number",
+    "federal_agency",
+    "foa_title",
+    "critical_dates",
+    "eligible_applicants",
+    "evaluation_criteria",
+    "review_stages",
+    "program_goals",
+    "submission_platform",
+    "required_registrations",
+    "required_forms",
+    "application_components"
+  ],
+  "properties": {
+    "foa_number": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Funding opportunity number. Resolves to UDM RFA.Opportunity_Number."
+    },
+    "cfda_number": {
+      "type": ["string", "null"],
+      "description": "CFDA number and title. Resolves to UDM RFA.CFDA_Number."
+    },
+    "federal_agency": {
+      "type": "string",
+      "enum": ["NSF", "NIH", "DOD", "DOE", "NASA", "USDA", "EPA", "DOT", "DOC", "ED", "Other"],
+      "description": "Federal agency name. Resolves to UDM Organization.Organization_Name."
+    },
+    "foa_title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Full title of the funding opportunity. Resolves to UDM RFA.RFA_Title."
+    },
+    "total_funding": {"type": ["number", "null"], "description": "Total available funding."},
+    "expected_awards": {"type": ["integer", "null"], "minimum": 0, "description": "Expected number of awards."},
+    "award_range": {"type": ["string", "null"]},
+    "cost_sharing_required": {"type": ["boolean", "null"]},
+    "critical_dates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["milestone", "date_time"],
+        "properties": {
+          "milestone": {"type": "string", "minLength": 1},
+          "date_time": {"type": "string", "minLength": 1},
+          "notes": {"type": ["string", "null"]}
+        }
+      },
+      "description": "All gating milestones (LOI, pre-application, full application, panel review, anticipated start)."
+    },
+    "performance_period": {"type": ["string", "null"]},
+    "eligible_applicants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "evaluation_criteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["criterion_name", "description"],
+        "properties": {
+          "criterion_name": {"type": "string", "minLength": 1},
+          "weight": {"type": ["string", "null"], "description": "Quote points or percentage verbatim."},
+          "description": {"type": "string", "minLength": 1},
+          "rating_definitions": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "total_points": {"type": ["string", "null"]},
+    "scoring_methodology": {"type": ["string", "null"]},
+    "minimum_threshold": {"type": ["string", "null"]},
+    "review_stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stage_name", "purpose"],
+        "properties": {
+          "stage_name": {"type": "string", "minLength": 1},
+          "purpose": {"type": "string", "minLength": 1},
+          "outcome": {"type": ["string", "null"], "description": "What proceeds to the next stage."}
+        }
+      }
+    },
+    "review_personnel": {"type": ["string", "null"]},
+    "screening_criteria": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "review_timeline": {"type": ["string", "null"]},
+    "agency_mission": {"type": ["string", "null"]},
+    "program_goals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["goal"],
+        "properties": {
+          "goal": {"type": "string", "minLength": 1},
+          "objective": {"type": ["string", "null"]},
+          "success_indicator": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "priority_areas": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "description": "In stated order of importance."
+    },
+    "expected_outcomes": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "submission_platform": {"type": "string", "minLength": 1},
+    "required_registrations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["system_name"],
+        "properties": {
+          "system_name": {"type": "string", "minLength": 1},
+          "timeline": {"type": ["string", "null"]},
+          "prerequisites": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "required_forms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "form_number": {"type": ["string", "null"]},
+          "name": {"type": "string", "minLength": 1},
+          "purpose": {"type": ["string", "null"]},
+          "special_instructions": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "application_components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["component_name"],
+        "properties": {
+          "component_name": {"type": "string", "minLength": 1},
+          "required_or_optional": {"type": ["string", "null"], "enum": ["required", "optional", null]},
+          "page_limit": {"type": ["string", "null"]},
+          "format_requirements": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "document_structure": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "page_limits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["section", "limit"],
+        "properties": {
+          "section": {"type": "string", "minLength": 1},
+          "limit": {"type": "string", "minLength": 1},
+          "what_counts": {"type": ["string", "null"]},
+          "consequences": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "formatting_standards": {"type": ["string", "null"]},
+    "file_requirements": {"type": ["string", "null"]}
+  }
+}

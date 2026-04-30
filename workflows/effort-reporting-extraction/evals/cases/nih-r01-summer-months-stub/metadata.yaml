@@ -1,0 +1,26 @@
+# Case identity
+case: nih-r01-summer-months-stub
+source: "Placeholder case shell — to be replaced with an authorized, de-identified NIH R01 award notice with summer-month commitment, after-the-fact certification, and explicit governing regulation reference."
+source_url: "https://www.nih.gov/grants/"
+retrieved: 2026-04-30
+
+structural_features:
+  - nih-r01
+  - summer-month-commitment
+  - after-the-fact-certification
+  - 2-cfr-200-430-cited
+
+workflow_features:
+  - reporting_frequency_enum_normalization
+  - certification_method_enum_normalization
+  - pi_mirror_rule_committed_effort_person_months
+  - validation_plan_chk01_effort_sum_chk02_person_months_consistency
+
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-04-30
+validated_against_version: "0.1.0"
+component_versions_at_validation:
+  effort-reporting-extraction-udm: "0.1.0"
+
+notes: |
+  Scaffolded case shell only.

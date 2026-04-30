@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/subaward-extraction-udm/schema.json",
+  "title": "Subaward Agreement Extraction — UDM Output",
+  "description": "JSON contract for a fully executed subaward agreement (Pass-Through Entity → Subrecipient) distilled into nine sections used for research-administration setup and ongoing monitoring. UDM-aligned to Award, Subaward, Organization, Personnel, ContactDetails, IndirectRate, CostShare, AwardDeliverable, Modification, Terms, ConflictOfInterest.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pte_name",
+    "subrecipient_name",
+    "subaward_number",
+    "project_title",
+    "pte_pi",
+    "subrecipient_pi",
+    "budget_period_start",
+    "budget_period_end",
+    "amount_funded",
+    "technical_reports",
+    "financial_reports",
+    "invention_reporting",
+    "governing_regulations"
+  ],
+  "$defs": {
+    "contact": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "email": {"type": ["string", "null"]},
+        "phone": {"type": ["string", "null"]}
+      }
+    },
+    "report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["report_name"],
+      "properties": {
+        "report_name": {"type": "string", "minLength": 1},
+        "frequency": {"type": ["string", "null"]},
+        "due": {"type": ["string", "null"]},
+        "recipient": {"type": ["string", "null"]}
+      }
+    }
+  },
+  "properties": {
+    "pte_name": {"type": "string", "minLength": 1, "description": "Pass-Through Entity name. Resolves to UDM Organization.Organization_Name."},
+    "subrecipient_name": {"type": "string", "minLength": 1, "description": "Subrecipient organization name. Resolves to UDM Organization.Organization_Name."},
+    "federal_award_number": {"type": ["string", "null"], "description": "PTE Federal Award Number (FAIN). Resolves to UDM Award.Federal_Award_ID."},
+    "subaward_number": {"type": "string", "minLength": 1, "description": "Subaward number. Resolves to UDM Subaward.Subaward_Number."},
+    "project_title": {"type": "string", "minLength": 1, "description": "Full project title. Resolves to UDM Award.Award_Title."},
+    "federal_awarding_agency": {"type": ["string", "null"]},
+
+    "pte_pi": {"$ref": "#/$defs/contact", "description": "PTE Principal Investigator. Resolves to UDM Personnel."},
+    "pte_admin_contact": {"$ref": "#/$defs/contact"},
+    "pte_financial_contact": {"$ref": "#/$defs/contact"},
+    "subrecipient_pi": {"$ref": "#/$defs/contact", "description": "Subrecipient PI. Resolves to UDM Subaward.PI_Name + Personnel."},
+    "subrecipient_admin_contact": {"$ref": "#/$defs/contact"},
+    "subrecipient_financial_contact": {"$ref": "#/$defs/contact"},
+
+    "budget_period_start": {"type": "string", "minLength": 1, "description": "Subaward budget period start date. Resolves to UDM Subaward.Start_Date."},
+    "budget_period_end": {"type": "string", "minLength": 1, "description": "Subaward budget period end date. Resolves to UDM Subaward.End_Date."},
+    "amount_funded": {"type": "number", "description": "Amount funded this action. Resolves to UDM Subaward.Subaward_Amount. Cross-field check CHK-01: amount_funded == total_direct_costs + total_indirect_costs when all three present."},
+    "total_direct_costs": {"type": ["number", "null"]},
+    "total_indirect_costs": {"type": ["number", "null"]},
+    "cost_type": {
+      "type": ["string", "null"],
+      "enum": ["Cost Reimbursement", "Fixed Price", "Time and Materials", null]
+    },
+
+    "invoicing_frequency": {
+      "type": ["string", "null"],
+      "enum": ["Monthly", "Quarterly", "Semi-Annual", "Annual", null],
+      "description": "Resolves to UDM Terms.Invoicing_Frequency."
+    },
+    "final_invoice_due": {"type": ["string", "null"]},
+    "fa_rate": {"type": ["string", "null"], "description": "Resolves to UDM IndirectRate.Rate_Percentage."},
+    "fa_base": {"type": ["string", "null"], "description": "Resolves to UDM IndirectRate.Base_Type."},
+    "cost_sharing_required": {"type": ["boolean", "null"], "description": "Resolves to UDM CostShare.Is_Mandatory."},
+    "carryforward_policy": {"type": ["string", "null"]},
+
+    "technical_reports": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/report"},
+      "description": "Required technical reports. Resolves to UDM AwardDeliverable. Empty array when none required."
+    },
+    "financial_reports": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/report"},
+      "description": "Required financial reports. Resolves to UDM AwardDeliverable. Empty array when none required."
+    },
+    "invention_reporting": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["requirement"],
+        "properties": {
+          "requirement": {"type": "string", "minLength": 1},
+          "timing": {"type": ["string", "null"]}
+        }
+      },
+      "description": "Invention disclosure and reporting requirements."
+    },
+
+    "governing_regulations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["regulation"],
+        "properties": {
+          "regulation": {"type": "string", "minLength": 1},
+          "source": {"type": ["string", "null"], "description": "Document section / attachment that calls it out."}
+        }
+      }
+    },
+    "prior_approval_handling": {"type": ["string", "null"], "description": "General prior-approval policy. Resolves to UDM Modification.Requires_Prior_Approval."},
+    "coi_policy": {"type": ["string", "null"], "description": "Conflict of interest policy application. Resolves to UDM ConflictOfInterest."},
+    "data_rights": {"type": ["string", "null"]},
+    "audit_requirements": {"type": ["string", "null"]},
+    "termination_clauses": {"type": ["string", "null"]},
+    "record_retention": {"type": ["string", "null"], "description": "Resolves to UDM Terms.Record_Retention_Years."}
+  }
+}

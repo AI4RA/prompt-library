@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/effort-reporting-extraction-udm/schema.json",
+  "title": "Effort Reporting Compliance Extraction — UDM Output",
+  "description": "JSON contract for effort-reporting and personnel-compliance requirements distilled from a federal award document. Produces award-identifying scalars, an effort-reporting cadence, PI commitments, a per-person key-personnel table, cost-shared effort, governing regulation, record-retention period, and referenced governing documents. UDM-aligned to Award, Personnel, Effort, ProjectRole, CostShare, and Terms.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pi_committed_effort",
+    "key_personnel_commitments",
+    "referenced_documents"
+  ],
+  "properties": {
+    "award_number": {
+      "type": ["string", "null"],
+      "description": "Federal Award Identification Number as printed on the award. Resolves to UDM Award.Award_Number."
+    },
+    "pi_name": {
+      "type": ["string", "null"],
+      "description": "Principal Investigator full name. Resolves to UDM Personnel.First_Name + Personnel.Last_Name."
+    },
+    "project_title": {
+      "type": ["string", "null"],
+      "description": "Full project title as stated in the award. Resolves to UDM Award.Award_Title."
+    },
+    "reporting_frequency": {
+      "type": ["string", "null"],
+      "enum": ["Monthly", "Quarterly", "Semi-Annual", "Annual", null],
+      "description": "Cadence at which effort must be certified. Distinct from the FFR submission cadence."
+    },
+    "certification_deadline": {
+      "type": ["string", "null"],
+      "description": "Deadline for effort certification after each reporting period end. Quote day-counts verbatim."
+    },
+    "certification_method": {
+      "type": ["string", "null"],
+      "enum": ["After-the-Fact", "Plan-Confirmation", "Payroll-Based", null],
+      "description": "Effort certification method per 2 CFR 200.430(i). Resolves to UDM Effort.Certification_Method."
+    },
+    "pi_committed_effort": {
+      "type": "string",
+      "minLength": 1,
+      "description": "PI committed effort using the sponsor's exact phrasing (e.g., '2.0 summer months', '25% academic year'). Resolves to UDM Effort.Committed_Percent."
+    },
+    "pi_person_months": {
+      "type": ["string", "null"],
+      "description": "PI committed effort expressed as person-months when the document provides it (e.g., '2.0'). Resolves to UDM Effort.Committed_Person_Months."
+    },
+    "key_personnel_commitments": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Per-person key-personnel commitments. Each row covers one named individual. Resolves to UDM Effort rows.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "role", "committed_effort"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Personnel full name as stated."
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Project role (e.g., 'PI', 'Co-PI', 'Senior Personnel'). Resolves to UDM ProjectRole."
+          },
+          "committed_effort": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Committed effort using the sponsor's exact phrasing."
+          },
+          "person_months": {
+            "type": ["string", "null"],
+            "description": "Effort expressed in person-months when the document provides it."
+          },
+          "cost_shared_effort": {
+            "type": ["string", "null"],
+            "description": "Cost-shared portion of the commitment, when separately documented."
+          },
+          "notes": {
+            "type": ["string", "null"],
+            "description": "Optional clarifying note (e.g., conditional effort, ceiling, dependent on enrollment)."
+          }
+        }
+      }
+    },
+    "cost_shared_effort": {
+      "type": ["string", "null"],
+      "description": "Total cost-shared effort obligations across the award. Resolves to UDM CostShare.Committed_Amount."
+    },
+    "governing_regulation": {
+      "type": ["string", "null"],
+      "description": "Primary governing regulation cited (e.g., '2 CFR 200.430')."
+    },
+    "record_retention": {
+      "type": ["string", "null"],
+      "description": "Record retention period requirement (e.g., '3 years', 'per sponsor requirements'). Resolves to UDM Terms.Record_Retention_Years."
+    },
+    "referenced_documents": {
+      "type": "array",
+      "description": "Referenced governing documents (RTCs, CA-FATC, agency policy statements). Empty array when none are stated.",
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}

@@ -1,0 +1,39 @@
+# Case identity
+case: federal-award-pms-stub
+source: "Placeholder case shell — to be replaced with an authorized, de-identified federal award notice that exercises a strict PMS submission schedule, explicit late-submission penalty language, and a documented preparation timeline."
+source_url: "https://www.grants.gov/"
+retrieved: 2026-04-30
+
+# Which structural features of the input award notice this case exercises.
+structural_features:
+  - pms-platform
+  - 90-day-annual-cadence
+  - explicit-late-penalties
+  - documented-preparation-timeline
+
+# Workflow-level behaviors this case targets. These are pipeline-level
+# checks that no single component's evals can cover (flat-to-nested collapse,
+# platform enum normalization, empty preparation_timeline rule, the two
+# validation_plan checks).
+workflow_features:
+  - flat_to_nested_submission_system_collapse
+  - platform_enum_normalization_pms
+  - preparation_timeline_populated_only_from_document
+  - validation_plan_chk01_date_format_chk02_deadline_consistency
+
+# Validation metadata — REQUIRED.
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-04-30
+validated_against_version: "0.1.0"
+component_versions_at_validation:
+  ffr-management-extraction-udm: "0.1.0"
+
+# Optional free-form notes on what was confirmed, what was surprising,
+# what should be re-checked on the next revalidation pass.
+notes: |
+  Scaffolded case shell only. The expected.json and input-source.md
+  artifacts will be added once an authorized, de-identified federal award
+  notice is selected and a sponsored-programs reviewer has produced and
+  validated the consolidated FFR JSON. This stub exists so the workflow can
+  declare workflow_local: true per docs/contracts.md while the real case is
+  being assembled in evaluation-data-sets.
