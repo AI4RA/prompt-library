@@ -1,0 +1,519 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "exported_at": "2026-04-30T00:00:00+00:00",
+  "exported_by": "ui-insight",
+  "items": [
+    {
+      "name": "Subaward Agreement Extraction",
+      "description": "Uploads a fully executed subaward agreement (Pass-Through Entity → Subrecipient) and returns a single structured JSON object covering nine sections used for research-administration setup and ongoing monitoring: core award info, project periods, PTE contacts, subrecipient contacts, financial summary, financial policies, reporting requirements, prior- approval handling, and key compliance requirements. Output conforms to the subaward-extraction-udm component schema. The runtime mirrors the ui-insight/ProcessMapping subaward-extraction workflow (six parallel Extraction tasks plus a Consolidation Prompt).",
+      "steps": [
+        {
+          "name": "Parallel Extraction",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-core-award-information",
+                "prompt": "Extract core identifying information and party details from\nthe subaward agreement. Be 100% accurate — quote names,\nnumbers, and titles verbatim.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Core Award Information",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": null,
+                  "items": [
+                    {
+                      "searchphrase": "Pass-Through Entity name.",
+                      "searchtype": "extraction",
+                      "title": "pte_name",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Subrecipient organization name.",
+                      "searchtype": "extraction",
+                      "title": "subrecipient_name",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "PTE Federal Award Number (FAIN). Required by source workflow.",
+                      "searchtype": "extraction",
+                      "title": "federal_award_number",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Subaward number.",
+                      "searchtype": "extraction",
+                      "title": "subaward_number",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Full project title.",
+                      "searchtype": "extraction",
+                      "title": "project_title",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Federal awarding agency name. Required by source workflow.",
+                      "searchtype": "extraction",
+                      "title": "federal_awarding_agency",
+                      "is_optional": false,
+                      "enum_values": null
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-contact-information",
+                "prompt": "Extract personnel contact information for both PTE and\nSubrecipient with character-perfect accuracy for emails and\nphone numbers. Each contact is captured here as three\nsearchset items (name / email / phone); the downstream\nConsolidation Prompt will compose them into {name, email,\nphone} objects.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Contact Information",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": null,
+                  "items": [
+                    {
+                      "searchphrase": "PTE Principal Investigator full name.",
+                      "searchtype": "extraction",
+                      "title": "pte_pi_name",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "PTE PI email address (character-perfect).",
+                      "searchtype": "extraction",
+                      "title": "pte_pi_email",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "PTE PI phone number (character-perfect).",
+                      "searchtype": "extraction",
+                      "title": "pte_pi_phone",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "PTE Administrative Contact name.",
+                      "searchtype": "extraction",
+                      "title": "pte_admin_contact_name",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "PTE Administrative Contact email (character-perfect).",
+                      "searchtype": "extraction",
+                      "title": "pte_admin_contact_email",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "PTE Administrative Contact phone (character-perfect).",
+                      "searchtype": "extraction",
+                      "title": "pte_admin_contact_phone",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "PTE Financial Contact name.",
+                      "searchtype": "extraction",
+                      "title": "pte_financial_contact_name",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "PTE Financial Contact email.",
+                      "searchtype": "extraction",
+                      "title": "pte_financial_contact_email",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "PTE Financial Contact phone.",
+                      "searchtype": "extraction",
+                      "title": "pte_financial_contact_phone",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Subrecipient PI full name.",
+                      "searchtype": "extraction",
+                      "title": "subrecipient_pi_name",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Subrecipient PI email (character-perfect).",
+                      "searchtype": "extraction",
+                      "title": "subrecipient_pi_email",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Subrecipient PI phone (character-perfect).",
+                      "searchtype": "extraction",
+                      "title": "subrecipient_pi_phone",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Subrecipient Administrative Contact name.",
+                      "searchtype": "extraction",
+                      "title": "subrecipient_admin_contact_name",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Subrecipient Administrative Contact email.",
+                      "searchtype": "extraction",
+                      "title": "subrecipient_admin_contact_email",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Subrecipient Administrative Contact phone.",
+                      "searchtype": "extraction",
+                      "title": "subrecipient_admin_contact_phone",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Subrecipient Financial Contact name.",
+                      "searchtype": "extraction",
+                      "title": "subrecipient_financial_contact_name",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Subrecipient Financial Contact email.",
+                      "searchtype": "extraction",
+                      "title": "subrecipient_financial_contact_email",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Subrecipient Financial Contact phone.",
+                      "searchtype": "extraction",
+                      "title": "subrecipient_financial_contact_phone",
+                      "is_optional": true,
+                      "enum_values": null
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-dates-and-monetary-values",
+                "prompt": "Extract dates and monetary values with absolute precision.\nCross-reference amounts against multiple document locations.\n\nMatch the schema's type for each field exactly:\n  - amount_funded, total_direct_costs, total_indirect_costs\n    are JSON numbers (no quotes, no currency symbol, no\n    thousand-separators). \"$1,234,567.89\" becomes 1234567.89.\n    Use the document's exact value; do not round.\n  - budget_period_start, budget_period_end are STRINGS\n    (date format preserved).\n  - cost_type is a STRING from the enum below.\n\nFor cost_type return one of: Cost Reimbursement, Fixed Price,\nTime and Materials.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Dates & Monetary Values",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": null,
+                  "items": [
+                    {
+                      "searchphrase": "Subaward budget period start date.",
+                      "searchtype": "extraction",
+                      "title": "budget_period_start",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Subaward budget period end date.",
+                      "searchtype": "extraction",
+                      "title": "budget_period_end",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Amount funded this action as a JSON number (no quotes, no currency symbol, no thousand-separators). \"$500,000\" becomes 500000.",
+                      "searchtype": "extraction",
+                      "title": "amount_funded",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Total direct costs as a JSON number (no quotes, no currency symbol, no thousand-separators).",
+                      "searchtype": "extraction",
+                      "title": "total_direct_costs",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Total indirect costs as a JSON number (no quotes, no currency symbol, no thousand-separators).",
+                      "searchtype": "extraction",
+                      "title": "total_indirect_costs",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Cost type classification (Cost Reimbursement, Fixed Price, Time and Materials).",
+                      "searchtype": "extraction",
+                      "title": "cost_type",
+                      "is_optional": true,
+                      "enum_values": [
+                        "Cost Reimbursement",
+                        "Fixed Price",
+                        "Time and Materials"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-financial-policies",
+                "prompt": "Extract financial policies, rates, and requirements. For\ninvoicing_frequency return one of: Monthly, Quarterly,\nSemi-Annual, Annual.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Financial Policies",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": null,
+                  "items": [
+                    {
+                      "searchphrase": "Invoicing frequency (Monthly, Quarterly, Semi-Annual, Annual). Required by source workflow.",
+                      "searchtype": "extraction",
+                      "title": "invoicing_frequency",
+                      "is_optional": false,
+                      "enum_values": [
+                        "Monthly",
+                        "Quarterly",
+                        "Semi-Annual",
+                        "Annual"
+                      ]
+                    },
+                    {
+                      "searchphrase": "Final invoice due date / timeframe.",
+                      "searchtype": "extraction",
+                      "title": "final_invoice_due",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Indirect cost (F&A) rate percentage as stated.",
+                      "searchtype": "extraction",
+                      "title": "fa_rate",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Indirect cost calculation base (MTDC, TDC, etc.).",
+                      "searchtype": "extraction",
+                      "title": "fa_base",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Boolean. Whether cost sharing is required.",
+                      "searchtype": "extraction",
+                      "title": "cost_sharing_required",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Carryforward policy details.",
+                      "searchtype": "extraction",
+                      "title": "carryforward_policy",
+                      "is_optional": true,
+                      "enum_values": null
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-reporting-requirements",
+                "prompt": "Extract only explicitly required reports as mandated by the\nsubaward agreement, with strict inclusion criteria — do NOT\nsynthesize standard reports the agreement does not mandate.\nEach report row is one required deliverable.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Reporting Requirements",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": null,
+                  "items": [
+                    {
+                      "searchphrase": "JSON array of {report_name, frequency, due, recipient} for required technical reports. Empty array when none required.",
+                      "searchtype": "extraction",
+                      "title": "technical_reports",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "JSON array of {report_name, frequency, due, recipient} for required financial reports. Empty array when none required.",
+                      "searchtype": "extraction",
+                      "title": "financial_reports",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "JSON array of {requirement, timing} for invention disclosure and reporting requirements.",
+                      "searchtype": "extraction",
+                      "title": "invention_reporting",
+                      "is_optional": true,
+                      "enum_values": null
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-compliance-requirements",
+                "prompt": "Extract compliance requirements, governing regulations, prior\napproval handling, COI policy, data rights, audit\nrequirements, and termination clauses with source attribution.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Compliance Requirements",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": null,
+                  "items": [
+                    {
+                      "searchphrase": "JSON array of {regulation, source} naming each governing instrument with the document section / attachment that calls it out.",
+                      "searchtype": "extraction",
+                      "title": "governing_regulations",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "General prior-approval policy.",
+                      "searchtype": "extraction",
+                      "title": "prior_approval_handling",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Conflict of interest policy application.",
+                      "searchtype": "extraction",
+                      "title": "coi_policy",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Data rights and sharing terms.",
+                      "searchtype": "extraction",
+                      "title": "data_rights",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Audit requirements and thresholds.",
+                      "searchtype": "extraction",
+                      "title": "audit_requirements",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Termination notice period and conditions.",
+                      "searchtype": "extraction",
+                      "title": "termination_clauses",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Record retention requirements.",
+                      "searchtype": "extraction",
+                      "title": "record_retention",
+                      "is_optional": true,
+                      "enum_values": null
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consolidation",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "subaward-summary-consolidation",
+                "prompt": "You are assembling the Subaward Agreement Extraction output.\nThe input is the JSON fragment produced by the upstream six\nparallel Extraction tasks. Your job is to emit a single JSON\nobject that validates against the\nsubaward-extraction-udm@0.1.0 schema.\n\nRules:\n1. For each of the six contact fields (pte_pi, pte_admin_contact,\n   pte_financial_contact, subrecipient_pi,\n   subrecipient_admin_contact, subrecipient_financial_contact),\n   compose a single object {name, email, phone} from the three\n   corresponding searchset items. When the name is missing,\n   set the entire contact field to null.\n2. cost_type and invoicing_frequency must use enum values\n   exactly. Normalize document phrasings to the closest enum.\n3. Verify CFR-01 reconciliation: amount_funded ==\n   total_direct_costs + total_indirect_costs when all three\n   are present. When they do not reconcile, preserve the\n   document's reported values rather than synthesizing.\n4. technical_reports, financial_reports, and invention_reporting\n   are typed arrays. Empty array when the agreement does not\n   require any.\n5. governing_regulations is required and must list every\n   governing instrument with its source attribution.\n6. Use null for missing scalar fields; never invent values.\n   Quote emails and phone numbers character-perfectly.\n7. Do not output any text outside the single JSON object.",
+                "input_source": "step_input"
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "check_id": "CHK-01",
+          "check_name": "Monetary cross-reference",
+          "check_type": "arithmetic",
+          "check_description": "When amount_funded, total_direct_costs, and total_indirect_costs are all present, verify amount_funded == total_direct_costs + total_indirect_costs.",
+          "target_fields": [
+            "amount_funded",
+            "total_direct_costs",
+            "total_indirect_costs"
+          ],
+          "severity": "error"
+        },
+        {
+          "check_id": "CHK-02",
+          "check_name": "Date consistency",
+          "check_type": "consistency",
+          "check_description": "Verify budget_period_start precedes budget_period_end and that all dates are well-formed.",
+          "target_fields": [
+            "budget_period_start",
+            "budget_period_end"
+          ],
+          "severity": "error"
+        },
+        {
+          "check_id": "CHK-03",
+          "check_name": "Contact info format",
+          "check_type": "format",
+          "check_description": "Verify each non-null contact has a non-empty name; emails and phones, when present, match basic format patterns.",
+          "target_fields": [
+            "pte_pi",
+            "pte_admin_contact",
+            "pte_financial_contact",
+            "subrecipient_pi",
+            "subrecipient_admin_contact",
+            "subrecipient_financial_contact"
+          ],
+          "severity": "warning"
+        }
+      ],
+      "validation_inputs": [],
+      "x_ai4ra": {
+        "workflow_source": "workflows/subaward-extraction/manifest.yaml",
+        "workflow_version": "0.1.0",
+        "status": "experimental",
+        "components": [
+          {
+            "slug": "subaward-extraction-udm",
+            "version": "0.1.0"
+          }
+        ]
+      }
+    }
+  ]
+}

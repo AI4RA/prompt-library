@@ -1,0 +1,27 @@
+# Case identity
+case: nih-multi-stage-review-stub
+source: "Placeholder case shell — to be replaced with an authorized, de-identified NIH PA/PAR FOA with multi-stage review (LOI → full → study section → council), point-weighted evaluation criteria, and prerequisite registrations (eRA Commons, SAM, UEI)."
+source_url: "https://grants.nih.gov/grants/guide/"
+retrieved: 2026-04-30
+
+structural_features:
+  - nih-pa-par
+  - multi-stage-review
+  - point-weighted-criteria
+  - era-commons-required
+
+workflow_features:
+  - six_fragment_assembly
+  - federal_agency_enum_normalization_nih
+  - chk02_date_consistency_loi_before_full
+  - chk03_funding_arithmetic
+  - review_stages_sequential_order_preserved
+
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-04-30
+validated_against_version: "0.1.0"
+component_versions_at_validation:
+  foa-checklist-extraction-udm: "0.1.0"
+
+notes: |
+  Scaffolded case shell only.

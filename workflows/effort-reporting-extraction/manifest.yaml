@@ -1,0 +1,177 @@
+# Authored source for the Effort Reporting Compliance Extraction Vandalizer workflow.
+#
+# The companion effort-reporting-extraction.vandalizer.json is generated from
+# this file by scripts/build_vandalizer_workflows.py and committed alongside.
+# Never hand-edit the generated JSON — update this manifest and rebuild.
+#
+# Runtime topology (v0.1.0):
+#   Step 1  Extraction
+#     1 Extraction task with an embedded SearchSet whose item titles mirror
+#     the effort-reporting-extraction-udm@0.1.0 schema field names.
+#   Step 2  Consolidation
+#     1 Prompt task assembles the JSON fragment into a schema-conformant
+#     object and normalizes the reporting_frequency / certification_method
+#     enums.
+
+name: Effort Reporting Compliance Extraction
+description: >
+  Uploads a federal award notice or agreement and returns a single
+  structured JSON object covering effort-reporting and personnel-compliance
+  requirements: cadence, certification method, PI commitments, per-person
+  key-personnel commitments, cost-shared effort, governing regulation,
+  record-retention requirement, and referenced governing documents. Output
+  conforms to the effort-reporting-extraction-udm component schema. The
+  runtime mirrors the ui-insight/ProcessMapping effort-reporting-extraction
+  workflow (one Extraction task plus a Formatting/Consolidation task).
+
+workflow_version: 0.1.0
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-04-30
+updated: 2026-04-30
+
+components:
+  - slug: effort-reporting-extraction-udm
+    pinned_version: 0.1.0
+
+validation_plan:
+  - check_id: CHK-01
+    check_name: Effort percentages sum
+    check_type: arithmetic
+    check_description: When effort is expressed as percentages across multiple months/periods, the sum should equal the document's stated total commitment.
+    target_fields:
+      - pi_committed_effort
+      - key_personnel_commitments
+    severity: error
+  - check_id: CHK-02
+    check_name: Person-months consistency
+    check_type: consistency
+    check_description: pi_person_months should match the PI's row in key_personnel_commitments and be derivable from pi_committed_effort.
+    target_fields:
+      - pi_person_months
+      - pi_committed_effort
+      - key_personnel_commitments
+    severity: warning
+  - check_id: CHK-03
+    check_name: Personnel table completeness
+    check_type: completeness
+    check_description: Every named individual in the document with a committed effort should appear in key_personnel_commitments (including the PI).
+    target_fields:
+      - key_personnel_commitments
+    severity: warning
+
+steps:
+  - name: Extraction
+    tasks:
+      - name: extract-effort-compliance
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          You are extracting effort-reporting and personnel-compliance
+          requirements from a federal award document.
+
+          Be 100% accurate. For each searchset item, return the value as
+          the document states it. Quote effort percentages, person-months,
+          and day-counts verbatim ("2.0 summer months", "25%", "30 days").
+          Use null when a field is not present — never invent values.
+
+          Search the entire document with attention to sections titled
+          "Effort Reporting", "Time and Effort", "Personnel", "Key
+          Personnel", "Budget Justification", or "Research Terms and
+          Conditions". Keywords to follow: effort reporting, time and
+          effort, personnel, key personnel, salary, certification, 2 CFR
+          200.430, cost share effort, person-months, summer months, FATC,
+          RTC, principal investigator, co-principal investigator.
+
+          For reporting_frequency return one of: Monthly, Quarterly,
+          Semi-Annual, Annual. For certification_method return one of:
+          After-the-Fact, Plan-Confirmation, Payroll-Based.
+
+          key_personnel_commitments is a JSON array; one row per named
+          individual with role, committed_effort, person_months, and any
+          cost_shared_effort. The PI's row should mirror the
+          pi_committed_effort scalar exactly.
+
+          referenced_documents is for governing instruments only (RTCs,
+          CA-FATC, NSF PAPPG, NIH GPS) — not for cited regulations
+          (governing_regulation).
+        searchset:
+          title: Effort Reporting Compliance Extraction
+          domain: research-administration
+          items:
+            - title: award_number
+              searchphrase: Federal Award Identification Number printed on the award.
+            - title: pi_name
+              searchphrase: Principal Investigator full name.
+            - title: project_title
+              searchphrase: Full project title as stated in the award.
+            - title: reporting_frequency
+              searchphrase: Cadence at which effort must be certified (Monthly, Quarterly, Semi-Annual, Annual).
+              enum_values:
+                - Monthly
+                - Quarterly
+                - Semi-Annual
+                - Annual
+            - title: certification_deadline
+              searchphrase: Deadline for effort certification after each reporting period end.
+              is_optional: true
+            - title: certification_method
+              searchphrase: Effort certification method per 2 CFR 200.430(i) (After-the-Fact, Plan-Confirmation, Payroll-Based).
+              is_optional: true
+              enum_values:
+                - After-the-Fact
+                - Plan-Confirmation
+                - Payroll-Based
+            - title: pi_committed_effort
+              searchphrase: PI committed effort using the sponsor's exact phrasing (e.g., "2.0 summer months", "25% academic year").
+            - title: pi_person_months
+              searchphrase: PI committed effort expressed as person-months when the document provides it.
+              is_optional: true
+            - title: key_personnel_commitments
+              searchphrase: JSON array of {name, role, committed_effort, person_months, cost_shared_effort, notes}, one row per named individual.
+            - title: cost_shared_effort
+              searchphrase: Total cost-shared effort obligations across the award, when separately documented.
+              is_optional: true
+            - title: governing_regulation
+              searchphrase: Primary governing regulation cited (e.g., "2 CFR 200.430").
+              is_optional: true
+            - title: record_retention
+              searchphrase: Record retention period requirement (e.g., "3 years", "per sponsor requirements").
+              is_optional: true
+            - title: referenced_documents
+              searchphrase: Referenced governing documents (RTCs, CA-FATC, agency policy statements). Empty array when none are stated.
+              is_optional: true
+
+  - name: Consolidation
+    is_output: true
+    tasks:
+      - name: effort-compliance-consolidation
+        kind: Prompt
+        input_source: step_input
+        prompt_inline: |
+          You are assembling the Effort Reporting Compliance Extraction
+          output. The input is the JSON fragment produced by the upstream
+          Extraction task. Your job is to emit a single JSON object that
+          validates against the effort-reporting-extraction-udm@0.1.0
+          schema.
+
+          Rules:
+          1. Map each Extraction searchset item to the corresponding
+             top-level schema field.
+          2. reporting_frequency and certification_method must use the
+             enum values exactly. Normalize document phrasings to the
+             closest enum; null when not specified.
+          3. pi_committed_effort is required. Use the sponsor's exact
+             phrasing.
+          4. key_personnel_commitments is required and must contain at
+             least one row. Ensure the PI is represented and that their
+             row mirrors pi_committed_effort and pi_person_months
+             exactly.
+          5. referenced_documents is a flat list of governing-instrument
+             names; cited regulations belong in governing_regulation.
+          6. Use null for missing scalar fields; never invent values.
+          7. Do not output any text outside the single JSON object.
+
+evals:
+  workflow_local: true

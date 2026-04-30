@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/proposal-budget-personnel-extraction-udm/schema.json",
+  "title": "Proposal Budget Personnel & Compliance Triggers — UDM Output",
+  "description": "JSON contract for personnel information and compliance-requirement triggers extracted from a proposal budget document. Derivable booleans (has_postdocs_or_grad_students, mentoring_plan_required, has_subawards, has_equipment_over_5k) drive downstream document-completeness reviews. UDM-aligned to Personnel, IndirectRate, and CostShare.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "senior_key_personnel",
+    "postdoc_count",
+    "postdoc_details",
+    "graduate_student_count",
+    "graduate_student_details",
+    "other_personnel",
+    "has_postdocs_or_grad_students",
+    "mentoring_plan_required",
+    "budget_categories",
+    "subaward_recipients",
+    "has_subawards",
+    "equipment_items",
+    "has_equipment_over_5k",
+    "total_costs"
+  ],
+  "properties": {
+    "senior_key_personnel": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "role"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "role": {"type": "string", "minLength": 1},
+          "institution": {"type": ["string", "null"]},
+          "effort": {"type": ["string", "null"]},
+          "salary_requested": {"type": ["number", "null"]}
+        }
+      },
+      "description": "Senior key personnel with effort and salary. Resolves to UDM Personnel."
+    },
+    "postdoc_count": {"type": "integer", "minimum": 0},
+    "postdoc_details": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1, "description": "Use 'TBN' for to-be-named slots."},
+          "effort": {"type": ["string", "null"]},
+          "salary_or_stipend": {"type": ["number", "null"]}
+        }
+      }
+    },
+    "graduate_student_count": {"type": "integer", "minimum": 0},
+    "graduate_student_details": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "type"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1, "description": "Use 'TBN' for to-be-named slots."},
+          "type": {"type": "string", "enum": ["RA", "TA"]},
+          "stipend": {"type": ["number", "null"]},
+          "tuition_remission": {"type": ["number", "null"]}
+        }
+      }
+    },
+    "undergraduate_count": {"type": ["integer", "null"], "minimum": 0},
+    "other_personnel": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role"],
+        "properties": {
+          "role": {"type": "string", "minLength": 1},
+          "cost": {"type": ["number", "null"]}
+        }
+      }
+    },
+    "total_personnel_cost": {"type": ["number", "null"]},
+    "has_postdocs_or_grad_students": {
+      "type": "boolean",
+      "description": "Derived: (postdoc_count > 0) OR (graduate_student_count > 0)."
+    },
+    "mentoring_plan_required": {
+      "type": "boolean",
+      "description": "Derived: equals has_postdocs_or_grad_students for NSF sponsors; per agency policy otherwise."
+    },
+    "budget_categories": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["category_name", "amount"],
+        "properties": {
+          "category_name": {"type": "string", "minLength": 1},
+          "amount": {"type": "number"},
+          "notes": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "subaward_recipients": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["institution_name", "amount"],
+        "properties": {
+          "institution_name": {"type": "string", "minLength": 1},
+          "sub_pi_name": {"type": ["string", "null"]},
+          "amount": {"type": "number"}
+        }
+      }
+    },
+    "has_subawards": {
+      "type": "boolean",
+      "description": "Derived: len(subaward_recipients) > 0."
+    },
+    "equipment_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["description", "cost"],
+        "properties": {
+          "description": {"type": "string", "minLength": 1},
+          "cost": {"type": "number", "minimum": 5000.01, "description": "Items over $5,000 only."}
+        }
+      }
+    },
+    "has_equipment_over_5k": {
+      "type": "boolean",
+      "description": "Derived: len(equipment_items) > 0."
+    },
+    "travel_summary": {"type": ["string", "null"]},
+    "fa_rate_and_base": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "rate": {"type": ["string", "null"]},
+        "base": {"type": ["string", "null"], "enum": ["MTDC", "TDC", "Salary & Wages", null]}
+      },
+      "description": "Indirect cost rate and base. Resolves to UDM IndirectRate."
+    },
+    "cost_sharing": {
+      "type": ["string", "null"],
+      "description": "Cost sharing amount and type if present. Resolves to UDM CostShare."
+    },
+    "total_costs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total_direct_costs", "total_indirect_costs", "total_project_cost"],
+      "properties": {
+        "total_direct_costs": {"type": "number"},
+        "total_indirect_costs": {"type": "number"},
+        "total_project_cost": {"type": "number"}
+      },
+      "description": "Cross-field check CHK-03: total_project_cost == total_direct_costs + total_indirect_costs."
+    },
+    "budget_periods": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["period_number", "amount"],
+        "properties": {
+          "period_number": {"type": "integer"},
+          "start_date": {"type": ["string", "null"]},
+          "end_date": {"type": ["string", "null"]},
+          "amount": {"type": "number"}
+        }
+      },
+      "description": "Per-period budgets for multi-year proposals. Empty array for single-period."
+    }
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/ffr-management-extraction-udm/schema.json",
+  "title": "FFR Management Extraction — UDM Output",
+  "description": "JSON contract for Federal Financial Report (FFR / SF-425) requirements and post-award financial reporting obligations distilled from a federal award notice or agreement. Produces five structured buckets (submission schedule, submission system, required financial data, compliance consequences, preparation timeline) plus award-identifying scalars that resolve to UDM Award and Personnel entities.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "submission_schedule",
+    "submission_system",
+    "required_financial_data",
+    "compliance_consequences",
+    "preparation_timeline"
+  ],
+  "properties": {
+    "award_number": {
+      "type": ["string", "null"],
+      "description": "Federal Award Identification Number (FAIN) as printed on the award. Resolves downstream to UDM Award.Federal_Award_ID."
+    },
+    "pi_name": {
+      "type": ["string", "null"],
+      "description": "Principal Investigator full name as printed on the award. Resolves downstream to UDM Personnel.Full_Name."
+    },
+    "submission_schedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["annual_ffr_due", "final_ffr_due"],
+      "properties": {
+        "annual_ffr_due": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Annual FFR due window expressed as the document states it (e.g., '90 days after each budget period end', '120 days after period end'). Quote day-counts verbatim. Required by source workflow; if the document does not state it, use 'Not specified in the document'."
+        },
+        "final_ffr_due": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Final FFR deadline expressed as the document states it (e.g., '120 days after project end'). Required by source workflow; if the document does not state it, use 'Not specified in the document'."
+        },
+        "interim_reporting": {
+          "type": ["string", "null"],
+          "description": "Interim financial reporting requirements when the award imposes them. Null when not specified."
+        },
+        "cash_transaction_reporting": {
+          "type": ["string", "null"],
+          "description": "SF-272 / cash transaction reporting requirements. Null when not specified."
+        }
+      }
+    },
+    "submission_system": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform"],
+      "properties": {
+        "platform": {
+          "type": ["string", "null"],
+          "enum": ["Payment Management System", "ASAP", "ACH", "Grants.gov", "Other", null],
+          "description": "Primary submission system. Use the document's exact platform name; pick 'Other' only when the document names a platform that is none of the listed enum values."
+        },
+        "access_requirements": {
+          "type": ["string", "null"],
+          "description": "Account, role, or registration prerequisites for accessing the platform."
+        },
+        "era_commons_integration": {
+          "type": ["string", "null"],
+          "description": "eRA Commons integration details. Populate when the award is NIH or HHS; otherwise null."
+        },
+        "submission_authorization": {
+          "type": ["string", "null"],
+          "description": "Roles and responsibilities for who may submit (e.g., 'AOR-only', 'PI with SO countersignature')."
+        }
+      }
+    },
+    "required_financial_data": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "description": "Flat list of required reporting category labels exactly as named in the document (e.g., 'Personnel', 'Fringe', 'Equipment', 'Subawards', 'Cost share', 'Program income'). Resolves downstream to UDM AwardBudget reporting categories."
+    },
+    "compliance_consequences": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "late_submission_penalties": {
+          "type": ["string", "null"],
+          "description": "Document language describing penalties for late FFR submission."
+        },
+        "account_restrictions": {
+          "type": ["string", "null"],
+          "description": "Document language describing payment-system or drawdown restrictions tied to non-compliance."
+        },
+        "impact_on_future_funding": {
+          "type": ["string", "null"],
+          "description": "Document language describing impact on future awards or competing renewals."
+        },
+        "required_documentation": {
+          "type": ["string", "null"],
+          "description": "Document language describing supporting documentation or backup the recipient must retain."
+        }
+      }
+    },
+    "preparation_timeline": {
+      "type": "array",
+      "description": "Countdown of preparation milestones derived from the document's own pre-submission timing language. Empty when the document does not describe a countdown.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["milestone", "action"],
+        "properties": {
+          "milestone": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Short label for the milestone (e.g., 'T-30 days', 'Period end', 'T+30 days')."
+          },
+          "days_before_period_end": {
+            "type": ["integer", "null"],
+            "description": "Days before budget-period or project end. Negative numbers are allowed for after-end milestones; null when the document is qualitative."
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What must be done at this milestone, quoted or paraphrased close to the document."
+          },
+          "owner": {
+            "type": ["string", "null"],
+            "description": "Responsible role (e.g., 'PI', 'Department admin', 'Sponsored Programs Office'). Null when not specified."
+          }
+        }
+      }
+    }
+  }
+}

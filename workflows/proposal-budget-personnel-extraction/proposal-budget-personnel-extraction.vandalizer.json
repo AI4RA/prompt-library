@@ -1,0 +1,246 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "exported_at": "2026-04-30T00:00:00+00:00",
+  "exported_by": "ui-insight",
+  "items": [
+    {
+      "name": "Proposal Budget Personnel & Compliance Requirements Extraction",
+      "description": "Uploads a proposal budget document (NSF-style budget tables / NIH PHS 398 / agency budget form) and returns a single structured JSON object covering personnel identification (senior key, postdocs, grad students, undergraduates, other personnel) and budget structure compliance triggers (subaward recipients, equipment over $5,000, F&A rate and base, cost sharing, total costs). Output conforms to the proposal-budget-personnel-extraction-udm component schema. The runtime mirrors the ui-insight/ProcessMapping proposal-budget-personnel-extraction workflow (two parallel Extraction tasks plus a Consolidation Prompt that derives the boolean compliance triggers).",
+      "steps": [
+        {
+          "name": "Parallel Extraction",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-personnel-identification",
+                "prompt": "You are extracting all personnel listed in a proposal budget\ndocument.\n\nBe 100% accurate. Match the schema's type for each field\nexactly:\n  - Integer-typed fields (postdoc_count, graduate_student_count,\n    undergraduate_count) are JSON integers.\n  - Number-typed fields (total_personnel_cost,\n    senior_key_personnel[].salary_requested,\n    postdoc_details[].salary_or_stipend,\n    graduate_student_details[].stipend / tuition_remission,\n    other_personnel[].cost) are JSON numbers — no quotes, no\n    currency symbol, no thousand-separators.\n  - String-typed fields (name, role, institution, effort) are\n    quoted verbatim, preserving \"%\" / \"summer months\" / etc.\nUse empty arrays when a category has no entries; never invent\npersonnel. Use \"TBN\" as the name for to-be-named postdoc or\ngraduate-student slots so per-person document workflows can\nflag the missing-name dependency without dropping the row.\n\nSearch Senior/Key Personnel, Other Personnel, Section A, Section\nB, Salary and Wages, Personnel Justification.\n\nThe four derivable booleans (has_postdocs_or_grad_students,\nmentoring_plan_required) will be computed by the downstream\nConsolidation Prompt — do not set them here.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Proposal Budget Personnel",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": null,
+                  "items": [
+                    {
+                      "searchphrase": "JSON array of {name, role, institution, effort, salary_requested} for senior/key personnel.",
+                      "searchtype": "extraction",
+                      "title": "senior_key_personnel",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Integer count of postdoctoral researchers in the budget.",
+                      "searchtype": "extraction",
+                      "title": "postdoc_count",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "JSON array of {name, effort, salary_or_stipend} for postdoctoral researchers. Use \"TBN\" for unnamed slots.",
+                      "searchtype": "extraction",
+                      "title": "postdoc_details",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Integer count of graduate research/teaching assistants in the budget.",
+                      "searchtype": "extraction",
+                      "title": "graduate_student_count",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "JSON array of {name, type, stipend, tuition_remission} where type is \"RA\" or \"TA\".",
+                      "searchtype": "extraction",
+                      "title": "graduate_student_details",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Integer count of undergraduate students in the budget.",
+                      "searchtype": "extraction",
+                      "title": "undergraduate_count",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "JSON array of {role, cost} for other personnel (technicians, programmers, administrative staff).",
+                      "searchtype": "extraction",
+                      "title": "other_personnel",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Total personnel costs including salary and fringe (decimal number).",
+                      "searchtype": "extraction",
+                      "title": "total_personnel_cost",
+                      "is_optional": true,
+                      "enum_values": null
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-budget-structure-and-compliance-triggers",
+                "prompt": "You are extracting the budget category structure and the\ncompliance-trigger inputs (subawards, equipment over $5,000,\ntravel, F&A rate and base, cost sharing, total costs) from a\nproposal budget document.\n\nBe 100% accurate. Match the schema's type for each field\nexactly:\n  - Number-typed fields (subaward_recipients[].amount,\n    equipment_items[].cost, budget_categories[].amount,\n    budget_periods[].amount, total_costs.{total_direct_costs,\n    total_indirect_costs, total_project_cost}) are JSON\n    numbers — no quotes, no currency symbol, no thousand-\n    separators.\n  - String-typed fields (fa_rate, travel_summary,\n    cost_sharing) are quoted verbatim with their \"%\" / \"$\" /\n    other formatting preserved.\nEquipment items below $5,000 do NOT belong in equipment_items\nregardless of how the budget labels them. F&A rate and base\nare two distinct STRING fields (\"42.5% MTDC\" → fa_rate:\n\"42.5%\", fa_base: \"MTDC\").\n\nThe boolean triggers (has_subawards, has_equipment_over_5k)\nwill be computed by the downstream Consolidation Prompt — do\nnot set them here.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Proposal Budget Structure",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": null,
+                  "items": [
+                    {
+                      "searchphrase": "JSON array of {category_name, amount, notes} for each budget category.",
+                      "searchtype": "extraction",
+                      "title": "budget_categories",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "JSON array of {institution_name, sub_pi_name, amount} for subaward/subcontract recipients. Empty array when none.",
+                      "searchtype": "extraction",
+                      "title": "subaward_recipients",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "JSON array of {description, cost} for equipment items costing over $5,000 only.",
+                      "searchtype": "extraction",
+                      "title": "equipment_items",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Summary of travel costs including domestic and foreign travel amounts.",
+                      "searchtype": "extraction",
+                      "title": "travel_summary",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "F&A (indirect cost) rate percentage as stated (e.g., \"42.5%\").",
+                      "searchtype": "extraction",
+                      "title": "fa_rate",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "Base for F&A rate calculation (MTDC, TDC, Salary & Wages).",
+                      "searchtype": "extraction",
+                      "title": "fa_base",
+                      "is_optional": true,
+                      "enum_values": [
+                        "MTDC",
+                        "TDC",
+                        "Salary & Wages"
+                      ]
+                    },
+                    {
+                      "searchphrase": "Cost sharing or matching amount and type if present in the budget.",
+                      "searchtype": "extraction",
+                      "title": "cost_sharing",
+                      "is_optional": true,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "JSON object {total_direct_costs, total_indirect_costs, total_project_cost} (all decimal numbers).",
+                      "searchtype": "extraction",
+                      "title": "total_costs",
+                      "is_optional": false,
+                      "enum_values": null
+                    },
+                    {
+                      "searchphrase": "JSON array of {period_number, start_date, end_date, amount} for multi-year proposals. Empty array for single-period.",
+                      "searchtype": "extraction",
+                      "title": "budget_periods",
+                      "is_optional": true,
+                      "enum_values": null
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consolidation",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "budget-personnel-consolidation",
+                "prompt": "You are assembling the Proposal Budget Personnel & Compliance\nTriggers extraction output. The input is the JSON fragment\nproduced by the upstream parallel Extraction tasks.\n\nRules:\n1. Pass-through every personnel and budget field verbatim.\n2. Combine fa_rate and fa_base into a single fa_rate_and_base\n   object: {rate: <fa_rate>, base: <fa_base>}.\n3. Derive the four boolean triggers:\n   - has_postdocs_or_grad_students = (postdoc_count > 0) OR\n     (graduate_student_count > 0)\n   - mentoring_plan_required = has_postdocs_or_grad_students\n     (for NSF; per agency policy otherwise — when the sponsor\n     is unknown, default to has_postdocs_or_grad_students)\n   - has_subawards = len(subaward_recipients) > 0\n   - has_equipment_over_5k = len(equipment_items) > 0\n4. Verify cost-totals reconciliation: total_costs.total_project_cost\n   must equal total_costs.total_direct_costs +\n   total_costs.total_indirect_costs (CHK-03). When they do not\n   reconcile, preserve the document's reported values rather\n   than synthesizing.\n5. Use null for missing scalar fields; never invent values.\n6. Do not output any text outside the single JSON object.",
+                "input_source": "step_input"
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "check_id": "CHK-01",
+          "check_name": "Personnel count consistency",
+          "check_type": "consistency",
+          "check_description": "Verify postdoc_count == len(postdoc_details), graduate_student_count == len(graduate_student_details), and that senior_key_personnel covers every PI/Co-PI named in budget_personnel.",
+          "target_fields": [
+            "postdoc_count",
+            "postdoc_details",
+            "graduate_student_count",
+            "graduate_student_details",
+            "senior_key_personnel"
+          ],
+          "severity": "warning"
+        },
+        {
+          "check_id": "CHK-02",
+          "check_name": "Boolean flag derivation",
+          "check_type": "consistency",
+          "check_description": "Verify the four derived booleans equal their corresponding list-length expressions (has_postdocs_or_grad_students = (postdoc_count > 0) OR (graduate_student_count > 0); mentoring_plan_required = has_postdocs_or_grad_students; has_subawards = len(subaward_recipients) > 0; has_equipment_over_5k = len(equipment_items) > 0).",
+          "target_fields": [
+            "has_postdocs_or_grad_students",
+            "mentoring_plan_required",
+            "has_subawards",
+            "has_equipment_over_5k"
+          ],
+          "severity": "warning"
+        },
+        {
+          "check_id": "CHK-03",
+          "check_name": "Cost totals validation",
+          "check_type": "arithmetic",
+          "check_description": "Verify total_costs.total_project_cost == total_costs.total_direct_costs + total_costs.total_indirect_costs.",
+          "target_fields": [
+            "total_costs"
+          ],
+          "severity": "error"
+        }
+      ],
+      "validation_inputs": [],
+      "x_ai4ra": {
+        "workflow_source": "workflows/proposal-budget-personnel-extraction/manifest.yaml",
+        "workflow_version": "0.1.0",
+        "status": "experimental",
+        "components": [
+          {
+            "slug": "proposal-budget-personnel-extraction-udm",
+            "version": "0.1.0"
+          }
+        ]
+      }
+    }
+  ]
+}

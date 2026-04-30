@@ -1,0 +1,278 @@
+# Authored source for the FOA Checklist Extraction Vandalizer workflow.
+#
+# The companion foa-checklist-extraction.vandalizer.json is generated from
+# this file by scripts/build_vandalizer_workflows.py and committed alongside.
+# Never hand-edit the generated JSON — update this manifest and rebuild.
+#
+# Runtime topology (v0.1.0):
+#   Step 1  Parallel Extraction
+#     6 Extraction tasks mirroring the source ProcessMapping workflow
+#     one-for-one (FOA Identification & Timeline; Evaluation Criteria;
+#     Review Process; Agency Priorities & Goals; Forms & Submission Systems;
+#     Formatting Requirements). Each task carries an embedded SearchSet
+#     whose item titles mirror the foa-checklist-extraction-udm@0.1.0
+#     schema field names.
+#   Step 2  Consolidation
+#     1 Prompt task assembles the six JSON fragments into a single object
+#     that validates against components/foa-checklist-extraction-udm/schema.json.
+
+name: FOA Checklist Maker Extraction
+description: >
+  Uploads a Federal Funding Opportunity Announcement (FOA) and returns a
+  single structured JSON object covering the eight reference sections a
+  federal-grants office uses for FOA review: FOA summary and key dates,
+  funding and eligibility, evaluation criteria with weights, multi-stage
+  review process, agency priorities and program goals, submission platform
+  and forms, application components, and formatting requirements. Output
+  conforms to the foa-checklist-extraction-udm component schema. The
+  runtime mirrors the ui-insight/ProcessMapping foa-checklist-extraction
+  workflow (six parallel Extraction tasks plus a Consolidation Prompt).
+
+workflow_version: 0.1.0
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-04-30
+updated: 2026-04-30
+
+components:
+  - slug: foa-checklist-extraction-udm
+    pinned_version: 0.1.0
+
+validation_plan:
+  - check_id: CHK-01
+    check_name: FOA number format
+    check_type: format
+    check_description: Verify foa_number matches a known agency format pattern (e.g., NIH PA/PAR/RFA, DOE DE-FOA, NSF program-solicitation).
+    target_fields:
+      - foa_number
+    severity: warning
+  - check_id: CHK-02
+    check_name: Date consistency
+    check_type: consistency
+    check_description: Verify critical_dates entries are chronologically ordered and that LOI/pre-application precedes full-application precedes panel review.
+    target_fields:
+      - critical_dates
+    severity: error
+  - check_id: CHK-03
+    check_name: Funding vs per-award amounts
+    check_type: arithmetic
+    check_description: Verify expected_awards * max(award_range) <= total_funding.
+    target_fields:
+      - total_funding
+      - expected_awards
+      - award_range
+    severity: warning
+
+steps:
+  - name: Parallel Extraction
+    tasks:
+      - name: extract-foa-identification-and-timeline
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          Extract FOA identifying information, funding details, critical
+          dates timeline, period of performance, and eligibility overview.
+
+          Be 100% accurate. Match the schema's type for each field
+          exactly:
+            - total_funding is a JSON number (no quotes, no currency
+              symbol, no thousand-separators).
+            - expected_awards is a JSON integer.
+            - cost_sharing_required is a JSON boolean (or null).
+            - award_range, performance_period, and the date strings
+              inside critical_dates are STRINGS, quoted verbatim
+              preserving "$300,000 to $750,000 per award" / date format /
+              etc.
+
+          For federal_agency return one of: NSF, NIH, DOD, DOE, NASA,
+          USDA, EPA, DOT, DOC, ED, Other.
+        searchset:
+          title: FOA Identification & Timeline
+          domain: research-administration
+          items:
+            - title: foa_number
+              searchphrase: Funding Opportunity Number / ID (e.g., PA-24-246, DE-FOA-0003117).
+            - title: cfda_number
+              searchphrase: CFDA Number and title.
+              is_optional: true
+            - title: federal_agency
+              searchphrase: Federal Agency Name (NSF, NIH, DOD, DOE, NASA, USDA, EPA, DOT, DOC, ED, Other).
+              enum_values:
+                - NSF
+                - NIH
+                - DOD
+                - DOE
+                - NASA
+                - USDA
+                - EPA
+                - DOT
+                - DOC
+                - ED
+                - Other
+            - title: foa_title
+              searchphrase: FOA Title / Program Name.
+            - title: total_funding
+              searchphrase: Total available funding as a JSON number (no quotes, no currency symbol, no thousand-separators). "$10,000,000" becomes 10000000.
+              is_optional: true
+            - title: expected_awards
+              searchphrase: Expected number of awards as a JSON integer.
+              is_optional: true
+            - title: award_range
+              searchphrase: Minimum and maximum award amounts (e.g., "$300,000 to $750,000 per award").
+              is_optional: true
+            - title: cost_sharing_required
+              searchphrase: Boolean. Whether cost sharing/matching is required.
+              is_optional: true
+            - title: critical_dates
+              searchphrase: JSON array of {milestone, date_time, notes} for all gating milestones (LOI, pre-application, full application, panel review, anticipated start).
+            - title: performance_period
+              searchphrase: Expected project duration range.
+              is_optional: true
+            - title: eligible_applicants
+              searchphrase: Flat list of eligible applicant types as stated.
+
+      - name: extract-evaluation-criteria
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          Extract all evaluation criteria with weights, scoring system
+          overview, methodology, and minimum thresholds. Quote weights
+          verbatim — points or percentages as the FOA states them.
+        searchset:
+          title: Evaluation Criteria
+          domain: research-administration
+          items:
+            - title: total_points
+              searchphrase: Total possible points or scoring scale (e.g., "100 points").
+              is_optional: true
+            - title: evaluation_criteria
+              searchphrase: JSON array of {criterion_name, weight, description, rating_definitions} for each evaluation criterion.
+            - title: scoring_methodology
+              searchphrase: How scores are calculated, tie resolution, weighting.
+              is_optional: true
+            - title: minimum_threshold
+              searchphrase: Minimum score thresholds for funding consideration.
+              is_optional: true
+
+      - name: extract-review-process
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          Extract review stages, review personnel types, initial screening
+          criteria, and review timeline. review_stages is sequential —
+          each stage's outcome is what proceeds to the next.
+        searchset:
+          title: Review Process
+          domain: research-administration
+          items:
+            - title: review_stages
+              searchphrase: JSON array of {stage_name, purpose, outcome} in sequential order.
+            - title: review_personnel
+              searchphrase: Types and composition of review panels.
+              is_optional: true
+            - title: screening_criteria
+              searchphrase: Flat list of initial-screening / disqualification factors.
+              is_optional: true
+            - title: review_timeline
+              searchphrase: Estimated length of review process and notification timeline.
+              is_optional: true
+
+      - name: extract-agency-priorities-and-goals
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          Extract agency mission alignment, program goals and objectives,
+          priority areas (in stated order of importance), and expected
+          outcomes.
+        searchset:
+          title: Agency Priorities & Goals
+          domain: research-administration
+          items:
+            - title: agency_mission
+              searchphrase: Agency mission relevant to this FOA.
+              is_optional: true
+            - title: program_goals
+              searchphrase: JSON array of {goal, objective, success_indicator} for each program goal.
+            - title: priority_areas
+              searchphrase: Flat list of priority areas in stated order of importance.
+              is_optional: true
+            - title: expected_outcomes
+              searchphrase: Flat list of required deliverables / intended impacts.
+              is_optional: true
+
+      - name: extract-forms-and-submission-systems
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          Extract submission platform details, required registrations
+          (SAM, UEI, eRA Commons, Grants.gov, agency portals), required
+          forms, and the application-components checklist with page
+          limits.
+        searchset:
+          title: Forms & Submission Systems
+          domain: research-administration
+          items:
+            - title: submission_platform
+              searchphrase: Primary submission system (Grants.gov, eRA Commons, etc.).
+            - title: required_registrations
+              searchphrase: JSON array of {system_name, timeline, prerequisites} for SAM, UEI, eRA Commons, Grants.gov, agency portals.
+              is_optional: true
+            - title: required_forms
+              searchphrase: JSON array of {form_number, name, purpose, special_instructions} for required forms.
+            - title: application_components
+              searchphrase: JSON array of {component_name, required_or_optional, page_limit, format_requirements} for each component.
+
+      - name: extract-formatting-requirements
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          Extract document structure, page limits with what-counts rules,
+          formatting standards, and file requirements.
+        searchset:
+          title: Formatting Requirements
+          domain: research-administration
+          items:
+            - title: document_structure
+              searchphrase: Flat list of required proposal sections in exact order.
+              is_optional: true
+            - title: page_limits
+              searchphrase: JSON array of {section, limit, what_counts, consequences} for each page-limit rule.
+              is_optional: true
+            - title: formatting_standards
+              searchphrase: Margin, font, spacing, and other formatting requirements.
+              is_optional: true
+            - title: file_requirements
+              searchphrase: Acceptable file formats, sizes, naming conventions.
+              is_optional: true
+
+  - name: Consolidation
+    is_output: true
+    tasks:
+      - name: foa-checklist-consolidation
+        kind: Prompt
+        input_source: step_input
+        prompt_inline: |
+          You are assembling the FOA Checklist extraction output. The
+          input is the JSON fragment produced by the upstream six
+          parallel Extraction tasks. Your job is to emit a single JSON
+          object that validates against the
+          foa-checklist-extraction-udm@0.1.0 schema (31 fields).
+
+          Rules:
+          1. Pass-through every field from the six fragments verbatim.
+             The schema has no nested re-shaping for this workflow — the
+             fragments map directly to top-level fields.
+          2. Verify cross-field consistency: critical_dates entries
+             chronological (LOI/pre-app < full-app < panel review);
+             expected_awards * max(award_range) <= total_funding.
+             Preserve document values when they conflict; surface the
+             conflict via validation_plan.
+          3. federal_agency must use the enum value exactly. Normalize
+             document phrasings to the closest enum.
+          4. Use null for missing scalar fields and empty arrays for
+             missing list fields; never invent values.
+          5. Do not output any text outside the single JSON object.
+
+evals:
+  workflow_local: true

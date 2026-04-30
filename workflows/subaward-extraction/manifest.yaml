@@ -1,0 +1,330 @@
+# Authored source for the Subaward Agreement Extraction Vandalizer workflow.
+#
+# Runtime topology (v0.1.0):
+#   Step 1  Parallel Extraction
+#     6 Extraction tasks mirroring the source ProcessMapping workflow
+#     one-for-one (Core Award Information; Contact Information; Dates &
+#     Monetary Values; Financial Policies; Reporting Requirements;
+#     Compliance Requirements).
+#   Step 2  Consolidation
+#     1 Prompt task assembles the six JSON fragments into a single object
+#     that validates against components/subaward-extraction-udm/schema.json,
+#     packages each contact into a {name, email, phone} object, and
+#     enforces the CFR-01 reconciliation between amount_funded and
+#     total_direct_costs + total_indirect_costs.
+
+name: Subaward Agreement Extraction
+description: >
+  Uploads a fully executed subaward agreement (Pass-Through Entity →
+  Subrecipient) and returns a single structured JSON object covering nine
+  sections used for research-administration setup and ongoing monitoring:
+  core award info, project periods, PTE contacts, subrecipient contacts,
+  financial summary, financial policies, reporting requirements, prior-
+  approval handling, and key compliance requirements. Output conforms to
+  the subaward-extraction-udm component schema. The runtime mirrors the
+  ui-insight/ProcessMapping subaward-extraction workflow (six parallel
+  Extraction tasks plus a Consolidation Prompt).
+
+workflow_version: 0.1.0
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-04-30
+updated: 2026-04-30
+
+components:
+  - slug: subaward-extraction-udm
+    pinned_version: 0.1.0
+
+validation_plan:
+  - check_id: CHK-01
+    check_name: Monetary cross-reference
+    check_type: arithmetic
+    check_description: When amount_funded, total_direct_costs, and total_indirect_costs are all present, verify amount_funded == total_direct_costs + total_indirect_costs.
+    target_fields:
+      - amount_funded
+      - total_direct_costs
+      - total_indirect_costs
+    severity: error
+  - check_id: CHK-02
+    check_name: Date consistency
+    check_type: consistency
+    check_description: Verify budget_period_start precedes budget_period_end and that all dates are well-formed.
+    target_fields:
+      - budget_period_start
+      - budget_period_end
+    severity: error
+  - check_id: CHK-03
+    check_name: Contact info format
+    check_type: format
+    check_description: Verify each non-null contact has a non-empty name; emails and phones, when present, match basic format patterns.
+    target_fields:
+      - pte_pi
+      - pte_admin_contact
+      - pte_financial_contact
+      - subrecipient_pi
+      - subrecipient_admin_contact
+      - subrecipient_financial_contact
+    severity: warning
+
+steps:
+  - name: Parallel Extraction
+    tasks:
+      - name: extract-core-award-information
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          Extract core identifying information and party details from
+          the subaward agreement. Be 100% accurate — quote names,
+          numbers, and titles verbatim.
+        searchset:
+          title: Core Award Information
+          domain: research-administration
+          items:
+            - title: pte_name
+              searchphrase: Pass-Through Entity name.
+            - title: subrecipient_name
+              searchphrase: Subrecipient organization name.
+            - title: federal_award_number
+              searchphrase: PTE Federal Award Number (FAIN). Required by source workflow.
+            - title: subaward_number
+              searchphrase: Subaward number.
+            - title: project_title
+              searchphrase: Full project title.
+            - title: federal_awarding_agency
+              searchphrase: Federal awarding agency name. Required by source workflow.
+
+      - name: extract-contact-information
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          Extract personnel contact information for both PTE and
+          Subrecipient with character-perfect accuracy for emails and
+          phone numbers. Each contact is captured here as three
+          searchset items (name / email / phone); the downstream
+          Consolidation Prompt will compose them into {name, email,
+          phone} objects.
+        searchset:
+          title: Contact Information
+          domain: research-administration
+          items:
+            - title: pte_pi_name
+              searchphrase: PTE Principal Investigator full name.
+            - title: pte_pi_email
+              searchphrase: PTE PI email address (character-perfect).
+              is_optional: true
+            - title: pte_pi_phone
+              searchphrase: PTE PI phone number (character-perfect).
+              is_optional: true
+            - title: pte_admin_contact_name
+              searchphrase: PTE Administrative Contact name.
+              is_optional: true
+            - title: pte_admin_contact_email
+              searchphrase: PTE Administrative Contact email (character-perfect).
+              is_optional: true
+            - title: pte_admin_contact_phone
+              searchphrase: PTE Administrative Contact phone (character-perfect).
+              is_optional: true
+            - title: pte_financial_contact_name
+              searchphrase: PTE Financial Contact name.
+              is_optional: true
+            - title: pte_financial_contact_email
+              searchphrase: PTE Financial Contact email.
+              is_optional: true
+            - title: pte_financial_contact_phone
+              searchphrase: PTE Financial Contact phone.
+              is_optional: true
+            - title: subrecipient_pi_name
+              searchphrase: Subrecipient PI full name.
+            - title: subrecipient_pi_email
+              searchphrase: Subrecipient PI email (character-perfect).
+              is_optional: true
+            - title: subrecipient_pi_phone
+              searchphrase: Subrecipient PI phone (character-perfect).
+              is_optional: true
+            - title: subrecipient_admin_contact_name
+              searchphrase: Subrecipient Administrative Contact name.
+              is_optional: true
+            - title: subrecipient_admin_contact_email
+              searchphrase: Subrecipient Administrative Contact email.
+              is_optional: true
+            - title: subrecipient_admin_contact_phone
+              searchphrase: Subrecipient Administrative Contact phone.
+              is_optional: true
+            - title: subrecipient_financial_contact_name
+              searchphrase: Subrecipient Financial Contact name.
+              is_optional: true
+            - title: subrecipient_financial_contact_email
+              searchphrase: Subrecipient Financial Contact email.
+              is_optional: true
+            - title: subrecipient_financial_contact_phone
+              searchphrase: Subrecipient Financial Contact phone.
+              is_optional: true
+
+      - name: extract-dates-and-monetary-values
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          Extract dates and monetary values with absolute precision.
+          Cross-reference amounts against multiple document locations.
+
+          Match the schema's type for each field exactly:
+            - amount_funded, total_direct_costs, total_indirect_costs
+              are JSON numbers (no quotes, no currency symbol, no
+              thousand-separators). "$1,234,567.89" becomes 1234567.89.
+              Use the document's exact value; do not round.
+            - budget_period_start, budget_period_end are STRINGS
+              (date format preserved).
+            - cost_type is a STRING from the enum below.
+
+          For cost_type return one of: Cost Reimbursement, Fixed Price,
+          Time and Materials.
+        searchset:
+          title: Dates & Monetary Values
+          domain: research-administration
+          items:
+            - title: budget_period_start
+              searchphrase: Subaward budget period start date.
+            - title: budget_period_end
+              searchphrase: Subaward budget period end date.
+            - title: amount_funded
+              searchphrase: Amount funded this action as a JSON number (no quotes, no currency symbol, no thousand-separators). "$500,000" becomes 500000.
+            - title: total_direct_costs
+              searchphrase: Total direct costs as a JSON number (no quotes, no currency symbol, no thousand-separators).
+              is_optional: true
+            - title: total_indirect_costs
+              searchphrase: Total indirect costs as a JSON number (no quotes, no currency symbol, no thousand-separators).
+              is_optional: true
+            - title: cost_type
+              searchphrase: Cost type classification (Cost Reimbursement, Fixed Price, Time and Materials).
+              is_optional: true
+              enum_values:
+                - Cost Reimbursement
+                - Fixed Price
+                - Time and Materials
+
+      - name: extract-financial-policies
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          Extract financial policies, rates, and requirements. For
+          invoicing_frequency return one of: Monthly, Quarterly,
+          Semi-Annual, Annual.
+        searchset:
+          title: Financial Policies
+          domain: research-administration
+          items:
+            - title: invoicing_frequency
+              searchphrase: Invoicing frequency (Monthly, Quarterly, Semi-Annual, Annual). Required by source workflow.
+              enum_values:
+                - Monthly
+                - Quarterly
+                - Semi-Annual
+                - Annual
+            - title: final_invoice_due
+              searchphrase: Final invoice due date / timeframe.
+              is_optional: true
+            - title: fa_rate
+              searchphrase: Indirect cost (F&A) rate percentage as stated.
+              is_optional: true
+            - title: fa_base
+              searchphrase: Indirect cost calculation base (MTDC, TDC, etc.).
+              is_optional: true
+            - title: cost_sharing_required
+              searchphrase: Boolean. Whether cost sharing is required.
+              is_optional: true
+            - title: carryforward_policy
+              searchphrase: Carryforward policy details.
+              is_optional: true
+
+      - name: extract-reporting-requirements
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          Extract only explicitly required reports as mandated by the
+          subaward agreement, with strict inclusion criteria — do NOT
+          synthesize standard reports the agreement does not mandate.
+          Each report row is one required deliverable.
+        searchset:
+          title: Reporting Requirements
+          domain: research-administration
+          items:
+            - title: technical_reports
+              searchphrase: JSON array of {report_name, frequency, due, recipient} for required technical reports. Empty array when none required.
+              is_optional: true
+            - title: financial_reports
+              searchphrase: JSON array of {report_name, frequency, due, recipient} for required financial reports. Empty array when none required.
+              is_optional: true
+            - title: invention_reporting
+              searchphrase: JSON array of {requirement, timing} for invention disclosure and reporting requirements.
+              is_optional: true
+
+      - name: extract-compliance-requirements
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          Extract compliance requirements, governing regulations, prior
+          approval handling, COI policy, data rights, audit
+          requirements, and termination clauses with source attribution.
+        searchset:
+          title: Compliance Requirements
+          domain: research-administration
+          items:
+            - title: governing_regulations
+              searchphrase: JSON array of {regulation, source} naming each governing instrument with the document section / attachment that calls it out.
+            - title: prior_approval_handling
+              searchphrase: General prior-approval policy.
+              is_optional: true
+            - title: coi_policy
+              searchphrase: Conflict of interest policy application.
+              is_optional: true
+            - title: data_rights
+              searchphrase: Data rights and sharing terms.
+              is_optional: true
+            - title: audit_requirements
+              searchphrase: Audit requirements and thresholds.
+              is_optional: true
+            - title: termination_clauses
+              searchphrase: Termination notice period and conditions.
+              is_optional: true
+            - title: record_retention
+              searchphrase: Record retention requirements.
+              is_optional: true
+
+  - name: Consolidation
+    is_output: true
+    tasks:
+      - name: subaward-summary-consolidation
+        kind: Prompt
+        input_source: step_input
+        prompt_inline: |
+          You are assembling the Subaward Agreement Extraction output.
+          The input is the JSON fragment produced by the upstream six
+          parallel Extraction tasks. Your job is to emit a single JSON
+          object that validates against the
+          subaward-extraction-udm@0.1.0 schema.
+
+          Rules:
+          1. For each of the six contact fields (pte_pi, pte_admin_contact,
+             pte_financial_contact, subrecipient_pi,
+             subrecipient_admin_contact, subrecipient_financial_contact),
+             compose a single object {name, email, phone} from the three
+             corresponding searchset items. When the name is missing,
+             set the entire contact field to null.
+          2. cost_type and invoicing_frequency must use enum values
+             exactly. Normalize document phrasings to the closest enum.
+          3. Verify CFR-01 reconciliation: amount_funded ==
+             total_direct_costs + total_indirect_costs when all three
+             are present. When they do not reconcile, preserve the
+             document's reported values rather than synthesizing.
+          4. technical_reports, financial_reports, and invention_reporting
+             are typed arrays. Empty array when the agreement does not
+             require any.
+          5. governing_regulations is required and must list every
+             governing instrument with its source attribution.
+          6. Use null for missing scalar fields; never invent values.
+             Quote emails and phone numbers character-perfectly.
+          7. Do not output any text outside the single JSON object.
+
+evals:
+  workflow_local: true

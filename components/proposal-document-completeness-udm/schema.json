@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/proposal-document-completeness-udm/schema.json",
+  "title": "Proposal Document Completeness — UDM Output",
+  "description": "JSON contract for the near-final document-completeness review of a proposal package. Captures the as-found inventory, sponsor requirements, and the gap analysis (per requirement and per person), with explicit boolean flags that downstream UDM ingest can use to populate Proposal, Personnel, and Subaward records.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sponsor_name",
+    "senior_key_personnel",
+    "budget_personnel",
+    "has_postdocs_or_grad_students",
+    "has_subawards",
+    "uploaded_documents",
+    "required_documents_checklist",
+    "per_person_required_documents",
+    "per_person_document_matrix",
+    "subaward_documents",
+    "personnel_discrepancies",
+    "prioritized_missing"
+  ],
+  "properties": {
+    "sponsor_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Sponsor agency name. Resolves to UDM Sponsor_Organization."
+    },
+    "rfa_foa_number": {
+      "type": ["string", "null"],
+      "description": "Solicitation number (e.g., 'NSF 26-508')."
+    },
+    "proposal_track_type": {
+      "type": ["string", "null"],
+      "description": "Proposal track type that may trigger additional requirements (e.g., 'TTP-P', 'standard')."
+    },
+    "review_type": {
+      "type": ["string", "null"],
+      "enum": ["7-day basic review", "10-day full review", "Not specified", null],
+      "description": "Review pathway selected for this proposal."
+    },
+    "senior_key_personnel": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "role"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "role": {"type": "string", "minLength": 1, "description": "PI / Co-PI / Senior Personnel."},
+          "institution": {"type": ["string", "null"]}
+        }
+      },
+      "description": "Senior key personnel as identified in the proposal. Resolves to UDM Personnel."
+    },
+    "budget_personnel": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "description": "Personnel identified from the budget document. Used to cross-check against senior_key_personnel."
+    },
+    "has_postdocs_or_grad_students": {
+      "type": "boolean",
+      "description": "True iff the budget includes postdoctoral or graduate-student personnel lines."
+    },
+    "has_subawards": {
+      "type": "boolean",
+      "description": "True iff the proposal includes subaward(s). Resolves to UDM Subaward presence."
+    },
+    "uploaded_documents": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "description": "Flat list of documents currently uploaded in the proposal package."
+    },
+    "required_documents_checklist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["document_name", "present"],
+        "properties": {
+          "document_name": {"type": "string", "minLength": 1},
+          "required_for": {
+            "type": ["string", "null"],
+            "description": "Whom the document is required for (e.g., 'all proposals', 'each senior key person', 'each subawardee')."
+          },
+          "present": {"type": "boolean"},
+          "notes": {"type": ["string", "null"]}
+        }
+      },
+      "description": "Sponsor-required documents with present/missing status."
+    },
+    "conditional_requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["condition", "document_name", "triggered"],
+        "properties": {
+          "condition": {"type": "string", "minLength": 1},
+          "document_name": {"type": "string", "minLength": 1},
+          "triggered": {"type": "boolean"},
+          "notes": {"type": ["string", "null"]}
+        }
+      },
+      "description": "Documents required only when a condition is met (e.g., mentoring plan when has_postdocs_or_grad_students)."
+    },
+    "per_person_required_documents": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "description": "Document names required per senior key person (typically: biosketch, current & pending, collaboration & affiliation, synergistic activities)."
+    },
+    "per_person_document_matrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "person_name",
+          "biosketch",
+          "current_and_pending",
+          "collaboration_and_affiliation",
+          "synergistic_activities",
+          "missing"
+        ],
+        "properties": {
+          "person_name": {"type": "string", "minLength": 1},
+          "biosketch": {"type": "boolean"},
+          "current_and_pending": {"type": "boolean"},
+          "collaboration_and_affiliation": {"type": "boolean"},
+          "synergistic_activities": {"type": "boolean"},
+          "missing": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+          }
+        }
+      },
+      "description": "Per-person matrix of the four required documents. One row per senior key person."
+    },
+    "subaward_documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "subawardee_name",
+          "commitment_form",
+          "budget",
+          "budget_justification",
+          "senior_key_docs",
+          "scope_of_work",
+          "facilities_equipment",
+          "missing"
+        ],
+        "properties": {
+          "subawardee_name": {"type": "string", "minLength": 1},
+          "commitment_form": {"type": "boolean"},
+          "budget": {"type": "boolean"},
+          "budget_justification": {"type": "boolean"},
+          "senior_key_docs": {"type": "boolean"},
+          "scope_of_work": {"type": "boolean"},
+          "facilities_equipment": {"type": "boolean"},
+          "missing": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+          }
+        }
+      },
+      "description": "Per-subawardee matrix of required subaward documents. Empty array when has_subawards is false."
+    },
+    "subaward_required_documents": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "description": "Document names required per subawardee."
+    },
+    "personnel_discrepancies": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "description": "Discrepancies between budget personnel and senior-key-personnel listings (duplicates, missing entries, name mismatches)."
+    },
+    "prioritized_missing": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "description": "Ordered list of missing items to ask the PI about, ranked by severity (compliance-critical first)."
+    }
+  }
+}

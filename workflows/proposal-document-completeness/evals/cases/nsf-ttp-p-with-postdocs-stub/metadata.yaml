@@ -1,0 +1,28 @@
+# Case identity
+case: nsf-ttp-p-with-postdocs-stub
+source: "Placeholder case shell — to be replaced with an authorized, de-identified NSF TTP-P track proposal that includes postdocs (exercises both the TTP letter-of-collaboration conditional and the mentoring-plan conditional). Should also include at least one subaward to exercise the subaward matrix."
+source_url: "https://www.nsf.gov/funding/"
+retrieved: 2026-04-30
+
+structural_features:
+  - nsf-ttp-p-track
+  - has-postdocs
+  - has-subawards
+  - per-person-doc-matrix-incomplete
+
+workflow_features:
+  - join_inventory_with_sponsor_requirements
+  - conditional_trigger_mentoring_plan_when_postdocs
+  - conditional_trigger_letter_of_collaboration_when_ttp
+  - per_person_missing_list_derivation
+  - subaward_missing_list_derivation
+  - prioritized_missing_ranking_compliance_critical_first
+
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-04-30
+validated_against_version: "0.1.0"
+component_versions_at_validation:
+  proposal-document-completeness-udm: "0.1.0"
+
+notes: |
+  Scaffolded case shell only.

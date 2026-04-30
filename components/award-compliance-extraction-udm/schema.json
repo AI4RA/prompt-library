@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/award-compliance-extraction-udm/schema.json",
+  "title": "Award Compliance & Financial Overview Extraction — UDM Output",
+  "description": "JSON contract for the compliance framework and financial-management requirements distilled from a federal award document. Two main blocks (compliance_framework, financial_management) drive a consolidated post-award setup and monitoring deliverable. UDM-aligned to Award, AwardBudget, AwardBudgetPeriod, AwardDeliverable, CostShare, IndirectRate, Modification, and Terms.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["compliance_framework", "financial_management"],
+  "properties": {
+    "award_number": {
+      "type": ["string", "null"],
+      "description": "Federal Award Identification Number. Resolves to UDM Award.Federal_Award_ID."
+    },
+    "compliance_framework": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["financial_reporting_requirements", "compliance_calendar"],
+      "properties": {
+        "uniform_guidance_applicability": {
+          "type": ["string", "null"],
+          "description": "2 CFR 200 Uniform Guidance applicability details."
+        },
+        "rtc_applicability": {
+          "type": ["string", "null"],
+          "description": "Research Terms and Conditions applicability."
+        },
+        "financial_reporting_requirements": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Financial reporting frequency, deadlines, and systems. Resolves to UDM Terms.Reporting_Requirements."
+        },
+        "progress_reporting_requirements": {
+          "type": ["string", "null"],
+          "description": "Progress report type, frequency, and format. Resolves to UDM AwardDeliverable."
+        },
+        "prior_approval_requirements": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Categorized list of prior-approval requirements. Resolves to UDM Modification.Requires_Prior_Approval. Procedural mechanics live in prior-approval-extraction-udm."
+        },
+        "budget_modification_restrictions": {
+          "type": ["string", "null"],
+          "description": "Budget modification restrictions and re-budgeting rules."
+        },
+        "property_requirements": {
+          "type": ["string", "null"],
+          "description": "Equipment and property management requirements. Resolves to UDM Terms.Property_Requirements."
+        },
+        "deliverable_requirements": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Deliverable requirements and deadlines. Resolves to UDM AwardDeliverable."
+        },
+        "high_risk_conditions": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Enhanced monitoring, additional reporting, or specific restrictions tied to the recipient's risk classification. Resolves to UDM Terms.Special_Conditions."
+        },
+        "compliance_calendar": {
+          "type": "array",
+          "description": "Consolidated calendar of compliance requirements with deadlines. Empty array when no calendar can be derived.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["requirement_type", "deadline"],
+            "properties": {
+              "requirement_type": {"type": "string", "minLength": 1},
+              "deadline": {"type": "string", "minLength": 1},
+              "responsible_party": {"type": ["string", "null"]},
+              "consequences": {"type": ["string", "null"]}
+            }
+          }
+        }
+      }
+    },
+    "financial_management": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total_award_amount", "performance_period", "budget_categories"],
+      "properties": {
+        "total_award_amount": {
+          "type": "number",
+          "description": "Total award amount as printed on the award. Resolves to UDM Award.Current_Total_Funded."
+        },
+        "budget_period_amounts": {
+          "type": "array",
+          "description": "Per-period budget amounts for multi-year awards. Empty array for single-period awards. Sum should reconcile to total_award_amount (downstream CFR-01). Resolves to UDM AwardBudgetPeriod.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["period", "amount"],
+            "properties": {
+              "period": {"type": "string", "minLength": 1},
+              "start_date": {"type": ["string", "null"]},
+              "end_date": {"type": ["string", "null"]},
+              "amount": {"type": "number"}
+            }
+          }
+        },
+        "cost_share_requirements": {
+          "type": ["string", "null"],
+          "description": "Cost sharing/matching requirements (amount and type). Resolves to UDM CostShare.Committed_Amount."
+        },
+        "fa_rate": {
+          "type": ["string", "null"],
+          "description": "Indirect cost rate percentage as stated (e.g., '42.5%'). Resolves to UDM IndirectRate.Rate_Percentage."
+        },
+        "fa_rate_base": {
+          "type": ["string", "null"],
+          "description": "Base for F&A rate calculation (e.g., 'MTDC', 'TDC', 'Salary & Wages'). Resolves to UDM IndirectRate.Base_Type."
+        },
+        "performance_period": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Period of performance dates as stated (e.g., '2026-07-01 to 2031-06-30')."
+        },
+        "budget_categories": {
+          "type": "array",
+          "description": "Budget categories with approved amounts, restrictions, and prior-approval flags. Resolves to UDM AwardBudget.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["category_name", "approved_amount"],
+            "properties": {
+              "category_name": {"type": "string", "minLength": 1},
+              "approved_amount": {"type": "number"},
+              "restrictions": {"type": ["string", "null"]},
+              "prior_approval_required": {"type": ["boolean", "null"]}
+            }
+          }
+        },
+        "ffr_requirements": {
+          "type": ["string", "null"],
+          "description": "Federal Financial Report frequency and deadlines. Resolves to UDM Terms.Reporting_Requirements."
+        },
+        "audit_requirements": {
+          "type": ["string", "null"],
+          "enum": ["Single Audit", "A-133", "Program-Specific Audit", "Not applicable", null],
+          "description": "Single Audit thresholds and requirements."
+        },
+        "record_retention": {
+          "type": ["string", "null"],
+          "enum": ["3 years", "5 years", "7 years", "Per sponsor requirements", null],
+          "description": "Record retention requirements. Resolves to UDM Terms.Record_Retention_Years."
+        }
+      }
+    }
+  }
+}

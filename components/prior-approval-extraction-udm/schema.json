@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/prior-approval-extraction-udm/schema.json",
+  "title": "Prior Approval Extraction — UDM Output",
+  "description": "JSON contract for prior-approval requirements extracted from a federal award document. Produces three logical buckets (budget approvals, scope/timeline approvals, approval procedures table) plus an RTC-waiver list. UDM-aligned: per-row entries resolve to UDM Modification.Requires_Prior_Approval; subaward approvals resolve to Subaward.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "budget_approvals",
+    "scope_timeline_approvals",
+    "approval_procedures",
+    "rtc_waivers"
+  ],
+  "properties": {
+    "award_number": {
+      "type": ["string", "null"],
+      "description": "Federal Award Identification Number (FAIN) as printed on the award. Resolves downstream to UDM Award.Federal_Award_ID."
+    },
+    "budget_approvals": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rebudgeting_thresholds": {
+          "type": ["string", "null"],
+          "description": "Re-budgeting thresholds and restrictions requiring prior approval. Quote dollar/percent thresholds verbatim."
+        },
+        "equipment_approvals": {
+          "type": ["string", "null"],
+          "description": "Equipment-purchase approval requirements (typically tied to a $ threshold)."
+        },
+        "subaward_approvals": {
+          "type": ["string", "null"],
+          "description": "Subcontracting / subaward approval requirements. Resolves downstream to UDM Subaward."
+        }
+      }
+    },
+    "scope_timeline_approvals": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pi_change_requirements": {
+          "type": ["string", "null"],
+          "description": "Requirements for PI or key-personnel changes (substitution, reduction in effort, etc.)."
+        },
+        "nce_requirements": {
+          "type": ["string", "null"],
+          "description": "No-cost extension request requirements (notice period, supporting documentation, sponsor route)."
+        },
+        "foreign_travel_approvals": {
+          "type": ["string", "null"],
+          "description": "Foreign travel approval requirements when the award imposes them."
+        }
+      }
+    },
+    "approval_procedures": {
+      "type": "array",
+      "description": "Per-row procedure mechanics from the source approval-procedures table. Each entry covers one approval type. Empty array when the document has no procedures table.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["approval_type"],
+        "properties": {
+          "approval_type": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Short label for the approval type (e.g., 'Equipment over $5,000', 'Foreign travel', 'PI substitution')."
+          },
+          "threshold": {
+            "type": ["string", "null"],
+            "description": "Dollar or percent threshold that triggers the approval. Quote verbatim. Null when threshold-less."
+          },
+          "documentation": {
+            "type": ["string", "null"],
+            "description": "Required supporting documentation."
+          },
+          "authority": {
+            "type": ["string", "null"],
+            "description": "Approving authority (e.g., 'Program Officer', 'Grants Management Specialist')."
+          },
+          "timeline": {
+            "type": ["string", "null"],
+            "description": "Time window for review or required notice period. Quote verbatim."
+          },
+          "consequences": {
+            "type": ["string", "null"],
+            "description": "Consequences of proceeding without approval."
+          }
+        }
+      }
+    },
+    "rtc_waivers": {
+      "type": "array",
+      "description": "Research Terms and Conditions waivers and expanded-authority delegations — approvals the recipient can handle without sponsor sign-off. Empty array when none are stated.",
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}

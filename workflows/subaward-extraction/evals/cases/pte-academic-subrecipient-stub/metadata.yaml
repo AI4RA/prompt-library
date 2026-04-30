@@ -1,0 +1,28 @@
+# Case identity
+case: pte-academic-subrecipient-stub
+source: "Placeholder case shell — to be replaced with an authorized, de-identified PTE → academic-subrecipient subaward agreement (with full Attachment A and Attachment 4) that exercises every contact field, the typed reporting arrays, and the CFR-01 reconciliation."
+source_url: "https://www.fdpclearinghouse.org/"
+retrieved: 2026-04-30
+
+structural_features:
+  - pte-academic-subrecipient
+  - cost-reimbursement
+  - quarterly-invoicing
+  - mtdc-fa-base
+  - explicit-coi-flowdown
+
+workflow_features:
+  - contact_composition_18_items_to_6_objects
+  - cost_type_enum_normalization
+  - invoicing_frequency_enum_normalization
+  - cfr01_amount_funded_reconciliation
+  - strict_inclusion_for_required_reports
+
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-04-30
+validated_against_version: "0.1.0"
+component_versions_at_validation:
+  subaward-extraction-udm: "0.1.0"
+
+notes: |
+  Scaffolded case shell only.

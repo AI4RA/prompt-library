@@ -1,0 +1,248 @@
+# Authored source for the Award Compliance & Financial Overview Extraction
+# Vandalizer workflow.
+#
+# The companion award-compliance-extraction.vandalizer.json is generated
+# from this file by scripts/build_vandalizer_workflows.py and committed
+# alongside. Never hand-edit the generated JSON — update this manifest and
+# rebuild.
+#
+# Runtime topology (v0.1.0):
+#   Step 1  Parallel Extraction
+#     2 Extraction tasks: extract-compliance-framework + extract-financial-management
+#   Step 2  Consolidation
+#     1 Prompt task assembles the two fragments into the schema's two-block
+#     shape and normalizes the audit_requirements / record_retention enums.
+
+name: Award Compliance & Financial Overview Extraction
+description: >
+  Uploads a federal award notice or agreement and returns a single
+  structured JSON object covering both the compliance framework (Uniform
+  Guidance applicability, RTC, financial reporting, progress reporting,
+  prior approvals, budget modification rules, property, deliverables,
+  high-risk conditions, compliance calendar) and the financial management
+  structure (total award amount, budget periods, cost share, F&A rate and
+  base, performance period, budget categories, FFR, audit, record
+  retention). Output conforms to the award-compliance-extraction-udm
+  component schema. The runtime mirrors the ui-insight/ProcessMapping
+  award-compliance-extraction workflow (two parallel Extraction tasks plus
+  a Consolidation Prompt).
+
+workflow_version: 0.1.0
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-04-30
+updated: 2026-04-30
+
+components:
+  - slug: award-compliance-extraction-udm
+    pinned_version: 0.1.0
+
+validation_plan:
+  - check_id: CHK-01
+    check_name: Monetary amount format
+    check_type: format
+    check_description: Verify total_award_amount, budget_period_amounts, and budget_categories.approved_amount preserve the document's currency formatting and are valid numbers.
+    target_fields:
+      - financial_management.total_award_amount
+      - financial_management.budget_period_amounts
+      - financial_management.budget_categories
+    severity: error
+  - check_id: CHK-02
+    check_name: Date validity
+    check_type: format
+    check_description: Verify performance_period and budget_period_amounts dates are well-formed and chronologically consistent.
+    target_fields:
+      - financial_management.performance_period
+      - financial_management.budget_period_amounts
+    severity: error
+  - check_id: CHK-03
+    check_name: Compliance calendar completeness
+    check_type: completeness
+    check_description: Verify every recurring or fixed deadline mentioned across the document (FFR, progress reports, equipment inventory, audit) appears as a row in compliance_calendar.
+    target_fields:
+      - compliance_framework.compliance_calendar
+    severity: warning
+
+steps:
+  - name: Parallel Extraction
+    tasks:
+      - name: extract-compliance-framework
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          You are extracting the compliance framework from a federal
+          award document: Uniform Guidance applicability, RTC
+          applicability, financial and progress reporting requirements,
+          prior-approval categories, budget modification restrictions,
+          property requirements, deliverable requirements, high-risk
+          conditions, and a consolidated compliance calendar.
+
+          Be 100% accurate. For each searchset item, return the value as
+          the document states it. Use null for missing scalars and empty
+          arrays for missing lists; never invent values.
+
+          prior_approval_requirements is a categorized list of approval
+          types only — the procedural mechanics (threshold, timeline,
+          consequences) live in the prior-approval-extraction-udm
+          component. Do not duplicate that work here.
+
+          compliance_calendar is the consolidated deadline view. Pull
+          every recurring or fixed deadline mentioned across the document
+          (FFR, progress reports, equipment inventory, audit submission,
+          RTC milestones) and emit one row per deadline with
+          {requirement_type, deadline, responsible_party, consequences}.
+        searchset:
+          title: Award Compliance Framework
+          domain: research-administration
+          items:
+            - title: uniform_guidance_applicability
+              searchphrase: 2 CFR 200 Uniform Guidance applicability details.
+              is_optional: true
+            - title: rtc_applicability
+              searchphrase: Research Terms and Conditions applicability.
+              is_optional: true
+            - title: financial_reporting_requirements
+              searchphrase: Financial reporting frequency, deadlines, and systems.
+            - title: progress_reporting_requirements
+              searchphrase: Progress report type, frequency, and format.
+              is_optional: true
+            - title: prior_approval_requirements
+              searchphrase: Categorized list of prior-approval requirements (one entry per approval type).
+              is_optional: true
+            - title: budget_modification_restrictions
+              searchphrase: Budget modification restrictions and re-budgeting rules.
+              is_optional: true
+            - title: property_requirements
+              searchphrase: Equipment and property management requirements.
+              is_optional: true
+            - title: deliverable_requirements
+              searchphrase: Deliverable requirements and deadlines.
+              is_optional: true
+            - title: high_risk_conditions
+              searchphrase: Enhanced monitoring, additional reporting, or specific restrictions tied to risk classification. Empty array when not high-risk.
+              is_optional: true
+            - title: compliance_calendar
+              searchphrase: JSON array of {requirement_type, deadline, responsible_party, consequences}, one row per recurring or fixed deadline pulled from across the document.
+
+      - name: extract-financial-management
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          You are extracting the financial management structure from a
+          federal award document: total award amount, multi-year budget
+          periods, cost share, F&A rate and base, performance period,
+          budget categories, FFR cadence, audit requirements, and record
+          retention.
+
+          Be 100% accurate. Match the schema's type for each field
+          exactly:
+            - Number-typed fields (total_award_amount,
+              budget_period_amounts[].amount, budget_categories[].approved_amount)
+              are JSON numbers — no quotes, no currency symbol, no
+              thousand-separators. "$1,234,567.89" in the document
+              becomes 1234567.89 in JSON.
+            - String-typed fields (cost_share_requirements, fa_rate,
+              fa_rate_base, performance_period, ffr_requirements, etc.)
+              are quoted verbatim — preserve currency symbols, percent
+              signs, and date format.
+          Use null for missing scalars and empty arrays for missing
+          lists.
+
+          budget_period_amounts is empty for single-period awards. The
+          sum across budget_period_amounts should reconcile to
+          total_award_amount (cross-field check CFR-01).
+
+          fa_rate and fa_rate_base are two distinct STRING fields.
+          "42.5% MTDC" becomes fa_rate: "42.5%" (string, percent sign
+          preserved) and fa_rate_base: "MTDC".
+
+          For audit_requirements return one of: Single Audit, A-133,
+          Program-Specific Audit, Not applicable. For record_retention
+          return one of: 3 years, 5 years, 7 years, Per sponsor
+          requirements.
+        searchset:
+          title: Award Financial Management
+          domain: research-administration
+          items:
+            - title: total_award_amount
+              searchphrase: Total award amount as a JSON number (no quotes, no currency symbol, no thousand-separators). "$1,234,567" becomes 1234567.
+            - title: budget_period_amounts
+              searchphrase: JSON array of {period, start_date, end_date, amount} for multi-year awards. amount is a JSON number; period / start_date / end_date are strings. Empty array for single-period awards.
+              is_optional: true
+            - title: cost_share_requirements
+              searchphrase: Cost sharing/matching requirements (amount and type).
+              is_optional: true
+            - title: fa_rate
+              searchphrase: Indirect cost rate percentage as stated (e.g., "42.5%").
+              is_optional: true
+            - title: fa_rate_base
+              searchphrase: Base for F&A rate calculation (e.g., MTDC, TDC, Salary & Wages).
+              is_optional: true
+            - title: performance_period
+              searchphrase: Period of performance dates as stated.
+            - title: budget_categories
+              searchphrase: JSON array of {category_name, approved_amount, restrictions, prior_approval_required} for each budget category. approved_amount is a JSON number; the others are strings or boolean.
+            - title: ffr_requirements
+              searchphrase: Federal Financial Report frequency and deadlines.
+              is_optional: true
+            - title: audit_requirements
+              searchphrase: Audit requirements (Single Audit, A-133, Program-Specific Audit, Not applicable).
+              is_optional: true
+              enum_values:
+                - Single Audit
+                - A-133
+                - Program-Specific Audit
+                - Not applicable
+            - title: record_retention
+              searchphrase: Record retention requirements (3 years, 5 years, 7 years, Per sponsor requirements).
+              is_optional: true
+              enum_values:
+                - 3 years
+                - 5 years
+                - 7 years
+                - Per sponsor requirements
+
+  - name: Consolidation
+    is_output: true
+    tasks:
+      - name: award-compliance-consolidation
+        kind: Prompt
+        input_source: step_input
+        prompt_inline: |
+          You are assembling the Award Compliance & Financial Overview
+          extraction output. The input is the JSON fragment produced by
+          the upstream parallel Extraction tasks (compliance framework +
+          financial management). Your job is to emit a single JSON object
+          that validates against the award-compliance-extraction-udm@0.1.0
+          schema.
+
+          Top-level shape:
+          {
+            "award_number": string|null,
+            "compliance_framework": { ...10 keys... },
+            "financial_management": { ...10 keys... }
+          }
+
+          Rules:
+          1. Pass the compliance framework fragment into
+             compliance_framework verbatim. Pass the financial management
+             fragment into financial_management verbatim.
+          2. award_number is a top-level scalar drawn from whichever
+             fragment carries it; null when neither does.
+          3. audit_requirements and record_retention must use enum values
+             exactly. Normalize document phrasings to the closest enum.
+          4. compliance_calendar must consolidate deadlines from across
+             the document — if both fragments produced calendar entries,
+             merge them, dedupe by (requirement_type, deadline) tuple,
+             and preserve responsible_party and consequences from the
+             more specific entry.
+          5. budget_period_amounts is an empty array for single-period
+             awards. When non-empty, the sum should reconcile to
+             total_award_amount (cross-field check CFR-01); flag in
+             validation_plan if not.
+          6. Use null for missing scalar fields; never invent values.
+          7. Do not output any text outside the single JSON object.
+
+evals:
+  workflow_local: true
