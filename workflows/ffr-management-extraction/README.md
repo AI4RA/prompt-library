@@ -63,4 +63,4 @@ The committed `ffr-management-extraction.vandalizer.json` can be uploaded direct
 
 ## Provenance
 
-Authored 2026-04-30 alongside the initial `ffr-management-extraction-udm` component, to give the `ui-insight/ProcessMapping` FFR Management Extraction workflow a versioned, catalog-discoverable Vandalizer manifestation that can be regenerated from the prompt-library source rather than hand-built in the Vandalizer UI.
+Authored 2026-04-30 alongside the initial `ffr-management-extraction-udm` component, to give the `ui-insight/ProcessMapping` FFR Management Extraction workflow a versioned, catalog-discoverable Vandalizer manifestation that can be regenerated from the prompt-library source rather than hand-built in the Vandalizer UI, against `ui-insight/ProcessMapping` at commit `b7176b0c913833a205efdb5e4ba00c17ff88af0f`.

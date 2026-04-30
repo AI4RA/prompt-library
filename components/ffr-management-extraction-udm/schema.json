@@ -28,12 +28,14 @@
       "required": ["annual_ffr_due", "final_ffr_due"],
       "properties": {
         "annual_ffr_due": {
-          "type": ["string", "null"],
-          "description": "Annual FFR due window expressed as the document states it (e.g., '90 days after each budget period end', '120 days after period end'). Quote day-counts verbatim."
+          "type": "string",
+          "minLength": 1,
+          "description": "Annual FFR due window expressed as the document states it (e.g., '90 days after each budget period end', '120 days after period end'). Quote day-counts verbatim. Required by source workflow; if the document does not state it, use 'Not specified in the document'."
         },
         "final_ffr_due": {
-          "type": ["string", "null"],
-          "description": "Final FFR deadline expressed as the document states it (e.g., '120 days after project end')."
+          "type": "string",
+          "minLength": 1,
+          "description": "Final FFR deadline expressed as the document states it (e.g., '120 days after project end'). Required by source workflow; if the document does not state it, use 'Not specified in the document'."
         },
         "interim_reporting": {
           "type": ["string", "null"],

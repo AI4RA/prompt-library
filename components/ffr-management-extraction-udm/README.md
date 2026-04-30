@@ -57,4 +57,4 @@ See [`evals/`](evals/) for reference inputs and known-good outputs. Initial case
 
 ## Provenance
 
-Authored 2026-04-30 against the `ffr-management-extraction` (Workflow_ID: `WF-FFR-MANAGEMENT-EXTRACTION`) process-mapping workflow in `ui-insight/ProcessMapping`, which was built from walkthrough transcripts of post-award sponsored-programs staff working through FFR / SF-425 submissions. Created to make that workflow a harness-evaluatable, versioned artifact rather than a runtime-embedded configuration.
+Authored 2026-04-30 against the `ffr-management-extraction` (Workflow_ID: `WF-FFR-MANAGEMENT-EXTRACTION`) process-mapping workflow in `ui-insight/ProcessMapping` at commit `b7176b0c913833a205efdb5e4ba00c17ff88af0f`, which was built from walkthrough transcripts of post-award sponsored-programs staff working through FFR / SF-425 submissions. Created to make that workflow a harness-evaluatable, versioned artifact rather than a runtime-embedded configuration.

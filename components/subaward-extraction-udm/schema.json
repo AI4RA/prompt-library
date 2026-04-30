@@ -9,13 +9,16 @@
   "required": [
     "pte_name",
     "subrecipient_name",
+    "federal_award_number",
     "subaward_number",
     "project_title",
+    "federal_awarding_agency",
     "pte_pi",
     "subrecipient_pi",
     "budget_period_start",
     "budget_period_end",
     "amount_funded",
+    "invoicing_frequency",
     "technical_reports",
     "financial_reports",
     "invention_reporting",
@@ -47,10 +50,10 @@
   "properties": {
     "pte_name": {"type": "string", "minLength": 1, "description": "Pass-Through Entity name. Resolves to UDM Organization.Organization_Name."},
     "subrecipient_name": {"type": "string", "minLength": 1, "description": "Subrecipient organization name. Resolves to UDM Organization.Organization_Name."},
-    "federal_award_number": {"type": ["string", "null"], "description": "PTE Federal Award Number (FAIN). Resolves to UDM Award.Federal_Award_ID."},
+    "federal_award_number": {"type": "string", "minLength": 1, "description": "PTE Federal Award Number (FAIN). Resolves to UDM Award.Federal_Award_ID. Required by source workflow."},
     "subaward_number": {"type": "string", "minLength": 1, "description": "Subaward number. Resolves to UDM Subaward.Subaward_Number."},
     "project_title": {"type": "string", "minLength": 1, "description": "Full project title. Resolves to UDM Award.Award_Title."},
-    "federal_awarding_agency": {"type": ["string", "null"]},
+    "federal_awarding_agency": {"type": "string", "minLength": 1, "description": "Federal awarding agency name. Required by source workflow."},
 
     "pte_pi": {"$ref": "#/$defs/contact", "description": "PTE Principal Investigator. Resolves to UDM Personnel."},
     "pte_admin_contact": {"$ref": "#/$defs/contact"},
@@ -70,9 +73,9 @@
     },
 
     "invoicing_frequency": {
-      "type": ["string", "null"],
-      "enum": ["Monthly", "Quarterly", "Semi-Annual", "Annual", null],
-      "description": "Resolves to UDM Terms.Invoicing_Frequency."
+      "type": "string",
+      "enum": ["Monthly", "Quarterly", "Semi-Annual", "Annual"],
+      "description": "Resolves to UDM Terms.Invoicing_Frequency. Required by source workflow."
     },
     "final_invoice_due": {"type": ["string", "null"]},
     "fa_rate": {"type": ["string", "null"], "description": "Resolves to UDM IndirectRate.Rate_Percentage."},

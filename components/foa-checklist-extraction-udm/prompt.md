@@ -35,7 +35,14 @@ A single announcement *can* be extracted through both contracts when the downstr
 
 You are extracting a Federal Funding Opportunity Announcement (FOA) into the eight pre-award checklist sections a federal-grants office uses for FOA review. Capture the FOA's identity and timeline; the evaluation criteria and scoring methodology; the review process; agency priorities and program goals; the forms and submission systems; and the formatting requirements.
 
-**Be 100% accurate.** Quote dollar amounts, percentages, page limits, and dates verbatim. When a field is not specified, set it to `null` or — for arrays/tables — return an empty array. Do not invent values.
+**Be 100% accurate.** Match the schema's type for each field exactly:
+
+- **Number-typed fields** (`total_funding`) — emit as JSON numbers. `$10,000,000` in the document → `10000000` in JSON. No quotes, no currency symbol, no thousand-separators.
+- **Integer-typed fields** (`expected_awards`) — emit as JSON integers.
+- **Boolean-typed fields** (`cost_sharing_required`) — emit as `true`/`false`/`null`.
+- **String-typed fields** (`award_range`, all percent strings, `evaluation_criteria[].weight`, page limits in `page_limits[].limit`, etc.) — quote verbatim, preserving `%`, `$`, page-counts ("15 pages"), and other document rendering.
+
+When a field is not specified, set it to `null` or — for arrays/tables — return an empty array. Do not invent values.
 
 Return a single JSON object that validates against [`schema.json`](schema.json) with these top-level keys:
 

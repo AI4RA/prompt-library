@@ -9,5 +9,6 @@ All notable changes to this component. Versions follow semver: MAJOR for output-
 - `key_personnel_commitments` realized as an array of `{name, role, committed_effort, person_months, cost_shared_effort, notes}` objects (rather than the source `Table` field) so per-row effort details attach to the right individual.
 - `reporting_frequency` enum matches the source `Reporting_Frequency` Enum_Values (`Monthly`, `Quarterly`, `Semi-Annual`, `Annual`).
 - `certification_method` enum matches the source `Certification_Method` Enum_Values (`After-the-Fact`, `Plan-Confirmation`, `Payroll-Based`).
+- Source-workflow requiredness preserved: `award_number`, `pi_name`, `project_title`, `reporting_frequency`, `pi_committed_effort`, and `key_personnel_commitments` are required (matching the source workflow's `Is_Required: true`).
 - UDM column bindings preserved: `award_number` → `Award.Award_Number`; `pi_name` → `Personnel.First_Name`/`Last_Name`; `project_title` → `Award.Award_Title`; `certification_method` → `Effort.Certification_Method`; `pi_committed_effort` → `Effort.Committed_Percent`; `pi_person_months` → `Effort.Committed_Person_Months`; `cost_shared_effort` → `CostShare.Committed_Amount`; `record_retention` → `Terms.Record_Retention_Years`.
 - No eval cases yet — status `experimental` until at least one golden extraction is added under `evals/cases/`.

@@ -86,15 +86,13 @@ steps:
             - title: subrecipient_name
               searchphrase: Subrecipient organization name.
             - title: federal_award_number
-              searchphrase: PTE Federal Award Number (FAIN).
-              is_optional: true
+              searchphrase: PTE Federal Award Number (FAIN). Required by source workflow.
             - title: subaward_number
               searchphrase: Subaward number.
             - title: project_title
               searchphrase: Full project title.
             - title: federal_awarding_agency
-              searchphrase: Federal awarding agency name.
-              is_optional: true
+              searchphrase: Federal awarding agency name. Required by source workflow.
 
       - name: extract-contact-information
         kind: Extraction
@@ -169,6 +167,16 @@ steps:
         prompt_inline: |
           Extract dates and monetary values with absolute precision.
           Cross-reference amounts against multiple document locations.
+
+          Match the schema's type for each field exactly:
+            - amount_funded, total_direct_costs, total_indirect_costs
+              are JSON numbers (no quotes, no currency symbol, no
+              thousand-separators). "$1,234,567.89" becomes 1234567.89.
+              Use the document's exact value; do not round.
+            - budget_period_start, budget_period_end are STRINGS
+              (date format preserved).
+            - cost_type is a STRING from the enum below.
+
           For cost_type return one of: Cost Reimbursement, Fixed Price,
           Time and Materials.
         searchset:
@@ -180,12 +188,12 @@ steps:
             - title: budget_period_end
               searchphrase: Subaward budget period end date.
             - title: amount_funded
-              searchphrase: Amount funded this action (decimal number).
+              searchphrase: Amount funded this action as a JSON number (no quotes, no currency symbol, no thousand-separators). "$500,000" becomes 500000.
             - title: total_direct_costs
-              searchphrase: Total direct costs (decimal number).
+              searchphrase: Total direct costs as a JSON number (no quotes, no currency symbol, no thousand-separators).
               is_optional: true
             - title: total_indirect_costs
-              searchphrase: Total indirect costs (decimal number).
+              searchphrase: Total indirect costs as a JSON number (no quotes, no currency symbol, no thousand-separators).
               is_optional: true
             - title: cost_type
               searchphrase: Cost type classification (Cost Reimbursement, Fixed Price, Time and Materials).
@@ -207,8 +215,7 @@ steps:
           domain: research-administration
           items:
             - title: invoicing_frequency
-              searchphrase: Invoicing frequency (Monthly, Quarterly, Semi-Annual, Annual).
-              is_optional: true
+              searchphrase: Invoicing frequency (Monthly, Quarterly, Semi-Annual, Annual). Required by source workflow.
               enum_values:
                 - Monthly
                 - Quarterly

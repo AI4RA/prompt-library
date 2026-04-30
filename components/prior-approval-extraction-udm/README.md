@@ -56,4 +56,4 @@ See [`evals/`](evals/) for reference inputs and known-good outputs. Initial case
 
 ## Provenance
 
-Authored 2026-04-30 against the `prior-approval-extraction` (Workflow_ID: `WF-PRIOR-APPROVAL-EXTRACTION`) process-mapping workflow in `ui-insight/ProcessMapping`, which was built from walkthrough transcripts of post-award sponsored-programs staff working through prior-approval procedures.
+Authored 2026-04-30 against the `prior-approval-extraction` (Workflow_ID: `WF-PRIOR-APPROVAL-EXTRACTION`) process-mapping workflow in `ui-insight/ProcessMapping` at commit `b7176b0c913833a205efdb5e4ba00c17ff88af0f`, which was built from walkthrough transcripts of post-award sponsored-programs staff working through prior-approval procedures.

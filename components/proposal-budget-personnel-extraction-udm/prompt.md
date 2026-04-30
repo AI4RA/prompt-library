@@ -31,7 +31,13 @@ This component does **not** cover the full document-completeness gap analysis �
 
 You are extracting personnel information and compliance-requirement triggers from a proposal budget document. Your output drives a downstream document-completeness review, so the booleans (`has_postdocs_or_grad_students`, `has_subawards`, `has_equipment_over_5k`, `mentoring_plan_required`) must be **derivable from the extracted lists** — never set a boolean except by counting the corresponding list.
 
-**Be 100% accurate.** Quote dollar amounts and effort percentages verbatim. When a category is empty, return an empty array; when a scalar is not specified, return `null`. Do not invent personnel, subawardees, or equipment items.
+**Be 100% accurate.** Match the schema's type for each field exactly:
+
+- **Number-typed fields** (`total_personnel_cost`, `senior_key_personnel[].salary_requested`, `postdoc_details[].salary_or_stipend`, `graduate_student_details[].stipend`/`tuition_remission`, `other_personnel[].cost`, `subaward_recipients[].amount`, `equipment_items[].cost`, `budget_categories[].amount`, `budget_periods[].amount`, all three keys of `total_costs`) — emit as JSON numbers. No quotes, no `$`, no thousand-separators. `$1,234,567.89` in the document → `1234567.89` in JSON. Use the document's exact value; do not round.
+- **Integer-typed fields** (`postdoc_count`, `graduate_student_count`, `undergraduate_count`, `budget_periods[].period_number`) — emit as JSON integers.
+- **String-typed fields** (effort percentages, F&A rate string, cost-sharing description, etc.) — quote verbatim, preserving the document's `%` and other formatting.
+
+When a category is empty, return an empty array; when a scalar is not specified, return `null`. Do not invent personnel, subawardees, or equipment items.
 
 Search the entire budget for content in or near sections titled *Senior/Key Personnel*, *Other Personnel*, *Personnel*, *Section A — Senior/Key Person*, *Section B — Other Personnel*, *Salary and Wages*, *Personnel Justification*, *Budget*, *Budget Summary*, *Cumulative Budget*, *Subaward*, *Subcontract*, *Equipment*, *Travel*, *Other Direct Costs*, *Indirect Costs*.
 
@@ -64,7 +70,7 @@ Return a single JSON object that validates against [`schema.json`](schema.json) 
 2. **Equipment threshold is $5,000.** Items below the threshold do not appear in `equipment_items` (regardless of whether the budget calls them "equipment").
 3. **Postdoc / graduate-student names may be unknown.** If the budget lists a "Postdoc to be named" or "GRA TBN", use `name: "TBN"` so per-person document workflows can flag a missing-name dependency without dropping the row.
 4. **`fa_rate_and_base` is two-part.** `"42.5% MTDC"` → `{rate: "42.5%", base: "MTDC"}`.
-5. **`total_costs` reconciliation.** `total_project_cost == total_direct_costs + total_indirect_costs` (downstream `CHK-03`).
+5. **`total_costs` reconciliation.** All three keys (`total_direct_costs`, `total_indirect_costs`, `total_project_cost`) are JSON numbers. `total_project_cost == total_direct_costs + total_indirect_costs` (downstream `CHK-03`).
 6. **`graduate_student_details.type` enum.** Use `"RA"` (Research Assistant) or `"TA"` (Teaching Assistant) per the budget's classification.
 7. Do not output any text outside the single JSON object.
 

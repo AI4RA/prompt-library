@@ -31,7 +31,12 @@ This component does **not** cover the FFR submission cadence in detail — that 
 
 You are extracting the compliance framework and financial-management requirements from a federal award document. Capture both the **regulatory framework** that governs the award (Uniform Guidance, RTC, agency policy, high-risk conditions) and the **financial management** structure (award amounts, budget structure, cost share, F&A, FFR cadence, audit thresholds).
 
-**Be 100% accurate.** Quote dollar amounts, date ranges, and rate percentages verbatim. When a field is not specified, set it to `null` or — for arrays/tables — return an empty array. Do not invent values.
+**Be 100% accurate.** Numeric fields and string fields have different rendering rules — the contract is the schema, not the surface form:
+
+- **Schema fields typed as `number` (`total_award_amount`, `budget_period_amounts[].amount`, `budget_categories[].approved_amount`)** must be emitted as JSON numbers — no quotes, no currency symbol, no thousand-separators. `$1,234,567.89` in the document → `1234567.89` in JSON. Use the document's exact value; do not round or truncate.
+- **Schema fields typed as `string` (`fa_rate`, `fa_rate_base`, `cost_share_requirements`, `performance_period`, etc.)** must be quoted verbatim — preserve the document's exact rendering including currency symbols, percent signs, and date format.
+
+When a field is not specified, set it to `null` (or — for arrays/tables — return an empty array). Do not invent values.
 
 Search the entire document for content in or near sections titled *Terms and Conditions*, *Special Terms and Conditions*, *Administrative Requirements*, *Programmatic Requirements*, *High Risk Terms*, *Federal Requirements*, *Award Amount*, *Budget Information*, *Financial Management*, *Cost Sharing/Matching*, *Indirect Costs*, or *Financial Reporting*. Keywords to follow: condition, requirement, must, shall, comply, report, submit, approve, prior, deadline, CFR, federal, audit, monitor, budget, cost, financial, funding, allowable, FFR, PMS, drawdown, match, share, indirect, record.
 
@@ -67,8 +72,8 @@ Return a single JSON object that validates against [`schema.json`](schema.json) 
 2. **`prior_approval_requirements` is a categorized list, not a table.** This component exposes only the *categories* (e.g., `"Equipment over $5,000 requires PO approval"`); the procedural mechanics (threshold / timeline / consequences) belong in `prior-approval-extraction-udm`.
 3. **`budget_period_amounts` covers multi-year awards.** For single-period awards, return an empty array; the total still lives in `total_award_amount`.
 4. **`high_risk_conditions` is for designations the document calls out** — enhanced monitoring, additional reporting, specific restrictions tied to the recipient's risk classification.
-5. **Quote `fa_rate` and `fa_rate_base` exactly.** `"42.5% MTDC"` is two fields: `fa_rate: "42.5%"`, `fa_rate_base: "MTDC"`.
-6. **`total_award_amount` is the sum across the award**; `budget_period_amounts` rows must reconcile to it (downstream cross-field check CFR-01).
+5. **`fa_rate` and `fa_rate_base` are two distinct strings.** `"42.5% MTDC"` is two fields: `fa_rate: "42.5%"` (string, percent sign preserved), `fa_rate_base: "MTDC"`.
+6. **`total_award_amount` is a JSON number, not a quoted string.** `budget_period_amounts[].amount` and `budget_categories[].approved_amount` are also JSON numbers. The sum of `budget_period_amounts[].amount` must reconcile to `total_award_amount` (downstream cross-field check CFR-01).
 7. Do not output any text outside the single JSON object.
 
 ### Output

@@ -73,9 +73,20 @@ steps:
         prompt_inline: |
           Extract FOA identifying information, funding details, critical
           dates timeline, period of performance, and eligibility overview.
-          Be 100% accurate; quote dollar amounts and dates verbatim. For
-          federal_agency return one of: NSF, NIH, DOD, DOE, NASA, USDA,
-          EPA, DOT, DOC, ED, Other.
+
+          Be 100% accurate. Match the schema's type for each field
+          exactly:
+            - total_funding is a JSON number (no quotes, no currency
+              symbol, no thousand-separators).
+            - expected_awards is a JSON integer.
+            - cost_sharing_required is a JSON boolean (or null).
+            - award_range, performance_period, and the date strings
+              inside critical_dates are STRINGS, quoted verbatim
+              preserving "$300,000 to $750,000 per award" / date format /
+              etc.
+
+          For federal_agency return one of: NSF, NIH, DOD, DOE, NASA,
+          USDA, EPA, DOT, DOC, ED, Other.
         searchset:
           title: FOA Identification & Timeline
           domain: research-administration
@@ -102,10 +113,10 @@ steps:
             - title: foa_title
               searchphrase: FOA Title / Program Name.
             - title: total_funding
-              searchphrase: Total available funding (decimal number).
+              searchphrase: Total available funding as a JSON number (no quotes, no currency symbol, no thousand-separators). "$10,000,000" becomes 10000000.
               is_optional: true
             - title: expected_awards
-              searchphrase: Expected number of awards (integer).
+              searchphrase: Expected number of awards as a JSON integer.
               is_optional: true
             - title: award_range
               searchphrase: Minimum and maximum award amounts (e.g., "$300,000 to $750,000 per award").

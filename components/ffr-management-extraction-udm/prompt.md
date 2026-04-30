@@ -38,8 +38,8 @@ Return a single JSON object that validates against [`schema.json`](schema.json) 
 - `award_number` — federal award identification number (FAIN). String or `null`.
 - `pi_name` — principal investigator full name. String or `null`.
 - `submission_schedule` — object covering annual / final / interim cadence:
-  - `annual_ffr_due` — string (e.g., `"90 days after each budget period end"`) or `null`.
-  - `final_ffr_due` — string (e.g., `"120 days after project end"`) or `null`.
+  - `annual_ffr_due` — string (e.g., `"90 days after each budget period end"`). **Required.** When the document does not state it, use `"Not specified in the document"` (do not use null).
+  - `final_ffr_due` — string (e.g., `"120 days after project end"`). **Required.** When the document does not state it, use `"Not specified in the document"`.
   - `interim_reporting` — string description or `null`.
   - `cash_transaction_reporting` — string description or `null`.
 - `submission_system` — object covering the platform and access:

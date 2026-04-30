@@ -41,10 +41,10 @@
                       "enum_values": null
                     },
                     {
-                      "searchphrase": "PTE Federal Award Number (FAIN).",
+                      "searchphrase": "PTE Federal Award Number (FAIN). Required by source workflow.",
                       "searchtype": "extraction",
                       "title": "federal_award_number",
-                      "is_optional": true,
+                      "is_optional": false,
                       "enum_values": null
                     },
                     {
@@ -62,10 +62,10 @@
                       "enum_values": null
                     },
                     {
-                      "searchphrase": "Federal awarding agency name.",
+                      "searchphrase": "Federal awarding agency name. Required by source workflow.",
                       "searchtype": "extraction",
                       "title": "federal_awarding_agency",
-                      "is_optional": true,
+                      "is_optional": false,
                       "enum_values": null
                     }
                   ]
@@ -218,7 +218,7 @@
               "name": "Extraction",
               "data": {
                 "name": "extract-dates-and-monetary-values",
-                "prompt": "Extract dates and monetary values with absolute precision.\nCross-reference amounts against multiple document locations.\nFor cost_type return one of: Cost Reimbursement, Fixed Price,\nTime and Materials.",
+                "prompt": "Extract dates and monetary values with absolute precision.\nCross-reference amounts against multiple document locations.\n\nMatch the schema's type for each field exactly:\n  - amount_funded, total_direct_costs, total_indirect_costs\n    are JSON numbers (no quotes, no currency symbol, no\n    thousand-separators). \"$1,234,567.89\" becomes 1234567.89.\n    Use the document's exact value; do not round.\n  - budget_period_start, budget_period_end are STRINGS\n    (date format preserved).\n  - cost_type is a STRING from the enum below.\n\nFor cost_type return one of: Cost Reimbursement, Fixed Price,\nTime and Materials.",
                 "input_source": "workflow_documents",
                 "_embedded_search_set": {
                   "title": "Dates & Monetary Values",
@@ -241,21 +241,21 @@
                       "enum_values": null
                     },
                     {
-                      "searchphrase": "Amount funded this action (decimal number).",
+                      "searchphrase": "Amount funded this action as a JSON number (no quotes, no currency symbol, no thousand-separators). \"$500,000\" becomes 500000.",
                       "searchtype": "extraction",
                       "title": "amount_funded",
                       "is_optional": false,
                       "enum_values": null
                     },
                     {
-                      "searchphrase": "Total direct costs (decimal number).",
+                      "searchphrase": "Total direct costs as a JSON number (no quotes, no currency symbol, no thousand-separators).",
                       "searchtype": "extraction",
                       "title": "total_direct_costs",
                       "is_optional": true,
                       "enum_values": null
                     },
                     {
-                      "searchphrase": "Total indirect costs (decimal number).",
+                      "searchphrase": "Total indirect costs as a JSON number (no quotes, no currency symbol, no thousand-separators).",
                       "searchtype": "extraction",
                       "title": "total_indirect_costs",
                       "is_optional": true,
@@ -289,10 +289,10 @@
                   "cross_field_rules": null,
                   "items": [
                     {
-                      "searchphrase": "Invoicing frequency (Monthly, Quarterly, Semi-Annual, Annual).",
+                      "searchphrase": "Invoicing frequency (Monthly, Quarterly, Semi-Annual, Annual). Required by source workflow.",
                       "searchtype": "extraction",
                       "title": "invoicing_frequency",
-                      "is_optional": true,
+                      "is_optional": false,
                       "enum_values": [
                         "Monthly",
                         "Quarterly",

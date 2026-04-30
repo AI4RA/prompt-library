@@ -37,10 +37,10 @@ Search the entire document for content in or near sections titled *Effort Report
 
 Return a single JSON object that validates against [`schema.json`](schema.json) with these top-level keys:
 
-- `award_number` — federal award identification number. String or `null`.
-- `pi_name` — principal investigator full name. String or `null`.
-- `project_title` — full project title as stated in the award. String or `null`.
-- `reporting_frequency` — one of `"Monthly"`, `"Quarterly"`, `"Semi-Annual"`, `"Annual"`, or `null`.
+- `award_number` — federal award identification number. String. **Required.**
+- `pi_name` — principal investigator full name. String. **Required.**
+- `project_title` — full project title as stated in the award. String. **Required.**
+- `reporting_frequency` — one of `"Monthly"`, `"Quarterly"`, `"Semi-Annual"`, `"Annual"`. **Required.**
 - `certification_deadline` — string (e.g., `"30 days after period end"`) or `null`.
 - `certification_method` — one of `"After-the-Fact"`, `"Plan-Confirmation"`, `"Payroll-Based"`, or `null`.
 - `pi_committed_effort` — string with sponsor's effort phrasing (e.g., `"2.0 summer months"`, `"25% academic year"`). Required.

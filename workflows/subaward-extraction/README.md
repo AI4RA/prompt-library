@@ -58,4 +58,4 @@ The committed `subaward-extraction.vandalizer.json` can be uploaded directly int
 
 ## Provenance
 
-Authored 2026-04-30 alongside the initial `subaward-extraction-udm` component.
+Authored 2026-04-30 alongside the initial `subaward-extraction-udm` component, against `ui-insight/ProcessMapping` at commit `b7176b0c913833a205efdb5e4ba00c17ff88af0f`.

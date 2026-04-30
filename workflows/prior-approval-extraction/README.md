@@ -59,4 +59,4 @@ The committed `prior-approval-extraction.vandalizer.json` can be uploaded direct
 
 ## Provenance
 
-Authored 2026-04-30 alongside the initial `prior-approval-extraction-udm` component, to give the `ui-insight/ProcessMapping` Prior Approval Extraction workflow a versioned, catalog-discoverable Vandalizer manifestation.
+Authored 2026-04-30 alongside the initial `prior-approval-extraction-udm` component, to give the `ui-insight/ProcessMapping` Prior Approval Extraction workflow a versioned, catalog-discoverable Vandalizer manifestation, against `ui-insight/ProcessMapping` at commit `b7176b0c913833a205efdb5e4ba00c17ff88af0f`.

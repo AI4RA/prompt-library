@@ -66,12 +66,22 @@ steps:
           You are extracting all personnel listed in a proposal budget
           document.
 
-          Be 100% accurate. Quote effort percentages and dollar amounts
-          verbatim. Use empty arrays when a category has no entries; never
-          invent personnel. Use "TBN" as the name for to-be-named
-          postdoc or graduate-student slots so per-person document
-          workflows can flag the missing-name dependency without dropping
-          the row.
+          Be 100% accurate. Match the schema's type for each field
+          exactly:
+            - Integer-typed fields (postdoc_count, graduate_student_count,
+              undergraduate_count) are JSON integers.
+            - Number-typed fields (total_personnel_cost,
+              senior_key_personnel[].salary_requested,
+              postdoc_details[].salary_or_stipend,
+              graduate_student_details[].stipend / tuition_remission,
+              other_personnel[].cost) are JSON numbers — no quotes, no
+              currency symbol, no thousand-separators.
+            - String-typed fields (name, role, institution, effort) are
+              quoted verbatim, preserving "%" / "summer months" / etc.
+          Use empty arrays when a category has no entries; never invent
+          personnel. Use "TBN" as the name for to-be-named postdoc or
+          graduate-student slots so per-person document workflows can
+          flag the missing-name dependency without dropping the row.
 
           Search Senior/Key Personnel, Other Personnel, Section A, Section
           B, Salary and Wages, Personnel Justification.
@@ -114,10 +124,21 @@ steps:
           travel, F&A rate and base, cost sharing, total costs) from a
           proposal budget document.
 
-          Be 100% accurate. Equipment items below $5,000 do NOT belong in
-          equipment_items regardless of how the budget labels them. F&A
-          rate and base are two distinct fields ("42.5% MTDC" → rate:
-          "42.5%", base: "MTDC").
+          Be 100% accurate. Match the schema's type for each field
+          exactly:
+            - Number-typed fields (subaward_recipients[].amount,
+              equipment_items[].cost, budget_categories[].amount,
+              budget_periods[].amount, total_costs.{total_direct_costs,
+              total_indirect_costs, total_project_cost}) are JSON
+              numbers — no quotes, no currency symbol, no thousand-
+              separators.
+            - String-typed fields (fa_rate, travel_summary,
+              cost_sharing) are quoted verbatim with their "%" / "$" /
+              other formatting preserved.
+          Equipment items below $5,000 do NOT belong in equipment_items
+          regardless of how the budget labels them. F&A rate and base
+          are two distinct STRING fields ("42.5% MTDC" → fa_rate:
+          "42.5%", fa_base: "MTDC").
 
           The boolean triggers (has_subawards, has_equipment_over_5k)
           will be computed by the downstream Consolidation Prompt — do

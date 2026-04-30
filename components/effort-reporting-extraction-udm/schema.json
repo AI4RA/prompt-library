@@ -7,27 +7,34 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
+    "award_number",
+    "pi_name",
+    "project_title",
+    "reporting_frequency",
     "pi_committed_effort",
     "key_personnel_commitments",
     "referenced_documents"
   ],
   "properties": {
     "award_number": {
-      "type": ["string", "null"],
-      "description": "Federal Award Identification Number as printed on the award. Resolves to UDM Award.Award_Number."
+      "type": "string",
+      "minLength": 1,
+      "description": "Federal Award Identification Number as printed on the award. Resolves to UDM Award.Award_Number. Required by source workflow."
     },
     "pi_name": {
-      "type": ["string", "null"],
-      "description": "Principal Investigator full name. Resolves to UDM Personnel.First_Name + Personnel.Last_Name."
+      "type": "string",
+      "minLength": 1,
+      "description": "Principal Investigator full name. Resolves to UDM Personnel.First_Name + Personnel.Last_Name. Required by source workflow."
     },
     "project_title": {
-      "type": ["string", "null"],
-      "description": "Full project title as stated in the award. Resolves to UDM Award.Award_Title."
+      "type": "string",
+      "minLength": 1,
+      "description": "Full project title as stated in the award. Resolves to UDM Award.Award_Title. Required by source workflow."
     },
     "reporting_frequency": {
-      "type": ["string", "null"],
-      "enum": ["Monthly", "Quarterly", "Semi-Annual", "Annual", null],
-      "description": "Cadence at which effort must be certified. Distinct from the FFR submission cadence."
+      "type": "string",
+      "enum": ["Monthly", "Quarterly", "Semi-Annual", "Annual"],
+      "description": "Cadence at which effort must be certified. Distinct from the FFR submission cadence. Required by source workflow."
     },
     "certification_deadline": {
       "type": ["string", "null"],

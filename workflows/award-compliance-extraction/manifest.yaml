@@ -135,16 +135,27 @@ steps:
           budget categories, FFR cadence, audit requirements, and record
           retention.
 
-          Be 100% accurate. Quote dollar amounts and rates verbatim
-          ("$500,000", "42.5%", "MTDC"). Use null for missing scalars and
-          empty arrays for missing lists.
+          Be 100% accurate. Match the schema's type for each field
+          exactly:
+            - Number-typed fields (total_award_amount,
+              budget_period_amounts[].amount, budget_categories[].approved_amount)
+              are JSON numbers — no quotes, no currency symbol, no
+              thousand-separators. "$1,234,567.89" in the document
+              becomes 1234567.89 in JSON.
+            - String-typed fields (cost_share_requirements, fa_rate,
+              fa_rate_base, performance_period, ffr_requirements, etc.)
+              are quoted verbatim — preserve currency symbols, percent
+              signs, and date format.
+          Use null for missing scalars and empty arrays for missing
+          lists.
 
           budget_period_amounts is empty for single-period awards. The
           sum across budget_period_amounts should reconcile to
           total_award_amount (cross-field check CFR-01).
 
-          fa_rate and fa_rate_base are two distinct fields. "42.5% MTDC"
-          becomes fa_rate: "42.5%" and fa_rate_base: "MTDC".
+          fa_rate and fa_rate_base are two distinct STRING fields.
+          "42.5% MTDC" becomes fa_rate: "42.5%" (string, percent sign
+          preserved) and fa_rate_base: "MTDC".
 
           For audit_requirements return one of: Single Audit, A-133,
           Program-Specific Audit, Not applicable. For record_retention
@@ -155,9 +166,9 @@ steps:
           domain: research-administration
           items:
             - title: total_award_amount
-              searchphrase: Total award amount (decimal number).
+              searchphrase: Total award amount as a JSON number (no quotes, no currency symbol, no thousand-separators). "$1,234,567" becomes 1234567.
             - title: budget_period_amounts
-              searchphrase: JSON array of {period, start_date, end_date, amount} for multi-year awards. Empty array for single-period awards.
+              searchphrase: JSON array of {period, start_date, end_date, amount} for multi-year awards. amount is a JSON number; period / start_date / end_date are strings. Empty array for single-period awards.
               is_optional: true
             - title: cost_share_requirements
               searchphrase: Cost sharing/matching requirements (amount and type).
@@ -171,7 +182,7 @@ steps:
             - title: performance_period
               searchphrase: Period of performance dates as stated.
             - title: budget_categories
-              searchphrase: JSON array of {category_name, approved_amount, restrictions, prior_approval_required} for each budget category.
+              searchphrase: JSON array of {category_name, approved_amount, restrictions, prior_approval_required} for each budget category. approved_amount is a JSON number; the others are strings or boolean.
             - title: ffr_requirements
               searchphrase: Federal Financial Report frequency and deadlines.
               is_optional: true

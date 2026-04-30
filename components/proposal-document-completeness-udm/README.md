@@ -51,4 +51,4 @@ See [`evals/`](evals/) for reference inputs and known-good outputs.
 
 ## Provenance
 
-Authored 2026-04-30 against the `proposal-document-completeness` (Workflow_ID: `WF-PROPOSAL-DOC-COMPLETENESS`) process-mapping workflow in `ui-insight/ProcessMapping`, which was built from walkthrough transcripts of the near-final-doc-review process (13-step process). Created to make that workflow a harness-evaluatable, versioned artifact.
+Authored 2026-04-30 against the `proposal-document-completeness` (Workflow_ID: `WF-PROPOSAL-DOC-COMPLETENESS`) process-mapping workflow in `ui-insight/ProcessMapping` at commit `b7176b0c913833a205efdb5e4ba00c17ff88af0f`, which was built from walkthrough transcripts of the near-final-doc-review process (13-step process). Created to make that workflow a harness-evaluatable, versioned artifact.

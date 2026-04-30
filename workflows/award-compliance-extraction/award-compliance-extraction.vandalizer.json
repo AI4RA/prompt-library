@@ -104,7 +104,7 @@
               "name": "Extraction",
               "data": {
                 "name": "extract-financial-management",
-                "prompt": "You are extracting the financial management structure from a\nfederal award document: total award amount, multi-year budget\nperiods, cost share, F&A rate and base, performance period,\nbudget categories, FFR cadence, audit requirements, and record\nretention.\n\nBe 100% accurate. Quote dollar amounts and rates verbatim\n(\"$500,000\", \"42.5%\", \"MTDC\"). Use null for missing scalars and\nempty arrays for missing lists.\n\nbudget_period_amounts is empty for single-period awards. The\nsum across budget_period_amounts should reconcile to\ntotal_award_amount (cross-field check CFR-01).\n\nfa_rate and fa_rate_base are two distinct fields. \"42.5% MTDC\"\nbecomes fa_rate: \"42.5%\" and fa_rate_base: \"MTDC\".\n\nFor audit_requirements return one of: Single Audit, A-133,\nProgram-Specific Audit, Not applicable. For record_retention\nreturn one of: 3 years, 5 years, 7 years, Per sponsor\nrequirements.",
+                "prompt": "You are extracting the financial management structure from a\nfederal award document: total award amount, multi-year budget\nperiods, cost share, F&A rate and base, performance period,\nbudget categories, FFR cadence, audit requirements, and record\nretention.\n\nBe 100% accurate. Match the schema's type for each field\nexactly:\n  - Number-typed fields (total_award_amount,\n    budget_period_amounts[].amount, budget_categories[].approved_amount)\n    are JSON numbers — no quotes, no currency symbol, no\n    thousand-separators. \"$1,234,567.89\" in the document\n    becomes 1234567.89 in JSON.\n  - String-typed fields (cost_share_requirements, fa_rate,\n    fa_rate_base, performance_period, ffr_requirements, etc.)\n    are quoted verbatim — preserve currency symbols, percent\n    signs, and date format.\nUse null for missing scalars and empty arrays for missing\nlists.\n\nbudget_period_amounts is empty for single-period awards. The\nsum across budget_period_amounts should reconcile to\ntotal_award_amount (cross-field check CFR-01).\n\nfa_rate and fa_rate_base are two distinct STRING fields.\n\"42.5% MTDC\" becomes fa_rate: \"42.5%\" (string, percent sign\npreserved) and fa_rate_base: \"MTDC\".\n\nFor audit_requirements return one of: Single Audit, A-133,\nProgram-Specific Audit, Not applicable. For record_retention\nreturn one of: 3 years, 5 years, 7 years, Per sponsor\nrequirements.",
                 "input_source": "workflow_documents",
                 "_embedded_search_set": {
                   "title": "Award Financial Management",
@@ -113,14 +113,14 @@
                   "cross_field_rules": null,
                   "items": [
                     {
-                      "searchphrase": "Total award amount (decimal number).",
+                      "searchphrase": "Total award amount as a JSON number (no quotes, no currency symbol, no thousand-separators). \"$1,234,567\" becomes 1234567.",
                       "searchtype": "extraction",
                       "title": "total_award_amount",
                       "is_optional": false,
                       "enum_values": null
                     },
                     {
-                      "searchphrase": "JSON array of {period, start_date, end_date, amount} for multi-year awards. Empty array for single-period awards.",
+                      "searchphrase": "JSON array of {period, start_date, end_date, amount} for multi-year awards. amount is a JSON number; period / start_date / end_date are strings. Empty array for single-period awards.",
                       "searchtype": "extraction",
                       "title": "budget_period_amounts",
                       "is_optional": true,
@@ -155,7 +155,7 @@
                       "enum_values": null
                     },
                     {
-                      "searchphrase": "JSON array of {category_name, approved_amount, restrictions, prior_approval_required} for each budget category.",
+                      "searchphrase": "JSON array of {category_name, approved_amount, restrictions, prior_approval_required} for each budget category. approved_amount is a JSON number; the others are strings or boolean.",
                       "searchtype": "extraction",
                       "title": "budget_categories",
                       "is_optional": false,
