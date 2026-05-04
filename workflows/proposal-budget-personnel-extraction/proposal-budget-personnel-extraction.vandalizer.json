@@ -24,7 +24,7 @@
                   "title": "Proposal Budget Personnel",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "JSON array of {name, role, institution, effort, salary_requested} for senior/key personnel.",
@@ -96,7 +96,7 @@
                   "title": "Proposal Budget Structure",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "JSON array of {category_name, amount, notes} for each budget category.",

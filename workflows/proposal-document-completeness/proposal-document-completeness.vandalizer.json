@@ -24,7 +24,7 @@
                   "title": "Proposal Components Inventory",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Complete list of all documents currently uploaded in the proposal package.",
@@ -103,7 +103,7 @@
                   "title": "Sponsor Requirements",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Sponsor agency name (e.g., \"National Science Foundation\").",

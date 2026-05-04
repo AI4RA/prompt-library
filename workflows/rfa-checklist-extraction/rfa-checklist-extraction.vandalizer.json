@@ -24,7 +24,7 @@
                   "title": "RFA Opportunity Metadata",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Combined sponsor-prefixed RFA identifier (e.g., NSF-26-508)",
@@ -96,7 +96,7 @@
                   "title": "RFA Dates and Deadlines",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "All dates and deadlines as a JSON array of {item, date_time, notes} objects",
@@ -119,7 +119,7 @@
                   "title": "RFA Eligible Institutions",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Eligible institutions as a JSON array of {type, subcategory, examples, compliance_requirements} objects",
@@ -142,7 +142,7 @@
                   "title": "RFA Eligible Individuals",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Eligible individuals as a JSON array of {type, criteria, compliance_requirements, conditions} objects",
@@ -165,7 +165,7 @@
                   "title": "RFA Award Information",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Anticipated award duration",
@@ -209,7 +209,7 @@
                   "title": "RFA Application Components, Submission, and Special Requirements",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Required application components as a JSON array of {name, description, special_requirements} objects",
@@ -253,7 +253,7 @@
                   "title": "RFA Budget Requirements and Policies",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Total program funding, per-year caps, and category-specific limits not already covered by amount_per_award",

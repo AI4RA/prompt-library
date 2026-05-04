@@ -24,7 +24,7 @@
                   "title": "Prior Approval Extraction",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Federal Award Identification Number (FAIN) printed on the award.",

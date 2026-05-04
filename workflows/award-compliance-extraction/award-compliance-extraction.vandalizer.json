@@ -24,7 +24,7 @@
                   "title": "Award Compliance Framework",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "2 CFR 200 Uniform Guidance applicability details.",
@@ -110,7 +110,7 @@
                   "title": "Award Financial Management",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Total award amount as a JSON number (no quotes, no currency symbol, no thousand-separators). \"$1,234,567\" becomes 1234567.",

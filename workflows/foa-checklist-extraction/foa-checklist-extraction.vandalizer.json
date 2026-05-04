@@ -24,7 +24,7 @@
                   "title": "FOA Identification & Timeline",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Funding Opportunity Number / ID (e.g., PA-24-246, DE-FOA-0003117).",
@@ -129,7 +129,7 @@
                   "title": "Evaluation Criteria",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Total possible points or scoring scale (e.g., \"100 points\").",
@@ -173,7 +173,7 @@
                   "title": "Review Process",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "JSON array of {stage_name, purpose, outcome} in sequential order.",
@@ -217,7 +217,7 @@
                   "title": "Agency Priorities & Goals",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Agency mission relevant to this FOA.",
@@ -261,7 +261,7 @@
                   "title": "Forms & Submission Systems",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Primary submission system (Grants.gov, eRA Commons, etc.).",
@@ -305,7 +305,7 @@
                   "title": "Formatting Requirements",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Flat list of required proposal sections in exact order.",

@@ -24,7 +24,7 @@
                   "title": "Core Award Information",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Pass-Through Entity name.",
@@ -82,7 +82,7 @@
                   "title": "Contact Information",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "PTE Principal Investigator full name.",
@@ -224,7 +224,7 @@
                   "title": "Dates & Monetary Values",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Subaward budget period start date.",
@@ -286,7 +286,7 @@
                   "title": "Financial Policies",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Invoicing frequency (Monthly, Quarterly, Semi-Annual, Annual). Required by source workflow.",
@@ -349,7 +349,7 @@
                   "title": "Reporting Requirements",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "JSON array of {report_name, frequency, due, recipient} for required technical reports. Empty array when none required.",
@@ -386,7 +386,7 @@
                   "title": "Compliance Requirements",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "JSON array of {regulation, source} naming each governing instrument with the document section / attachment that calls it out.",
