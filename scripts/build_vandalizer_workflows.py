@@ -189,10 +189,12 @@ def build_embedded_search_set(task: dict, manifest_path: Path) -> dict:
             )
         seen_titles.add(item_title)
         enum_values = item.get("enum_values")
-        if enum_values is not None and not isinstance(enum_values, list):
+        if enum_values is None:
+            enum_values = []
+        elif not isinstance(enum_values, list):
             raise BuildError(
                 manifest_path,
-                f"task {task_name!r} searchset.items[{idx}] enum_values must be a list or null",
+                f"task {task_name!r} searchset.items[{idx}] enum_values must be a list when present",
             )
         built_items.append({
             "searchphrase": searchphrase,
@@ -202,11 +204,25 @@ def build_embedded_search_set(task: dict, manifest_path: Path) -> dict:
             "enum_values": enum_values,
         })
 
+    # Vandalizer's SearchSet pydantic model rejects null for cross_field_rules
+    # (it expects a list, defaulting to empty). Emit `[]` rather than `null`
+    # when the manifest does not declare any cross-field rules; otherwise
+    # importing the export fails with a list_type validation error before
+    # the SearchSet is even materialized.
+    cross_field_rules = searchset.get("cross_field_rules")
+    if cross_field_rules is None:
+        cross_field_rules = []
+    elif not isinstance(cross_field_rules, list):
+        raise BuildError(
+            manifest_path,
+            f"task {task_name!r} searchset.cross_field_rules must be a list when present",
+        )
+
     return {
         "title": title,
         "extraction_config": searchset.get("extraction_config", {}) or {},
         "domain": searchset.get("domain"),
-        "cross_field_rules": searchset.get("cross_field_rules"),
+        "cross_field_rules": cross_field_rules,
         "items": built_items,
     }
 

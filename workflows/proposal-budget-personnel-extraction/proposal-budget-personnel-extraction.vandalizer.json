@@ -24,63 +24,63 @@
                   "title": "Proposal Budget Personnel",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "JSON array of {name, role, institution, effort, salary_requested} for senior/key personnel.",
                       "searchtype": "extraction",
                       "title": "senior_key_personnel",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Integer count of postdoctoral researchers in the budget.",
                       "searchtype": "extraction",
                       "title": "postdoc_count",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {name, effort, salary_or_stipend} for postdoctoral researchers. Use \"TBN\" for unnamed slots.",
                       "searchtype": "extraction",
                       "title": "postdoc_details",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Integer count of graduate research/teaching assistants in the budget.",
                       "searchtype": "extraction",
                       "title": "graduate_student_count",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {name, type, stipend, tuition_remission} where type is \"RA\" or \"TA\".",
                       "searchtype": "extraction",
                       "title": "graduate_student_details",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Integer count of undergraduate students in the budget.",
                       "searchtype": "extraction",
                       "title": "undergraduate_count",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {role, cost} for other personnel (technicians, programmers, administrative staff).",
                       "searchtype": "extraction",
                       "title": "other_personnel",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Total personnel costs including salary and fringe (decimal number).",
                       "searchtype": "extraction",
                       "title": "total_personnel_cost",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }
@@ -96,42 +96,42 @@
                   "title": "Proposal Budget Structure",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "JSON array of {category_name, amount, notes} for each budget category.",
                       "searchtype": "extraction",
                       "title": "budget_categories",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {institution_name, sub_pi_name, amount} for subaward/subcontract recipients. Empty array when none.",
                       "searchtype": "extraction",
                       "title": "subaward_recipients",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {description, cost} for equipment items costing over $5,000 only.",
                       "searchtype": "extraction",
                       "title": "equipment_items",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Summary of travel costs including domestic and foreign travel amounts.",
                       "searchtype": "extraction",
                       "title": "travel_summary",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "F&A (indirect cost) rate percentage as stated (e.g., \"42.5%\").",
                       "searchtype": "extraction",
                       "title": "fa_rate",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Base for F&A rate calculation (MTDC, TDC, Salary & Wages).",
@@ -149,21 +149,21 @@
                       "searchtype": "extraction",
                       "title": "cost_sharing",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON object {total_direct_costs, total_indirect_costs, total_project_cost} (all decimal numbers).",
                       "searchtype": "extraction",
                       "title": "total_costs",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {period_number, start_date, end_date, amount} for multi-year proposals. Empty array for single-period.",
                       "searchtype": "extraction",
                       "title": "budget_periods",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }

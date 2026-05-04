@@ -24,77 +24,77 @@
                   "title": "Award Compliance Framework",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "2 CFR 200 Uniform Guidance applicability details.",
                       "searchtype": "extraction",
                       "title": "uniform_guidance_applicability",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Research Terms and Conditions applicability.",
                       "searchtype": "extraction",
                       "title": "rtc_applicability",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Financial reporting frequency, deadlines, and systems.",
                       "searchtype": "extraction",
                       "title": "financial_reporting_requirements",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Progress report type, frequency, and format.",
                       "searchtype": "extraction",
                       "title": "progress_reporting_requirements",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Categorized list of prior-approval requirements (one entry per approval type).",
                       "searchtype": "extraction",
                       "title": "prior_approval_requirements",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Budget modification restrictions and re-budgeting rules.",
                       "searchtype": "extraction",
                       "title": "budget_modification_restrictions",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Equipment and property management requirements.",
                       "searchtype": "extraction",
                       "title": "property_requirements",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Deliverable requirements and deadlines.",
                       "searchtype": "extraction",
                       "title": "deliverable_requirements",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Enhanced monitoring, additional reporting, or specific restrictions tied to risk classification. Empty array when not high-risk.",
                       "searchtype": "extraction",
                       "title": "high_risk_conditions",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {requirement_type, deadline, responsible_party, consequences}, one row per recurring or fixed deadline pulled from across the document.",
                       "searchtype": "extraction",
                       "title": "compliance_calendar",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }
@@ -110,63 +110,63 @@
                   "title": "Award Financial Management",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Total award amount as a JSON number (no quotes, no currency symbol, no thousand-separators). \"$1,234,567\" becomes 1234567.",
                       "searchtype": "extraction",
                       "title": "total_award_amount",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {period, start_date, end_date, amount} for multi-year awards. amount is a JSON number; period / start_date / end_date are strings. Empty array for single-period awards.",
                       "searchtype": "extraction",
                       "title": "budget_period_amounts",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Cost sharing/matching requirements (amount and type).",
                       "searchtype": "extraction",
                       "title": "cost_share_requirements",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Indirect cost rate percentage as stated (e.g., \"42.5%\").",
                       "searchtype": "extraction",
                       "title": "fa_rate",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Base for F&A rate calculation (e.g., MTDC, TDC, Salary & Wages).",
                       "searchtype": "extraction",
                       "title": "fa_rate_base",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Period of performance dates as stated.",
                       "searchtype": "extraction",
                       "title": "performance_period",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {category_name, approved_amount, restrictions, prior_approval_required} for each budget category. approved_amount is a JSON number; the others are strings or boolean.",
                       "searchtype": "extraction",
                       "title": "budget_categories",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Federal Financial Report frequency and deadlines.",
                       "searchtype": "extraction",
                       "title": "ffr_requirements",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Audit requirements (Single Audit, A-133, Program-Specific Audit, Not applicable).",

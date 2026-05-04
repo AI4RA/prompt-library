@@ -24,70 +24,70 @@
                   "title": "Prior Approval Extraction",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Federal Award Identification Number (FAIN) printed on the award.",
                       "searchtype": "extraction",
                       "title": "award_number",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Re-budgeting thresholds and restrictions requiring prior approval. Quote dollar/percent thresholds verbatim.",
                       "searchtype": "extraction",
                       "title": "rebudgeting_thresholds",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Equipment-purchase approval requirements (typically tied to a $ threshold).",
                       "searchtype": "extraction",
                       "title": "equipment_approvals",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Subcontracting / subaward approval requirements.",
                       "searchtype": "extraction",
                       "title": "subaward_approvals",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Requirements for PI or key-personnel changes (substitution, reduction in effort).",
                       "searchtype": "extraction",
                       "title": "pi_change_requirements",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "No-cost extension request requirements (notice period, supporting documentation, sponsor route).",
                       "searchtype": "extraction",
                       "title": "nce_requirements",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Foreign travel approval requirements when the award imposes them.",
                       "searchtype": "extraction",
                       "title": "foreign_travel_approvals",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Approval-procedures table with rows of {approval_type, threshold, documentation, authority, timeline, consequences}. Each row is one approval type.",
                       "searchtype": "extraction",
                       "title": "approval_procedures",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Research Terms and Conditions waivers and expanded-authority delegations the recipient can handle without sponsor sign-off.",
                       "searchtype": "extraction",
                       "title": "rtc_waivers",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }

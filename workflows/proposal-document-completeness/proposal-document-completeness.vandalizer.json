@@ -24,70 +24,70 @@
                   "title": "Proposal Components Inventory",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Complete list of all documents currently uploaded in the proposal package.",
                       "searchtype": "extraction",
                       "title": "uploaded_documents",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {name, role, institution} for senior/key personnel listed in the proposal (PI, Co-PI, Senior Personnel).",
                       "searchtype": "extraction",
                       "title": "senior_key_personnel",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Flat list of personnel names identified from the budget document.",
                       "searchtype": "extraction",
                       "title": "budget_personnel",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Boolean. True iff the budget includes postdoctoral or graduate-student personnel lines.",
                       "searchtype": "extraction",
                       "title": "has_postdocs_or_grad_students",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Boolean. True iff the proposal includes subaward(s) (commitment form, subaward budget, or subaward narrative present).",
                       "searchtype": "extraction",
                       "title": "has_subawards",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {subawardee_name, commitment_form, budget, budget_justification, senior_key_docs, scope_of_work, facilities_equipment} booleans, one row per subawardee. Empty when has_subawards is false.",
                       "searchtype": "extraction",
                       "title": "subaward_documents_inventory",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {person_name, biosketch, current_and_pending, collaboration_and_affiliation, synergistic_activities} booleans, one row per senior-key person.",
                       "searchtype": "extraction",
                       "title": "per_person_document_matrix_inventory",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Proposal track type (e.g., TTP-P, standard, track-2) that may trigger additional requirements.",
                       "searchtype": "extraction",
                       "title": "proposal_track_type",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Discrepancies between budget personnel and senior-key-personnel listings (duplicates, missing entries, name mismatches).",
                       "searchtype": "extraction",
                       "title": "personnel_discrepancies",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }
@@ -103,21 +103,21 @@
                   "title": "Sponsor Requirements",
                   "extraction_config": {},
                   "domain": "research-administration",
-                  "cross_field_rules": null,
+                  "cross_field_rules": [],
                   "items": [
                     {
                       "searchphrase": "Sponsor agency name (e.g., \"National Science Foundation\").",
                       "searchtype": "extraction",
                       "title": "sponsor_name",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Solicitation number (e.g., \"NSF 26-508\").",
                       "searchtype": "extraction",
                       "title": "rfa_foa_number",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Review pathway (7-day basic review, 10-day full review, or Not specified).",
@@ -135,28 +135,28 @@
                       "searchtype": "extraction",
                       "title": "required_documents_checklist",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {condition, document_name, notes} for documents required only when a condition holds (e.g., mentoring plan when postdocs present, letter of collaboration for TTP-P track).",
                       "searchtype": "extraction",
                       "title": "conditional_requirements",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Document names required per senior-key person (typically biosketch, current & pending, collaboration & affiliation, synergistic activities).",
                       "searchtype": "extraction",
                       "title": "per_person_required_documents",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Document names required per subawardee (commitment form, budget, budget justification, senior key docs, scope of work, facilities/equipment).",
                       "searchtype": "extraction",
                       "title": "subaward_required_documents",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }
