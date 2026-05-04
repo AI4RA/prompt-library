@@ -189,10 +189,12 @@ def build_embedded_search_set(task: dict, manifest_path: Path) -> dict:
             )
         seen_titles.add(item_title)
         enum_values = item.get("enum_values")
-        if enum_values is not None and not isinstance(enum_values, list):
+        if enum_values is None:
+            enum_values = []
+        elif not isinstance(enum_values, list):
             raise BuildError(
                 manifest_path,
-                f"task {task_name!r} searchset.items[{idx}] enum_values must be a list or null",
+                f"task {task_name!r} searchset.items[{idx}] enum_values must be a list when present",
             )
         built_items.append({
             "searchphrase": searchphrase,

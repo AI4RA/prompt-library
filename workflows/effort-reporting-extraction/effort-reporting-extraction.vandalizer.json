@@ -31,21 +31,21 @@
                       "searchtype": "extraction",
                       "title": "award_number",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Principal Investigator full name.",
                       "searchtype": "extraction",
                       "title": "pi_name",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Full project title as stated in the award.",
                       "searchtype": "extraction",
                       "title": "project_title",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Cadence at which effort must be certified (Monthly, Quarterly, Semi-Annual, Annual).",
@@ -64,7 +64,7 @@
                       "searchtype": "extraction",
                       "title": "certification_deadline",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Effort certification method per 2 CFR 200.430(i) (After-the-Fact, Plan-Confirmation, Payroll-Based).",
@@ -82,49 +82,49 @@
                       "searchtype": "extraction",
                       "title": "pi_committed_effort",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "PI committed effort expressed as person-months when the document provides it.",
                       "searchtype": "extraction",
                       "title": "pi_person_months",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {name, role, committed_effort, person_months, cost_shared_effort, notes}, one row per named individual.",
                       "searchtype": "extraction",
                       "title": "key_personnel_commitments",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Total cost-shared effort obligations across the award, when separately documented.",
                       "searchtype": "extraction",
                       "title": "cost_shared_effort",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Primary governing regulation cited (e.g., \"2 CFR 200.430\").",
                       "searchtype": "extraction",
                       "title": "governing_regulation",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Record retention period requirement (e.g., \"3 years\", \"per sponsor requirements\").",
                       "searchtype": "extraction",
                       "title": "record_retention",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Referenced governing documents (RTCs, CA-FATC, agency policy statements). Empty array when none are stated.",
                       "searchtype": "extraction",
                       "title": "referenced_documents",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }

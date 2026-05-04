@@ -31,42 +31,42 @@
                       "searchtype": "extraction",
                       "title": "award_number",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Principal Investigator full name printed on the award.",
                       "searchtype": "extraction",
                       "title": "pi_name",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Annual FFR due window (e.g., 90 or 120 days after each budget period end). Quote the document verbatim.",
                       "searchtype": "extraction",
                       "title": "annual_ffr_due",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Final FFR deadline after project end (e.g., 120 days after project end).",
                       "searchtype": "extraction",
                       "title": "final_ffr_due",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Interim financial reporting requirements when imposed.",
                       "searchtype": "extraction",
                       "title": "interim_reporting",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "SF-272 or cash transaction reporting requirements.",
                       "searchtype": "extraction",
                       "title": "cash_transaction_reporting",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Primary submission system / platform (one of Payment Management System, ASAP, ACH, Grants.gov, Other).",
@@ -86,63 +86,63 @@
                       "searchtype": "extraction",
                       "title": "submission_system_access_requirements",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "eRA Commons integration details (NIH/HHS awards). Null otherwise.",
                       "searchtype": "extraction",
                       "title": "era_commons_integration",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Roles and responsibilities for who may submit (e.g., AOR-only).",
                       "searchtype": "extraction",
                       "title": "submission_authorization",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Flat list of required reporting category labels exactly as the document names them (Personnel, Fringe, Equipment, Subawards, Cost share, Program income, etc.).",
                       "searchtype": "extraction",
                       "title": "required_financial_data",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Document language describing penalties for late FFR submission.",
                       "searchtype": "extraction",
                       "title": "late_submission_penalties",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Document language describing payment-system or drawdown restrictions tied to non-compliance.",
                       "searchtype": "extraction",
                       "title": "account_restrictions",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Document language describing impact on future awards or competing renewals.",
                       "searchtype": "extraction",
                       "title": "impact_on_future_funding",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Document language describing supporting documentation or backup the recipient must retain.",
                       "searchtype": "extraction",
                       "title": "required_documentation",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Countdown of preparation milestones derived from the document's own pre-submission timing language. Empty when the document does not describe a countdown.",
                       "searchtype": "extraction",
                       "title": "preparation_timeline",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }

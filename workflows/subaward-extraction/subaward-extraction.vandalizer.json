@@ -31,42 +31,42 @@
                       "searchtype": "extraction",
                       "title": "pte_name",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Subrecipient organization name.",
                       "searchtype": "extraction",
                       "title": "subrecipient_name",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "PTE Federal Award Number (FAIN). Required by source workflow.",
                       "searchtype": "extraction",
                       "title": "federal_award_number",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Subaward number.",
                       "searchtype": "extraction",
                       "title": "subaward_number",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Full project title.",
                       "searchtype": "extraction",
                       "title": "project_title",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Federal awarding agency name. Required by source workflow.",
                       "searchtype": "extraction",
                       "title": "federal_awarding_agency",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }
@@ -89,126 +89,126 @@
                       "searchtype": "extraction",
                       "title": "pte_pi_name",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "PTE PI email address (character-perfect).",
                       "searchtype": "extraction",
                       "title": "pte_pi_email",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "PTE PI phone number (character-perfect).",
                       "searchtype": "extraction",
                       "title": "pte_pi_phone",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "PTE Administrative Contact name.",
                       "searchtype": "extraction",
                       "title": "pte_admin_contact_name",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "PTE Administrative Contact email (character-perfect).",
                       "searchtype": "extraction",
                       "title": "pte_admin_contact_email",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "PTE Administrative Contact phone (character-perfect).",
                       "searchtype": "extraction",
                       "title": "pte_admin_contact_phone",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "PTE Financial Contact name.",
                       "searchtype": "extraction",
                       "title": "pte_financial_contact_name",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "PTE Financial Contact email.",
                       "searchtype": "extraction",
                       "title": "pte_financial_contact_email",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "PTE Financial Contact phone.",
                       "searchtype": "extraction",
                       "title": "pte_financial_contact_phone",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Subrecipient PI full name.",
                       "searchtype": "extraction",
                       "title": "subrecipient_pi_name",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Subrecipient PI email (character-perfect).",
                       "searchtype": "extraction",
                       "title": "subrecipient_pi_email",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Subrecipient PI phone (character-perfect).",
                       "searchtype": "extraction",
                       "title": "subrecipient_pi_phone",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Subrecipient Administrative Contact name.",
                       "searchtype": "extraction",
                       "title": "subrecipient_admin_contact_name",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Subrecipient Administrative Contact email.",
                       "searchtype": "extraction",
                       "title": "subrecipient_admin_contact_email",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Subrecipient Administrative Contact phone.",
                       "searchtype": "extraction",
                       "title": "subrecipient_admin_contact_phone",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Subrecipient Financial Contact name.",
                       "searchtype": "extraction",
                       "title": "subrecipient_financial_contact_name",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Subrecipient Financial Contact email.",
                       "searchtype": "extraction",
                       "title": "subrecipient_financial_contact_email",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Subrecipient Financial Contact phone.",
                       "searchtype": "extraction",
                       "title": "subrecipient_financial_contact_phone",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }
@@ -231,35 +231,35 @@
                       "searchtype": "extraction",
                       "title": "budget_period_start",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Subaward budget period end date.",
                       "searchtype": "extraction",
                       "title": "budget_period_end",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Amount funded this action as a JSON number (no quotes, no currency symbol, no thousand-separators). \"$500,000\" becomes 500000.",
                       "searchtype": "extraction",
                       "title": "amount_funded",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Total direct costs as a JSON number (no quotes, no currency symbol, no thousand-separators).",
                       "searchtype": "extraction",
                       "title": "total_direct_costs",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Total indirect costs as a JSON number (no quotes, no currency symbol, no thousand-separators).",
                       "searchtype": "extraction",
                       "title": "total_indirect_costs",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Cost type classification (Cost Reimbursement, Fixed Price, Time and Materials).",
@@ -305,35 +305,35 @@
                       "searchtype": "extraction",
                       "title": "final_invoice_due",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Indirect cost (F&A) rate percentage as stated.",
                       "searchtype": "extraction",
                       "title": "fa_rate",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Indirect cost calculation base (MTDC, TDC, etc.).",
                       "searchtype": "extraction",
                       "title": "fa_base",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Boolean. Whether cost sharing is required.",
                       "searchtype": "extraction",
                       "title": "cost_sharing_required",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Carryforward policy details.",
                       "searchtype": "extraction",
                       "title": "carryforward_policy",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }
@@ -356,21 +356,21 @@
                       "searchtype": "extraction",
                       "title": "technical_reports",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {report_name, frequency, due, recipient} for required financial reports. Empty array when none required.",
                       "searchtype": "extraction",
                       "title": "financial_reports",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "JSON array of {requirement, timing} for invention disclosure and reporting requirements.",
                       "searchtype": "extraction",
                       "title": "invention_reporting",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }
@@ -393,49 +393,49 @@
                       "searchtype": "extraction",
                       "title": "governing_regulations",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "General prior-approval policy.",
                       "searchtype": "extraction",
                       "title": "prior_approval_handling",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Conflict of interest policy application.",
                       "searchtype": "extraction",
                       "title": "coi_policy",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Data rights and sharing terms.",
                       "searchtype": "extraction",
                       "title": "data_rights",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Audit requirements and thresholds.",
                       "searchtype": "extraction",
                       "title": "audit_requirements",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Termination notice period and conditions.",
                       "searchtype": "extraction",
                       "title": "termination_clauses",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Record retention requirements.",
                       "searchtype": "extraction",
                       "title": "record_retention",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }

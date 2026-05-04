@@ -31,56 +31,56 @@
                       "searchtype": "extraction",
                       "title": "rfa_id",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Sponsor's announcement number without agency prefix (e.g., 26-508)",
                       "searchtype": "extraction",
                       "title": "rfa_number",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Full title of the funding opportunity, including any track or component designation",
                       "searchtype": "extraction",
                       "title": "rfa_title",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Full name of the lead sponsoring agency",
                       "searchtype": "extraction",
                       "title": "sponsor_name",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Sponsor's internal program or division code (e.g., NSF/TIP/ITE)",
                       "searchtype": "extraction",
                       "title": "program_code",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Canonical URL of the announcement on the sponsor's site",
                       "searchtype": "extraction",
                       "title": "announcement_url",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Grants.gov or portal opportunity ID when distinct from the announcement number",
                       "searchtype": "extraction",
                       "title": "opportunity_number",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "CFDA / Assistance Listing number(s)",
                       "searchtype": "extraction",
                       "title": "cfda_number",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }
@@ -103,7 +103,7 @@
                       "searchtype": "extraction",
                       "title": "dates_and_deadlines",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }
@@ -126,7 +126,7 @@
                       "searchtype": "extraction",
                       "title": "eligible_institutions",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }
@@ -149,7 +149,7 @@
                       "searchtype": "extraction",
                       "title": "eligible_individuals",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }
@@ -172,28 +172,28 @@
                       "searchtype": "extraction",
                       "title": "award_duration",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Amount per award including matching, indirect, and restrictions",
                       "searchtype": "extraction",
                       "title": "amount_per_award",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Anticipated number of awards",
                       "searchtype": "extraction",
                       "title": "number_of_awards",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Anticipated award date",
                       "searchtype": "extraction",
                       "title": "anticipated_award_date",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }
@@ -216,28 +216,28 @@
                       "searchtype": "extraction",
                       "title": "required_components",
                       "is_optional": false,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Optional application components as a JSON array of {name, description, special_requirements} objects",
                       "searchtype": "extraction",
                       "title": "optional_components",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Submission method, portal, file-format requirements, naming conventions, and collaboration rules as a paragraph",
                       "searchtype": "extraction",
                       "title": "submission_details",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Special RFA requirements as a JSON array of strings",
                       "searchtype": "extraction",
                       "title": "special_requirements",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }
@@ -260,7 +260,7 @@
                       "searchtype": "extraction",
                       "title": "funding_limits",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Cost-sharing requirement status (Required, Voluntary, Prohibited, or Not Specified)",
@@ -279,42 +279,42 @@
                       "searchtype": "extraction",
                       "title": "cost_sharing_details",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "F&A / indirect cost policy — rate, base (MTDC / TDC / S&W), excluded categories, documentation",
                       "searchtype": "extraction",
                       "title": "fa_policy",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Categories explicitly called out as allowable, as a JSON array of strings",
                       "searchtype": "extraction",
                       "title": "allowable_costs",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Categories explicitly called out as unallowable, as a JSON array of strings",
                       "searchtype": "extraction",
                       "title": "unallowable_costs",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "PI / key personnel effort requirements, salary caps, student and postdoc support",
                       "searchtype": "extraction",
                       "title": "personnel_effort",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     },
                     {
                       "searchphrase": "Pre-award costs, program income, budget revisions, sponsor-specific budget forms",
                       "searchtype": "extraction",
                       "title": "other_considerations",
                       "is_optional": true,
-                      "enum_values": null
+                      "enum_values": []
                     }
                   ]
                 }
