@@ -27,12 +27,12 @@ description: >
   award-compliance-extraction workflow (two parallel Extraction tasks plus
   a Consolidation Prompt).
 
-workflow_version: 0.1.0
+workflow_version: 0.1.1
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-04-30
-updated: 2026-04-30
+updated: 2026-05-20
 
 components:
   - slug: award-compliance-extraction-udm
@@ -97,7 +97,7 @@ steps:
           domain: research-administration
           items:
             - title: uniform_guidance_applicability
-              searchphrase: 2 CFR 200 Uniform Guidance applicability details.
+              searchphrase: Uniform Guidance (2 CFR 200) applicability details.
               is_optional: true
             - title: rtc_applicability
               searchphrase: Research Terms and Conditions applicability.

@@ -2,7 +2,7 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-04-30T00:00:00+00:00",
+  "exported_at": "2026-05-20T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
@@ -27,7 +27,7 @@
                   "cross_field_rules": [],
                   "items": [
                     {
-                      "searchphrase": "2 CFR 200 Uniform Guidance applicability details.",
+                      "searchphrase": "Uniform Guidance (2 CFR 200) applicability details.",
                       "searchtype": "extraction",
                       "title": "uniform_guidance_applicability",
                       "is_optional": true,
@@ -255,7 +255,7 @@
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/award-compliance-extraction/manifest.yaml",
-        "workflow_version": "0.1.0",
+        "workflow_version": "0.1.1",
         "status": "experimental",
         "components": [
           {

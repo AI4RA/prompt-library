@@ -1905,7 +1905,7 @@
       "slug": "award-compliance-extraction",
       "name": "Award Compliance & Financial Overview Extraction",
       "description": "Uploads a federal award notice or agreement and returns a single structured JSON object covering both the compliance framework (Uniform Guidance applicability, RTC, financial reporting, progress reporting, prior approvals, budget modification rules, property, deliverables, high-risk conditions, compliance calendar) and the financial management structure (total award amount, budget periods, cost share, F&A rate and base, performance period, budget categories, FFR, audit, record retention). Output conforms to the award-compliance-extraction-udm component schema. The runtime mirrors the ui-insight/ProcessMapping award-compliance-extraction workflow (two parallel Extraction tasks plus a Consolidation Prompt).",
-      "workflow_version": "0.1.0",
+      "workflow_version": "0.1.1",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
