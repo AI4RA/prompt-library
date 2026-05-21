@@ -78,6 +78,81 @@
   },
   "components": [
     {
+      "component_id": "prompt.award-allowability-terms-extraction",
+      "slug": "award-allowability-terms-extraction",
+      "name": "award-allowability-terms-extraction",
+      "summary": "Extracts the federal award terms that govern cost allowability — period of performance, approved budget categories, caps and exclusions, sponsor prior-approval triggers, indirect-cost treatment, and institutional compliance-approval requirements — into one structured record. It is an input-normalization step of the federal cost-allowability analysis workflow.",
+      "version": "0.1.0",
+      "category": "extraction",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "cost-allowability",
+        "post-award",
+        "award-terms",
+        "extraction",
+        "federal-grants",
+        "research-administration"
+      ],
+      "audience": [
+        "post-award-staff",
+        "sponsored-programs-staff",
+        "grant-accountants"
+      ],
+      "paths": {
+        "component_dir": "components/award-allowability-terms-extraction",
+        "readme": "components/award-allowability-terms-extraction/README.md",
+        "prompt": "components/award-allowability-terms-extraction/prompt.md",
+        "schema": "components/award-allowability-terms-extraction/schema.json",
+        "evals_dir": "components/award-allowability-terms-extraction/evals",
+        "eval_case_metadata_glob": "components/award-allowability-terms-extraction/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/award-allowability-terms-extraction/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/award-allowability-terms-extraction/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_normalization_contract",
+          "notes": "Repo-local record of the federal award terms that govern cost allowability — period of performance, approved budget, caps and exclusions, federal prior-approval triggers, indirect-cost treatment, and institutional compliance-approval requirements. Input-normalization contract for the cost-allowability analysis workflow; not a shared AI4RA-UDM schema.",
+          "schema_path": "components/award-allowability-terms-extraction/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "cost-award-terms-conformance-check",
+          "relationship": "provides_input_to",
+          "notes": "Supplies the caps, exclusions, and restrictions the conformance check evaluates."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON output against schema.json. Canonical invocation surface is prompt.md. Invoked as a Step 1 task of the workflows/cost-allowability-analysis Vandalizer workflow.",
+        "udm_alignment": {
+          "status": "repo_local_normalization_contract",
+          "notes": "Aligns to sponsored-project award and budget semantics. It deliberately separates federal prior-approval triggers from institutional IRB / IACUC / IBC compliance-approval requirements; the record is a prompt-library normalization contract, not a shared UDM schema."
+        }
+      }
+    },
+    {
       "component_id": "prompt.award-compliance-extraction-udm",
       "slug": "award-compliance-extraction-udm",
       "name": "award-compliance-extraction-udm",
@@ -424,6 +499,636 @@
       }
     },
     {
+      "component_id": "prompt.cost-allocability-check",
+      "slug": "cost-allocability-check",
+      "name": "cost-allocability-check",
+      "summary": "Checks whether a single expense is allocable to the award under 2 CFR 200.405 — that it benefits the award and is charged in reasonable proportion to that benefit. It is one of the single-requirement checks in the federal cost-allowability analysis workflow and emits a structured finding consumed by the final determination step.",
+      "version": "0.1.0",
+      "category": "review",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "cost-allowability",
+        "post-award",
+        "allocability",
+        "review",
+        "federal-grants",
+        "research-administration"
+      ],
+      "audience": [
+        "post-award-staff",
+        "sponsored-programs-staff",
+        "grant-accountants"
+      ],
+      "paths": {
+        "component_dir": "components/cost-allocability-check",
+        "readme": "components/cost-allocability-check/README.md",
+        "prompt": "components/cost-allocability-check/prompt.md",
+        "schema": "components/cost-allocability-check/schema.json",
+        "evals_dir": "components/cost-allocability-check/evals",
+        "eval_case_metadata_glob": "components/cost-allocability-check/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/cost-allocability-check/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/cost-allocability-check/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_single_requirement_finding_contract",
+          "notes": "Repo-local single-requirement allowability finding for the cost allocability check (2 CFR 200.405). Emits the shared cost-allowability finding object.",
+          "schema_path": "components/cost-allocability-check/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON output against schema.json. Canonical invocation surface is prompt.md. Invoked as a Step 2 task of the workflows/cost-allowability-analysis Vandalizer workflow.",
+        "udm_alignment": {
+          "status": "repo_local_single_requirement_finding_contract",
+          "notes": "Aligns to sponsored-project cost-allowability semantics; the finding object is a prompt-library contract shared across the cost-allowability check components, not a shared UDM schema."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.cost-allowability-determination",
+      "slug": "cost-allowability-determination",
+      "name": "cost-allowability-determination",
+      "summary": "Synthesizes the findings from the upstream single-requirement checks into one concise, decision-ready Markdown allowability review for a single expense. It is the final step of the federal cost-allowability analysis workflow.",
+      "version": "0.1.0",
+      "category": "review",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "cost-allowability",
+        "post-award",
+        "determination",
+        "synthesis",
+        "review",
+        "research-administration"
+      ],
+      "audience": [
+        "post-award-staff",
+        "sponsored-programs-staff",
+        "grant-accountants",
+        "principal-investigators"
+      ],
+      "paths": {
+        "component_dir": "components/cost-allowability-determination",
+        "readme": "components/cost-allowability-determination/README.md",
+        "prompt": "components/cost-allowability-determination/prompt.md",
+        "schema": null,
+        "evals_dir": "components/cost-allowability-determination/evals",
+        "eval_case_metadata_glob": "components/cost-allowability-determination/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/cost-allowability-determination/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/cost-allowability-determination/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "markdown_review",
+          "scope": "repo_local_human_readable_determination_contract",
+          "notes": "Repo-local human-readable Markdown allowability determination for a single expense. Synthesizes the upstream single-requirement check findings into one decision (Allowable, Potential issue, Missing info, or Not allowable). No JSON output schema.",
+          "schema_path": null,
+          "schema_entrypoints": [],
+          "validation_surfaces": []
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "regulated-activity-classifier",
+          "relationship": "upstream_compliance_signal",
+          "notes": "The determination surfaces a compliance-oversight flag when the protocol-approval check, gated by the classifier, returns anything other than not_applicable."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Canonical invocation surface is prompt.md. Score the Markdown response against expected.md golden cases for the overall decision, the conservative-decision rule (any not_allowable finding forces an overall Not allowable), per-check coverage, the compliance-oversight flag, and non-fabrication. Invoked as the Step 3 output task of the workflows/cost-allowability-analysis Vandalizer workflow.",
+        "udm_alignment": {
+          "status": "repo_local_human_readable_determination_contract",
+          "notes": "Aligns to sponsored-project cost-allowability semantics; the human-readable determination shape is maintained only in prompt-library and is not a shared UDM schema."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.cost-award-terms-conformance-check",
+      "slug": "cost-award-terms-conformance-check",
+      "name": "cost-award-terms-conformance-check",
+      "summary": "Checks whether a single expense conforms to the limitations and exclusions in the Federal award and the cost principles, under 2 CFR 200.403(b). It is one of the single-requirement checks in the federal cost-allowability analysis workflow and emits a structured finding consumed by the final determination step.",
+      "version": "0.1.0",
+      "category": "review",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "cost-allowability",
+        "post-award",
+        "award-terms",
+        "review",
+        "federal-grants",
+        "research-administration"
+      ],
+      "audience": [
+        "post-award-staff",
+        "sponsored-programs-staff",
+        "grant-accountants"
+      ],
+      "paths": {
+        "component_dir": "components/cost-award-terms-conformance-check",
+        "readme": "components/cost-award-terms-conformance-check/README.md",
+        "prompt": "components/cost-award-terms-conformance-check/prompt.md",
+        "schema": "components/cost-award-terms-conformance-check/schema.json",
+        "evals_dir": "components/cost-award-terms-conformance-check/evals",
+        "eval_case_metadata_glob": "components/cost-award-terms-conformance-check/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/cost-award-terms-conformance-check/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/cost-award-terms-conformance-check/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_single_requirement_finding_contract",
+          "notes": "Repo-local single-requirement allowability finding for the award terms conformance check (2 CFR 200.403(b)). Emits the shared cost-allowability finding object.",
+          "schema_path": "components/cost-award-terms-conformance-check/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON output against schema.json. Canonical invocation surface is prompt.md. Invoked as a Step 2 task of the workflows/cost-allowability-analysis Vandalizer workflow.",
+        "udm_alignment": {
+          "status": "repo_local_single_requirement_finding_contract",
+          "notes": "Aligns to sponsored-project cost-allowability semantics; the finding object is a prompt-library contract shared across the cost-allowability check components, not a shared UDM schema."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.cost-consistent-treatment-check",
+      "slug": "cost-consistent-treatment-check",
+      "name": "cost-consistent-treatment-check",
+      "summary": "Checks whether a single expense is accorded consistent treatment under 2 CFR 200.403(d) and 200.405(c) — that it is not direct-charged to the award when costs incurred for the same purpose in like circumstances are recovered as indirect (F&A) costs. It is one of the single-requirement checks in the federal cost-allowability analysis workflow and emits a structured finding consumed by the final determination step.",
+      "version": "0.1.0",
+      "category": "review",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "cost-allowability",
+        "post-award",
+        "consistent-treatment",
+        "indirect-cost",
+        "review",
+        "research-administration"
+      ],
+      "audience": [
+        "post-award-staff",
+        "sponsored-programs-staff",
+        "grant-accountants"
+      ],
+      "paths": {
+        "component_dir": "components/cost-consistent-treatment-check",
+        "readme": "components/cost-consistent-treatment-check/README.md",
+        "prompt": "components/cost-consistent-treatment-check/prompt.md",
+        "schema": "components/cost-consistent-treatment-check/schema.json",
+        "evals_dir": "components/cost-consistent-treatment-check/evals",
+        "eval_case_metadata_glob": "components/cost-consistent-treatment-check/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/cost-consistent-treatment-check/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/cost-consistent-treatment-check/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_single_requirement_finding_contract",
+          "notes": "Repo-local single-requirement allowability finding for the consistent cost treatment check (2 CFR 200.403(d), 200.405(c)). Emits the shared cost-allowability finding object.",
+          "schema_path": "components/cost-consistent-treatment-check/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON output against schema.json. Canonical invocation surface is prompt.md. Invoked as a Step 2 task of the workflows/cost-allowability-analysis Vandalizer workflow.",
+        "udm_alignment": {
+          "status": "repo_local_single_requirement_finding_contract",
+          "notes": "Aligns to sponsored-project cost-allowability semantics; the finding object is a prompt-library contract shared across the cost-allowability check components, not a shared UDM schema."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.cost-documentation-check",
+      "slug": "cost-documentation-check",
+      "name": "cost-documentation-check",
+      "summary": "Checks whether a single expense is adequately documented under 2 CFR 200.403(g) to support charging it to the award. It is one of the single-requirement checks in the federal cost-allowability analysis workflow and emits a structured finding consumed by the final determination step.",
+      "version": "0.1.0",
+      "category": "review",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "cost-allowability",
+        "post-award",
+        "documentation",
+        "review",
+        "federal-grants",
+        "research-administration"
+      ],
+      "audience": [
+        "post-award-staff",
+        "sponsored-programs-staff",
+        "grant-accountants"
+      ],
+      "paths": {
+        "component_dir": "components/cost-documentation-check",
+        "readme": "components/cost-documentation-check/README.md",
+        "prompt": "components/cost-documentation-check/prompt.md",
+        "schema": "components/cost-documentation-check/schema.json",
+        "evals_dir": "components/cost-documentation-check/evals",
+        "eval_case_metadata_glob": "components/cost-documentation-check/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/cost-documentation-check/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/cost-documentation-check/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_single_requirement_finding_contract",
+          "notes": "Repo-local single-requirement allowability finding for the cost documentation check (2 CFR 200.403(g)). Emits the shared cost-allowability finding object.",
+          "schema_path": "components/cost-documentation-check/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON output against schema.json. Canonical invocation surface is prompt.md. Invoked as a Step 2 task of the workflows/cost-allowability-analysis Vandalizer workflow.",
+        "udm_alignment": {
+          "status": "repo_local_single_requirement_finding_contract",
+          "notes": "Aligns to sponsored-project cost-allowability semantics; the finding object is a prompt-library contract shared across the cost-allowability check components, not a shared UDM schema."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.cost-period-check",
+      "slug": "cost-period-check",
+      "name": "cost-period-check",
+      "summary": "Checks whether a single expense was incurred within the award's period of performance, under 2 CFR 200.403(h) and 200.309. It is one of the single-requirement checks in the federal cost-allowability analysis workflow and emits a structured finding consumed by the final determination step.",
+      "version": "0.1.0",
+      "category": "review",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "cost-allowability",
+        "post-award",
+        "period-of-performance",
+        "review",
+        "federal-grants",
+        "research-administration"
+      ],
+      "audience": [
+        "post-award-staff",
+        "sponsored-programs-staff",
+        "grant-accountants"
+      ],
+      "paths": {
+        "component_dir": "components/cost-period-check",
+        "readme": "components/cost-period-check/README.md",
+        "prompt": "components/cost-period-check/prompt.md",
+        "schema": "components/cost-period-check/schema.json",
+        "evals_dir": "components/cost-period-check/evals",
+        "eval_case_metadata_glob": "components/cost-period-check/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/cost-period-check/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/cost-period-check/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_single_requirement_finding_contract",
+          "notes": "Repo-local single-requirement allowability finding for the cost period-of-performance check (2 CFR 200.403(h), 200.309). Emits the shared cost-allowability finding object.",
+          "schema_path": "components/cost-period-check/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON output against schema.json. Canonical invocation surface is prompt.md. Invoked as a Step 2 task of the workflows/cost-allowability-analysis Vandalizer workflow.",
+        "udm_alignment": {
+          "status": "repo_local_single_requirement_finding_contract",
+          "notes": "Aligns to sponsored-project cost-allowability semantics; the finding object is a prompt-library contract shared across the cost-allowability check components, not a shared UDM schema."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.cost-prior-approval-check",
+      "slug": "cost-prior-approval-check",
+      "name": "cost-prior-approval-check",
+      "summary": "Checks whether a single expense represents an action that requires federal sponsor prior written approval under 2 CFR 200.407, and whether that approval is evidenced. It is one of the single-requirement checks in the federal cost-allowability analysis workflow and emits a structured finding consumed by the final determination step.",
+      "version": "0.1.0",
+      "category": "review",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "cost-allowability",
+        "post-award",
+        "prior-approval",
+        "review",
+        "federal-grants",
+        "research-administration"
+      ],
+      "audience": [
+        "post-award-staff",
+        "sponsored-programs-staff",
+        "grant-accountants"
+      ],
+      "paths": {
+        "component_dir": "components/cost-prior-approval-check",
+        "readme": "components/cost-prior-approval-check/README.md",
+        "prompt": "components/cost-prior-approval-check/prompt.md",
+        "schema": "components/cost-prior-approval-check/schema.json",
+        "evals_dir": "components/cost-prior-approval-check/evals",
+        "eval_case_metadata_glob": "components/cost-prior-approval-check/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/cost-prior-approval-check/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/cost-prior-approval-check/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_single_requirement_finding_contract",
+          "notes": "Repo-local single-requirement allowability finding for the federal prior approval check (2 CFR 200.407). Emits the shared cost-allowability finding object.",
+          "schema_path": "components/cost-prior-approval-check/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "protocol-approval-allowability-check",
+          "relationship": "sibling_distinct_regime",
+          "notes": "Covers federal sponsor prior approval (2 CFR 200.407); protocol-approval-allowability-check covers institutional IRB / IACUC / IBC approval, a distinct regulatory regime."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON output against schema.json. Canonical invocation surface is prompt.md. Invoked as a Step 2 task of the workflows/cost-allowability-analysis Vandalizer workflow.",
+        "udm_alignment": {
+          "status": "repo_local_single_requirement_finding_contract",
+          "notes": "Aligns to sponsored-project cost-allowability semantics; the finding object is a prompt-library contract shared across the cost-allowability check components, not a shared UDM schema."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.cost-reasonableness-check",
+      "slug": "cost-reasonableness-check",
+      "name": "cost-reasonableness-check",
+      "summary": "Checks whether a single expense is necessary and reasonable under the prudent-person standard of 2 CFR 200.404. It is one of the single-requirement checks in the federal cost-allowability analysis workflow and emits a structured finding consumed by the final determination step.",
+      "version": "0.1.0",
+      "category": "review",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "cost-allowability",
+        "post-award",
+        "reasonableness",
+        "review",
+        "federal-grants",
+        "research-administration"
+      ],
+      "audience": [
+        "post-award-staff",
+        "sponsored-programs-staff",
+        "grant-accountants"
+      ],
+      "paths": {
+        "component_dir": "components/cost-reasonableness-check",
+        "readme": "components/cost-reasonableness-check/README.md",
+        "prompt": "components/cost-reasonableness-check/prompt.md",
+        "schema": "components/cost-reasonableness-check/schema.json",
+        "evals_dir": "components/cost-reasonableness-check/evals",
+        "eval_case_metadata_glob": "components/cost-reasonableness-check/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/cost-reasonableness-check/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/cost-reasonableness-check/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_single_requirement_finding_contract",
+          "notes": "Repo-local single-requirement allowability finding for the cost reasonableness check (2 CFR 200.404). Emits the shared cost-allowability finding object.",
+          "schema_path": "components/cost-reasonableness-check/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON output against schema.json. Canonical invocation surface is prompt.md. Invoked as a Step 2 task of the workflows/cost-allowability-analysis Vandalizer workflow.",
+        "udm_alignment": {
+          "status": "repo_local_single_requirement_finding_contract",
+          "notes": "Aligns to sponsored-project cost-allowability semantics; the finding object is a prompt-library contract shared across the cost-allowability check components, not a shared UDM schema."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.cost-selected-item-check",
+      "slug": "cost-selected-item-check",
+      "name": "cost-selected-item-check",
+      "summary": "Identifies which selected item of cost under 2 CFR 200.421-200.476 governs an expense and applies that section's rule. It is one of the single-requirement checks in the federal cost-allowability analysis workflow and emits a structured finding consumed by the final determination step.",
+      "version": "0.1.0",
+      "category": "review",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "cost-allowability",
+        "post-award",
+        "selected-items-of-cost",
+        "review",
+        "federal-grants",
+        "research-administration"
+      ],
+      "audience": [
+        "post-award-staff",
+        "sponsored-programs-staff",
+        "grant-accountants"
+      ],
+      "paths": {
+        "component_dir": "components/cost-selected-item-check",
+        "readme": "components/cost-selected-item-check/README.md",
+        "prompt": "components/cost-selected-item-check/prompt.md",
+        "schema": "components/cost-selected-item-check/schema.json",
+        "evals_dir": "components/cost-selected-item-check/evals",
+        "eval_case_metadata_glob": "components/cost-selected-item-check/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/cost-selected-item-check/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/cost-selected-item-check/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_single_requirement_finding_contract",
+          "notes": "Repo-local single-requirement allowability finding for the selected items of cost check (2 CFR 200.421-200.476). Routes an expense to its governing selected-item section and emits the shared cost-allowability finding object.",
+          "schema_path": "components/cost-selected-item-check/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON output against schema.json. Canonical invocation surface is prompt.md. Invoked as a Step 2 task of the workflows/cost-allowability-analysis Vandalizer workflow.",
+        "udm_alignment": {
+          "status": "repo_local_single_requirement_finding_contract",
+          "notes": "Aligns to sponsored-project cost-allowability semantics; the finding object is a prompt-library contract shared across the cost-allowability check components, not a shared UDM schema."
+        }
+      }
+    },
+    {
       "component_id": "prompt.document-type-classifier-udm",
       "slug": "document-type-classifier-udm",
       "name": "document-type-classifier-udm",
@@ -581,6 +1286,81 @@
         "udm_alignment": {
           "status": "shared_udm_semantics_repo_local_schema",
           "notes": "award_number / pi_name / project_title resolve to UDM Award and Personnel; certification_method, pi_committed_effort, pi_person_months, and per-row key_personnel_commitments resolve to UDM Effort + ProjectRole; cost_shared_effort resolves to CostShare.Committed_Amount; record_retention resolves to Terms.Record_Retention_Years."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.expense-transaction-extraction",
+      "slug": "expense-transaction-extraction",
+      "name": "expense-transaction-extraction",
+      "summary": "Normalizes one expense — receipt, invoice, purchase order, p-card line, or general-ledger detail — into a single structured transaction record covering date, vendor, amount, account coding, description, and documentation status. It is the input-normalization step of the federal cost-allowability analysis workflow.",
+      "version": "0.1.0",
+      "category": "extraction",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "cost-allowability",
+        "post-award",
+        "expense",
+        "extraction",
+        "federal-grants",
+        "research-administration"
+      ],
+      "audience": [
+        "post-award-staff",
+        "sponsored-programs-staff",
+        "grant-accountants"
+      ],
+      "paths": {
+        "component_dir": "components/expense-transaction-extraction",
+        "readme": "components/expense-transaction-extraction/README.md",
+        "prompt": "components/expense-transaction-extraction/prompt.md",
+        "schema": "components/expense-transaction-extraction/schema.json",
+        "evals_dir": "components/expense-transaction-extraction/evals",
+        "eval_case_metadata_glob": "components/expense-transaction-extraction/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/expense-transaction-extraction/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/expense-transaction-extraction/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_normalization_contract",
+          "notes": "Repo-local single-expense transaction record normalized from receipt, invoice, purchase-order, p-card, or general-ledger evidence. Input-normalization contract for the cost-allowability analysis workflow; not a shared AI4RA-UDM schema.",
+          "schema_path": "components/expense-transaction-extraction/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "regulated-activity-classifier",
+          "relationship": "provides_input_to",
+          "notes": "The normalized expense record is the classifier's primary input."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON output against schema.json. Canonical invocation surface is prompt.md. Invoked as a Step 1 task of the workflows/cost-allowability-analysis Vandalizer workflow.",
+        "udm_alignment": {
+          "status": "repo_local_normalization_contract",
+          "notes": "Fields align to sponsored-project transaction semantics (vendor, amount, account coding, period) but the record is a prompt-library normalization contract, not a shared UDM schema."
         }
       }
     },
@@ -1665,6 +2445,163 @@
       }
     },
     {
+      "component_id": "prompt.protocol-approval-allowability-check",
+      "slug": "protocol-approval-allowability-check",
+      "name": "protocol-approval-allowability-check",
+      "summary": "Checks whether an expense tied to a regulated activity is backed by a current, in-scope institutional protocol approval — IRB (human subjects), IACUC (animals), or IBC (biosafety). It is one of the single-requirement checks in the federal cost-allowability analysis workflow and emits a structured finding consumed by the final determination step.",
+      "version": "0.1.0",
+      "category": "review",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "cost-allowability",
+        "compliance",
+        "irb",
+        "iacuc",
+        "biosafety",
+        "review",
+        "research-administration"
+      ],
+      "audience": [
+        "post-award-staff",
+        "sponsored-programs-staff",
+        "research-compliance-staff"
+      ],
+      "paths": {
+        "component_dir": "components/protocol-approval-allowability-check",
+        "readme": "components/protocol-approval-allowability-check/README.md",
+        "prompt": "components/protocol-approval-allowability-check/prompt.md",
+        "schema": "components/protocol-approval-allowability-check/schema.json",
+        "evals_dir": "components/protocol-approval-allowability-check/evals",
+        "eval_case_metadata_glob": "components/protocol-approval-allowability-check/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/protocol-approval-allowability-check/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/protocol-approval-allowability-check/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_single_requirement_finding_contract",
+          "notes": "Repo-local single-requirement allowability finding for the protocol approval allowability check, covering institutional IRB (45 CFR 46), IACUC (PHS Policy / 9 CFR), and IBC (NIH Guidelines for Recombinant or Synthetic Nucleic Acid Molecules / 42 CFR 73) oversight. Emits the shared cost-allowability finding object.",
+          "schema_path": "components/protocol-approval-allowability-check/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "regulated-activity-classifier",
+          "relationship": "gated_by",
+          "notes": "The classifier's regime flags determine whether this check applies."
+        },
+        {
+          "slug": "cost-prior-approval-check",
+          "relationship": "sibling_distinct_regime",
+          "notes": "Covers institutional IRB / IACUC / IBC approval; cost-prior-approval-check covers federal sponsor prior approval, a distinct regulatory regime."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON output against schema.json. Canonical invocation surface is prompt.md. Invoked as a Step 2 task of the workflows/cost-allowability-analysis Vandalizer workflow; its applicability is gated by the regulated-activity-classifier output.",
+        "udm_alignment": {
+          "status": "repo_local_single_requirement_finding_contract",
+          "notes": "Aligns to research-compliance semantics; the finding object is a prompt-library contract shared across the cost-allowability check components, not a shared UDM schema."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.regulated-activity-classifier",
+      "slug": "regulated-activity-classifier",
+      "name": "regulated-activity-classifier",
+      "summary": "Flags whether an expense implicates an activity that requires institutional compliance oversight — human subjects (IRB), animals (IACUC), or biosafety (IBC) — based on expense-level signals such as the description, vendor, and account coding. It is the detection layer of the federal cost-allowability analysis workflow.",
+      "version": "0.1.0",
+      "category": "classification",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "cost-allowability",
+        "compliance",
+        "irb",
+        "iacuc",
+        "biosafety",
+        "classification",
+        "research-administration"
+      ],
+      "audience": [
+        "post-award-staff",
+        "sponsored-programs-staff",
+        "research-compliance-staff"
+      ],
+      "paths": {
+        "component_dir": "components/regulated-activity-classifier",
+        "readme": "components/regulated-activity-classifier/README.md",
+        "prompt": "components/regulated-activity-classifier/prompt.md",
+        "schema": "components/regulated-activity-classifier/schema.json",
+        "evals_dir": "components/regulated-activity-classifier/evals",
+        "eval_case_metadata_glob": "components/regulated-activity-classifier/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/regulated-activity-classifier/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/regulated-activity-classifier/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_detection_contract",
+          "notes": "Repo-local classification record flagging whether an expense implicates an activity requiring institutional compliance oversight — human subjects (IRB), animals (IACUC), or biosafety (IBC). Detection-layer contract for the cost-allowability analysis workflow; not a shared AI4RA-UDM schema.",
+          "schema_path": "components/regulated-activity-classifier/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "protocol-approval-allowability-check",
+          "relationship": "gates",
+          "notes": "The regime flags determine whether the protocol-approval check applies."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON output against schema.json. Canonical invocation surface is prompt.md. Invoked as a Step 1 task of the workflows/cost-allowability-analysis Vandalizer workflow; its output routes the protocol-approval check in Step 2.",
+        "udm_alignment": {
+          "status": "repo_local_detection_contract",
+          "notes": "Aligns to research-compliance semantics; the per-regime classification shape is a prompt-library contract and is not a shared UDM schema."
+        }
+      }
+    },
+    {
       "component_id": "prompt.rfa-checklist-extraction-udm",
       "slug": "rfa-checklist-extraction-udm",
       "name": "rfa-checklist-extraction-udm",
@@ -2344,6 +3281,45 @@
       "evaluation": {
         "posture": "workflow_local",
         "source": "workflows/compliance-personnel-verification/evals"
+      }
+    },
+    {
+      "slug": "cost-allowability-analysis",
+      "name": "Federal Cost Allowability Analysis",
+      "description": "Reviews a single federal-grant expense for cost allowability under the Uniform Guidance (2 CFR 200). Step 1 normalizes the expense, extracts the governing award terms, and classifies whether the expense implicates IRB-, IACUC-, or IBC-regulated activity. Step 2 runs nine single-requirement checks in parallel — period of performance, reasonableness, allocability, consistent treatment, award-terms conformance, federal prior approval, documentation, selected items of cost, and protocol approval. Step 3 synthesizes the findings into one Markdown allowability determination (Allowable, Potential issue, Missing info, or Not allowable). The workflow is decision support and does not replace institutional approval, sponsor prior approval, or final accounting authority.",
+      "workflow_version": "0.1.0",
+      "status": "experimental",
+      "vandalizer_schema_version": 2,
+      "paths": {
+        "workflow_dir": "workflows/cost-allowability-analysis",
+        "manifest": "workflows/cost-allowability-analysis/manifest.yaml",
+        "export": "workflows/cost-allowability-analysis/cost-allowability-analysis.vandalizer.json",
+        "readme": "workflows/cost-allowability-analysis/README.md",
+        "changelog": "workflows/cost-allowability-analysis/CHANGELOG.md"
+      },
+      "components_manifested": [
+        "expense-transaction-extraction",
+        "award-allowability-terms-extraction",
+        "regulated-activity-classifier",
+        "cost-period-check",
+        "cost-reasonableness-check",
+        "cost-allocability-check",
+        "cost-consistent-treatment-check",
+        "cost-award-terms-conformance-check",
+        "cost-prior-approval-check",
+        "cost-documentation-check",
+        "protocol-approval-allowability-check",
+        "cost-selected-item-check",
+        "cost-allowability-determination"
+      ],
+      "steps": {
+        "step_count": 3,
+        "task_count": 13,
+        "output_step_name": "Synthesize determination"
+      },
+      "evaluation": {
+        "posture": "workflow_local",
+        "source": "workflows/cost-allowability-analysis/evals"
       }
     },
     {

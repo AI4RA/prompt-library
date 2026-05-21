@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/regulated-activity-classifier/schema.json",
+  "title": "Regulated Activity Classifier — Output",
+  "description": "Classification record flagging whether an expense implicates an activity that requires institutional compliance oversight — human subjects (IRB), animals (IACUC), or biosafety (IBC). Detection-layer contract for the federal cost-allowability analysis workflow.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "$defs": {
+    "regime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["triggered", "rationale", "trigger_signals"],
+      "properties": {
+        "triggered": {
+          "type": "boolean",
+          "description": "True when the expense plausibly implicates this regulated activity."
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Explanation of the flag decision."
+        },
+        "trigger_signals": {
+          "type": "array",
+          "description": "Concrete expense signals relied on. Empty array when not triggered.",
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  },
+  "required": [
+    "human_subjects",
+    "animal",
+    "biosafety",
+    "any_regime_triggered",
+    "summary"
+  ],
+  "properties": {
+    "expense_id": {
+      "type": ["string", "null"],
+      "description": "Expense reference carried from the input."
+    },
+    "human_subjects": {
+      "$ref": "#/$defs/regime",
+      "description": "Human-subjects (IRB) oversight regime."
+    },
+    "animal": {
+      "$ref": "#/$defs/regime",
+      "description": "Animal-care (IACUC) oversight regime."
+    },
+    "biosafety": {
+      "$ref": "#/$defs/regime",
+      "description": "Biosafety (IBC) oversight regime."
+    },
+    "any_regime_triggered": {
+      "type": "boolean",
+      "description": "True when at least one regime is triggered."
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "description": "One-sentence statement of flagged regimes and what to verify next."
+    }
+  }
+}

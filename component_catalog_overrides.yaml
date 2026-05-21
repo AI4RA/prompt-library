@@ -1118,3 +1118,331 @@ components:
           CostShare, AwardDeliverable, Modification, Terms, and
           ConflictOfInterest (see prompt.md). The six-block shape itself
           is repo-local.
+
+  expense-transaction-extraction:
+    output_contract:
+      format: json_object
+      scope: repo_local_normalization_contract
+      notes: >
+        Repo-local single-expense transaction record normalized from
+        receipt, invoice, purchase-order, p-card, or general-ledger
+        evidence. Input-normalization contract for the cost-allowability
+        analysis workflow; not a shared AI4RA-UDM schema.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON output against schema.json. Canonical invocation
+        surface is prompt.md. Invoked as a Step 1 task of the
+        workflows/cost-allowability-analysis Vandalizer workflow.
+      udm_alignment:
+        status: repo_local_normalization_contract
+        notes: >
+          Fields align to sponsored-project transaction semantics
+          (vendor, amount, account coding, period) but the record is a
+          prompt-library normalization contract, not a shared UDM schema.
+    related_components:
+      - slug: regulated-activity-classifier
+        relationship: provides_input_to
+        notes: The normalized expense record is the classifier's primary input.
+
+  award-allowability-terms-extraction:
+    output_contract:
+      format: json_object
+      scope: repo_local_normalization_contract
+      notes: >
+        Repo-local record of the federal award terms that govern cost
+        allowability — period of performance, approved budget, caps and
+        exclusions, federal prior-approval triggers, indirect-cost
+        treatment, and institutional compliance-approval requirements.
+        Input-normalization contract for the cost-allowability analysis
+        workflow; not a shared AI4RA-UDM schema.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON output against schema.json. Canonical invocation
+        surface is prompt.md. Invoked as a Step 1 task of the
+        workflows/cost-allowability-analysis Vandalizer workflow.
+      udm_alignment:
+        status: repo_local_normalization_contract
+        notes: >
+          Aligns to sponsored-project award and budget semantics. It
+          deliberately separates federal prior-approval triggers from
+          institutional IRB / IACUC / IBC compliance-approval
+          requirements; the record is a prompt-library normalization
+          contract, not a shared UDM schema.
+    related_components:
+      - slug: cost-award-terms-conformance-check
+        relationship: provides_input_to
+        notes: Supplies the caps, exclusions, and restrictions the conformance check evaluates.
+
+  regulated-activity-classifier:
+    output_contract:
+      format: json_object
+      scope: repo_local_detection_contract
+      notes: >
+        Repo-local classification record flagging whether an expense
+        implicates an activity requiring institutional compliance
+        oversight — human subjects (IRB), animals (IACUC), or biosafety
+        (IBC). Detection-layer contract for the cost-allowability
+        analysis workflow; not a shared AI4RA-UDM schema.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON output against schema.json. Canonical invocation
+        surface is prompt.md. Invoked as a Step 1 task of the
+        workflows/cost-allowability-analysis Vandalizer workflow; its
+        output routes the protocol-approval check in Step 2.
+      udm_alignment:
+        status: repo_local_detection_contract
+        notes: >
+          Aligns to research-compliance semantics; the per-regime
+          classification shape is a prompt-library contract and is not a
+          shared UDM schema.
+    related_components:
+      - slug: protocol-approval-allowability-check
+        relationship: gates
+        notes: The regime flags determine whether the protocol-approval check applies.
+
+  cost-period-check:
+    output_contract:
+      format: json_object
+      scope: repo_local_single_requirement_finding_contract
+      notes: >
+        Repo-local single-requirement allowability finding for the cost
+        period-of-performance check (2 CFR 200.403(h), 200.309). Emits
+        the shared cost-allowability finding object.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON output against schema.json. Canonical invocation
+        surface is prompt.md. Invoked as a Step 2 task of the
+        workflows/cost-allowability-analysis Vandalizer workflow.
+      udm_alignment:
+        status: repo_local_single_requirement_finding_contract
+        notes: >
+          Aligns to sponsored-project cost-allowability semantics; the
+          finding object is a prompt-library contract shared across the
+          cost-allowability check components, not a shared UDM schema.
+
+  cost-reasonableness-check:
+    output_contract:
+      format: json_object
+      scope: repo_local_single_requirement_finding_contract
+      notes: >
+        Repo-local single-requirement allowability finding for the cost
+        reasonableness check (2 CFR 200.404). Emits the shared
+        cost-allowability finding object.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON output against schema.json. Canonical invocation
+        surface is prompt.md. Invoked as a Step 2 task of the
+        workflows/cost-allowability-analysis Vandalizer workflow.
+      udm_alignment:
+        status: repo_local_single_requirement_finding_contract
+        notes: >
+          Aligns to sponsored-project cost-allowability semantics; the
+          finding object is a prompt-library contract shared across the
+          cost-allowability check components, not a shared UDM schema.
+
+  cost-allocability-check:
+    output_contract:
+      format: json_object
+      scope: repo_local_single_requirement_finding_contract
+      notes: >
+        Repo-local single-requirement allowability finding for the cost
+        allocability check (2 CFR 200.405). Emits the shared
+        cost-allowability finding object.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON output against schema.json. Canonical invocation
+        surface is prompt.md. Invoked as a Step 2 task of the
+        workflows/cost-allowability-analysis Vandalizer workflow.
+      udm_alignment:
+        status: repo_local_single_requirement_finding_contract
+        notes: >
+          Aligns to sponsored-project cost-allowability semantics; the
+          finding object is a prompt-library contract shared across the
+          cost-allowability check components, not a shared UDM schema.
+
+  cost-consistent-treatment-check:
+    output_contract:
+      format: json_object
+      scope: repo_local_single_requirement_finding_contract
+      notes: >
+        Repo-local single-requirement allowability finding for the
+        consistent cost treatment check (2 CFR 200.403(d), 200.405(c)).
+        Emits the shared cost-allowability finding object.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON output against schema.json. Canonical invocation
+        surface is prompt.md. Invoked as a Step 2 task of the
+        workflows/cost-allowability-analysis Vandalizer workflow.
+      udm_alignment:
+        status: repo_local_single_requirement_finding_contract
+        notes: >
+          Aligns to sponsored-project cost-allowability semantics; the
+          finding object is a prompt-library contract shared across the
+          cost-allowability check components, not a shared UDM schema.
+
+  cost-award-terms-conformance-check:
+    output_contract:
+      format: json_object
+      scope: repo_local_single_requirement_finding_contract
+      notes: >
+        Repo-local single-requirement allowability finding for the award
+        terms conformance check (2 CFR 200.403(b)). Emits the shared
+        cost-allowability finding object.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON output against schema.json. Canonical invocation
+        surface is prompt.md. Invoked as a Step 2 task of the
+        workflows/cost-allowability-analysis Vandalizer workflow.
+      udm_alignment:
+        status: repo_local_single_requirement_finding_contract
+        notes: >
+          Aligns to sponsored-project cost-allowability semantics; the
+          finding object is a prompt-library contract shared across the
+          cost-allowability check components, not a shared UDM schema.
+
+  cost-prior-approval-check:
+    output_contract:
+      format: json_object
+      scope: repo_local_single_requirement_finding_contract
+      notes: >
+        Repo-local single-requirement allowability finding for the
+        federal prior approval check (2 CFR 200.407). Emits the shared
+        cost-allowability finding object.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON output against schema.json. Canonical invocation
+        surface is prompt.md. Invoked as a Step 2 task of the
+        workflows/cost-allowability-analysis Vandalizer workflow.
+      udm_alignment:
+        status: repo_local_single_requirement_finding_contract
+        notes: >
+          Aligns to sponsored-project cost-allowability semantics; the
+          finding object is a prompt-library contract shared across the
+          cost-allowability check components, not a shared UDM schema.
+    related_components:
+      - slug: protocol-approval-allowability-check
+        relationship: sibling_distinct_regime
+        notes: >
+          Covers federal sponsor prior approval (2 CFR 200.407);
+          protocol-approval-allowability-check covers institutional IRB /
+          IACUC / IBC approval, a distinct regulatory regime.
+
+  cost-documentation-check:
+    output_contract:
+      format: json_object
+      scope: repo_local_single_requirement_finding_contract
+      notes: >
+        Repo-local single-requirement allowability finding for the cost
+        documentation check (2 CFR 200.403(g)). Emits the shared
+        cost-allowability finding object.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON output against schema.json. Canonical invocation
+        surface is prompt.md. Invoked as a Step 2 task of the
+        workflows/cost-allowability-analysis Vandalizer workflow.
+      udm_alignment:
+        status: repo_local_single_requirement_finding_contract
+        notes: >
+          Aligns to sponsored-project cost-allowability semantics; the
+          finding object is a prompt-library contract shared across the
+          cost-allowability check components, not a shared UDM schema.
+
+  protocol-approval-allowability-check:
+    output_contract:
+      format: json_object
+      scope: repo_local_single_requirement_finding_contract
+      notes: >
+        Repo-local single-requirement allowability finding for the
+        protocol approval allowability check, covering institutional IRB
+        (45 CFR 46), IACUC (PHS Policy / 9 CFR), and IBC (NIH Guidelines
+        for Recombinant or Synthetic Nucleic Acid Molecules / 42 CFR 73)
+        oversight. Emits the shared cost-allowability finding object.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON output against schema.json. Canonical invocation
+        surface is prompt.md. Invoked as a Step 2 task of the
+        workflows/cost-allowability-analysis Vandalizer workflow; its
+        applicability is gated by the regulated-activity-classifier
+        output.
+      udm_alignment:
+        status: repo_local_single_requirement_finding_contract
+        notes: >
+          Aligns to research-compliance semantics; the finding object is
+          a prompt-library contract shared across the cost-allowability
+          check components, not a shared UDM schema.
+    related_components:
+      - slug: regulated-activity-classifier
+        relationship: gated_by
+        notes: The classifier's regime flags determine whether this check applies.
+      - slug: cost-prior-approval-check
+        relationship: sibling_distinct_regime
+        notes: >
+          Covers institutional IRB / IACUC / IBC approval;
+          cost-prior-approval-check covers federal sponsor prior
+          approval, a distinct regulatory regime.
+
+  cost-selected-item-check:
+    output_contract:
+      format: json_object
+      scope: repo_local_single_requirement_finding_contract
+      notes: >
+        Repo-local single-requirement allowability finding for the
+        selected items of cost check (2 CFR 200.421-200.476). Routes an
+        expense to its governing selected-item section and emits the
+        shared cost-allowability finding object.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON output against schema.json. Canonical invocation
+        surface is prompt.md. Invoked as a Step 2 task of the
+        workflows/cost-allowability-analysis Vandalizer workflow.
+      udm_alignment:
+        status: repo_local_single_requirement_finding_contract
+        notes: >
+          Aligns to sponsored-project cost-allowability semantics; the
+          finding object is a prompt-library contract shared across the
+          cost-allowability check components, not a shared UDM schema.
+
+  cost-allowability-determination:
+    output_contract:
+      format: markdown_review
+      scope: repo_local_human_readable_determination_contract
+      notes: >
+        Repo-local human-readable Markdown allowability determination
+        for a single expense. Synthesizes the upstream single-requirement
+        check findings into one decision (Allowable, Potential issue,
+        Missing info, or Not allowable). No JSON output schema.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Canonical invocation surface is prompt.md. Score the Markdown
+        response against expected.md golden cases for the overall
+        decision, the conservative-decision rule (any not_allowable
+        finding forces an overall Not allowable), per-check coverage, the
+        compliance-oversight flag, and non-fabrication. Invoked as the
+        Step 3 output task of the workflows/cost-allowability-analysis
+        Vandalizer workflow.
+      udm_alignment:
+        status: repo_local_human_readable_determination_contract
+        notes: >
+          Aligns to sponsored-project cost-allowability semantics; the
+          human-readable determination shape is maintained only in
+          prompt-library and is not a shared UDM schema.
+    related_components:
+      - slug: regulated-activity-classifier
+        relationship: upstream_compliance_signal
+        notes: >
+          The determination surfaces a compliance-oversight flag when the
+          protocol-approval check, gated by the classifier, returns
+          anything other than not_applicable.
