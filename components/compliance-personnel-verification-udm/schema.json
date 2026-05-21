@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/compliance-personnel-verification-udm/schema.json",
+  "title": "Compliance Personnel Verification (SFI & RST) — UDM Output",
+  "description": "JSON contract for verifying SFI disclosure status and Research Security Training (RST) completion across every person named on a federal research proposal. The workflow joins three inputs (VERAS proposal package, institutional SFI disclosure records, daily RST completion spreadsheet) and produces a per-person compliance matrix with non-compliance flags and remediation priorities. Mirrors the source ui-insight/ProcessMapping compliance-personnel-verification workflow.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "proposal_metadata",
+    "personnel_identification",
+    "sfi_verification",
+    "rst_verification",
+    "non_compliant_personnel",
+    "verification_status"
+  ],
+  "properties": {
+    "proposal_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["proposal_type", "sponsor_type", "sfi_rst_required"],
+      "properties": {
+        "proposal_type": {
+          "type": "string",
+          "enum": ["Research", "Non-Research", "Not specified"],
+          "description": "Whether the proposal is a research proposal. Required by source workflow."
+        },
+        "sponsor_type": {
+          "type": "string",
+          "enum": ["Federal", "State", "Non-Federal", "Not specified"],
+          "description": "Whether the sponsor is federal, state, or non-federal. Required by source workflow."
+        },
+        "sfi_rst_required": {
+          "type": "boolean",
+          "description": "Whether SFI and RST checks are required for this proposal. Required by source workflow. True when proposal_type == 'Research' AND sponsor_type == 'Federal'; false otherwise."
+        }
+      }
+    },
+    "personnel_identification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section_66_personnel",
+        "section_2_personnel",
+        "consolidated_personnel",
+        "personnel_discrepancies"
+      ],
+      "properties": {
+        "section_66_personnel": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Names listed in VERAS Section 6.6 requiring SFI disclosures. Required by source workflow (may be empty when the section is not present)."
+        },
+        "section_2_personnel": {
+          "type": "array",
+          "minItems": 1,
+          "description": "PIs and Senior/Key Personnel from VERAS Section 2. Required by source workflow. Must contain at least one entry (every proposal has a PI). Resolves to UDM Personnel.First_Name / Personnel.Last_Name.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "role"],
+            "properties": {
+              "name": {"type": "string", "minLength": 1},
+              "role": {
+                "type": "string",
+                "enum": ["PI", "Co-PI", "Senior/Key Personnel"]
+              },
+              "department": {"type": ["string", "null"]}
+            }
+          }
+        },
+        "consolidated_personnel": {
+          "type": "array",
+          "description": "Deduplicated union of Section 6.6 and Section 2 personnel that require SFI and / or RST verification. Required by source workflow.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "role", "source_sections"],
+            "properties": {
+              "name": {"type": "string", "minLength": 1},
+              "role": {
+                "type": "string",
+                "enum": ["PI", "Co-PI", "Senior/Key Personnel"]
+              },
+              "department": {"type": ["string", "null"]},
+              "source_sections": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "enum": ["6.6", "2"]
+                },
+                "description": "Which VERAS source section(s) listed this person."
+              }
+            }
+          }
+        },
+        "personnel_discrepancies": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Differences between the Section 6.6 and Section 2 personnel lists (e.g., person in Section 2 but missing from Section 6.6). Empty array when the lists match."
+        }
+      }
+    },
+    "sfi_verification": {
+      "type": "array",
+      "description": "Per-person SFI disclosure verification records, one entry per person in consolidated_personnel.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "disclosure_found", "status"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "disclosure_found": {"type": "boolean"},
+          "disclosure_date": {
+            "type": ["string", "null"],
+            "description": "ISO YYYY-MM-DD when found; null otherwise."
+          },
+          "days_since_disclosure": {
+            "type": ["integer", "null"],
+            "minimum": 0,
+            "description": "Days between disclosure_date and the proposal submission date. JSON integer. Null when disclosure_found is false."
+          },
+          "valid_within_365_days": {
+            "type": ["boolean", "null"],
+            "description": "True when days_since_disclosure <= 365. Null when disclosure_found is false."
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Valid", "Expiring Soon", "Expired", "Not Found", "Review Required"],
+            "description": "Valid = within 365 days; Expiring Soon = valid but within 30 days of expiration; Expired = > 365 days; Not Found = no disclosure on file; Review Required = ambiguous match."
+          }
+        }
+      }
+    },
+    "rst_verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spreadsheet_date", "spreadsheet_source", "records"],
+      "properties": {
+        "spreadsheet_date": {
+          "type": "string",
+          "description": "ISO YYYY-MM-DD date of the RST completion spreadsheet used for verification. Required by source workflow."
+        },
+        "spreadsheet_source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Source label for the spreadsheet (e.g., 'UI Bridge daily export'). Required by source workflow."
+        },
+        "records": {
+          "type": "array",
+          "description": "Per-person RST completion records, one entry per person in consolidated_personnel.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "found_in_spreadsheet", "status"],
+            "properties": {
+              "name": {"type": "string", "minLength": 1},
+              "found_in_spreadsheet": {"type": "boolean"},
+              "completion_date": {
+                "type": ["string", "null"],
+                "description": "ISO YYYY-MM-DD when found; null otherwise."
+              },
+              "status": {
+                "type": "string",
+                "enum": ["Complete", "Incomplete", "Review Required"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "non_compliant_personnel": {
+      "type": "array",
+      "description": "Per-person compliance issue records (one person may have multiple entries when both SFI and RST fail). Empty array when every person is compliant.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "issue", "required_action", "priority"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "issue": {"type": "string", "minLength": 1},
+          "required_action": {"type": "string", "minLength": 1},
+          "priority": {
+            "type": "string",
+            "enum": ["Critical", "High", "Medium"],
+            "description": "Critical = blocks submission (no SFI on file or RST not completed); High = SFI expired needs immediate renewal; Medium = SFI expires within 30 days."
+          }
+        }
+      }
+    },
+    "verification_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_personnel_checked",
+        "sfi_compliant_count",
+        "rst_compliant_count",
+        "fully_compliant_count",
+        "overall_status"
+      ],
+      "properties": {
+        "total_personnel_checked": {"type": "integer", "minimum": 0},
+        "sfi_compliant_count": {"type": "integer", "minimum": 0},
+        "rst_compliant_count": {"type": "integer", "minimum": 0},
+        "fully_compliant_count": {"type": "integer", "minimum": 0},
+        "overall_status": {
+          "type": "string",
+          "enum": ["All Compliant", "Non-Compliance Found", "Not Applicable"],
+          "description": "All Compliant = every person passed; Non-Compliance Found = at least one non-compliant entry; Not Applicable = sfi_rst_required is false."
+        },
+        "notes": {
+          "type": ["string", "null"],
+          "description": "Source-document warnings (e.g., SFI records not provided, ambiguous name matches). Null when no notes apply."
+        }
+      }
+    }
+  }
+}

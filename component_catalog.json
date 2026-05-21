@@ -162,6 +162,268 @@
       }
     },
     {
+      "component_id": "prompt.award-modification-intake-udm",
+      "slug": "award-modification-intake-udm",
+      "name": "award-modification-intake-udm",
+      "summary": "Classifies an incoming federal award amendment / modification document and extracts the type-specific fields a Post-Award Specialist needs to enter the modification into Banner. Covers the four mapped modification processes — additional funds, no-cost extension (NCE), PI change, rebudget — plus scope change, administrative change, and combined modifications. The structured JSON output drives Banner setup; the source process-mapping workflow's human-review (ApprovalNode) step is a runtime concern handled by Vandalizer's UI and is not part of this extraction contract.",
+      "version": "0.1.0",
+      "category": "extraction",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "award-modification",
+        "post-award",
+        "intake",
+        "classification",
+        "ncne",
+        "rebudget",
+        "pi-change",
+        "additional-funds",
+        "udm",
+        "structured-extraction",
+        "json"
+      ],
+      "audience": [
+        "sponsored-programs-staff",
+        "post-award-teams",
+        "ingest-pipelines"
+      ],
+      "paths": {
+        "component_dir": "components/award-modification-intake-udm",
+        "readme": "components/award-modification-intake-udm/README.md",
+        "prompt": "components/award-modification-intake-udm/prompt.md",
+        "schema": "components/award-modification-intake-udm/schema.json",
+        "evals_dir": "components/award-modification-intake-udm/evals",
+        "eval_case_metadata_glob": "components/award-modification-intake-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/award-modification-intake-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/award-modification-intake-udm/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "shared_udm_semantics_repo_local_schema",
+          "notes": "Repo-local post-award modification intake & classification contract. Three structured blocks (identification, financial, compliance) covering the seven-value modification_type classification, monetary impact with rebudget routing, and prior-approval / sponsor-conditions / Financial-Unit routing flags that a Post-Award Specialist uses to enter the modification into Banner. Source workflow's STEP-03 ApprovalNode is intentionally omitted (handled by Vandalizer's UI as a runtime concern).",
+          "schema_path": "components/award-modification-intake-udm/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "prior-approval-extraction-udm",
+          "relationship": "complementary_drilldown",
+          "notes": "award-modification-intake-udm captures the prior-approval STATUS (boolean) and approval date on a single modification; prior-approval-extraction-udm captures the procedural MECHANICS (threshold / authority / documentation / timeline / consequences) for each prior-approval CATEGORY across the award lifecycle."
+        },
+        {
+          "slug": "ffr-management-extraction-udm",
+          "relationship": "complementary_focus",
+          "notes": "ffr-management-extraction-udm covers post-award FFR / SF-425 submission cadence on the parent award; this component covers modification intake on a specific amendment."
+        },
+        {
+          "slug": "award-compliance-extraction-udm",
+          "relationship": "complementary_focus",
+          "notes": "award-compliance-extraction-udm captures the broader compliance framework (high-risk conditions, audit thresholds, deliverable schedules) on the parent award; this component captures the modification-specific compliance fields and routing flags needed to enter the modification into Banner."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON outputs against schema.json. Canonical single-call invocation surface is prompt.md. The companion top-level workflows/award-modification-intake Vandalizer workflow at v0.1.0 implements the contract as three parallel Extraction tasks plus a Consolidation Prompt that assembles the three fragments and enforces the four source cross-field rules (CFR-01..CFR-04) as flag emissions on compliance.sponsor_conditions when the source document is internally inconsistent. Campaign authors should record both single-call and post-consolidation signals when both are available.",
+        "udm_alignment": {
+          "status": "shared_udm_semantics_repo_local_schema",
+          "notes": "award_number resolves to UDM Award.Award_Number or Award.Federal_Award_ID; sponsor_name to Organization.Organization_Name; pi_name to UDM Personnel; modification_amount to Modification.Funding_Amount_Change; current_award_amount to Award.Current_Total_Funded; fa_rate to IndirectRate.Rate_Percentage; budget_breakdown rows to AwardBudget; cost_share_changes to CostShare.Committed_Amount; sponsor_conditions to Terms.Special_Conditions; prior_approval_required to Modification.Requires_Prior_Approval. The three-block intake shape itself is repo-local."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.budget-justification-generator-udm",
+      "slug": "budget-justification-generator-udm",
+      "name": "budget-justification-generator-udm",
+      "summary": "Generates a complete, professional budget-justification narrative from a grant budget form and the project narrative / proposal. Captures both the structured per-section extracted financial data AND the generated narrative text for each section, plus the final assembled Markdown document and cross-validation notes. Organized in standard R&R Budget / SF-424A category order (A through I). Supports multi-year budgets and agency-specific rules when a NOFO / RFA is provided.",
+      "version": "0.1.0",
+      "category": "drafting",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "budget-justification",
+        "drafting",
+        "pre-award",
+        "nsf",
+        "nih",
+        "rr-budget",
+        "sf-424a",
+        "narrative-generation",
+        "multi-year",
+        "udm",
+        "structured-output",
+        "json"
+      ],
+      "audience": [
+        "sponsored-programs-staff",
+        "pre-award-teams",
+        "pis",
+        "proposal-developers"
+      ],
+      "paths": {
+        "component_dir": "components/budget-justification-generator-udm",
+        "readme": "components/budget-justification-generator-udm/README.md",
+        "prompt": "components/budget-justification-generator-udm/prompt.md",
+        "schema": "components/budget-justification-generator-udm/schema.json",
+        "evals_dir": "components/budget-justification-generator-udm/evals",
+        "eval_case_metadata_glob": "components/budget-justification-generator-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/budget-justification-generator-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/budget-justification-generator-udm/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "shared_udm_semantics_repo_local_schema",
+          "notes": "Repo-local agency-agnostic budget-justification drafting contract. Seven structured blocks (project_metadata, four per-section data-and-narrative blocks, cross_validation, final_justification_document) capture both the per-section extracted financial data AND the generated narrative text for each R&R Budget / SF-424A section (A-I), plus the final assembled Markdown document and arithmetic / clarification / missing-justification notes. The workflow's primary deliverable is the final_justification_document Markdown string; structured-data fields exist to support arithmetic re-validation.",
+          "schema_path": "components/budget-justification-generator-udm/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "nsf-budget-justification-udm",
+          "relationship": "sibling_agency_specific_vs_agency_agnostic",
+          "notes": "Both components draft a budget justification. This component follows the agency-agnostic R&R Budget / SF-424A category order (A-I); nsf-budget-justification-udm follows NSF's eight-section structure. Use this component when the agency is not NSF or when the budget follows the standard R&R / SF-424A shape."
+        },
+        {
+          "slug": "proposal-budget-personnel-extraction-udm",
+          "relationship": "complementary_focus",
+          "notes": "proposal-budget-personnel-extraction-udm extracts the budget structure and personnel listing WITHOUT generating narrative text. budget-justification-generator-udm does both — extracts the structure and drafts the narrative."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON outputs against schema.json. Canonical single-call invocation surface is prompt.md. The companion top-level workflows/budget-justification-generator Vandalizer workflow at v0.1.0 implements the contract as four parallel Extraction tasks (each both extracting data AND generating section narratives) plus a Consolidation Prompt that computes four arithmetic checks deterministically and renders final_justification_document as a single Markdown string in R&R Budget / SF-424A category order. Scoring is two-layered — structured fields validate against schema.json and arithmetic_checks; narrative strings require human review against the project narrative and budget form.",
+        "udm_alignment": {
+          "status": "shared_udm_semantics_repo_local_schema",
+          "notes": "Leaf fields bind to UDM entities: senior_key_personnel + pi_name to Personnel; project_title to Proposal.Proposal_Title; sponsoring_agency to Organization.Organization_Name; every monetary leaf to ProposalBudget.Direct_Cost or ProposalBudget.Indirect_Cost; budget_period_summary to ProposalBudget.Period_Number; fa_rate_percentage and fa_base_type and fa_rate_type to IndirectRate (Rate_Percentage, Base_Type, Rate_Type); cost_share_required / cost_share_amount / cost_share_type to CostShare (Is_Mandatory, Committed_Amount, Commitment_Type). The seven-block drafting shape itself is repo-local."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.compliance-personnel-verification-udm",
+      "slug": "compliance-personnel-verification-udm",
+      "name": "compliance-personnel-verification-udm",
+      "summary": "Automates the SFI (Significant Financial Interest) disclosure and RST (Research Security Training) compliance check across every person named on a federal research proposal. Joins three input sources — the VERAS proposal package, the institutional SFI disclosure records, and the most recent daily RST completion spreadsheet — into a per-person compliance matrix that a Sponsored Programs Administrator (SPA) reviews in seconds rather than minutes per person. Covers the source `PROC-SFI-RST-COMPLIANCE-CHECK` process (10 steps, 80% automatable per the source process map).",
+      "version": "0.1.0",
+      "category": "extraction",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "compliance",
+        "sfi",
+        "rst",
+        "personnel-verification",
+        "veras",
+        "pre-award",
+        "conflict-of-interest",
+        "research-security-training",
+        "udm",
+        "structured-extraction",
+        "json"
+      ],
+      "audience": [
+        "sponsored-programs-staff",
+        "pre-award-teams",
+        "compliance-officers"
+      ],
+      "paths": {
+        "component_dir": "components/compliance-personnel-verification-udm",
+        "readme": "components/compliance-personnel-verification-udm/README.md",
+        "prompt": "components/compliance-personnel-verification-udm/prompt.md",
+        "schema": "components/compliance-personnel-verification-udm/schema.json",
+        "evals_dir": "components/compliance-personnel-verification-udm/evals",
+        "eval_case_metadata_glob": "components/compliance-personnel-verification-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/compliance-personnel-verification-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/compliance-personnel-verification-udm/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "shared_udm_semantics_repo_local_schema",
+          "notes": "Repo-local SFI + RST personnel-verification contract for federal research proposals. Six structured blocks (proposal_metadata, personnel_identification, sfi_verification, rst_verification, non_compliant_personnel, verification_status) covering the consolidated cross-section personnel list, per-person SFI / RST status with five-value and three-value enums, derived non-compliance flags with priority, and overall summary counts. The workflow requires three workflow documents to be uploaded together (VERAS proposal, SFI disclosure records, daily RST completion spreadsheet); missing sources do not produce silent compliance — they produce non-compliant defaults and a notes gap-flag.",
+          "schema_path": "components/compliance-personnel-verification-udm/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "section2-personnel-eligibility-udm",
+          "relationship": "sibling_pre_award_personnel_check",
+          "notes": "Both components run against the same VERAS Section 2 personnel. compliance-personnel-verification-udm checks SFI disclosure + RST completion (compliance state); section2-personnel-eligibility-udm checks APM 45.22 PI / Co-PI eligibility (role state)."
+        },
+        {
+          "slug": "proposal-document-completeness-udm",
+          "relationship": "sibling_pre_award_review",
+          "notes": "Both components run on a VERAS upload during pre-award review. proposal-document-completeness-udm checks document-level inventory and gap analysis; compliance-personnel-verification-udm checks per-person SFI and RST compliance."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON outputs against schema.json. Canonical single-call invocation surface is prompt.md. The companion top-level workflows/compliance-personnel-verification Vandalizer workflow at v0.1.0 implements the contract as two parallel Extraction tasks (personnel identification + compliance status verification) plus a Consolidation Prompt that derives non_compliant_personnel from the SFI / RST per-person status records and computes the five verification_status counts. Campaign authors should record both single-call and post-consolidation signals when both are available.",
+        "udm_alignment": {
+          "status": "shared_udm_semantics_repo_local_schema",
+          "notes": "section_2_personnel[].name resolves to UDM Personnel.First_Name / Personnel.Last_Name; the proposal record itself resolves to UDM Proposal. The per-person SFI / RST verification matrices are repo-local — no shared UDM compliance table exists for them yet."
+        }
+      }
+    },
+    {
       "component_id": "prompt.document-type-classifier-udm",
       "slug": "document-type-classifier-udm",
       "name": "document-type-classifier-udm",
@@ -319,6 +581,95 @@
         "udm_alignment": {
           "status": "shared_udm_semantics_repo_local_schema",
           "notes": "award_number / pi_name / project_title resolve to UDM Award and Personnel; certification_method, pi_committed_effort, pi_person_months, and per-row key_personnel_commitments resolve to UDM Effort + ProjectRole; cost_shared_effort resolves to CostShare.Committed_Amount; record_retention resolves to Terms.Record_Retention_Years."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.export-to-banner-extraction-udm",
+      "slug": "export-to-banner-extraction-udm",
+      "name": "export-to-banner-extraction-udm",
+      "summary": "Extracts operational setup data from a fully-executed federal award document into the specific fields needed to populate the VERAS Export to Banner form. Focuses on Banner ERP-specific data points: award identification, dates and performance period, sponsor entity classification, budget structure and indirect-cost terms, billing and payment terms, and reporting / special-conditions text. Complements `award-compliance-extraction-udm` (broader compliance monitoring) by targeting only the operational fields Banner needs.",
+      "version": "0.1.0",
+      "category": "extraction",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "export-to-banner",
+        "post-award",
+        "banner-erp",
+        "award-notice",
+        "financial",
+        "billing",
+        "sponsor-classification",
+        "udm",
+        "structured-extraction",
+        "json"
+      ],
+      "audience": [
+        "sponsored-programs-staff",
+        "post-award-teams",
+        "ingest-pipelines"
+      ],
+      "paths": {
+        "component_dir": "components/export-to-banner-extraction-udm",
+        "readme": "components/export-to-banner-extraction-udm/README.md",
+        "prompt": "components/export-to-banner-extraction-udm/prompt.md",
+        "schema": "components/export-to-banner-extraction-udm/schema.json",
+        "evals_dir": "components/export-to-banner-extraction-udm/evals",
+        "eval_case_metadata_glob": "components/export-to-banner-extraction-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/export-to-banner-extraction-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/export-to-banner-extraction-udm/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "shared_udm_semantics_repo_local_schema",
+          "notes": "Repo-local Banner ERP-setup contract. Six structured blocks (award_identification, dates_and_performance, sponsor_entity, budget_financial, billing_payment, reporting_special) covering the specific data points needed to populate the VERAS Export to Banner form on its way into Banner ERP. Targets only the operational fields Banner needs — complements award-compliance-extraction-udm (broader compliance monitoring) rather than duplicating it. All monetary fields are JSON numbers per the boss's PR #33 review feedback.",
+          "schema_path": "components/export-to-banner-extraction-udm/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "award-compliance-extraction-udm",
+          "relationship": "complementary_focus",
+          "notes": "export-to-banner-extraction-udm captures operational Banner-setup fields from a fully-executed award document; award-compliance-extraction-udm captures the broader compliance framework (high-risk conditions, audit thresholds, deliverable schedules) on the same award."
+        },
+        {
+          "slug": "ffr-management-extraction-udm",
+          "relationship": "complementary_focus",
+          "notes": "ffr-management-extraction-udm covers FFR / SF-425 submission cadence; export-to-banner-extraction-udm covers operational billing and payment terms (billing_type / billing_frequency / PMS LOC code)."
+        },
+        {
+          "slug": "award-modification-intake-udm",
+          "relationship": "complementary_focus",
+          "notes": "award-modification-intake-udm covers modification intake on an amendment; export-to-banner-extraction-udm covers operational Banner-setup fields on the original (fully- executed) award. The two can be combined to refresh Banner when a modification updates Banner-relevant fields."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON outputs against schema.json. Canonical single-call invocation surface is prompt.md. The companion top-level workflows/export-to-banner-extraction Vandalizer workflow at v0.1.0 implements the contract as six parallel Extraction tasks plus a Consolidation Prompt that converts quoted-dollar strings to JSON numbers, normalizes four enums (award_type, sponsor_entity_type, fa_rate_base, billing_type), and enforces the two source cross-field rules (CFR-01 award_start < award_end; CFR-02 performance_period_start <= award_start_date) as flag emissions on reporting_special.special_terms. Campaign authors should record both single-call and post-consolidation signals when both are available.",
+        "udm_alignment": {
+          "status": "shared_udm_semantics_repo_local_schema",
+          "notes": "Broad UDM alignment via leaf-field column bindings: Award (Award_Number, Award_Title, Original_Start_Date, Original_End_Date, Flow_Through_Indicator, CFDA_Number, Current_Total_Funded, Total_Anticipated_Funding); Personnel (First_Name, Last_Name); Organization (Organization_Name, Organization_Type, UEI); AwardBudget; AwardBudgetPeriod; IndirectRate (Rate_Percentage, Base_Type); CostShare (Committed_Amount); ContactDetails (ContactDetails_Value); Terms (Payment_Method, Invoicing_Frequency). The six-block Banner-setup shape itself is repo-local."
         }
       }
     },
@@ -1574,6 +1925,180 @@
       }
     },
     {
+      "component_id": "prompt.risk-domain-assessment-udm",
+      "slug": "risk-domain-assessment-udm",
+      "name": "risk-domain-assessment-udm",
+      "summary": "Evaluates one or more award documents (Notice of Award, FOA / NOFO / RFA, modification, proposal) across 14 institutional risk domains using a standardized 1–5 scoring rubric. Each domain captures a distinct dimension of risk — programmatic complexity, financial structure, subrecipient risk, research security, compliance burden, reporting burden, administrative burden, audit risk, strategic alignment, sustainability, sensitive data, IP / privacy, sponsor reliability, reputational risk — and produces an evidence-cited justification supporting an informed institutional risk-acceptance decision.",
+      "version": "0.1.0",
+      "category": "review",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "risk-assessment",
+        "risk-scoring",
+        "14-domain-rubric",
+        "post-award",
+        "pre-award",
+        "compliance",
+        "research-security",
+        "audit",
+        "sustainability",
+        "intellectual-property",
+        "reputational-risk",
+        "udm",
+        "structured-extraction",
+        "json"
+      ],
+      "audience": [
+        "sponsored-programs-staff",
+        "post-award-teams",
+        "research-security-officers",
+        "audit-and-compliance",
+        "institutional-leadership"
+      ],
+      "paths": {
+        "component_dir": "components/risk-domain-assessment-udm",
+        "readme": "components/risk-domain-assessment-udm/README.md",
+        "prompt": "components/risk-domain-assessment-udm/prompt.md",
+        "schema": "components/risk-domain-assessment-udm/schema.json",
+        "evals_dir": "components/risk-domain-assessment-udm/evals",
+        "eval_case_metadata_glob": "components/risk-domain-assessment-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/risk-domain-assessment-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/risk-domain-assessment-udm/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "shared_udm_semantics_repo_local_schema",
+          "notes": "Repo-local 14-domain institutional risk-rubric contract. Three structured blocks (award_metadata, domain_scores, aggregate_metrics) where domain_scores is 14 typed blocks each with a JSON integer score (1-5), an evidence-cited justification, and domain-specific evidence fields. The consolidator computes aggregate_metrics deterministically (total_risk_score sum, average_risk_score quotient, four-value overall_risk_level enum) and derives high_risk_domains, key_risk_findings, recommended_mitigations from the per-domain scores. All scores are JSON integers per the boss's PR #33 review feedback.",
+          "schema_path": "components/risk-domain-assessment-udm/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "award-compliance-extraction-udm",
+          "relationship": "complementary_focus",
+          "notes": "risk-domain-assessment-udm produces a one-time institutional risk profile (run at award acceptance and on major modifications); award-compliance-extraction-udm runs continuously through the award lifecycle to monitor the compliance framework. The risk-assessment Domain 5 (Compliance & Regulatory) evidence fields overlap with the award-compliance contract's compliance_framework block."
+        },
+        {
+          "slug": "export-to-banner-extraction-udm",
+          "relationship": "sibling_award_consumption",
+          "notes": "Both components consume the same fully-executed award document(s). risk-domain-assessment-udm produces an institutional risk profile; export-to-banner-extraction-udm produces operational Banner ERP setup fields."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON outputs against schema.json. Canonical single-call invocation surface is prompt.md. The companion top-level workflows/risk-domain-assessment Vandalizer workflow at v0.1.0 implements the contract as six parallel Extraction tasks (each covering 2-4 of the 14 domains) plus a Consolidation Prompt that assembles the 14 domain blocks, computes aggregate_metrics deterministically, and derives high_risk_domains / key_risk_findings / recommended_mitigations. Campaign authors should record both single-call and post-consolidation signals when both are available.",
+        "udm_alignment": {
+          "status": "shared_udm_semantics_repo_local_schema",
+          "notes": "award_metadata fields and selected evidence fields resolve to UDM entities: award_number to Award.Award_Number; award_period_start / award_period_end to Award.Original_Start_Date / Original_End_Date; sponsor_name to Organization.Organization_Name; cfda_number to Award.CFDA_Number; domain_1.project_title to Award.Award_Title; domain_2.total_federal_funding to Award.Current_Total_Funded; domain_2.cost_share_required and cost_share_amount to CostShare.Is_Mandatory and CostShare.Committed_Amount; domain_2.idc_rate_restriction to IndirectRate.Rate_Percentage; domain_3.subrecipient_risk_level and subrecipient_monitoring_requirements to Subaward.Risk_Level and Subaward.Monitoring_Plan; domain_5.compliance_requirement_type and compliance_risk_level to ComplianceRequirement (Requirement_Type, Risk_Level); domain_6.reporting_frequency and reporting_requirements_detail to Terms.Invoicing_Frequency and Terms.Reporting_Requirements; domain_8.pass_through_indicator to Award.Flow_Through_Indicator; domain_10.closeout_requirements and property_equipment_obligations to Terms.Closeout_Requirements and Terms.Property_Requirements; domain_12.publication_requirements to Terms.Publication_Requirements; domain_13.special_conditions to Terms.Special_Conditions. The 14-domain rubric and aggregate-metrics shape themselves are repo-local — no shared UDM risk-rubric table exists yet."
+        }
+      }
+    },
+    {
+      "component_id": "prompt.section2-personnel-eligibility-udm",
+      "slug": "section2-personnel-eligibility-udm",
+      "name": "section2-personnel-eligibility-udm",
+      "summary": "Automates the VERAS Section 2 review at the University of Idaho — the most-requested SPA automation in the source process map. Extracts every PI / Co-PI / Senior Key Person from VERAS Section 2, verifies employment via Banner NBAJOBS, cross-references each PI / Co-PI job title against APM Section 45.22 eligibility criteria, compiles timesheet org codes, maps org codes to Departmental Grant Administrators (DGAs) using the institutional Department List, and cross-references required DGAs against Section 2 participants. Covers the source `PROC-SPA-SECTION2-REVIEW` process (13 steps, 77% automatable per the source process map).",
+      "version": "0.1.0",
+      "category": "extraction",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "section2",
+        "veras",
+        "pre-award",
+        "personnel-eligibility",
+        "apm-45-22",
+        "dga-mapping",
+        "pi-eligibility",
+        "banner",
+        "udm",
+        "structured-extraction",
+        "json"
+      ],
+      "audience": [
+        "sponsored-programs-staff",
+        "pre-award-teams"
+      ],
+      "paths": {
+        "component_dir": "components/section2-personnel-eligibility-udm",
+        "readme": "components/section2-personnel-eligibility-udm/README.md",
+        "prompt": "components/section2-personnel-eligibility-udm/prompt.md",
+        "schema": "components/section2-personnel-eligibility-udm/schema.json",
+        "evals_dir": "components/section2-personnel-eligibility-udm/evals",
+        "eval_case_metadata_glob": "components/section2-personnel-eligibility-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/section2-personnel-eligibility-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/section2-personnel-eligibility-udm/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "shared_udm_semantics_repo_local_schema",
+          "notes": "Repo-local VERAS Section 2 review contract for the University of Idaho. Seven structured blocks (personnel_extraction, personnel_verification, eligibility_check, org_code_compilation, dga_mapping, dga_cross_reference, verification_summary) covering APM 45.22 PI / Co-PI eligibility cross-checks, Banner NBAJOBS verification, timesheet org-code compilation, Department List org-code-to-DGA mapping, and per-DGA cross-reference against Section 2 participants. The workflow requires three workflow documents to be uploaded together (VERAS proposal, Banner NBAJOBS extract, Department List); the APM 45.22 eligible-titles list is consumed from the knowledge base / search corpus.",
+          "schema_path": "components/section2-personnel-eligibility-udm/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "compliance-personnel-verification-udm",
+          "relationship": "sibling_pre_award_personnel_check",
+          "notes": "Both components run against the same VERAS Section 2 personnel. section2-personnel-eligibility-udm checks APM 45.22 PI / Co-PI eligibility (role state) and DGA mapping; compliance-personnel-verification-udm checks SFI disclosure + RST completion (compliance state)."
+        },
+        {
+          "slug": "proposal-document-completeness-udm",
+          "relationship": "sibling_pre_award_review",
+          "notes": "Both components run on a VERAS upload during pre-award review. proposal-document-completeness-udm checks document-level inventory and gap analysis; section2-personnel-eligibility-udm checks per-person Section 2 eligibility and DGA coverage."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON outputs against schema.json. Canonical single-call invocation surface is prompt.md. The companion top-level workflows/section2-personnel-eligibility Vandalizer workflow at v0.1.0 implements the contract as two parallel Extraction tasks (personnel extraction + eligibility / DGA verification) plus a Consolidation Prompt that derives the seven verification_summary counts and four flag arrays from the per-person / per-org-code / per-DGA records. Campaign authors should record both single-call and post-consolidation signals when both are available.",
+        "udm_alignment": {
+          "status": "shared_udm_semantics_repo_local_schema",
+          "notes": "section_21_personnel[].name and section_22_personnel[].name resolve to UDM Personnel.First_Name / Personnel.Last_Name; the proposal record itself resolves to UDM Proposal. The APM 45.22 eligibility surface, org-code -> DGA mapping, and per-DGA cross-reference matrices are repo-local — no shared UDM table exists for them yet."
+        }
+      }
+    },
+    {
       "component_id": "prompt.solicitation-doc-modifications-udm",
       "slug": "solicitation-doc-modifications-udm",
       "name": "solicitation-doc-modifications-udm",
@@ -1929,6 +2454,87 @@
       }
     },
     {
+      "slug": "award-modification-intake",
+      "name": "Award Modification Intake & Classification",
+      "description": "Uploads a federal award amendment / modification document and returns a single structured JSON object covering the three blocks a Post-Award Specialist uses to enter the modification into Banner: identification (with modification-type classification), financial impact (amounts, F&A, rebudget routing), and compliance (prior-approval status, sponsor conditions, Financial-Unit routing). Output conforms to the award-modification-intake-udm component schema. The runtime mirrors the ui-insight/ProcessMapping award-modification-intake workflow's three parallel Extraction tasks plus a Consolidation Prompt; the source workflow's human-review (ApprovalNode) step is handled by Vandalizer's UI outside this manifest.",
+      "workflow_version": "0.1.0",
+      "status": "experimental",
+      "vandalizer_schema_version": 2,
+      "paths": {
+        "workflow_dir": "workflows/award-modification-intake",
+        "manifest": "workflows/award-modification-intake/manifest.yaml",
+        "export": "workflows/award-modification-intake/award-modification-intake.vandalizer.json",
+        "readme": "workflows/award-modification-intake/README.md",
+        "changelog": "workflows/award-modification-intake/CHANGELOG.md"
+      },
+      "components_manifested": [
+        "award-modification-intake-udm"
+      ],
+      "steps": {
+        "step_count": 2,
+        "task_count": 4,
+        "output_step_name": "Consolidation"
+      },
+      "evaluation": {
+        "posture": "workflow_local",
+        "source": "workflows/award-modification-intake/evals"
+      }
+    },
+    {
+      "slug": "budget-justification-generator",
+      "name": "Budget Justification Generator",
+      "description": "Uploads a grant budget form, the project narrative / proposal, and optionally the funding opportunity announcement (NOFO / RFA), and returns a single structured JSON object capturing both the structured per-section extracted financial data AND the generated narrative text for each section, plus the final assembled Markdown document and cross-validation notes. Output conforms to the budget-justification-generator-udm component schema. The runtime mirrors the ui-insight/ProcessMapping budget-justification-generator workflow's four parallel Extraction tasks (each extracting data and generating narrative) plus a Consolidation Prompt that assembles everything in R&R Budget / SF-424A category order.",
+      "workflow_version": "0.1.0",
+      "status": "experimental",
+      "vandalizer_schema_version": 2,
+      "paths": {
+        "workflow_dir": "workflows/budget-justification-generator",
+        "manifest": "workflows/budget-justification-generator/manifest.yaml",
+        "export": "workflows/budget-justification-generator/budget-justification-generator.vandalizer.json",
+        "readme": "workflows/budget-justification-generator/README.md",
+        "changelog": "workflows/budget-justification-generator/CHANGELOG.md"
+      },
+      "components_manifested": [
+        "budget-justification-generator-udm"
+      ],
+      "steps": {
+        "step_count": 2,
+        "task_count": 5,
+        "output_step_name": "Budget Justification Assembly and Cross-Validation"
+      },
+      "evaluation": {
+        "posture": "workflow_local",
+        "source": "workflows/budget-justification-generator/evals"
+      }
+    },
+    {
+      "slug": "compliance-personnel-verification",
+      "name": "Compliance Personnel Verification (SFI & RST)",
+      "description": "Verifies SFI (Significant Financial Interest) disclosure status and Research Security Training (RST) completion for every person named on a federal research proposal. Operator uploads three workflow documents together — the VERAS proposal package, the institutional SFI disclosure records, and the most recent daily RST completion spreadsheet — and the workflow returns a per-person compliance matrix with non-compliance priorities and overall summary counts. Output conforms to the compliance-personnel-verification-udm component schema. The runtime mirrors the ui-insight/ProcessMapping compliance-personnel-verification workflow's two parallel Extraction tasks plus a Consolidation Prompt.",
+      "workflow_version": "0.1.0",
+      "status": "experimental",
+      "vandalizer_schema_version": 2,
+      "paths": {
+        "workflow_dir": "workflows/compliance-personnel-verification",
+        "manifest": "workflows/compliance-personnel-verification/manifest.yaml",
+        "export": "workflows/compliance-personnel-verification/compliance-personnel-verification.vandalizer.json",
+        "readme": "workflows/compliance-personnel-verification/README.md",
+        "changelog": "workflows/compliance-personnel-verification/CHANGELOG.md"
+      },
+      "components_manifested": [
+        "compliance-personnel-verification-udm"
+      ],
+      "steps": {
+        "step_count": 2,
+        "task_count": 3,
+        "output_step_name": "Consolidation"
+      },
+      "evaluation": {
+        "posture": "workflow_local",
+        "source": "workflows/compliance-personnel-verification/evals"
+      }
+    },
+    {
       "slug": "effort-reporting-extraction",
       "name": "Effort Reporting Compliance Extraction",
       "description": "Uploads a federal award notice or agreement and returns a single structured JSON object covering effort-reporting and personnel-compliance requirements: cadence, certification method, PI commitments, per-person key-personnel commitments, cost-shared effort, governing regulation, record-retention requirement, and referenced governing documents. Output conforms to the effort-reporting-extraction-udm component schema. The runtime mirrors the ui-insight/ProcessMapping effort-reporting-extraction workflow (one Extraction task plus a Formatting/Consolidation task).",
@@ -1953,6 +2559,33 @@
       "evaluation": {
         "posture": "workflow_local",
         "source": "workflows/effort-reporting-extraction/evals"
+      }
+    },
+    {
+      "slug": "export-to-banner-extraction",
+      "name": "Export to Banner Award Extraction",
+      "description": "Uploads a fully-executed federal award document (notice of award, cooperative agreement, contract, or modification) and returns a single structured JSON object covering the six blocks needed to populate the VERAS Export to Banner form: award identification (FAIN, title, PI, type, pass-through, CFDA, NAICS, agency); dates and performance period (current and overall, plus multi-year periods table); sponsor entity classification (entity type, agency hierarchy, address, UEIs); budget structure (line-item categories with JSON-number amounts, F&A rate / base, cost share, program income); billing and payment terms (type enum, frequency, PMS LOC code, payment terms); and reporting / special requirements (reports table, record retention, carry-forward, prior-approval, closeout, governing regs). Output conforms to the export-to-banner-extraction-udm component schema. The runtime mirrors the ui-insight/ProcessMapping export-to-banner-extraction workflow's six parallel Extraction tasks plus a Consolidation Prompt.",
+      "workflow_version": "0.1.0",
+      "status": "experimental",
+      "vandalizer_schema_version": 2,
+      "paths": {
+        "workflow_dir": "workflows/export-to-banner-extraction",
+        "manifest": "workflows/export-to-banner-extraction/manifest.yaml",
+        "export": "workflows/export-to-banner-extraction/export-to-banner-extraction.vandalizer.json",
+        "readme": "workflows/export-to-banner-extraction/README.md",
+        "changelog": "workflows/export-to-banner-extraction/CHANGELOG.md"
+      },
+      "components_manifested": [
+        "export-to-banner-extraction-udm"
+      ],
+      "steps": {
+        "step_count": 2,
+        "task_count": 7,
+        "output_step_name": "Consolidation"
+      },
+      "evaluation": {
+        "posture": "workflow_local",
+        "source": "workflows/export-to-banner-extraction/evals"
       }
     },
     {
@@ -2199,6 +2832,60 @@
       "evaluation": {
         "posture": "workflow_local",
         "source": "workflows/rfa-checklist-extraction/evals"
+      }
+    },
+    {
+      "slug": "risk-domain-assessment",
+      "name": "Risk Domain Assessment",
+      "description": "Uploads one or more award documents (Notice of Award, FOA / NOFO / RFA, modification, proposal) and returns a single structured JSON object scoring 14 institutional risk domains on a 1-5 rubric with evidence-cited justifications, plus aggregate metrics (total / average risk scores, overall risk level enum, high-risk-domain list, key findings, recommended mitigations). Output conforms to the risk-domain-assessment-udm component schema. The runtime mirrors the ui-insight/ProcessMapping risk-domain-assessment workflow's six parallel Extraction tasks (each covering 2-4 domains) plus a Consolidation Prompt.",
+      "workflow_version": "0.1.0",
+      "status": "experimental",
+      "vandalizer_schema_version": 2,
+      "paths": {
+        "workflow_dir": "workflows/risk-domain-assessment",
+        "manifest": "workflows/risk-domain-assessment/manifest.yaml",
+        "export": "workflows/risk-domain-assessment/risk-domain-assessment.vandalizer.json",
+        "readme": "workflows/risk-domain-assessment/README.md",
+        "changelog": "workflows/risk-domain-assessment/CHANGELOG.md"
+      },
+      "components_manifested": [
+        "risk-domain-assessment-udm"
+      ],
+      "steps": {
+        "step_count": 2,
+        "task_count": 7,
+        "output_step_name": "Risk Profile Consolidation"
+      },
+      "evaluation": {
+        "posture": "workflow_local",
+        "source": "workflows/risk-domain-assessment/evals"
+      }
+    },
+    {
+      "slug": "section2-personnel-eligibility",
+      "name": "Section 2 Personnel Eligibility Verification",
+      "description": "Verifies VERAS Section 2 personnel against APM Section 45.22 eligibility criteria and maps timesheet org codes to Departmental Grant Administrators (DGAs) using the institutional Department List. Operator uploads three workflow documents together — the VERAS proposal package, the Banner NBAJOBS extract for each person on the proposal, and the institutional Department List — and the workflow returns a verification matrix with per-person eligibility determinations, per-org-code DGA mappings, and flags for ineligible personnel and missing DGAs. Output conforms to the section2-personnel-eligibility-udm component schema. The runtime mirrors the ui-insight/ProcessMapping section2-personnel-eligibility workflow's two parallel Extraction tasks plus a Consolidation Prompt.",
+      "workflow_version": "0.1.0",
+      "status": "experimental",
+      "vandalizer_schema_version": 2,
+      "paths": {
+        "workflow_dir": "workflows/section2-personnel-eligibility",
+        "manifest": "workflows/section2-personnel-eligibility/manifest.yaml",
+        "export": "workflows/section2-personnel-eligibility/section2-personnel-eligibility.vandalizer.json",
+        "readme": "workflows/section2-personnel-eligibility/README.md",
+        "changelog": "workflows/section2-personnel-eligibility/CHANGELOG.md"
+      },
+      "components_manifested": [
+        "section2-personnel-eligibility-udm"
+      ],
+      "steps": {
+        "step_count": 2,
+        "task_count": 3,
+        "output_step_name": "Consolidation"
+      },
+      "evaluation": {
+        "posture": "workflow_local",
+        "source": "workflows/section2-personnel-eligibility/evals"
       }
     },
     {

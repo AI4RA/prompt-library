@@ -1,0 +1,593 @@
+# Authored source for the Budget Justification Generator Vandalizer workflow.
+#
+# The companion budget-justification-generator.vandalizer.json is generated
+# from this file by scripts/build_vandalizer_workflows.py and committed
+# alongside. Never hand-edit the generated JSON — update this manifest and
+# rebuild.
+#
+# Runtime topology (v0.1.0):
+#   Step 1  Parallel Extraction + Generation
+#     4 Extraction tasks, each extracting structured budget data AND
+#     generating the narrative text for specific budget categories.
+#     Mirrors the source ProcessMapping workflow's TASK-1-1 through
+#     TASK-1-4 one-for-one (personnel-and-fringe, equipment-and-travel,
+#     participant-support-and-other-direct-costs,
+#     indirect-costs-and-summary).
+#   Step 2  Consolidation
+#     1 Prompt task assembles the four JSON fragments into a single object
+#     that validates against
+#     components/budget-justification-generator-udm/schema.json, performs
+#     the three cross-validation checks, and renders the
+#     final_justification_document Markdown string in R&R Budget /
+#     SF-424A category order.
+
+name: Budget Justification Generator
+description: >
+  Uploads a grant budget form, the project narrative / proposal, and
+  optionally the funding opportunity announcement (NOFO / RFA), and
+  returns a single structured JSON object capturing both the structured
+  per-section extracted financial data AND the generated narrative text
+  for each section, plus the final assembled Markdown document and
+  cross-validation notes. Output conforms to the
+  budget-justification-generator-udm component schema. The runtime
+  mirrors the ui-insight/ProcessMapping budget-justification-generator
+  workflow's four parallel Extraction tasks (each extracting data and
+  generating narrative) plus a Consolidation Prompt that assembles
+  everything in R&R Budget / SF-424A category order.
+
+workflow_version: 0.1.0
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-05-20
+updated: 2026-05-20
+
+components:
+  - slug: budget-justification-generator-udm
+    pinned_version: 0.1.0
+
+validation_plan:
+  - check_id: CHK-01
+    check_name: Line item sum equals category total
+    check_type: arithmetic
+    check_description: Verify sum of line items equals category total for each budget category.
+    target_fields:
+      - personnel_and_fringe.total_senior_personnel_cost
+      - personnel_and_fringe.total_other_personnel_cost
+      - personnel_and_fringe.total_fringe_benefits
+      - equipment_and_travel.total_equipment_cost
+      - equipment_and_travel.total_domestic_travel_cost
+      - equipment_and_travel.total_foreign_travel_cost
+      - participant_support_and_other_direct_costs.total_participant_support
+      - participant_support_and_other_direct_costs.total_other_direct_costs
+    severity: error
+  - check_id: CHK-02
+    check_name: Direct plus indirect equals total
+    check_type: arithmetic
+    check_description: Verify total_direct_costs + total_indirect_costs equals total_project_costs.
+    target_fields:
+      - indirect_costs_and_summary.total_direct_costs
+      - indirect_costs_and_summary.total_indirect_costs
+      - indirect_costs_and_summary.total_project_costs
+    severity: error
+  - check_id: CHK-03
+    check_name: Personnel costs match FTE
+    check_type: consistency
+    check_description: Verify personnel cost calculations are consistent with FTE / person-months.
+    target_fields:
+      - personnel_and_fringe.senior_key_personnel
+      - personnel_and_fringe.total_senior_personnel_cost
+    severity: warning
+
+steps:
+  - name: Parallel Budget Category Extraction and Justification Generation
+    tasks:
+      - name: extract-personnel-and-fringe
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          You are extracting personnel data AND generating the
+          professional justification narrative for Sections A
+          (Senior/Key Personnel), B (Other Personnel), and C (Fringe
+          Benefits) of an R&R Budget / SF-424A. Mirrors TASK-1-1 of the
+          source ProcessMapping budget-justification-generator workflow.
+
+          Be 100% accurate. Reproduce financial figures verbatim from
+          the budget form. Tie each person's effort and salary to roles
+          and responsibilities described in the project narrative.
+          Generate professional third-person narrative text.
+
+          Monetary fields are JSON NUMBERS, not quoted strings. Convert
+          "$125,400.00" -> 125400.
+
+          For each searchset item return the document's evidence and / or
+          generated narrative:
+
+          - senior_key_personnel: JSON array of
+            {name, title, role, person_months, salary_basis,
+             requested_salary} objects. MUST be non-empty.
+          - other_personnel: JSON array of
+            {category, count, person_months, rate} objects. Empty array
+            when no other personnel are listed.
+          - total_senior_personnel_cost: JSON number.
+          - total_other_personnel_cost: JSON number or null.
+          - fringe_benefit_rates: JSON array of
+            {category, rate, calculation_basis} objects.
+          - total_fringe_benefits: JSON number.
+          - is_salary_cap_applicable: JSON boolean or null.
+          - salary_cap_amount: JSON number or null.
+          - year_over_year_personnel_changes: string or null.
+          - section_a_narrative: generated professional narrative for
+            Section A.
+          - section_b_narrative: generated narrative for Section B (use
+            "No other personnel costs are requested for this project."
+            when other_personnel is empty).
+          - section_c_narrative: generated narrative for Section C
+            (fringe benefits).
+        searchset:
+          title: Personnel and Fringe Benefits Budget and Narrative
+          domain: research-administration
+          items:
+            - title: senior_key_personnel
+              searchphrase: Senior / Key Personnel table as a JSON array of {name, title, role, person_months, salary_basis, requested_salary} objects.
+            - title: other_personnel
+              searchphrase: Other Personnel table as a JSON array of {category, count, person_months, rate} objects.
+              is_optional: true
+            - title: total_senior_personnel_cost
+              searchphrase: Total salary costs for all senior / key personnel as a JSON number.
+            - title: total_other_personnel_cost
+              searchphrase: Total salary costs for all other personnel as a JSON number.
+              is_optional: true
+            - title: fringe_benefit_rates
+              searchphrase: Fringe benefit rates by personnel category as a JSON array of {category, rate, calculation_basis} objects.
+            - title: total_fringe_benefits
+              searchphrase: Total fringe benefit costs as a JSON number.
+            - title: is_salary_cap_applicable
+              searchphrase: Whether any personnel salary is subject to an agency salary cap as a JSON boolean.
+              is_optional: true
+            - title: salary_cap_amount
+              searchphrase: Agency salary cap amount as a JSON number; null when not applicable.
+              is_optional: true
+            - title: year_over_year_personnel_changes
+              searchphrase: Description of personnel effort or salary changes across budget years.
+              is_optional: true
+            - title: section_a_narrative
+              searchphrase: Generated professional justification text for Section A (Senior/Key Personnel).
+            - title: section_b_narrative
+              searchphrase: Generated professional justification text for Section B (Other Personnel).
+            - title: section_c_narrative
+              searchphrase: Generated professional justification text for Section C (Fringe Benefits).
+
+      - name: extract-equipment-and-travel
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          You are extracting equipment and travel data AND generating the
+          professional justification narrative for Sections D (Equipment)
+          and E (Travel: Domestic + Foreign). Mirrors TASK-1-2 of the
+          source workflow.
+
+          Monetary fields are JSON NUMBERS.
+
+          For each searchset item return data and / or narrative:
+          - equipment_items: JSON array of {name, cost, purpose} objects.
+            Empty array when no equipment requested.
+          - total_equipment_cost: JSON number.
+          - equipment_threshold_applied: string or null.
+          - domestic_travel: JSON array of
+            {destination, purpose, travelers, duration_days, total_cost}.
+          - foreign_travel: JSON array of same shape.
+          - total_domestic_travel_cost, total_foreign_travel_cost: JSON
+            numbers.
+          - is_foreign_travel_restricted: JSON boolean or null.
+          - travel_cost_basis: string or null.
+          - section_d_narrative: generated narrative for Section D.
+            Use "No equipment costs are requested for this project."
+            when equipment_items is empty.
+          - section_e_domestic_narrative: generated narrative for
+            domestic travel.
+          - section_e_foreign_narrative: generated narrative for foreign
+            travel.
+        searchset:
+          title: Equipment and Travel Budget and Narrative
+          domain: research-administration
+          items:
+            - title: equipment_items
+              searchphrase: Equipment items as a JSON array of {name, cost, purpose} objects.
+              is_optional: true
+            - title: total_equipment_cost
+              searchphrase: Total equipment costs as a JSON number.
+            - title: equipment_threshold_applied
+              searchphrase: Equipment cost threshold used (e.g., standard $5,000 institutional, $10,000 per 2 CFR 200.313).
+              is_optional: true
+            - title: domestic_travel
+              searchphrase: Domestic trips as a JSON array of {destination, purpose, travelers, duration_days, total_cost} objects.
+              is_optional: true
+            - title: foreign_travel
+              searchphrase: Foreign trips as a JSON array of {destination, purpose, travelers, duration_days, total_cost} objects.
+              is_optional: true
+            - title: total_domestic_travel_cost
+              searchphrase: Total domestic travel costs as a JSON number.
+            - title: total_foreign_travel_cost
+              searchphrase: Total foreign travel costs as a JSON number.
+            - title: is_foreign_travel_restricted
+              searchphrase: Whether the NOFO restricts foreign travel as a JSON boolean.
+              is_optional: true
+            - title: travel_cost_basis
+              searchphrase: Basis for travel cost estimates (GSA rates, quotes, etc.).
+              is_optional: true
+            - title: section_d_narrative
+              searchphrase: Generated professional justification text for Section D (Equipment).
+            - title: section_e_domestic_narrative
+              searchphrase: Generated professional justification text for Section E Domestic Travel.
+            - title: section_e_foreign_narrative
+              searchphrase: Generated professional justification text for Section E Foreign Travel.
+
+      - name: extract-participant-support-and-odc
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          You are extracting participant support and Other Direct Costs
+          data AND generating the professional justification narrative
+          for Sections F (Participant/Trainee Support) and G (Other
+          Direct Costs with nine subcategories G.1-G.9). Mirrors
+          TASK-1-3 of the source workflow.
+
+          Monetary fields are JSON NUMBERS.
+
+          For each searchset item return data and / or narrative:
+          - participant_support_costs: JSON array of {category, cost}
+            objects. Empty when none.
+          - total_participant_support: JSON number.
+          - materials_and_supplies: JSON array of {category, cost}
+            objects. Empty when none.
+          - publication_costs: JSON number or null.
+          - consultant_services: JSON array of
+            {name, rate, days, total, scope} objects. Empty when none.
+          - adp_computing_services: string or null.
+          - subaward_details: JSON array of
+            {institution, pi, scope, total_cost} objects. Empty when
+            none.
+          - total_subaward_costs: JSON number or null.
+          - equipment_rental, alterations_and_renovations: strings or
+            null.
+          - tuition_remission: JSON number or null.
+          - other_direct_costs: JSON array of {category, cost} objects.
+            Empty when none.
+          - total_other_direct_costs: JSON number (sum across all G
+            subcategories).
+          - section_f_narrative: generated narrative for Section F.
+          - section_g_narrative: generated narrative for Section G
+            (assembling G.1-G.9 subsections in order).
+        searchset:
+          title: Participant Support and Other Direct Costs Budget and Narrative
+          domain: research-administration
+          items:
+            - title: participant_support_costs
+              searchphrase: Participant support cost breakdown as a JSON array of {category, cost} objects.
+              is_optional: true
+            - title: total_participant_support
+              searchphrase: Total participant / trainee support costs as a JSON number.
+            - title: materials_and_supplies
+              searchphrase: Materials and supplies as a JSON array of {category, cost} objects.
+              is_optional: true
+            - title: publication_costs
+              searchphrase: Publication and documentation costs as a JSON number.
+              is_optional: true
+            - title: consultant_services
+              searchphrase: Consultants as a JSON array of {name, rate, days, total, scope} objects.
+              is_optional: true
+            - title: adp_computing_services
+              searchphrase: Computing services and costs as a string.
+              is_optional: true
+            - title: subaward_details
+              searchphrase: Subawards as a JSON array of {institution, pi, scope, total_cost} objects.
+              is_optional: true
+            - title: total_subaward_costs
+              searchphrase: Total subaward / subcontract costs as a JSON number.
+              is_optional: true
+            - title: equipment_rental
+              searchphrase: Equipment or facility rental costs as a string.
+              is_optional: true
+            - title: alterations_and_renovations
+              searchphrase: Alteration and renovation costs as a string.
+              is_optional: true
+            - title: tuition_remission
+              searchphrase: Graduate student tuition remission costs as a JSON number.
+              is_optional: true
+            - title: other_direct_costs
+              searchphrase: Other direct costs not fitting above categories as a JSON array of {category, cost} objects.
+              is_optional: true
+            - title: total_other_direct_costs
+              searchphrase: Total of all Other Direct Cost subcategories as a JSON number.
+            - title: section_f_narrative
+              searchphrase: Generated professional justification text for Section F (Participant Support).
+            - title: section_g_narrative
+              searchphrase: Generated professional justification text for Section G (Other Direct Costs) covering G.1 through G.9.
+
+      - name: extract-indirect-and-summary
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          You are extracting indirect-cost, cost-share, and budget-summary
+          data AND generating the professional justification narrative
+          for Section H (Indirect Costs / F&A), Cost Sharing, and Budget
+          Summary. Check the NOFO for F&A caps, cost-share requirements,
+          and formatting rules. Mirrors TASK-1-4 of the source workflow.
+
+          Monetary fields are JSON NUMBERS. fa_rate_percentage is a JSON
+          number (e.g., 56.5, not the string "56.5%"). fringe rate
+          strings preserve "%" but fa_rate_percentage does not.
+
+          For each searchset item return data and / or narrative:
+          - fa_rate_percentage: JSON number 0-100.
+          - fa_base_type: string (MTDC, TDC, Salaries and Wages, etc.).
+          - fa_rate_type: string or null (defaults to "Federally
+            negotiated rate" when not stated).
+          - mtdc_base_exclusions: JSON array of strings.
+          - is_fa_rate_capped: JSON boolean or null.
+          - fa_rate_cap_details: string or null.
+          - total_direct_costs: JSON number.
+          - total_indirect_costs: JSON number.
+          - total_project_costs: JSON number.
+          - cost_share_required: JSON boolean or null.
+          - cost_share_amount: JSON number or null.
+          - cost_share_type: string or null.
+          - cost_share_sources: JSON array of strings.
+          - budget_period_summary: JSON array of
+            {period_number, direct_costs, indirect_costs, total} objects
+            for multi-year budgets; empty for single-period.
+          - year_over_year_variations: string or null.
+          - nofo_budget_rules: JSON array of strings.
+          - nofo_page_limit_for_justification: string or null.
+          - section_h_narrative: generated narrative for Section H,
+            including the MTDC calculation.
+          - cost_share_narrative: generated narrative for Cost Sharing.
+          - budget_summary_narrative: generated budget summary overview
+            with year-over-year explanation.
+        searchset:
+          title: Indirect Costs Cost Share and Budget Summary Budget and Narrative
+          domain: research-administration
+          items:
+            - title: fa_rate_percentage
+              searchphrase: Facilities and Administrative indirect cost rate as a JSON number 0-100 percent.
+            - title: fa_base_type
+              searchphrase: F&A rate base type (MTDC, TDC, Salaries and Wages, etc.).
+            - title: fa_rate_type
+              searchphrase: Type of F&A rate (on-campus, off-campus, etc.).
+              is_optional: true
+            - title: mtdc_base_exclusions
+              searchphrase: Items excluded from the MTDC base as a JSON array of strings.
+              is_optional: true
+            - title: is_fa_rate_capped
+              searchphrase: Whether the NOFO imposes a cap on the F&A rate as a JSON boolean.
+              is_optional: true
+            - title: fa_rate_cap_details
+              searchphrase: Details of any F&A rate cap from the NOFO.
+              is_optional: true
+            - title: total_direct_costs
+              searchphrase: Total direct costs across all budget categories as a JSON number.
+            - title: total_indirect_costs
+              searchphrase: Total indirect (F&A) costs as a JSON number.
+            - title: total_project_costs
+              searchphrase: Total project costs (direct + indirect) as a JSON number.
+            - title: cost_share_required
+              searchphrase: Whether cost sharing or matching is required as a JSON boolean.
+              is_optional: true
+            - title: cost_share_amount
+              searchphrase: Total cost share commitment amount as a JSON number.
+              is_optional: true
+            - title: cost_share_type
+              searchphrase: Type of cost share (cash, in-kind, third-party, waived IDC).
+              is_optional: true
+            - title: cost_share_sources
+              searchphrase: Sources of cost share contributions as a JSON array of strings.
+              is_optional: true
+            - title: budget_period_summary
+              searchphrase: Year-by-year budget summary as a JSON array of {period_number, direct_costs, indirect_costs, total} objects.
+              is_optional: true
+            - title: year_over_year_variations
+              searchphrase: Explanation of year-over-year budget changes as a string.
+              is_optional: true
+            - title: nofo_budget_rules
+              searchphrase: Agency-specific budget rules or restrictions from the NOFO as a JSON array of strings.
+              is_optional: true
+            - title: nofo_page_limit_for_justification
+              searchphrase: Page limit for the budget justification from the NOFO.
+              is_optional: true
+            - title: section_h_narrative
+              searchphrase: Generated professional justification text for Section H (Indirect Costs) including the MTDC calculation.
+            - title: cost_share_narrative
+              searchphrase: Generated professional justification text for Cost Sharing.
+            - title: budget_summary_narrative
+              searchphrase: Generated budget summary overview with totals and year-over-year explanation.
+
+  - name: Budget Justification Assembly and Cross-Validation
+    is_output: true
+    tasks:
+      - name: budget-justification-generator-consolidation
+        kind: Prompt
+        input_source: step_input
+        prompt_inline: |
+          You are the consolidation step of the Budget Justification
+          Generator workflow. You receive four extraction outputs from
+          the previous step (personnel-and-fringe, equipment-and-travel,
+          participant-support-and-other-direct-costs,
+          indirect-costs-and-summary) and must emit a SINGLE JSON object
+          that validates against the
+          budget-justification-generator-udm@0.1.0 schema (schema.json
+          in the component directory).
+
+          ## Output contract
+
+          Emit exactly one JSON object. No preamble, no closing commentary,
+          no markdown fences. If your runtime requires fenced output, wrap
+          in a single ```json ... ``` block and emit nothing outside it.
+
+          Top-level keys (in this order): `project_metadata`,
+          `personnel_and_fringe`, `equipment_and_travel`,
+          `participant_support_and_other_direct_costs`,
+          `indirect_costs_and_summary`, `cross_validation`,
+          `final_justification_document`.
+
+          ## Field-by-field assembly
+
+          ### project_metadata
+
+          Pull project_title, pi_name, sponsoring_agency,
+          budget_period_count, is_multi_year_budget from the input
+          documents. budget_period_count is a JSON integer >= 1.
+
+          ### personnel_and_fringe, equipment_and_travel, participant_support_and_other_direct_costs, indirect_costs_and_summary
+
+          Pass the four extraction fragments through into the four
+          mid-level blocks. CRITICAL: if any extractor surfaced a quoted
+          dollar string ("$125,400.00") in any monetary structured-data
+          field, convert it to a JSON number here. Apply to every
+          monetary leaf in the schema.
+
+          fa_rate_percentage is a JSON NUMBER (e.g., 56.5), not the
+          string "56.5%". Fringe rate strings preserve "%" — they are
+          in fringe_benefit_rates[].rate, which is a string. Do not
+          conflate.
+
+          Every section narrative field (section_a_narrative through
+          budget_summary_narrative) must be a non-empty string. When
+          the section has no costs, the narrative is the standard
+          "No <category> costs are requested for this project."
+
+          ### cross_validation (derive)
+
+          Compute:
+
+          arithmetic_checks: JSON array of arithmetic-check records.
+          Run these checks:
+          1. Personnel & Fringe subtotal:
+             total_senior_personnel_cost + total_other_personnel_cost
+             + total_fringe_benefits = expected sum.
+             check_name: "Personnel & Fringe subtotal",
+             status: "PASS" or "FAIL", populate expected/actual/discrepancy.
+          2. Non-personnel direct subtotal:
+             total_equipment_cost + total_domestic_travel_cost +
+             total_foreign_travel_cost + total_participant_support +
+             total_other_direct_costs = expected sum.
+          3. Total Direct Costs check:
+             sum of all direct cost categories = total_direct_costs.
+          4. Total Project Costs check:
+             total_direct_costs + total_indirect_costs =
+             total_project_costs.
+
+          When a check fails, status: "FAIL" with populated expected,
+          actual, and discrepancy values. Do NOT alter any value to
+          make the math work — the RA must resolve discrepancies with
+          the PI.
+
+          items_requiring_clarification: walk every narrative field for
+          phrases like "clarification needed from PI", "not described
+          in the project narrative", "not specified in the provided
+          documents". Aggregate each instance as a single-string entry
+          with the section name prefixed.
+
+          missing_justification_flags: identify any budget category
+          that shows a non-zero dollar amount but lacks substantive
+          narrative justification.
+
+          ### final_justification_document (render)
+
+          Render the complete document as a single Markdown string in
+          this structure:
+
+          ```
+          # BUDGET JUSTIFICATION
+          ## <project_title>
+          ### PI: <pi_name>
+
+          [FORMATTING ADVISORY block — include ONLY if
+          indirect_costs_and_summary.nofo_budget_rules is non-empty or
+          nofo_page_limit_for_justification is non-null. List each
+          formatting requirement as a bullet point.]
+
+          ---
+
+          ## A. SENIOR/KEY PERSONNEL
+          <personnel_and_fringe.section_a_narrative>
+
+          ## B. OTHER PERSONNEL
+          <personnel_and_fringe.section_b_narrative>
+
+          ## C. FRINGE BENEFITS
+          <personnel_and_fringe.section_c_narrative>
+
+          [Personnel Summary Table — derived from senior_key_personnel
+          + other_personnel + fringe rates]
+
+          ---
+
+          ## D. EQUIPMENT
+          <equipment_and_travel.section_d_narrative>
+
+          ## E. TRAVEL
+          ### Domestic Travel
+          <equipment_and_travel.section_e_domestic_narrative>
+          ### Foreign Travel
+          <equipment_and_travel.section_e_foreign_narrative>
+
+          [Travel Summary Table]
+
+          ---
+
+          ## F. PARTICIPANT/TRAINEE SUPPORT COSTS
+          <participant_support_and_other_direct_costs.section_f_narrative>
+
+          ## G. OTHER DIRECT COSTS
+          <participant_support_and_other_direct_costs.section_g_narrative>
+
+          [Other Direct Costs Summary Table]
+
+          ---
+
+          ## H. INDIRECT COSTS (FACILITIES & ADMINISTRATIVE)
+          <indirect_costs_and_summary.section_h_narrative>
+
+          ## COST SHARING
+          <indirect_costs_and_summary.cost_share_narrative>
+
+          ## BUDGET SUMMARY
+          <indirect_costs_and_summary.budget_summary_narrative>
+
+          [Budget Summary Table — multi-year period rows when applicable]
+
+          ---
+
+          ## CROSS-VALIDATION NOTES
+          **For the RA's internal review only — NOT for submission to
+          the sponsor.**
+
+          ### Arithmetic Checks
+          [Render each cross_validation.arithmetic_checks entry as a
+          single line: status check_name (expected, actual, discrepancy)]
+
+          ### Items Requiring PI Clarification
+          [Render cross_validation.items_requiring_clarification or
+          "No items requiring PI clarification were identified."]
+
+          ### Missing or Incomplete Sections
+          [Render cross_validation.missing_justification_flags or
+          "All budget categories have been addressed."]
+          ```
+
+          Do NOT include the cross-validation notes above the heading.
+          Do NOT modify dollar amounts to make arithmetic work.
+
+          ## Quality bar
+
+          - Output validates against schema.json (draft 2020-12).
+          - All monetary structured-data fields are JSON numbers.
+          - Narrative text preserves $X,XXX.XX format for readability.
+          - The final_justification_document is a single Markdown string.
+          - The cross-validation notes section is clearly marked as
+            not-for-submission and appears BELOW everything else in
+            the document.
+
+evals:
+  workflow_local: true

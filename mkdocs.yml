@@ -87,8 +87,12 @@ nav:
   - Components:
       - Index: components/index.md
       - award-compliance-extraction-udm: components/award-compliance-extraction-udm.md
+      - award-modification-intake-udm: components/award-modification-intake-udm.md
+      - budget-justification-generator-udm: components/budget-justification-generator-udm.md
+      - compliance-personnel-verification-udm: components/compliance-personnel-verification-udm.md
       - document-type-classifier-udm: components/document-type-classifier-udm.md
       - effort-reporting-extraction-udm: components/effort-reporting-extraction-udm.md
+      - export-to-banner-extraction-udm: components/export-to-banner-extraction-udm.md
       - ffr-management-extraction-udm: components/ffr-management-extraction-udm.md
       - foa-checklist-extraction-udm: components/foa-checklist-extraction-udm.md
       - nsf-award-notice-extraction-udm:
@@ -112,6 +116,8 @@ nav:
       - rfa-checklist-extraction-udm: components/rfa-checklist-extraction-udm.md
       - rfp-extraction: components/rfp-extraction.md
       - rfp-extraction-udm: components/rfp-extraction-udm.md
+      - risk-domain-assessment-udm: components/risk-domain-assessment-udm.md
+      - section2-personnel-eligibility-udm: components/section2-personnel-eligibility-udm.md
       - solicitation-doc-modifications-udm: components/solicitation-doc-modifications-udm.md
       - sponsor-doc-defaults-udm: components/sponsor-doc-defaults-udm.md
       - subaward-extraction-udm: components/subaward-extraction-udm.md

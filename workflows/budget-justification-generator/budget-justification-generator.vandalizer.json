@@ -1,0 +1,571 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "exported_at": "2026-05-20T00:00:00+00:00",
+  "exported_by": "ui-insight",
+  "items": [
+    {
+      "name": "Budget Justification Generator",
+      "description": "Uploads a grant budget form, the project narrative / proposal, and optionally the funding opportunity announcement (NOFO / RFA), and returns a single structured JSON object capturing both the structured per-section extracted financial data AND the generated narrative text for each section, plus the final assembled Markdown document and cross-validation notes. Output conforms to the budget-justification-generator-udm component schema. The runtime mirrors the ui-insight/ProcessMapping budget-justification-generator workflow's four parallel Extraction tasks (each extracting data and generating narrative) plus a Consolidation Prompt that assembles everything in R&R Budget / SF-424A category order.",
+      "steps": [
+        {
+          "name": "Parallel Budget Category Extraction and Justification Generation",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-personnel-and-fringe",
+                "prompt": "You are extracting personnel data AND generating the\nprofessional justification narrative for Sections A\n(Senior/Key Personnel), B (Other Personnel), and C (Fringe\nBenefits) of an R&R Budget / SF-424A. Mirrors TASK-1-1 of the\nsource ProcessMapping budget-justification-generator workflow.\n\nBe 100% accurate. Reproduce financial figures verbatim from\nthe budget form. Tie each person's effort and salary to roles\nand responsibilities described in the project narrative.\nGenerate professional third-person narrative text.\n\nMonetary fields are JSON NUMBERS, not quoted strings. Convert\n\"$125,400.00\" -> 125400.\n\nFor each searchset item return the document's evidence and / or\ngenerated narrative:\n\n- senior_key_personnel: JSON array of\n  {name, title, role, person_months, salary_basis,\n   requested_salary} objects. MUST be non-empty.\n- other_personnel: JSON array of\n  {category, count, person_months, rate} objects. Empty array\n  when no other personnel are listed.\n- total_senior_personnel_cost: JSON number.\n- total_other_personnel_cost: JSON number or null.\n- fringe_benefit_rates: JSON array of\n  {category, rate, calculation_basis} objects.\n- total_fringe_benefits: JSON number.\n- is_salary_cap_applicable: JSON boolean or null.\n- salary_cap_amount: JSON number or null.\n- year_over_year_personnel_changes: string or null.\n- section_a_narrative: generated professional narrative for\n  Section A.\n- section_b_narrative: generated narrative for Section B (use\n  \"No other personnel costs are requested for this project.\"\n  when other_personnel is empty).\n- section_c_narrative: generated narrative for Section C\n  (fringe benefits).",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Personnel and Fringe Benefits Budget and Narrative",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Senior / Key Personnel table as a JSON array of {name, title, role, person_months, salary_basis, requested_salary} objects.",
+                      "searchtype": "extraction",
+                      "title": "senior_key_personnel",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Other Personnel table as a JSON array of {category, count, person_months, rate} objects.",
+                      "searchtype": "extraction",
+                      "title": "other_personnel",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total salary costs for all senior / key personnel as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "total_senior_personnel_cost",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total salary costs for all other personnel as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "total_other_personnel_cost",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Fringe benefit rates by personnel category as a JSON array of {category, rate, calculation_basis} objects.",
+                      "searchtype": "extraction",
+                      "title": "fringe_benefit_rates",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total fringe benefit costs as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "total_fringe_benefits",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Whether any personnel salary is subject to an agency salary cap as a JSON boolean.",
+                      "searchtype": "extraction",
+                      "title": "is_salary_cap_applicable",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Agency salary cap amount as a JSON number; null when not applicable.",
+                      "searchtype": "extraction",
+                      "title": "salary_cap_amount",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Description of personnel effort or salary changes across budget years.",
+                      "searchtype": "extraction",
+                      "title": "year_over_year_personnel_changes",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Generated professional justification text for Section A (Senior/Key Personnel).",
+                      "searchtype": "extraction",
+                      "title": "section_a_narrative",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Generated professional justification text for Section B (Other Personnel).",
+                      "searchtype": "extraction",
+                      "title": "section_b_narrative",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Generated professional justification text for Section C (Fringe Benefits).",
+                      "searchtype": "extraction",
+                      "title": "section_c_narrative",
+                      "is_optional": false,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-equipment-and-travel",
+                "prompt": "You are extracting equipment and travel data AND generating the\nprofessional justification narrative for Sections D (Equipment)\nand E (Travel: Domestic + Foreign). Mirrors TASK-1-2 of the\nsource workflow.\n\nMonetary fields are JSON NUMBERS.\n\nFor each searchset item return data and / or narrative:\n- equipment_items: JSON array of {name, cost, purpose} objects.\n  Empty array when no equipment requested.\n- total_equipment_cost: JSON number.\n- equipment_threshold_applied: string or null.\n- domestic_travel: JSON array of\n  {destination, purpose, travelers, duration_days, total_cost}.\n- foreign_travel: JSON array of same shape.\n- total_domestic_travel_cost, total_foreign_travel_cost: JSON\n  numbers.\n- is_foreign_travel_restricted: JSON boolean or null.\n- travel_cost_basis: string or null.\n- section_d_narrative: generated narrative for Section D.\n  Use \"No equipment costs are requested for this project.\"\n  when equipment_items is empty.\n- section_e_domestic_narrative: generated narrative for\n  domestic travel.\n- section_e_foreign_narrative: generated narrative for foreign\n  travel.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Equipment and Travel Budget and Narrative",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Equipment items as a JSON array of {name, cost, purpose} objects.",
+                      "searchtype": "extraction",
+                      "title": "equipment_items",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total equipment costs as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "total_equipment_cost",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Equipment cost threshold used (e.g., standard $5,000 institutional, $10,000 per 2 CFR 200.313).",
+                      "searchtype": "extraction",
+                      "title": "equipment_threshold_applied",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Domestic trips as a JSON array of {destination, purpose, travelers, duration_days, total_cost} objects.",
+                      "searchtype": "extraction",
+                      "title": "domestic_travel",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Foreign trips as a JSON array of {destination, purpose, travelers, duration_days, total_cost} objects.",
+                      "searchtype": "extraction",
+                      "title": "foreign_travel",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total domestic travel costs as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "total_domestic_travel_cost",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total foreign travel costs as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "total_foreign_travel_cost",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Whether the NOFO restricts foreign travel as a JSON boolean.",
+                      "searchtype": "extraction",
+                      "title": "is_foreign_travel_restricted",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Basis for travel cost estimates (GSA rates, quotes, etc.).",
+                      "searchtype": "extraction",
+                      "title": "travel_cost_basis",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Generated professional justification text for Section D (Equipment).",
+                      "searchtype": "extraction",
+                      "title": "section_d_narrative",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Generated professional justification text for Section E Domestic Travel.",
+                      "searchtype": "extraction",
+                      "title": "section_e_domestic_narrative",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Generated professional justification text for Section E Foreign Travel.",
+                      "searchtype": "extraction",
+                      "title": "section_e_foreign_narrative",
+                      "is_optional": false,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-participant-support-and-odc",
+                "prompt": "You are extracting participant support and Other Direct Costs\ndata AND generating the professional justification narrative\nfor Sections F (Participant/Trainee Support) and G (Other\nDirect Costs with nine subcategories G.1-G.9). Mirrors\nTASK-1-3 of the source workflow.\n\nMonetary fields are JSON NUMBERS.\n\nFor each searchset item return data and / or narrative:\n- participant_support_costs: JSON array of {category, cost}\n  objects. Empty when none.\n- total_participant_support: JSON number.\n- materials_and_supplies: JSON array of {category, cost}\n  objects. Empty when none.\n- publication_costs: JSON number or null.\n- consultant_services: JSON array of\n  {name, rate, days, total, scope} objects. Empty when none.\n- adp_computing_services: string or null.\n- subaward_details: JSON array of\n  {institution, pi, scope, total_cost} objects. Empty when\n  none.\n- total_subaward_costs: JSON number or null.\n- equipment_rental, alterations_and_renovations: strings or\n  null.\n- tuition_remission: JSON number or null.\n- other_direct_costs: JSON array of {category, cost} objects.\n  Empty when none.\n- total_other_direct_costs: JSON number (sum across all G\n  subcategories).\n- section_f_narrative: generated narrative for Section F.\n- section_g_narrative: generated narrative for Section G\n  (assembling G.1-G.9 subsections in order).",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Participant Support and Other Direct Costs Budget and Narrative",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Participant support cost breakdown as a JSON array of {category, cost} objects.",
+                      "searchtype": "extraction",
+                      "title": "participant_support_costs",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total participant / trainee support costs as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "total_participant_support",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Materials and supplies as a JSON array of {category, cost} objects.",
+                      "searchtype": "extraction",
+                      "title": "materials_and_supplies",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Publication and documentation costs as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "publication_costs",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Consultants as a JSON array of {name, rate, days, total, scope} objects.",
+                      "searchtype": "extraction",
+                      "title": "consultant_services",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Computing services and costs as a string.",
+                      "searchtype": "extraction",
+                      "title": "adp_computing_services",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Subawards as a JSON array of {institution, pi, scope, total_cost} objects.",
+                      "searchtype": "extraction",
+                      "title": "subaward_details",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total subaward / subcontract costs as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "total_subaward_costs",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Equipment or facility rental costs as a string.",
+                      "searchtype": "extraction",
+                      "title": "equipment_rental",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Alteration and renovation costs as a string.",
+                      "searchtype": "extraction",
+                      "title": "alterations_and_renovations",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Graduate student tuition remission costs as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "tuition_remission",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Other direct costs not fitting above categories as a JSON array of {category, cost} objects.",
+                      "searchtype": "extraction",
+                      "title": "other_direct_costs",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total of all Other Direct Cost subcategories as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "total_other_direct_costs",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Generated professional justification text for Section F (Participant Support).",
+                      "searchtype": "extraction",
+                      "title": "section_f_narrative",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Generated professional justification text for Section G (Other Direct Costs) covering G.1 through G.9.",
+                      "searchtype": "extraction",
+                      "title": "section_g_narrative",
+                      "is_optional": false,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-indirect-and-summary",
+                "prompt": "You are extracting indirect-cost, cost-share, and budget-summary\ndata AND generating the professional justification narrative\nfor Section H (Indirect Costs / F&A), Cost Sharing, and Budget\nSummary. Check the NOFO for F&A caps, cost-share requirements,\nand formatting rules. Mirrors TASK-1-4 of the source workflow.\n\nMonetary fields are JSON NUMBERS. fa_rate_percentage is a JSON\nnumber (e.g., 56.5, not the string \"56.5%\"). fringe rate\nstrings preserve \"%\" but fa_rate_percentage does not.\n\nFor each searchset item return data and / or narrative:\n- fa_rate_percentage: JSON number 0-100.\n- fa_base_type: string (MTDC, TDC, Salaries and Wages, etc.).\n- fa_rate_type: string or null (defaults to \"Federally\n  negotiated rate\" when not stated).\n- mtdc_base_exclusions: JSON array of strings.\n- is_fa_rate_capped: JSON boolean or null.\n- fa_rate_cap_details: string or null.\n- total_direct_costs: JSON number.\n- total_indirect_costs: JSON number.\n- total_project_costs: JSON number.\n- cost_share_required: JSON boolean or null.\n- cost_share_amount: JSON number or null.\n- cost_share_type: string or null.\n- cost_share_sources: JSON array of strings.\n- budget_period_summary: JSON array of\n  {period_number, direct_costs, indirect_costs, total} objects\n  for multi-year budgets; empty for single-period.\n- year_over_year_variations: string or null.\n- nofo_budget_rules: JSON array of strings.\n- nofo_page_limit_for_justification: string or null.\n- section_h_narrative: generated narrative for Section H,\n  including the MTDC calculation.\n- cost_share_narrative: generated narrative for Cost Sharing.\n- budget_summary_narrative: generated budget summary overview\n  with year-over-year explanation.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Indirect Costs Cost Share and Budget Summary Budget and Narrative",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Facilities and Administrative indirect cost rate as a JSON number 0-100 percent.",
+                      "searchtype": "extraction",
+                      "title": "fa_rate_percentage",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "F&A rate base type (MTDC, TDC, Salaries and Wages, etc.).",
+                      "searchtype": "extraction",
+                      "title": "fa_base_type",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Type of F&A rate (on-campus, off-campus, etc.).",
+                      "searchtype": "extraction",
+                      "title": "fa_rate_type",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Items excluded from the MTDC base as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "mtdc_base_exclusions",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Whether the NOFO imposes a cap on the F&A rate as a JSON boolean.",
+                      "searchtype": "extraction",
+                      "title": "is_fa_rate_capped",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Details of any F&A rate cap from the NOFO.",
+                      "searchtype": "extraction",
+                      "title": "fa_rate_cap_details",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total direct costs across all budget categories as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "total_direct_costs",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total indirect (F&A) costs as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "total_indirect_costs",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total project costs (direct + indirect) as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "total_project_costs",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Whether cost sharing or matching is required as a JSON boolean.",
+                      "searchtype": "extraction",
+                      "title": "cost_share_required",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total cost share commitment amount as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "cost_share_amount",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Type of cost share (cash, in-kind, third-party, waived IDC).",
+                      "searchtype": "extraction",
+                      "title": "cost_share_type",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Sources of cost share contributions as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "cost_share_sources",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Year-by-year budget summary as a JSON array of {period_number, direct_costs, indirect_costs, total} objects.",
+                      "searchtype": "extraction",
+                      "title": "budget_period_summary",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Explanation of year-over-year budget changes as a string.",
+                      "searchtype": "extraction",
+                      "title": "year_over_year_variations",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Agency-specific budget rules or restrictions from the NOFO as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "nofo_budget_rules",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Page limit for the budget justification from the NOFO.",
+                      "searchtype": "extraction",
+                      "title": "nofo_page_limit_for_justification",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Generated professional justification text for Section H (Indirect Costs) including the MTDC calculation.",
+                      "searchtype": "extraction",
+                      "title": "section_h_narrative",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Generated professional justification text for Cost Sharing.",
+                      "searchtype": "extraction",
+                      "title": "cost_share_narrative",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Generated budget summary overview with totals and year-over-year explanation.",
+                      "searchtype": "extraction",
+                      "title": "budget_summary_narrative",
+                      "is_optional": false,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Budget Justification Assembly and Cross-Validation",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "budget-justification-generator-consolidation",
+                "prompt": "You are the consolidation step of the Budget Justification\nGenerator workflow. You receive four extraction outputs from\nthe previous step (personnel-and-fringe, equipment-and-travel,\nparticipant-support-and-other-direct-costs,\nindirect-costs-and-summary) and must emit a SINGLE JSON object\nthat validates against the\nbudget-justification-generator-udm@0.1.0 schema (schema.json\nin the component directory).\n\n## Output contract\n\nEmit exactly one JSON object. No preamble, no closing commentary,\nno markdown fences. If your runtime requires fenced output, wrap\nin a single ```json ... ``` block and emit nothing outside it.\n\nTop-level keys (in this order): `project_metadata`,\n`personnel_and_fringe`, `equipment_and_travel`,\n`participant_support_and_other_direct_costs`,\n`indirect_costs_and_summary`, `cross_validation`,\n`final_justification_document`.\n\n## Field-by-field assembly\n\n### project_metadata\n\nPull project_title, pi_name, sponsoring_agency,\nbudget_period_count, is_multi_year_budget from the input\ndocuments. budget_period_count is a JSON integer >= 1.\n\n### personnel_and_fringe, equipment_and_travel, participant_support_and_other_direct_costs, indirect_costs_and_summary\n\nPass the four extraction fragments through into the four\nmid-level blocks. CRITICAL: if any extractor surfaced a quoted\ndollar string (\"$125,400.00\") in any monetary structured-data\nfield, convert it to a JSON number here. Apply to every\nmonetary leaf in the schema.\n\nfa_rate_percentage is a JSON NUMBER (e.g., 56.5), not the\nstring \"56.5%\". Fringe rate strings preserve \"%\" — they are\nin fringe_benefit_rates[].rate, which is a string. Do not\nconflate.\n\nEvery section narrative field (section_a_narrative through\nbudget_summary_narrative) must be a non-empty string. When\nthe section has no costs, the narrative is the standard\n\"No <category> costs are requested for this project.\"\n\n### cross_validation (derive)\n\nCompute:\n\narithmetic_checks: JSON array of arithmetic-check records.\nRun these checks:\n1. Personnel & Fringe subtotal:\n   total_senior_personnel_cost + total_other_personnel_cost\n   + total_fringe_benefits = expected sum.\n   check_name: \"Personnel & Fringe subtotal\",\n   status: \"PASS\" or \"FAIL\", populate expected/actual/discrepancy.\n2. Non-personnel direct subtotal:\n   total_equipment_cost + total_domestic_travel_cost +\n   total_foreign_travel_cost + total_participant_support +\n   total_other_direct_costs = expected sum.\n3. Total Direct Costs check:\n   sum of all direct cost categories = total_direct_costs.\n4. Total Project Costs check:\n   total_direct_costs + total_indirect_costs =\n   total_project_costs.\n\nWhen a check fails, status: \"FAIL\" with populated expected,\nactual, and discrepancy values. Do NOT alter any value to\nmake the math work — the RA must resolve discrepancies with\nthe PI.\n\nitems_requiring_clarification: walk every narrative field for\nphrases like \"clarification needed from PI\", \"not described\nin the project narrative\", \"not specified in the provided\ndocuments\". Aggregate each instance as a single-string entry\nwith the section name prefixed.\n\nmissing_justification_flags: identify any budget category\nthat shows a non-zero dollar amount but lacks substantive\nnarrative justification.\n\n### final_justification_document (render)\n\nRender the complete document as a single Markdown string in\nthis structure:\n\n```\n# BUDGET JUSTIFICATION\n## <project_title>\n### PI: <pi_name>\n\n[FORMATTING ADVISORY block — include ONLY if\nindirect_costs_and_summary.nofo_budget_rules is non-empty or\nnofo_page_limit_for_justification is non-null. List each\nformatting requirement as a bullet point.]\n\n---\n\n## A. SENIOR/KEY PERSONNEL\n<personnel_and_fringe.section_a_narrative>\n\n## B. OTHER PERSONNEL\n<personnel_and_fringe.section_b_narrative>\n\n## C. FRINGE BENEFITS\n<personnel_and_fringe.section_c_narrative>\n\n[Personnel Summary Table — derived from senior_key_personnel\n+ other_personnel + fringe rates]\n\n---\n\n## D. EQUIPMENT\n<equipment_and_travel.section_d_narrative>\n\n## E. TRAVEL\n### Domestic Travel\n<equipment_and_travel.section_e_domestic_narrative>\n### Foreign Travel\n<equipment_and_travel.section_e_foreign_narrative>\n\n[Travel Summary Table]\n\n---\n\n## F. PARTICIPANT/TRAINEE SUPPORT COSTS\n<participant_support_and_other_direct_costs.section_f_narrative>\n\n## G. OTHER DIRECT COSTS\n<participant_support_and_other_direct_costs.section_g_narrative>\n\n[Other Direct Costs Summary Table]\n\n---\n\n## H. INDIRECT COSTS (FACILITIES & ADMINISTRATIVE)\n<indirect_costs_and_summary.section_h_narrative>\n\n## COST SHARING\n<indirect_costs_and_summary.cost_share_narrative>\n\n## BUDGET SUMMARY\n<indirect_costs_and_summary.budget_summary_narrative>\n\n[Budget Summary Table — multi-year period rows when applicable]\n\n---\n\n## CROSS-VALIDATION NOTES\n**For the RA's internal review only — NOT for submission to\nthe sponsor.**\n\n### Arithmetic Checks\n[Render each cross_validation.arithmetic_checks entry as a\nsingle line: status check_name (expected, actual, discrepancy)]\n\n### Items Requiring PI Clarification\n[Render cross_validation.items_requiring_clarification or\n\"No items requiring PI clarification were identified.\"]\n\n### Missing or Incomplete Sections\n[Render cross_validation.missing_justification_flags or\n\"All budget categories have been addressed.\"]\n```\n\nDo NOT include the cross-validation notes above the heading.\nDo NOT modify dollar amounts to make arithmetic work.\n\n## Quality bar\n\n- Output validates against schema.json (draft 2020-12).\n- All monetary structured-data fields are JSON numbers.\n- Narrative text preserves $X,XXX.XX format for readability.\n- The final_justification_document is a single Markdown string.\n- The cross-validation notes section is clearly marked as\n  not-for-submission and appears BELOW everything else in\n  the document.",
+                "input_source": "step_input"
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "check_id": "CHK-01",
+          "check_name": "Line item sum equals category total",
+          "check_type": "arithmetic",
+          "check_description": "Verify sum of line items equals category total for each budget category.",
+          "target_fields": [
+            "personnel_and_fringe.total_senior_personnel_cost",
+            "personnel_and_fringe.total_other_personnel_cost",
+            "personnel_and_fringe.total_fringe_benefits",
+            "equipment_and_travel.total_equipment_cost",
+            "equipment_and_travel.total_domestic_travel_cost",
+            "equipment_and_travel.total_foreign_travel_cost",
+            "participant_support_and_other_direct_costs.total_participant_support",
+            "participant_support_and_other_direct_costs.total_other_direct_costs"
+          ],
+          "severity": "error"
+        },
+        {
+          "check_id": "CHK-02",
+          "check_name": "Direct plus indirect equals total",
+          "check_type": "arithmetic",
+          "check_description": "Verify total_direct_costs + total_indirect_costs equals total_project_costs.",
+          "target_fields": [
+            "indirect_costs_and_summary.total_direct_costs",
+            "indirect_costs_and_summary.total_indirect_costs",
+            "indirect_costs_and_summary.total_project_costs"
+          ],
+          "severity": "error"
+        },
+        {
+          "check_id": "CHK-03",
+          "check_name": "Personnel costs match FTE",
+          "check_type": "consistency",
+          "check_description": "Verify personnel cost calculations are consistent with FTE / person-months.",
+          "target_fields": [
+            "personnel_and_fringe.senior_key_personnel",
+            "personnel_and_fringe.total_senior_personnel_cost"
+          ],
+          "severity": "warning"
+        }
+      ],
+      "validation_inputs": [],
+      "x_ai4ra": {
+        "workflow_source": "workflows/budget-justification-generator/manifest.yaml",
+        "workflow_version": "0.1.0",
+        "status": "experimental",
+        "components": [
+          {
+            "slug": "budget-justification-generator-udm",
+            "version": "0.1.0"
+          }
+        ]
+      }
+    }
+  ]
+}

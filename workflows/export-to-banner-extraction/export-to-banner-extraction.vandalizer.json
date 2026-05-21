@@ -1,0 +1,563 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "exported_at": "2026-05-20T00:00:00+00:00",
+  "exported_by": "ui-insight",
+  "items": [
+    {
+      "name": "Export to Banner Award Extraction",
+      "description": "Uploads a fully-executed federal award document (notice of award, cooperative agreement, contract, or modification) and returns a single structured JSON object covering the six blocks needed to populate the VERAS Export to Banner form: award identification (FAIN, title, PI, type, pass-through, CFDA, NAICS, agency); dates and performance period (current and overall, plus multi-year periods table); sponsor entity classification (entity type, agency hierarchy, address, UEIs); budget structure (line-item categories with JSON-number amounts, F&A rate / base, cost share, program income); billing and payment terms (type enum, frequency, PMS LOC code, payment terms); and reporting / special requirements (reports table, record retention, carry-forward, prior-approval, closeout, governing regs). Output conforms to the export-to-banner-extraction-udm component schema. The runtime mirrors the ui-insight/ProcessMapping export-to-banner-extraction workflow's six parallel Extraction tasks plus a Consolidation Prompt.",
+      "steps": [
+        {
+          "name": "Parallel Extraction",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-award-identification",
+                "prompt": "You are extracting the AWARD IDENTIFICATION block of a\nfully-executed federal award document. Mirrors TASK-01 of the\nsource ProcessMapping export-to-banner-extraction workflow.\n\nBe 100% accurate. Quote identifiers verbatim. Use null for\nfields the document does not state.\n\nFor award_type pick exactly one of the four enum values\n(Grant, Cooperative Agreement, Contract, Subcontract).\n\nis_pass_through is a JSON boolean. When true, populate\nprime_sponsor_name with the prime sponsor's full name. When\nfalse, prime_sponsor_name is null.\n\ncfda_number uses the document's stated XX.XXX format. When\nmultiple CFDAs apply, comma-separate them as a single string.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Award Identification and Title Information",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Federal Award Identification Number (FAIN) or sponsor award number.",
+                      "searchtype": "extraction",
+                      "title": "award_number",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Full project title as stated in the award document.",
+                      "searchtype": "extraction",
+                      "title": "project_title",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Principal Investigator name as listed on the award.",
+                      "searchtype": "extraction",
+                      "title": "pi_name",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Award type classification (Grant, Cooperative Agreement, Contract, Subcontract).",
+                      "searchtype": "extraction",
+                      "title": "award_type",
+                      "is_optional": false,
+                      "enum_values": [
+                        "Grant",
+                        "Cooperative Agreement",
+                        "Contract",
+                        "Subcontract"
+                      ]
+                    },
+                    {
+                      "searchphrase": "Whether the award is a pass-through (subaward) or a direct federal award as a JSON boolean.",
+                      "searchtype": "extraction",
+                      "title": "is_pass_through",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Name of the prime sponsor for pass-through awards; null for direct federal awards.",
+                      "searchtype": "extraction",
+                      "title": "prime_sponsor_name",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Catalog of Federal Domestic Assistance (CFDA) / Assistance Listing number in XX.XXX format.",
+                      "searchtype": "extraction",
+                      "title": "cfda_number",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "North American Industry Classification System code from the award header.",
+                      "searchtype": "extraction",
+                      "title": "naics_code",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Name of the federal awarding agency.",
+                      "searchtype": "extraction",
+                      "title": "federal_agency_name",
+                      "is_optional": false,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-dates-and-performance",
+                "prompt": "You are extracting the DATES AND PERFORMANCE PERIOD block of a\nfully-executed federal award document. Mirrors TASK-02 of the\nsource ProcessMapping export-to-banner-extraction workflow.\n\nDates use ISO YYYY-MM-DD when the document is unambiguous.\nWhen the document gives a qualitative form\n(e.g., \"5 years from acceptance\"), preserve the document's\nstated form as a string. Do not invent precision.\n\naward_start_date / award_end_date are the current budget\nperiod. performance_period_start / performance_period_end are\nthe overall project period (may extend beyond the current\nbudget period for multi-year incremental awards).\n\nbudget_periods is a JSON array of\n{period_number, start_date, end_date, amount} objects, one row\nper budget period when the award is incrementally funded.\nEmpty array when the award is a single-period award.\n\nis_multi_year is true / false / null (null when not\ndeterminable).",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Award Dates and Performance Period",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Start date of the current award or budget period in ISO YYYY-MM-DD when unambiguous.",
+                      "searchtype": "extraction",
+                      "title": "award_start_date",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "End date of the current award or budget period in ISO YYYY-MM-DD when unambiguous.",
+                      "searchtype": "extraction",
+                      "title": "award_end_date",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Start date of the overall project performance period in ISO YYYY-MM-DD when unambiguous.",
+                      "searchtype": "extraction",
+                      "title": "performance_period_start",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "End date of the overall project performance period in ISO YYYY-MM-DD when unambiguous.",
+                      "searchtype": "extraction",
+                      "title": "performance_period_end",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Budget period rows as a JSON array of {period_number, start_date, end_date, amount} objects when multi-year incremental; empty array otherwise.",
+                      "searchtype": "extraction",
+                      "title": "budget_periods",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Whether the award spans multiple budget periods with incremental funding as a JSON boolean.",
+                      "searchtype": "extraction",
+                      "title": "is_multi_year",
+                      "is_optional": true,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-sponsor-and-entity",
+                "prompt": "You are extracting the SPONSOR AND ENTITY CLASSIFICATION block\nof a fully-executed federal award document. Mirrors TASK-03 of\nthe source ProcessMapping export-to-banner-extraction workflow.\n\nsponsor_entity_type picks exactly one of the seven enum values\n(Federal, State Government, Non-Profit, Private Industry,\nFoundation, University, Other).\n\nsponsor_uei / awardee_uei are 12-character alphanumeric\nstrings when stated. Preserve case verbatim. Null when not\nstated in the document.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Sponsor and Entity Classification",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Full legal name of the sponsoring organization.",
+                      "searchtype": "extraction",
+                      "title": "sponsor_name",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Sponsor entity classification (Federal, State Government, Non-Profit, Private Industry, Foundation, University, Other).",
+                      "searchtype": "extraction",
+                      "title": "sponsor_entity_type",
+                      "is_optional": false,
+                      "enum_values": [
+                        "Federal",
+                        "State Government",
+                        "Non-Profit",
+                        "Private Industry",
+                        "Foundation",
+                        "University",
+                        "Other"
+                      ]
+                    },
+                    {
+                      "searchphrase": "Full agency hierarchy (e.g., USDA > NIFA > Agriculture and Food Research Initiative).",
+                      "searchtype": "extraction",
+                      "title": "federal_agency_hierarchy",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Sponsor mailing or billing address as stated in the award document.",
+                      "searchtype": "extraction",
+                      "title": "sponsor_address",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Sponsor Unique Entity Identifier as a 12-character alphanumeric string.",
+                      "searchtype": "extraction",
+                      "title": "sponsor_uei",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Name of the recipient institution as stated in the award.",
+                      "searchtype": "extraction",
+                      "title": "awardee_organization",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Awardee Unique Entity Identifier as a 12-character alphanumeric string.",
+                      "searchtype": "extraction",
+                      "title": "awardee_uei",
+                      "is_optional": true,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-budget-and-financial",
+                "prompt": "You are extracting the BUDGET AND FINANCIAL TERMS block of a\nfully-executed federal award document. Mirrors TASK-04 of the\nsource ProcessMapping export-to-banner-extraction workflow.\n\nCRITICAL: All monetary fields are JSON NUMBERS, not quoted\nstrings. Convert document language verbatim to numeric values:\n  \"$1,234,567.89\" -> 1234567.89\n  \"$500,000\"      -> 500000\n\nNumeric fields: total_award_amount, total_anticipated_amount,\ntotal_direct_costs, total_indirect_costs, cost_share_amount,\nbudget_categories[].approved_amount.\n\nfa_rate is a STRING with the document's percentage notation\n(e.g., \"56.5%\", \"30% MTDC\"). fa_rate_base picks exactly one of\nMTDC, TDC, \"Salary & Wages\", Other, or null when the document\ndoes not state it.\n\nbudget_categories is a JSON array of\n{category, approved_amount} objects, one entry per sponsor\ncategory. category is the exact label (e.g., \"Salary\",\n\"Fringe\", \"Equipment\", \"Travel\", \"Operating/Supplies\",\n\"Subcontracts\", \"Other\"). approved_amount is a JSON number.\n\nis_fa_waived is true when indirect costs are waived or\nlimited; false when the negotiated rate applies; null when not\ndeterminable.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Budget and Financial Terms",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Total amount of the current award action as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "total_award_amount",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total anticipated funding across all periods as a JSON number; null when not specified.",
+                      "searchtype": "extraction",
+                      "title": "total_anticipated_amount",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Budget breakdown by sponsor category as a JSON array of {category, approved_amount} objects with approved_amount as JSON number.",
+                      "searchtype": "extraction",
+                      "title": "budget_categories",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total direct costs as a JSON number; null when not specified.",
+                      "searchtype": "extraction",
+                      "title": "total_direct_costs",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total indirect (F&A) costs as a JSON number; null when not specified.",
+                      "searchtype": "extraction",
+                      "title": "total_indirect_costs",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Facilities & Administrative (indirect cost) rate as a percentage string with base annotation (e.g., 56.5%, 30% MTDC).",
+                      "searchtype": "extraction",
+                      "title": "fa_rate",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "F&A rate base type (MTDC, TDC, Salary & Wages, Other) or null when not specified.",
+                      "searchtype": "extraction",
+                      "title": "fa_rate_base",
+                      "is_optional": true,
+                      "enum_values": [
+                        "MTDC",
+                        "TDC",
+                        "Salary & Wages",
+                        "Other"
+                      ]
+                    },
+                    {
+                      "searchphrase": "Whether indirect costs are waived or limited by the sponsor as a JSON boolean.",
+                      "searchtype": "extraction",
+                      "title": "is_fa_waived",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Required cost-sharing or matching amount as a JSON number; null when not applicable.",
+                      "searchtype": "extraction",
+                      "title": "cost_share_amount",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Type of cost sharing (mandatory, voluntary committed, in-kind) as a string.",
+                      "searchtype": "extraction",
+                      "title": "cost_share_type",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Program income provisions and handling requirements.",
+                      "searchtype": "extraction",
+                      "title": "program_income",
+                      "is_optional": true,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-billing-and-payment",
+                "prompt": "You are extracting the BILLING AND PAYMENT TERMS block of a\nfully-executed federal award document. Mirrors TASK-05 of the\nsource ProcessMapping export-to-banner-extraction workflow.\n\nbilling_type picks exactly one of the four enum values\n(Cost Reimbursement, Fixed Price, Letter of Credit, Milestone).\n\nbilling_frequency is a string (Monthly, Quarterly,\nUpon Milestone, etc.). Preserve the document's wording.\n\ninvoice_requirements is a JSON array of strings (one per\nrequired item). Empty array when none specified.\n\nfinal_invoice_deadline preserves the document's wording\n(e.g., \"60 days\", \"90 days after project end\"). String.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Billing and Payment Terms",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Type of billing arrangement (Cost Reimbursement, Fixed Price, Letter of Credit, Milestone).",
+                      "searchtype": "extraction",
+                      "title": "billing_type",
+                      "is_optional": false,
+                      "enum_values": [
+                        "Cost Reimbursement",
+                        "Fixed Price",
+                        "Letter of Credit",
+                        "Milestone"
+                      ]
+                    },
+                    {
+                      "searchphrase": "How often invoices should be submitted (Monthly, Quarterly, Upon Milestone).",
+                      "searchtype": "extraction",
+                      "title": "billing_frequency",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Physical or electronic address for invoice submission.",
+                      "searchtype": "extraction",
+                      "title": "billing_address",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Email address for electronic invoice submission.",
+                      "searchtype": "extraction",
+                      "title": "invoice_email",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Payment Management System or Letter of Credit code for federal drawdowns.",
+                      "searchtype": "extraction",
+                      "title": "pms_loc_code",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Payment terms (e.g., Net 30, advance payment, reimbursement).",
+                      "searchtype": "extraction",
+                      "title": "payment_terms",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Items required on invoices as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "invoice_requirements",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Deadline for submitting the final invoice after project end.",
+                      "searchtype": "extraction",
+                      "title": "final_invoice_deadline",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Name and contact information for the sponsor's billing or payment office.",
+                      "searchtype": "extraction",
+                      "title": "billing_contact",
+                      "is_optional": true,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-reporting-and-special",
+                "prompt": "You are extracting the REPORTING AND SPECIAL REQUIREMENTS\nblock of a fully-executed federal award document. Mirrors\nTASK-06 of the source ProcessMapping\nexport-to-banner-extraction workflow.\n\nreporting_requirements is a JSON array of\n{report_type, frequency, due_date_or_timing, submission_method}\nobjects. One entry per required report.\n\nprior_approval_requirements, special_terms, and\ngoverning_regulations are JSON arrays of strings. Empty arrays\nwhen not specified.\n\nrecord_retention_period, carry_forward_policy, and\ncloseout_requirements are strings or null.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Reporting and Special Requirements",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Required reports as a JSON array of {report_type, frequency, due_date_or_timing, submission_method} objects.",
+                      "searchtype": "extraction",
+                      "title": "reporting_requirements",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Required record retention period (e.g., 3 years after final FFR).",
+                      "searchtype": "extraction",
+                      "title": "record_retention_period",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Whether unspent funds can be carried forward to subsequent budget periods and under what conditions.",
+                      "searchtype": "extraction",
+                      "title": "carry_forward_policy",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Actions requiring prior written agency approval as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "prior_approval_requirements",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Special terms and conditions beyond standard federal requirements as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "special_terms",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Specific closeout requirements and timeline.",
+                      "searchtype": "extraction",
+                      "title": "closeout_requirements",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Governing regulations and terms referenced as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "governing_regulations",
+                      "is_optional": true,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consolidation",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "export-to-banner-extraction-consolidation",
+                "prompt": "You are the consolidation step of the Export to Banner Award\nExtraction workflow. You receive six extraction outputs from\nthe previous step (award_identification, dates_and_performance,\nsponsor_entity, budget_financial, billing_payment,\nreporting_special) and must emit a SINGLE JSON object that\nvalidates against the export-to-banner-extraction-udm@0.1.0\nschema (schema.json in the component directory).\n\n## Output contract\n\nEmit exactly one JSON object. No preamble, no closing commentary,\nno markdown fences. If your runtime requires fenced output, wrap\nin a single ```json ... ``` block and emit nothing outside it.\n\nTop-level keys (in this order): `award_identification`,\n`dates_and_performance`, `sponsor_entity`, `budget_financial`,\n`billing_payment`, `reporting_special`.\n\n## Field-by-field assembly\n\nPass the six extraction fragments through into the six\ntop-level blocks. Apply the following normalizations.\n\n### award_identification\n\nRequired (must not be null): award_number, project_title,\npi_name, award_type (one of the four enum values),\nis_pass_through (JSON boolean), federal_agency_name.\n\nprime_sponsor_name is null when is_pass_through is false.\n\n### dates_and_performance\n\nRequired: award_start_date, award_end_date,\nperformance_period_start, performance_period_end. Use ISO\nYYYY-MM-DD when the document is unambiguous.\n\nbudget_periods is required by the schema as an array. Empty\narray for single-period awards.\n\n### sponsor_entity\n\nRequired: sponsor_name, sponsor_entity_type (one of the seven\nenum values), awardee_organization.\n\n### budget_financial\n\nRequired: total_award_amount (JSON number),\nbudget_categories (array of {category, approved_amount}\nobjects with approved_amount as JSON number).\n\nCRITICAL: If any extractor surfaced a quoted dollar string\n(e.g., \"$1,234,567.89\"), convert it to a JSON number\n(1234567.89) here. Apply to total_award_amount,\ntotal_anticipated_amount, total_direct_costs,\ntotal_indirect_costs, cost_share_amount, every\nbudget_categories[].approved_amount, every\nbudget_periods[].amount.\n\nfa_rate remains a string. fa_rate_base picks one of MTDC, TDC,\n\"Salary & Wages\", Other, or null.\n\n### billing_payment\n\nRequired: billing_type (one of the four enum values).\n\ninvoice_requirements is required by the schema as an array.\nEmpty array when none specified.\n\n### reporting_special\n\nRequired: reporting_requirements (array of objects).\n\nprior_approval_requirements, special_terms,\ngoverning_regulations are required by the schema as arrays.\nEmpty array when none specified.\n\n## Cross-field rules (from source workflow)\n\n1. CFR-01 (error): award_start_date < award_end_date.\n   When the document violates this, do not alter the dates —\n   append a flag string to reporting_special.special_terms:\n   \"FLAG: award_start_date is not before award_end_date in\n   the source document.\"\n\n2. CFR-02 (warning): performance_period_start <=\n   award_start_date. When the document violates this,\n   do not alter the dates — append a flag string to\n   reporting_special.special_terms:\n   \"FLAG: performance_period_start is later than\n   award_start_date in the source document.\"\n\n## Quality bar\n\n- Output validates against schema.json (draft 2020-12).\n- award_type, sponsor_entity_type, fa_rate_base, and\n  billing_type are exact enum matches.\n- All monetary fields are JSON numbers.\n- Booleans are JSON booleans.\n- Dates use ISO YYYY-MM-DD when unambiguous.\n- Required arrays (budget_categories, budget_periods,\n  invoice_requirements, reporting_requirements,\n  prior_approval_requirements, special_terms,\n  governing_regulations) are always emitted; use [] when\n  empty rather than null.",
+                "input_source": "step_input"
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "check_id": "CHK-01",
+          "check_name": "Date range consistency",
+          "check_type": "consistency",
+          "check_description": "Verify award_start_date < award_end_date and performance_period_start <= award_start_date.",
+          "target_fields": [
+            "dates_and_performance.award_start_date",
+            "dates_and_performance.award_end_date",
+            "dates_and_performance.performance_period_start",
+            "dates_and_performance.performance_period_end"
+          ],
+          "severity": "error"
+        },
+        {
+          "check_id": "CHK-02",
+          "check_name": "Monetary amount formatting",
+          "check_type": "format",
+          "check_description": "Verify monetary amounts are emitted as JSON numbers, not quoted strings.",
+          "target_fields": [
+            "budget_financial.total_award_amount",
+            "budget_financial.total_anticipated_amount",
+            "budget_financial.total_direct_costs",
+            "budget_financial.total_indirect_costs"
+          ],
+          "severity": "error"
+        },
+        {
+          "check_id": "CHK-03",
+          "check_name": "UEI format validation",
+          "check_type": "format",
+          "check_description": "Verify UEI follows the 12-character alphanumeric format when present.",
+          "target_fields": [
+            "sponsor_entity.sponsor_uei",
+            "sponsor_entity.awardee_uei"
+          ],
+          "severity": "warning"
+        },
+        {
+          "check_id": "CHK-04",
+          "check_name": "CFDA number format",
+          "check_type": "format",
+          "check_description": "Verify cfda_number follows the XX.XXX format when present.",
+          "target_fields": [
+            "award_identification.cfda_number"
+          ],
+          "severity": "warning"
+        }
+      ],
+      "validation_inputs": [],
+      "x_ai4ra": {
+        "workflow_source": "workflows/export-to-banner-extraction/manifest.yaml",
+        "workflow_version": "0.1.0",
+        "status": "experimental",
+        "components": [
+          {
+            "slug": "export-to-banner-extraction-udm",
+            "version": "0.1.0"
+          }
+        ]
+      }
+    }
+  ]
+}

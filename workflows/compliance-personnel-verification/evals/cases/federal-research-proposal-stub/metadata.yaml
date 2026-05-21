@@ -1,0 +1,46 @@
+# Case identity
+case: federal-research-proposal-stub
+source: "Placeholder case shell — to be replaced with a synthetic federal research proposal exercise (deliberately mixed compliance profile) paired with stub SFI records and a stub RST completion spreadsheet."
+source_url: "https://www.research.gov/"
+retrieved: 2026-05-20
+
+# Which structural features of the three input documents this case exercises.
+structural_features:
+  - federal-research-proposal
+  - mixed-sfi-compliance-profile
+  - mixed-rst-compliance-profile
+  - section66-section2-personnel-mismatch
+  - 365-day-validity-window
+
+# Workflow-level behaviors this case targets. These are pipeline-level
+# checks that no single component's evals can cover (six-block consolidation,
+# derivation of non_compliant_personnel + verification_status counts,
+# no-assumption-of-compliance rule for missing sources).
+workflow_features:
+  - six_block_consolidation
+  - non_compliant_personnel_derivation_from_status_records
+  - verification_status_counts_derivation
+  - overall_status_branch_all_compliant_non_compliance_not_applicable
+  - missing_source_document_gap_flagging
+  - personnel_discrepancies_derivation_from_cfr01
+
+# Validation metadata — REQUIRED.
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-05-20
+validated_against_version: "0.1.0"
+component_versions_at_validation:
+  compliance-personnel-verification-udm: "0.1.0"
+
+# Optional free-form notes on what was confirmed, what was surprising,
+# what should be re-checked on the next revalidation pass.
+notes: |
+  Scaffolded case shell only. The expected.json, input-source.md, and
+  three input-document fixtures (synthetic VERAS package, synthetic SFI
+  records, synthetic RST spreadsheet) will be added once a compliance
+  officer has reviewed and validated the consolidated workflow output.
+  This stub exists so the workflow can declare workflow_local: true per
+  docs/contracts.md while the real case is being assembled in
+  evaluation-data-sets. Additional case shells should follow for the
+  missing-source-document, non-federal-sponsor, and ambiguous-name-match
+  paths once the first shell is validated and the contract has been
+  exercised end-to-end.

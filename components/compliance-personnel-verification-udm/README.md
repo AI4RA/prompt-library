@@ -1,0 +1,75 @@
+# Compliance Personnel Verification (SFI & RST) — UDM JSON
+
+Automates the SFI (Significant Financial Interest) disclosure and RST (Research Security Training) compliance check across every person named on a federal research proposal. Joins three input sources — the VERAS proposal package, the institutional SFI disclosure records, and the most recent daily RST completion spreadsheet — into a per-person compliance matrix that a Sponsored Programs Administrator (SPA) reviews in seconds rather than minutes per person. Covers the source `PROC-SFI-RST-COMPLIANCE-CHECK` process (10 steps, 80% automatable per the source process map).
+
+**Current version:** 0.1.0
+**Category:** extraction
+**Domain:** research-administration
+**Status:** experimental
+**Manifestations:** prompt
+**Output contract:** [`schema.json`](schema.json)
+**Contract scope:** repo-local, UDM-aligned
+
+## Inputs
+
+Three workflow documents must be uploaded together in Vandalizer:
+
+1. **VERAS proposal package** — at minimum Section 2 (PI / senior key personnel) and Section 6.6 (personnel requiring SFI disclosures).
+2. **Institutional SFI disclosure records** — the searchable export, scanned correspondence, or extracted records the SPA would otherwise grep through manually.
+3. **Daily RST completion spreadsheet** — typically the UI Bridge daily export.
+
+When any of the three is missing, the contract requires the workflow to emit `null` in the affected fields and capture the gap in `verification_status.notes`. The contract never silently assumes compliance.
+
+## Outputs
+
+A single JSON object with six structured blocks:
+
+- **`proposal_metadata`** — `proposal_type` (enum), `sponsor_type` (enum), `sfi_rst_required` (boolean)
+- **`personnel_identification`** — `section_66_personnel[]`, `section_2_personnel[]` (with role + department), `consolidated_personnel[]` (deduplicated union with `source_sections`), `personnel_discrepancies[]`
+- **`sfi_verification`** — array of `{name, disclosure_found, disclosure_date, days_since_disclosure, valid_within_365_days, status}` (five-value status enum)
+- **`rst_verification`** — `{spreadsheet_date, spreadsheet_source, records[]}` where each record is `{name, found_in_spreadsheet, completion_date, status}` (three-value status enum)
+- **`non_compliant_personnel`** — array of `{name, issue, required_action, priority}` (three-value priority enum)
+- **`verification_status`** — `total_personnel_checked`, three compliant counts, `overall_status` (three-value enum), `notes`
+
+See [`schema.json`](schema.json) for the authoritative definition and [`prompt.md`](prompt.md) for encoding rules (365-day validity window, ambiguous-match flagging, no-assumption-of-compliance rule).
+
+## Contract scope
+
+Repo-local, UDM-aligned. The proposal record itself resolves to UDM `Proposal`; personnel resolve to UDM `Personnel.First_Name` / `Personnel.Last_Name`; the verification matrix itself is a repo-local compliance surface that does not (yet) have a shared UDM table.
+
+## Triad integration
+
+- **Evaluation datasets:** none yet — planned: a synthetic federal research proposal exercise with three deliberately-mismatched personnel records (one SFI valid, one SFI expired, one SFI not found) and at least one RST-incomplete person, validated by a compliance officer.
+- **Harness notes:** canonical manifestation is `prompt.md`. Validation surface is `schema.json`. The contract assumes the SFI records and RST spreadsheet are uploaded as workflow documents alongside the VERAS proposal — the workflow does not call external systems.
+- **Shared UDM relationship:** aligned, not owning. The per-person verification rows do not map to a shared UDM compliance table — they are a repo-local extension of UDM Personnel records.
+
+## Relationship to other components
+
+| Concern | Source of truth |
+|---|---|
+| SFI disclosure + RST completion check across federal research proposal personnel | `compliance-personnel-verification-udm` (this component) |
+| Section 2 PI / Co-PI eligibility against APM 45.22 | [`section2-personnel-eligibility-udm`](../section2-personnel-eligibility-udm/) |
+| Proposal-document-completeness gap analysis (different VERAS sections, document-level requirements) | [`proposal-document-completeness-udm`](../proposal-document-completeness-udm/) |
+
+The three pre-award compliance components are versioned independently and intended to run together on a single proposal upload to produce a comprehensive readiness review.
+
+## Runtime topology — the Vandalizer workflow
+
+The canonical runtime for this component is the [`compliance-personnel-verification` workflow](https://github.com/AI4RA/prompt-library/tree/main/workflows/compliance-personnel-verification) shipped at the top level of this repo. The single source of truth is [`workflows/compliance-personnel-verification/manifest.yaml`](https://github.com/AI4RA/prompt-library/blob/main/workflows/compliance-personnel-verification/manifest.yaml); the companion `.vandalizer.json` envelope is generated by [`scripts/build_vandalizer_workflows.py`](https://github.com/AI4RA/prompt-library/blob/main/scripts/build_vandalizer_workflows.py) and committed alongside. The runtime mirrors the source [`ui-insight/ProcessMapping/workflows/compliance-personnel-verification/`](https://github.com/ui-insight/ProcessMapping/tree/main/workflows/compliance-personnel-verification) workflow:
+
+- **Step 1 (parallel Extraction)** — two Extraction tasks mirror the source workflow one-for-one: personnel-identification (pulls Sections 6.6 and 2, derives the consolidated list and the `sfi_rst_required` flag) and compliance-status-verification (per-person SFI + RST lookup with status flags).
+- **Step 2 (Consolidation Prompt)** — assembles the two JSON fragments into the schema-conformant six-block object, builds the cross-product compliance matrix, derives `non_compliant_personnel` and `verification_status` from the per-person status records, and enforces the no-assumption-of-compliance rule.
+
+Regenerate the workflow JSON whenever this component bumps MINOR or MAJOR (or whenever the workflow manifest changes); CI fails if the committed `.vandalizer.json` drifts from a fresh build.
+
+## Manifestations
+
+- [`prompt.md`](prompt.md) — canonical, LLM-agnostic prompt
+
+## Evals
+
+See [`evals/`](evals/) for reference inputs and known-good outputs. Initial case pending: a synthetic federal research proposal with a deliberately mixed compliance profile validated by a compliance officer.
+
+## Provenance
+
+Authored 2026-05-20 against the `compliance-personnel-verification` (Workflow_ID: `WF-COMPLIANCE-PERSONNEL-VERIFY`) process-mapping workflow in `ui-insight/ProcessMapping` at commit `2c1f47f46474130743af5aee44d074bcd21787e9`, which was built from the `PROC-SFI-RST-COMPLIANCE-CHECK` process map (10 steps, 80% automatable). Created to make the SPA's pre-award compliance check a harness-evaluatable, versioned artifact rather than a manual email-folder-and-spreadsheet workflow.

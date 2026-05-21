@@ -1,0 +1,739 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "exported_at": "2026-05-20T00:00:00+00:00",
+  "exported_by": "ui-insight",
+  "items": [
+    {
+      "name": "Risk Domain Assessment",
+      "description": "Uploads one or more award documents (Notice of Award, FOA / NOFO / RFA, modification, proposal) and returns a single structured JSON object scoring 14 institutional risk domains on a 1-5 rubric with evidence-cited justifications, plus aggregate metrics (total / average risk scores, overall risk level enum, high-risk-domain list, key findings, recommended mitigations). Output conforms to the risk-domain-assessment-udm component schema. The runtime mirrors the ui-insight/ProcessMapping risk-domain-assessment workflow's six parallel Extraction tasks (each covering 2-4 domains) plus a Consolidation Prompt.",
+      "steps": [
+        {
+          "name": "Parallel Risk Domain Extraction",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-programmatic-strategic",
+                "prompt": "You are scoring Domain 1 (Programmatic Complexity) and\nDomain 9 (Strategic / Mission Alignment) of the 14-domain risk\nrubric. Mirrors TASK-1-1 of the source ProcessMapping\nrisk-domain-assessment workflow.\n\nBe evidence-based. Cite document sections in every\njustification. When the document is insufficient, score\nconservatively (1 or 2) and write\n\"Insufficient document evidence: ...\" as the justification.\n\nDomain 1 score is a JSON INTEGER in [1, 5], not a quoted string.\nDomain 9 score is a JSON INTEGER in [1, 5], not a quoted string.\n\nFor each searchset item return the document's evidence:\n- project_title: title of the funded project.\n- project_description_summary: brief summary of project scope.\n- number_of_project_components: JSON integer or null.\n- partnership_requirements: string or null.\n- technical_sophistication_indicators: JSON array of strings.\n- domain_1_score: JSON integer 1-5.\n- domain_1_justification: evidence-cited string.\n- institutional_mission_fit: string or null.\n- institutional_resource_requirements: JSON array of strings.\n- domain_9_score: JSON integer 1-5.\n- domain_9_justification: evidence-cited string.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Programmatic Complexity and Strategic Alignment",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Title of the funded project as stated in the documents.",
+                      "searchtype": "extraction",
+                      "title": "project_title",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Brief summary of the project scope and objectives.",
+                      "searchtype": "extraction",
+                      "title": "project_description_summary",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Count of distinct project activities, phases, or components identified as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "number_of_project_components",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Required partnerships, consortia, or collaborative structures.",
+                      "searchtype": "extraction",
+                      "title": "partnership_requirements",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Indicators of technical complexity as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "technical_sophistication_indicators",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Programmatic Complexity risk score 1-5 as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "domain_1_score",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Evidence-based justification for the Programmatic Complexity score.",
+                      "searchtype": "extraction",
+                      "title": "domain_1_justification",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Alignment between the project and institutional priorities as a string.",
+                      "searchtype": "extraction",
+                      "title": "institutional_mission_fit",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Required institutional resources as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "institutional_resource_requirements",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Strategic Alignment risk score 1-5 as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "domain_9_score",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Evidence-based justification for the Strategic Alignment score.",
+                      "searchtype": "extraction",
+                      "title": "domain_9_justification",
+                      "is_optional": false,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-financial-audit",
+                "prompt": "You are scoring Domain 2 (Financial & Budgetary Risk) and\nDomain 8 (Audit Risk). Mirrors TASK-1-2 of the source workflow.\n\nDomain 2 and Domain 8 scores are JSON INTEGERS in [1, 5], not\nquoted strings.\n\nMonetary fields are JSON NUMBERS, not quoted strings.\nConvert \"$1,234,567\" -> 1234567.\n\nBooleans (cost_share_required, multiple_funding_streams,\npass_through_indicator) are JSON booleans.\n\nFor each searchset item return the document's evidence.",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Financial Budgetary and Audit Risk",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Total federal funds awarded as a JSON number.",
+                      "searchtype": "extraction",
+                      "title": "total_federal_funding",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Total anticipated funding across all periods as a JSON number; null when not specified.",
+                      "searchtype": "extraction",
+                      "title": "total_anticipated_funding",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Whether cost sharing or matching is required as a JSON boolean.",
+                      "searchtype": "extraction",
+                      "title": "cost_share_required",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Required cost share or matching amount as a JSON number; null when not applicable.",
+                      "searchtype": "extraction",
+                      "title": "cost_share_amount",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Indirect cost rate restrictions or caps imposed by the award.",
+                      "searchtype": "extraction",
+                      "title": "idc_rate_restriction",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Specific budget restrictions as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "budget_flexibility_restrictions",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Whether the award involves multiple funding streams as a JSON boolean.",
+                      "searchtype": "extraction",
+                      "title": "multiple_funding_streams",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Financial Budgetary Risk score 1-5 as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "domain_2_score",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Evidence-based justification for the Financial Risk score.",
+                      "searchtype": "extraction",
+                      "title": "domain_2_justification",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Whether the award involves pass-through funding as a JSON boolean.",
+                      "searchtype": "extraction",
+                      "title": "pass_through_indicator",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Factors that increase audit scrutiny as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "audit_exposure_indicators",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Audit Risk score 1-5 as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "domain_8_score",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Evidence-based justification for the Audit Risk score.",
+                      "searchtype": "extraction",
+                      "title": "domain_8_justification",
+                      "is_optional": false,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-subrecipient-sponsor",
+                "prompt": "You are scoring Domain 3 (Subrecipient / Partner Risk) and\nDomain 13 (Unusual Terms and Conditions / Sponsor Reliability).\nMirrors TASK-1-3 of the source workflow.\n\nDomain 3 and Domain 13 scores are JSON INTEGERS in [1, 5].",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Subrecipient and Sponsor Risk",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Count of identified subrecipients or consortium partners as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "number_of_subrecipients",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Subrecipients with names, amounts, and noted capacity concerns as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "subrecipient_details",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Whether foreign subrecipients or partners are involved as a JSON boolean.",
+                      "searchtype": "extraction",
+                      "title": "foreign_partners_present",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Overall subrecipient risk assessment as a string.",
+                      "searchtype": "extraction",
+                      "title": "subrecipient_risk_level",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Required monitoring activities for subrecipients as a string.",
+                      "searchtype": "extraction",
+                      "title": "subrecipient_monitoring_requirements",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Subrecipient Risk score 1-5 as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "domain_3_score",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Evidence-based justification for the Subrecipient Risk score.",
+                      "searchtype": "extraction",
+                      "title": "domain_3_justification",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Terms that deviate from 2 CFR 200 Uniform Guidance or standard federal practice as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "non_standard_terms",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Special conditions, restrictions, or unique requirements imposed by the award as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "special_conditions",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Unusual Terms and Conditions score 1-5 as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "domain_13_score",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Evidence-based justification for the Unusual Terms score.",
+                      "searchtype": "extraction",
+                      "title": "domain_13_justification",
+                      "is_optional": false,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-security-compliance",
+                "prompt": "You are scoring Domain 4 (Research Security & Foreign Influence)\nand Domain 5 (Compliance & Regulatory Requirements). Mirrors\nTASK-1-4 of the source workflow.\n\nDomain 4 and Domain 5 scores are JSON INTEGERS in [1, 5].",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Research Security and Compliance",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Any foreign affiliations or collaborations referenced in the award as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "foreign_collaboration_indicators",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Whether the project involves export-controlled technologies as a JSON boolean.",
+                      "searchtype": "extraction",
+                      "title": "export_control_concerns",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "NSPM-33 and CHIPS Act compliance requirements as a string.",
+                      "searchtype": "extraction",
+                      "title": "nspm33_chips_applicability",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Research Security risk score 1-5 as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "domain_4_score",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Evidence-based justification for the Research Security score.",
+                      "searchtype": "extraction",
+                      "title": "domain_4_justification",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Regulatory compliance areas triggered by the project as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "compliance_requirements_identified",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Primary type of compliance requirement as a string.",
+                      "searchtype": "extraction",
+                      "title": "compliance_requirement_type",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Risk level for the primary compliance requirement as a string.",
+                      "searchtype": "extraction",
+                      "title": "compliance_risk_level",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Cross-cutting federal requirements referenced as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "cross_cutting_federal_requirements",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Compliance and Regulatory score 1-5 as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "domain_5_score",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Evidence-based justification for the Compliance score.",
+                      "searchtype": "extraction",
+                      "title": "domain_5_justification",
+                      "is_optional": false,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-reporting-administrative",
+                "prompt": "You are scoring Domain 6 (Performance Measurement & Reporting\nBurden) and Domain 7 (Administrative / Operational Burden).\nMirrors TASK-1-5 of the source workflow.\n\nDomain 6 and Domain 7 scores are JSON INTEGERS in [1, 5].",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Reporting and Administrative Burden",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Required reporting frequency (annual, quarterly, monthly).",
+                      "searchtype": "extraction",
+                      "title": "reporting_frequency",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Detailed description of all required reports and submissions.",
+                      "searchtype": "extraction",
+                      "title": "reporting_requirements_detail",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Complexity and number of required performance indicators as a string.",
+                      "searchtype": "extraction",
+                      "title": "performance_metrics_complexity",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Whether an external evaluator is required as a JSON boolean.",
+                      "searchtype": "extraction",
+                      "title": "evaluator_required",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Whether data use agreements are required as a JSON boolean.",
+                      "searchtype": "extraction",
+                      "title": "data_use_agreements_required",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Reporting Burden score 1-5 as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "domain_6_score",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Evidence-based justification for the Reporting Burden score.",
+                      "searchtype": "extraction",
+                      "title": "domain_6_justification",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Actions requiring prior approval from the sponsor as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "prior_approval_requirements",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Indicators of administrative burden as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "administrative_complexity_indicators",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Assessment of PI experience and capacity as a string.",
+                      "searchtype": "extraction",
+                      "title": "pi_capacity_considerations",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Administrative Burden score 1-5 as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "domain_7_score",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Evidence-based justification for the Administrative Burden score.",
+                      "searchtype": "extraction",
+                      "title": "domain_7_justification",
+                      "is_optional": false,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Extraction",
+              "data": {
+                "name": "extract-data-sustainability-reputational",
+                "prompt": "You are scoring Domain 10 (Sustainability & Closeout Risk),\nDomain 11 (DOJ Bulk Data & Sensitive Information), Domain 12\n(IP, Data Rights & Privacy), and Domain 14 (Institutional /\nReputational Risk). Mirrors TASK-1-6 of the source workflow.\n\nAll four domain scores are JSON INTEGERS in [1, 5].",
+                "input_source": "workflow_documents",
+                "_embedded_search_set": {
+                  "title": "Data Sustainability and Reputational Risk",
+                  "extraction_config": {},
+                  "domain": "research-administration",
+                  "cross_field_rules": [],
+                  "items": [
+                    {
+                      "searchphrase": "Ongoing institutional obligations after the period of performance ends as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "post_award_obligations",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Specific closeout requirements and timelines as a string.",
+                      "searchtype": "extraction",
+                      "title": "closeout_requirements",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Requirements for property or equipment management during and after the award as a string.",
+                      "searchtype": "extraction",
+                      "title": "property_equipment_obligations",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Sustainability and Closeout Risk score 1-5 as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "domain_10_score",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Evidence-based justification for the Sustainability score.",
+                      "searchtype": "extraction",
+                      "title": "domain_10_justification",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Requirements for handling sensitive data as a string.",
+                      "searchtype": "extraction",
+                      "title": "sensitive_data_requirements",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Required data security and encryption standards as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "data_security_standards",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "DOJ Bulk Data and Sensitive Information score 1-5 as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "domain_11_score",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Evidence-based justification for the DOJ Data score.",
+                      "searchtype": "extraction",
+                      "title": "domain_11_justification",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Intellectual property ownership clauses and restrictions as a string.",
+                      "searchtype": "extraction",
+                      "title": "ip_ownership_terms",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Required data sharing or open data mandates as a string.",
+                      "searchtype": "extraction",
+                      "title": "data_sharing_requirements",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Publication restrictions or requirements imposed by the award as a string.",
+                      "searchtype": "extraction",
+                      "title": "publication_requirements",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Privacy concerns as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "privacy_risk_indicators",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "IP Data Rights and Privacy score 1-5 as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "domain_12_score",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Evidence-based justification for the IP and Privacy score.",
+                      "searchtype": "extraction",
+                      "title": "domain_12_justification",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Factors that could affect institutional reputation as a JSON array of strings.",
+                      "searchtype": "extraction",
+                      "title": "reputational_risk_indicators",
+                      "is_optional": true,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Institutional and Reputational Risk score 1-5 as a JSON integer.",
+                      "searchtype": "extraction",
+                      "title": "domain_14_score",
+                      "is_optional": false,
+                      "enum_values": []
+                    },
+                    {
+                      "searchphrase": "Evidence-based justification for the Reputational Risk score.",
+                      "searchtype": "extraction",
+                      "title": "domain_14_justification",
+                      "is_optional": false,
+                      "enum_values": []
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Risk Profile Consolidation",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "risk-domain-assessment-consolidation",
+                "prompt": "You are the consolidation step of the Risk Domain Assessment\nworkflow. You receive six extraction outputs from the previous\nstep (each covering 2-4 of the 14 risk domains) and must emit\na SINGLE JSON object that validates against the\nrisk-domain-assessment-udm@0.1.0 schema (schema.json in the\ncomponent directory).\n\n## Output contract\n\nEmit exactly one JSON object. No preamble, no closing commentary,\nno markdown fences. If your runtime requires fenced output, wrap\nin a single ```json ... ``` block and emit nothing outside it.\n\nTop-level keys (in this order): `award_metadata`,\n`domain_scores`, `aggregate_metrics`.\n\n## Field-by-field assembly\n\n### award_metadata\n\nPull award_number, cfda_number, sponsor_name, pi_name,\naward_period_start, award_period_end from the input documents\n(these are not split by the six extraction tasks — the\nconsolidator must surface them from any document section in\nwhich they appear). assessment_date is today's date in ISO\nYYYY-MM-DD, or null when the workflow runner does not provide\none.\n\n### domain_scores\n\nAssemble 14 domain blocks (`domain_1_programmatic_complexity`\nthrough `domain_14_reputational_risk`) by routing each\nextraction's per-domain output to the matching block. Each\ndomain block must contain:\n- score: JSON INTEGER 1-5 (never quoted, never an enum entry).\n- justification: evidence-cited string. When the extractor\n  returned an empty justification but a non-null score, emit\n  a flag string in justification: \"FLAG: extractor returned\n  score N with no justification — re-run domain extraction.\"\n- all required evidence fields per the schema.\n\nCRITICAL: if any extractor surfaced a quoted score string\n(\"3\"), convert it to a JSON integer (3) here.\n\n### aggregate_metrics\n\nCompute deterministically from domain_scores:\n\n- total_risk_score: JSON INTEGER. Sum of the 14\n  domain_scores.*.score integers. Range [14, 70].\n- average_risk_score: JSON NUMBER. total_risk_score / 14,\n  rounded to one decimal place. Range [1.0, 5.0].\n- overall_risk_level: one of \"Low\" (avg 1.0-1.9), \"Moderate\"\n  (2.0-2.9), \"High\" (3.0-3.9), \"Very High\" (4.0-5.0).\n- high_risk_domains: JSON array of domain names (e.g.,\n  \"Domain 4 — Research Security & Foreign Influence\") with\n  score >= 4. Empty array when none reach 4 or 5.\n- key_risk_findings: JSON array of short evidence-cited\n  strings drawn from high-risk-domain justifications. Empty\n  array when overall risk is \"Low\".\n- recommended_mitigations: JSON array of short mitigation\n  strategies tied to high-risk domains. Empty array when\n  overall risk is \"Low\".\n\n## Cross-field rules\n\n1. Every domain score is a JSON integer in [1, 5].\n2. Every domain score has a non-empty justification (enforce\n   minLength: 1 via the FLAG path above when the extractor\n   omitted one).\n3. When score >= 3, the justification cites specific document\n   evidence (mirrors source CFR-01). When the extractor\n   returned a >= 3 score with a generic justification, prepend\n   \"FLAG: \" and require a manual re-run.\n4. total_risk_score equals the arithmetic sum of the 14\n   domain scores.\n5. average_risk_score equals total_risk_score / 14 (rounded\n   to one decimal place).\n\n## Quality bar\n\n- Output validates against schema.json (draft 2020-12).\n- All 14 domain scores are JSON integers, not quoted strings.\n- total_risk_score is a JSON integer in [14, 70].\n- average_risk_score is a JSON number in [1.0, 5.0].\n- overall_risk_level is one of the four enum values.\n- Required arrays (high_risk_domains, key_risk_findings,\n  recommended_mitigations) are always emitted; use [] when\n  empty rather than null.",
+                "input_source": "step_input"
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "check_id": "CHK-01",
+          "check_name": "Score range validation",
+          "check_type": "range",
+          "check_description": "Verify all 14 domain scores are JSON integers in [1, 5].",
+          "target_fields": [
+            "domain_scores.domain_1_programmatic_complexity.score",
+            "domain_scores.domain_2_financial_budgetary_risk.score",
+            "domain_scores.domain_3_subrecipient_partner_risk.score",
+            "domain_scores.domain_4_research_security.score",
+            "domain_scores.domain_5_compliance_regulatory.score",
+            "domain_scores.domain_6_reporting_burden.score",
+            "domain_scores.domain_7_administrative_burden.score",
+            "domain_scores.domain_8_audit_risk.score",
+            "domain_scores.domain_9_strategic_alignment.score",
+            "domain_scores.domain_10_sustainability_closeout.score",
+            "domain_scores.domain_11_doj_bulk_data.score",
+            "domain_scores.domain_12_ip_privacy.score",
+            "domain_scores.domain_13_unusual_terms.score",
+            "domain_scores.domain_14_reputational_risk.score"
+          ],
+          "severity": "error"
+        },
+        {
+          "check_id": "CHK-02",
+          "check_name": "Justification completeness",
+          "check_type": "completeness",
+          "check_description": "Verify all 14 domain scores have non-empty justifications.",
+          "target_fields": [
+            "domain_scores.domain_1_programmatic_complexity.justification",
+            "domain_scores.domain_2_financial_budgetary_risk.justification",
+            "domain_scores.domain_3_subrecipient_partner_risk.justification",
+            "domain_scores.domain_4_research_security.justification",
+            "domain_scores.domain_5_compliance_regulatory.justification",
+            "domain_scores.domain_6_reporting_burden.justification",
+            "domain_scores.domain_7_administrative_burden.justification",
+            "domain_scores.domain_8_audit_risk.justification",
+            "domain_scores.domain_9_strategic_alignment.justification",
+            "domain_scores.domain_10_sustainability_closeout.justification",
+            "domain_scores.domain_11_doj_bulk_data.justification",
+            "domain_scores.domain_12_ip_privacy.justification",
+            "domain_scores.domain_13_unusual_terms.justification",
+            "domain_scores.domain_14_reputational_risk.justification"
+          ],
+          "severity": "error"
+        },
+        {
+          "check_id": "CHK-03",
+          "check_name": "Aggregate score consistency",
+          "check_type": "arithmetic",
+          "check_description": "Verify total_risk_score equals the sum of the 14 domain scores and average_risk_score equals total_risk_score / 14.",
+          "target_fields": [
+            "aggregate_metrics.total_risk_score",
+            "aggregate_metrics.average_risk_score"
+          ],
+          "severity": "warning"
+        }
+      ],
+      "validation_inputs": [],
+      "x_ai4ra": {
+        "workflow_source": "workflows/risk-domain-assessment/manifest.yaml",
+        "workflow_version": "0.1.0",
+        "status": "experimental",
+        "components": [
+          {
+            "slug": "risk-domain-assessment-udm",
+            "version": "0.1.0"
+          }
+        ]
+      }
+    }
+  ]
+}

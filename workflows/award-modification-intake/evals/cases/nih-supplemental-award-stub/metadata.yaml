@@ -1,0 +1,43 @@
+# Case identity
+case: nih-supplemental-award-stub
+source: "Placeholder case shell — to be replaced with an authorized, de-identified NIH supplemental award notice that exercises an Additional Funds modification with a reconciling totals identity (current_award_amount + modification_amount == total_obligated_amount) and prior-approval language."
+source_url: "https://www.grants.gov/"
+retrieved: 2026-05-20
+
+# Which structural features of the input modification document this case exercises.
+structural_features:
+  - additional-funds-modification
+  - reconciling-totals
+  - explicit-prior-approval-language
+  - bilateral-execution-status
+  - regulatory-references-2-cfr-200-308
+
+# Workflow-level behaviors this case targets. These are pipeline-level
+# checks that no single component's evals can cover (three-block consolidation,
+# enum normalization, cross-field rule enforcement, quoted-dollar conversion).
+workflow_features:
+  - three_block_consolidation_identification_financial_compliance
+  - modification_type_enum_additional_funds
+  - execution_status_enum_bilateral
+  - cfr04_totals_reconciliation
+  - quoted_dollar_to_json_number_conversion
+
+# Validation metadata — REQUIRED.
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-05-20
+validated_against_version: "0.1.0"
+component_versions_at_validation:
+  award-modification-intake-udm: "0.1.0"
+
+# Optional free-form notes on what was confirmed, what was surprising,
+# what should be re-checked on the next revalidation pass.
+notes: |
+  Scaffolded case shell only. The expected.json and input-source.md
+  artifacts will be added once an authorized, de-identified NIH
+  supplemental award notice is selected and a Post-Award Specialist has
+  produced and validated the consolidated modification intake JSON. This
+  stub exists so the workflow can declare workflow_local: true per
+  docs/contracts.md while the real case is being assembled in
+  evaluation-data-sets. Additional case shells should follow for the
+  other modification types (NCE, PI Change, Rebudget) once the first
+  shell is validated and the contract has been exercised end-to-end.

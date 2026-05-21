@@ -1,0 +1,336 @@
+# Authored source for the Section 2 Personnel Eligibility Verification Vandalizer workflow.
+#
+# The companion section2-personnel-eligibility.vandalizer.json is generated
+# from this file by scripts/build_vandalizer_workflows.py and committed
+# alongside. Never hand-edit the generated JSON — update this manifest and
+# rebuild.
+#
+# Runtime topology (v0.1.0):
+#   Step 1  Parallel Extraction
+#     2 Extraction tasks, each with an embedded SearchSet whose item titles
+#     mirror the section2-personnel-eligibility-udm@0.1.0 schema field
+#     names. Mirrors the source ProcessMapping workflow's two parallel
+#     extraction tasks (personnel extraction + eligibility & DGA
+#     verification) one-for-one.
+#   Step 2  Consolidation
+#     1 Prompt task assembles the two JSON fragments into a single object
+#     that validates against
+#     components/section2-personnel-eligibility-udm/schema.json, derives
+#     verification_summary counts and flag arrays from the per-person /
+#     per-org-code / per-DGA records, and enforces the three cross-field
+#     rules from the source workflow.
+
+name: Section 2 Personnel Eligibility Verification
+description: >
+  Verifies VERAS Section 2 personnel against APM Section 45.22 eligibility
+  criteria and maps timesheet org codes to Departmental Grant Administrators
+  (DGAs) using the institutional Department List. Operator uploads three
+  workflow documents together — the VERAS proposal package, the Banner
+  NBAJOBS extract for each person on the proposal, and the institutional
+  Department List — and the workflow returns a verification matrix with
+  per-person eligibility determinations, per-org-code DGA mappings, and
+  flags for ineligible personnel and missing DGAs. Output conforms to the
+  section2-personnel-eligibility-udm component schema. The runtime mirrors
+  the ui-insight/ProcessMapping section2-personnel-eligibility workflow's
+  two parallel Extraction tasks plus a Consolidation Prompt.
+
+workflow_version: 0.1.0
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-05-20
+updated: 2026-05-20
+
+components:
+  - slug: section2-personnel-eligibility-udm
+    pinned_version: 0.1.0
+
+validation_plan:
+  - check_id: CHK-01
+    check_name: Personnel extraction completeness
+    check_type: completeness
+    check_description: Verify all personnel from Sections 2.1 and 2.2A are extracted.
+    target_fields:
+      - personnel_extraction.section_21_personnel
+      - personnel_extraction.section_22_personnel
+    severity: error
+  - check_id: CHK-02
+    check_name: Eligibility check completeness
+    check_type: completeness
+    check_description: Verify every PI and Co-PI has an APM 45.22 eligibility determination.
+    target_fields:
+      - eligibility_check
+    severity: error
+  - check_id: CHK-03
+    check_name: Org code extraction completeness
+    check_type: completeness
+    check_description: Verify every person has a timesheet org code recorded (or is flagged when no Banner record exists).
+    target_fields:
+      - personnel_verification
+    severity: error
+  - check_id: CHK-04
+    check_name: DGA mapping completeness
+    check_type: completeness
+    check_description: Verify every unique org code maps to a DGA (or is flagged in unmapped_org_codes).
+    target_fields:
+      - dga_mapping
+      - verification_summary.unmapped_org_codes
+    severity: error
+
+steps:
+  - name: Parallel Extraction
+    tasks:
+      - name: extract-section-2-personnel
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          You are extracting the personnel-extraction block from VERAS
+          Sections 2.1 (PI + Co-PIs) and 2.2A (Senior / Key Personnel).
+          Mirrors TASK-01 of the source ProcessMapping
+          section2-personnel-eligibility workflow.
+
+          Be 100% accurate. Quote names and roles verbatim. Do not invent
+          personnel.
+
+          For each searchset item return the document's stated values:
+
+          - section_21_personnel: JSON array of {name, role, institution}
+            objects from VERAS Section 2.1. role is one of "PI", "Co-PI".
+            institution is null when not stated. MUST contain at least
+            one entry (every proposal has a PI).
+
+          - section_22_personnel: JSON array of {name, role, institution}
+            objects from VERAS Section 2.2A. role is always
+            "Senior/Key Personnel". institution is null when not stated.
+            Empty array when Section 2.2A is not populated.
+
+          - total_personnel_count: JSON integer (sum of Section 2.1 +
+            Section 2.2A entries).
+
+          - pi_copis_requiring_eligibility: JSON array of strings —
+            the names from section_21_personnel (PI / Co-PI only). These
+            are the people who need APM 45.22 eligibility verification.
+
+          - personnel_requiring_org_code_only: JSON array of strings —
+            the names from section_22_personnel (Senior / Key only).
+            These people need org-code collection but NOT eligibility
+            checks. Empty array when Section 2.2A is empty.
+        searchset:
+          title: VERAS Section 2 Personnel Extraction
+          domain: research-administration
+          items:
+            - title: section_21_personnel
+              searchphrase: PI and Co-PI personnel from VERAS Section 2.1 as a JSON array of {name, role, institution} objects.
+            - title: section_22_personnel
+              searchphrase: Senior / Key Personnel from VERAS Section 2.2A as a JSON array of {name, role, institution} objects.
+              is_optional: true
+            - title: total_personnel_count
+              searchphrase: Total number of personnel requiring verification as a JSON integer.
+            - title: pi_copis_requiring_eligibility
+              searchphrase: Names of PI and Co-PI personnel requiring APM 45.22 eligibility verification as a JSON array of strings.
+            - title: personnel_requiring_org_code_only
+              searchphrase: Names of Senior / Key Personnel requiring org-code collection only as a JSON array of strings.
+              is_optional: true
+
+      - name: extract-eligibility-and-dga-verification
+        kind: Extraction
+        input_source: workflow_documents
+        prompt_inline: |
+          You are performing the eligibility and DGA verification for the
+          personnel identified in VERAS Section 2. Mirrors TASK-02 of the
+          source ProcessMapping section2-personnel-eligibility workflow.
+
+          Sources to read (all uploaded as workflow documents, except APM
+          45.22 which is consumed from the knowledge base / search
+          corpus):
+          - Banner NBAJOBS extract for every person on the proposal.
+          - Institutional Department List mapping org codes to
+            departments and DGAs.
+          - APM Section 45.22 (knowledge base) — authoritative list of
+            job titles eligible for PI / Co-PI status at the University
+            of Idaho.
+
+          Be 100% accurate. Do NOT assume employment, eligibility, or DGA
+          mapping. When a job title is ambiguous (clinical faculty,
+          lecturer, adjunct, dual appointment), emit
+          eligibility_status: "Review Required" with evidence describing
+          the ambiguity — never "Eligible" or "Not Eligible".
+
+          When a workflow document is missing, emit non-compliant
+          defaults and capture the gap in notes_about_missing_sources.
+
+          For each searchset item return the document's stated values:
+
+          - personnel_verification: JSON array of per-person
+            {name, found_in_banner, current_employee, job_title,
+             timesheet_org_code, notes} objects. One entry per person
+            from the combined Section 2.1 + Section 2.2A list. notes
+            captures duplicate-name disambiguation, terminated-employee
+            flags, external-collaborator flags. When Banner is not
+            provided, set found_in_banner: false for every person.
+
+          - eligibility_check: JSON array of per-PI / Co-PI
+            {name, role, job_title, eligibility_status, evidence}
+            objects. One entry per PI / Co-PI ONLY (do NOT emit entries
+            for Senior / Key Personnel). eligibility_status is one of
+            "Eligible", "Not Eligible", "Review Required". evidence is a
+            short APM 45.22 citation or rationale.
+
+          - org_code_compilation: JSON array of
+            {org_code, personnel_names, count} objects, one entry per
+            unique timesheet org code across all personnel.
+
+          - dga_mapping: JSON array of
+            {org_code, department_name, dga_names} objects, one entry
+            per unique org code. dga_names is an array (multiple DGAs
+            per org code are supported). When an org code is NOT in the
+            Department List, department_name: null and dga_names: [].
+
+          - dga_cross_reference: JSON array of
+            {dga_name, org_codes, listed_in_section_2, action_needed}
+            objects, one entry per unique DGA pulled from dga_mapping.
+            org_codes is the array of codes this DGA covers.
+            listed_in_section_2 is true when the DGA name appears in
+            section_21_personnel or section_22_personnel.
+            action_needed is one of "No action needed" or
+            "FLAG — Must be added to Section 2".
+
+          - notes_about_missing_sources: short string describing any
+            workflow document that was not provided, or null when all
+            sources are present.
+        searchset:
+          title: APM 45.22 Eligibility and DGA Verification
+          domain: research-administration
+          items:
+            - title: personnel_verification
+              searchphrase: Per-person Banner NBAJOBS verification records as a JSON array of objects.
+            - title: eligibility_check
+              searchphrase: Per-PI / Co-PI APM 45.22 eligibility records as a JSON array of objects (Senior / Key Personnel excluded).
+            - title: org_code_compilation
+              searchphrase: Unique timesheet org codes with the personnel using each code as a JSON array of objects.
+            - title: dga_mapping
+              searchphrase: Per-org-code DGA mappings as a JSON array of {org_code, department_name, dga_names} objects.
+            - title: dga_cross_reference
+              searchphrase: Per-DGA cross-reference against VERAS Section 2 participants as a JSON array of objects.
+            - title: notes_about_missing_sources
+              searchphrase: Short string describing any workflow document that was not provided; null when all sources are present.
+              is_optional: true
+
+  - name: Consolidation
+    is_output: true
+    tasks:
+      - name: section2-personnel-eligibility-consolidation
+        kind: Prompt
+        input_source: step_input
+        prompt_inline: |
+          You are the consolidation step of the Section 2 Personnel
+          Eligibility Verification workflow. You receive two extraction
+          outputs from the previous step (personnel extraction +
+          eligibility / DGA verification) and must emit a SINGLE JSON
+          object that validates against the
+          section2-personnel-eligibility-udm@0.1.0 schema (schema.json
+          in the component directory).
+
+          ## Output contract
+
+          Emit exactly one JSON object. No preamble, no closing commentary,
+          no markdown fences. If your runtime requires fenced output, wrap
+          in a single ```json ... ``` block and emit nothing outside it.
+
+          Top-level keys (in this order): `personnel_extraction`,
+          `personnel_verification`, `eligibility_check`,
+          `org_code_compilation`, `dga_mapping`, `dga_cross_reference`,
+          `verification_summary`.
+
+          ## Field-by-field assembly
+
+          ### personnel_extraction
+
+          Pass through section_21_personnel, section_22_personnel,
+          total_personnel_count, pi_copis_requiring_eligibility,
+          personnel_requiring_org_code_only as the extractor returned
+          them. section_21_personnel must be non-empty.
+
+          ### personnel_verification
+
+          Pass through the array. One entry per person from
+          section_21_personnel + section_22_personnel combined. When
+          Banner is not provided, every entry has found_in_banner: false
+          and all dependent fields null.
+
+          ### eligibility_check
+
+          Pass through the array. One entry per PI / Co-PI ONLY. Senior /
+          Key Personnel must NOT appear here. When a PI / Co-PI has no
+          Banner record (found_in_banner: false), emit
+          eligibility_status: "Review Required" with evidence "Banner
+          record not found — cannot evaluate job title."
+
+          ### org_code_compilation
+
+          Pass through. One entry per unique timesheet org code. count is
+          a JSON integer equal to personnel_names.length.
+
+          ### dga_mapping
+
+          Pass through. One entry per unique org code. When an org code
+          has no Department List entry, department_name: null and
+          dga_names: [].
+
+          ### dga_cross_reference
+
+          Pass through. One entry per unique DGA pulled from
+          dga_mapping.dga_names. listed_in_section_2 is true when the DGA
+          name is present in section_21_personnel or
+          section_22_personnel. action_needed:
+          - "No action needed" when listed_in_section_2 is true
+          - "FLAG — Must be added to Section 2" when listed_in_section_2
+            is false
+
+          ### verification_summary (derive)
+
+          {
+            "total_personnel_verified":
+              personnel_extraction.total_personnel_count,
+            "pi_copis_eligible_count": count of eligibility_check entries
+              with eligibility_status "Eligible",
+            "pi_copis_not_eligible": array of names from eligibility_check
+              with eligibility_status "Not Eligible",
+            "pi_copis_review_required": array of names from
+              eligibility_check with eligibility_status "Review Required",
+            "unique_org_codes_count": org_code_compilation.length,
+            "dgas_required_count": dga_cross_reference.length,
+            "dgas_in_section_2_count": count of dga_cross_reference
+              entries with listed_in_section_2 true,
+            "missing_dgas": array of dga_name from dga_cross_reference
+              entries with action_needed
+              "FLAG — Must be added to Section 2",
+            "unmapped_org_codes": array of org_code from dga_mapping
+              entries with department_name null,
+            "notes": null OR a single string capturing any missing-source
+              warnings + ambiguous-match disambiguation notes.
+          }
+
+          ## Cross-field rules (from source workflow)
+
+          1. Every PI / Co-PI in eligibility_check has eligibility_status
+             populated — never null. If no Banner record exists, use
+             "Review Required".
+          2. Every unique org code from personnel_verification appears in
+             dga_mapping (with null department_name + empty dga_names
+             when not in the Department List).
+          3. Every DGA from dga_mapping.dga_names is cross-referenced in
+             dga_cross_reference.
+
+          ## Quality bar
+
+          - Output validates against schema.json (draft 2020-12).
+          - Counts are JSON integers >= 0.
+          - Booleans (found_in_banner, current_employee,
+            listed_in_section_2) are JSON booleans.
+          - No fabricated eligibility / employment / DGA mapping. When a
+            source is missing, the contract emits non-compliant defaults
+            and captures the gap in verification_summary.notes.
+
+evals:
+  workflow_local: true
