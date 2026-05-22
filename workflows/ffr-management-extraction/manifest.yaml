@@ -4,33 +4,55 @@
 # this file by scripts/build_vandalizer_workflows.py and committed alongside.
 # Never hand-edit the generated JSON — update this manifest and rebuild.
 #
-# Runtime topology (v0.1.0):
-#   Step 1  Extraction
-#     1 Extraction task with an embedded SearchSet whose item titles mirror
-#     the ffr-management-extraction-udm@0.1.0 schema field names. Mirrors
-#     TASK-01 of the source ProcessMapping workflow.
-#   Step 2  Consolidation
-#     1 Prompt task assembles the JSON fragment into a single object that
-#     validates against components/ffr-management-extraction-udm/schema.json
-#     and normalizes the submission_system.platform enum.
+# === Topology (v0.2.0, Variant A + KB injection) ===
+#
+# v0.2.0 architectural changes vs. v0.1.0:
+#   1. Parallel "Extraction" tasks converted to Vandalizer Prompt tasks
+#      (full-document LLM reading) — grant docs don't use the literal
+#      field labels SearchSet keyword retrieval expects, so Prompt tasks
+#      with NLU give more reliable extraction.
+#   2. Output contract changed from JSON-against-schema to RA-friendly
+#      Markdown deliverable (mirroring the source ui-insight/ProcessMapping
+#      ffr-management-extraction formatting.md conventions). The
+#      ffr-management-extraction-udm COMPONENT remains JSON-emitting and
+#      is the evaluation-harness target; this WORKFLOW is the Vandalizer
+#      end-user (sponsored-programs analyst) deliverable.
+#   3. Step 0 KnowledgeBaseQuery added (kb_uuid blanked by importer; the
+#      operator selects a KB in Vandalizer's UI — primary recommendation
+#      is OMB Uniform Guidance (2 CFR 200); NIH Grants Policy Statement
+#      is the alternative for NIH awards). KBQueryNode returns empty
+#      output gracefully when no KB is attached.
+#
+# Step 1  Knowledge Base Context Lookup
+#   1 KnowledgeBaseQuery task with kb_uuid blanked.
+# Step 2  Extraction (single Prompt)
+#   1 Prompt task receiving input_sources: [step_input, workflow_documents]
+#   — combining the KB chunks (when available) with the uploaded federal
+#   award notice. Emits a JSON object covering award identifiers + five
+#   structured buckets (submission_schedule, submission_system,
+#   required_financial_data, compliance_consequences,
+#   preparation_timeline).
+# Step 3  Consolidation (Markdown deliverable)
+#   1 Prompt task renders the extracted JSON as the bold-category-label
+#   Markdown reference the source workflow's formatting.md prescribes.
 
 name: FFR Management Extraction
 description: >
-  Uploads a federal award notice or agreement and returns a single structured
-  JSON object covering the five buckets a sponsored-programs analyst uses
-  when preparing FFR (SF-425) submissions: submission schedule, submission
-  system and procedures, required financial data, compliance consequences,
-  and preparation timeline. Output conforms to the
-  ffr-management-extraction-udm component schema. The runtime mirrors the
-  ui-insight/ProcessMapping ffr-management-extraction workflow (one
-  Extraction task plus a Formatting/Consolidation task).
+  Uploads a federal award notice or agreement and returns an RA-friendly
+  Markdown FFR (SF-425) management reference covering the five buckets a
+  sponsored-programs analyst uses when scheduling FFR submissions:
+  submission schedule, submission system and procedures, required
+  financial data categories, compliance consequences, and preparation
+  timeline. The Markdown uses bold category labels for maximum
+  readability, matching the source ui-insight/ProcessMapping
+  ffr-management-extraction formatting.md conventions.
 
-workflow_version: 0.1.0
+workflow_version: 0.2.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-04-30
-updated: 2026-04-30
+updated: 2026-05-22
 
 components:
   - slug: ffr-management-extraction-udm
@@ -40,163 +62,230 @@ validation_plan:
   - check_id: CHK-01
     check_name: Date format checks
     check_type: format
-    check_description: Verify all dates and day-counts (annual FFR due, final FFR due, interim cadence) preserve the document's exact wording.
-    target_fields:
-      - submission_schedule.annual_ffr_due
-      - submission_schedule.final_ffr_due
-      - submission_schedule.interim_reporting
+    check_description: Verify all dates and day-counts (annual FFR due, final FFR due, interim cadence) preserve the document's exact wording in the rendered Markdown.
+    target_fields: []
     severity: error
   - check_id: CHK-02
     check_name: Deadline consistency
     check_type: consistency
     check_description: Verify final_ffr_due is consistent with annual_ffr_due (e.g., if annual is 90 days, final is at least 90 days; if document specifies different cadences, both are captured).
-    target_fields:
-      - submission_schedule.annual_ffr_due
-      - submission_schedule.final_ffr_due
+    target_fields: []
     severity: warning
 
 steps:
-  - name: Extraction
+  - name: Knowledge Base Context Lookup
+    tasks:
+      - name: kb-context-lookup
+        kind: KnowledgeBaseQuery
+        query: "Federal Financial Report SF-425 FFR submission schedule Payment Management System PMS reporting cadence late submission penalties drawdown liquidation 2 CFR 200 Subpart F audit financial reporting requirements"
+        k: 8
+        knowledge_base_hint:
+          title: "OMB Uniform Guidance (2 CFR 200)"
+          description: >
+            Primary regulatory KB for FFR / SF-425 reporting
+            requirements. For NIH awards, swap in NIH Grants Policy
+            Statement (covers eRA Commons / PMS specifics). For DOE
+            awards, swap in DOE Financial Assistance Rules. When the
+            operator does not attach a KB, this step returns empty
+            output gracefully and the downstream extraction falls back
+            to reading just the uploaded award notice.
+
+  - name: Extraction (Prompt)
     tasks:
       - name: extract-ffr-management
-        kind: Extraction
-        input_source: workflow_documents
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
           You are extracting Federal Financial Report (FFR / SF-425)
-          requirements and post-award financial reporting obligations from a
-          federal award notice or agreement.
+          requirements and post-award financial reporting obligations
+          from a federal award notice or agreement. You receive the
+          uploaded document AND any KB chunks the previous step
+          retrieved in your context.
 
-          Be 100% accurate. For each searchset item, return the value as the
-          document states it. Quote dollar amounts and day-counts verbatim
-          ("90 days", not "three months"). Use null when a field is not
-          present — never invent values.
+          Be 100% accurate. Quote dollar amounts and day-counts
+          verbatim ("90 days", not "three months", "$500,000" not
+          "$0.5M"). Use null when a field is absent — never invent
+          values.
 
-          Search the entire document with attention to sections titled
-          "Financial Reporting Requirements", "SF-425", "Federal Financial
-          Report", "Payment Management System", "Reporting Schedule", or
-          "Financial Monitoring". Keywords to follow: FFR, SF-425, financial
-          report, PMS, expenditure, deadline, submit, days, budget period,
-          project end, liquidation, drawdown.
+          Search every section of the document with attention to titles
+          like "Financial Reporting Requirements", "SF-425", "Federal
+          Financial Report", "Payment Management System", "Reporting
+          Schedule", or "Financial Monitoring". Keywords to follow:
+          FFR, SF-425, financial report, PMS, expenditure, deadline,
+          submit, days, budget period, project end, liquidation,
+          drawdown.
 
-          For submission_system_platform return one of: Payment Management
-          System, ASAP, ACH, Grants.gov, Other. Use Other only when the
-          document names a platform that is none of the listed values.
+          CRITICAL — descriptive fields must be FLAT STRINGS, not
+          nested objects. Specifically `annual_ffr_due`,
+          `final_ffr_due`, `interim_reporting`,
+          `cash_transaction_reporting`,
+          `submission_system_access_requirements`,
+          `era_commons_integration`, `submission_authorization`,
+          `late_submission_penalties`, `account_restrictions`,
+          `impact_on_future_funding`, `required_documentation` MUST
+          be single natural-language strings (or null). Do NOT emit
+          them as `{"sub_key": "value"}` JSON objects — the downstream
+          Consolidation step renders them verbatim into Markdown, and
+          nested JSON appears as unreadable literal `{...}` in the
+          final deliverable.
 
-          Each searchset item maps to a top-level schema field used by the
-          downstream Consolidation Prompt; preserve sponsor terminology and
-          do not synthesize a preparation_timeline from generic best
-          practices — populate that table only when the document itself
-          describes a countdown.
-        searchset:
-          title: FFR Management Extraction
-          domain: research-administration
-          items:
-            - title: award_number
-              searchphrase: Federal Award Identification Number (FAIN) printed on the award.
-            - title: pi_name
-              searchphrase: Principal Investigator full name printed on the award.
-            - title: annual_ffr_due
-              searchphrase: Annual FFR due window (e.g., 90 or 120 days after each budget period end). Quote the document verbatim.
-            - title: final_ffr_due
-              searchphrase: Final FFR deadline after project end (e.g., 120 days after project end).
-            - title: interim_reporting
-              searchphrase: Interim financial reporting requirements when imposed.
-              is_optional: true
-            - title: cash_transaction_reporting
-              searchphrase: SF-272 or cash transaction reporting requirements.
-              is_optional: true
-            - title: submission_system_platform
-              searchphrase: Primary submission system / platform (one of Payment Management System, ASAP, ACH, Grants.gov, Other).
-              enum_values:
-                - Payment Management System
-                - ASAP
-                - ACH
-                - Grants.gov
-                - Other
-            - title: submission_system_access_requirements
-              searchphrase: Account, role, or registration prerequisites for accessing the platform.
-              is_optional: true
-            - title: era_commons_integration
-              searchphrase: eRA Commons integration details (NIH/HHS awards). Null otherwise.
-              is_optional: true
-            - title: submission_authorization
-              searchphrase: Roles and responsibilities for who may submit (e.g., AOR-only).
-              is_optional: true
-            - title: required_financial_data
-              searchphrase: Flat list of required reporting category labels exactly as the document names them (Personnel, Fringe, Equipment, Subawards, Cost share, Program income, etc.).
-            - title: late_submission_penalties
-              searchphrase: Document language describing penalties for late FFR submission.
-              is_optional: true
-            - title: account_restrictions
-              searchphrase: Document language describing payment-system or drawdown restrictions tied to non-compliance.
-              is_optional: true
-            - title: impact_on_future_funding
-              searchphrase: Document language describing impact on future awards or competing renewals.
-              is_optional: true
-            - title: required_documentation
-              searchphrase: Document language describing supporting documentation or backup the recipient must retain.
-              is_optional: true
-            - title: preparation_timeline
-              searchphrase: Countdown of preparation milestones derived from the document's own pre-submission timing language. Empty when the document does not describe a countdown.
-              is_optional: true
+          Extract these fields:
 
-  - name: Consolidation
+          - award_number: STRING. Federal Award Identification Number
+            (FAIN) printed on the award. null when absent.
+          - pi_name: STRING. Principal Investigator full name. null
+            when absent.
+          - annual_ffr_due: STRING. Annual FFR due window
+            (e.g., "90 days after each budget period end",
+            "120 days after period end"). When the document does not
+            state it, use "Not specified in the document".
+          - final_ffr_due: STRING. Final FFR deadline
+            (e.g., "120 days after project end"). When the document
+            does not state it, use "Not specified in the document".
+          - interim_reporting: STRING. Interim financial reporting
+            requirements when imposed. null when absent.
+          - cash_transaction_reporting: STRING. SF-272 / cash
+            transaction reporting requirements. null when absent.
+          - submission_system_platform: STRING — one of
+            "Payment Management System", "ASAP", "ACH", "Grants.gov",
+            "Other", or null. Use "Other" only when the document
+            names a platform that is none of the listed values.
+          - submission_system_access_requirements: STRING. Account,
+            role, or registration prerequisites for accessing the
+            platform. null when absent.
+          - era_commons_integration: STRING. eRA Commons integration
+            details (NIH/HHS awards). null when not applicable or
+            absent.
+          - submission_authorization: STRING. Roles and
+            responsibilities for who may submit (e.g., "AOR-only"). null
+            when absent.
+          - required_financial_data: JSON ARRAY OF STRINGS. Flat list
+            of required reporting category labels exactly as the
+            document names them ("Personnel", "Fringe", "Equipment",
+            "Subawards", "Cost share", "Program income", etc.). Empty
+            array when not specified.
+          - late_submission_penalties: STRING. Document language
+            describing penalties for late FFR submission. null when
+            absent.
+          - account_restrictions: STRING. Document language describing
+            payment-system or drawdown restrictions tied to
+            non-compliance. null when absent.
+          - impact_on_future_funding: STRING. Document language
+            describing impact on future awards or competing renewals.
+            null when absent.
+          - required_documentation: STRING. Document language
+            describing supporting documentation or backup the recipient
+            must retain. null when absent.
+          - preparation_timeline: JSON ARRAY of
+            {milestone, days_before_period_end, action, owner}
+            objects ONLY when the document itself describes a countdown
+            of pre-submission preparation milestones. Empty array
+            otherwise — DO NOT synthesize a preparation timeline from
+            generic best practices. milestone is a short label
+            ("T-30 days"), days_before_period_end is an integer or
+            null, action describes what must be done, owner names a
+            role.
+
+          ## Output
+
+          Emit exactly one JSON object with ALL the keys above. No
+          preamble, no closing commentary, no markdown fences. The
+          downstream Consolidation step parses this JSON and renders
+          the final Markdown deliverable.
+
+  - name: Consolidation (Markdown deliverable)
     is_output: true
     tasks:
       - name: ffr-management-consolidation
         kind: Prompt
         input_source: step_input
         prompt_inline: |
-          You are assembling the FFR Management Extraction output. The input
-          is the JSON fragment produced by the upstream Extraction task. Your
-          job is to emit a single JSON object that validates against the
-          ffr-management-extraction-udm@0.1.0 schema.
+          You are the consolidation step of the FFR Management
+          Extraction workflow. You receive ONE JSON object from the
+          previous Extraction step containing FFR reporting
+          requirements pulled from a federal award notice.
 
-          Top-level shape:
-          {
-            "award_number": string|null,
-            "pi_name": string|null,
-            "submission_schedule": {
-              "annual_ffr_due": string|null,
-              "final_ffr_due": string|null,
-              "interim_reporting": string|null,
-              "cash_transaction_reporting": string|null
-            },
-            "submission_system": {
-              "platform": "Payment Management System"|"ASAP"|"ACH"|"Grants.gov"|"Other"|null,
-              "access_requirements": string|null,
-              "era_commons_integration": string|null,
-              "submission_authorization": string|null
-            },
-            "required_financial_data": string[],
-            "compliance_consequences": {
-              "late_submission_penalties": string|null,
-              "account_restrictions": string|null,
-              "impact_on_future_funding": string|null,
-              "required_documentation": string|null
-            },
-            "preparation_timeline": {milestone, days_before_period_end, action, owner}[]
-          }
+          Your job is to render a single RA-friendly Markdown
+          deliverable for the sponsored-programs analyst. The
+          deliverable is Markdown — NOT a JSON object, NOT a JSON code
+          fence. The audience is a research administrator who will
+          copy this into Word, paste into an email to the post-award
+          team, or save to a shared folder.
 
-          Rules:
-          1. Map each Extraction searchset item to its corresponding
-             top-level schema field. submission_system_* items collapse into
-             the nested submission_system object; the four
-             compliance_consequences items collapse into that nested object;
-             the four submission_schedule items collapse into that nested
-             object.
-          2. Normalize submission_system.platform to the closest enum value;
-             use Other only when the document explicitly names a platform
-             outside the enum list.
-          3. preparation_timeline must be an array of objects. If the
-             extraction returned a string description, parse it into one or
-             more {milestone, days_before_period_end, action, owner} entries
-             only when the document itself describes a countdown. Otherwise
-             return an empty array.
-          4. required_financial_data must be a flat list of category label
-             strings. Reject any nested objects.
-          5. Use null for missing scalar fields; never invent values.
-          6. Do not output any text outside the single JSON object.
+          ## Required structure (in this exact order)
+
+          # FFR Management Reference: <award_number or "Not specified">
+
+          **Principal Investigator:** <pi_name or "Not specified">
+
+          ---
+
+          ## SUBMISSION SCHEDULE
+
+          - **Annual FFR Due:** <annual_ffr_due>
+          - **Final FFR Due:** <final_ffr_due>
+          - **Interim Reporting:** <interim_reporting or "Not specified">
+          - **Cash Transaction Reporting:** <cash_transaction_reporting or "Not specified">
+
+          ---
+
+          ## SUBMISSION SYSTEM & PROCEDURES
+
+          - **Platform:** <submission_system_platform or "Not specified">
+          - **Access Requirements:** <submission_system_access_requirements or "Not specified">
+          - **eRA Commons Integration:** <era_commons_integration or "Not applicable">
+          - **Submission Authorization:** <submission_authorization or "Not specified">
+
+          ---
+
+          ## REQUIRED FINANCIAL DATA
+
+          Render `required_financial_data` as a bulleted list of
+          category labels. If empty, state "Not specified in the
+          document."
+
+          ---
+
+          ## COMPLIANCE CONSEQUENCES
+
+          - **Late Submission Penalties:** <late_submission_penalties or "Not specified">
+          - **Account Restrictions:** <account_restrictions or "Not specified">
+          - **Impact on Future Funding:** <impact_on_future_funding or "Not specified">
+          - **Required Documentation:** <required_documentation or "Not specified">
+
+          ---
+
+          ## PREPARATION TIMELINE
+
+          If `preparation_timeline` is non-empty, render as a Markdown
+          table:
+
+          | Milestone | Days Before Period End | Action | Owner |
+          |---|---|---|---|
+
+          If empty, state "The document does not describe a
+          preparation timeline. The Post-Award team should establish
+          internal preparation milestones based on the FFR cadence
+          above."
+
+          ## Rendering rules
+
+          - Bold every category label using `**Category Name:**`
+            (matches the source workflow's bold-category-labels
+            convention).
+          - Preserve day-counts verbatim ("90 days", not "three
+            months").
+          - Preserve any monetary amounts in the document's exact
+            format ($1,234,567).
+          - If any field from the JSON arrives as a nested object
+            instead of a string, REWRITE it into natural-language
+            prose before emitting — do NOT pass through `{...}` JSON
+            syntax into the final Markdown.
+          - No JSON code fences around the output. The output is the
+            Markdown deliverable itself.
+          - Skip empty sub-bullets — do not emit "Field: —" placeholder
+            lines when a field is null.
 
 evals:
   workflow_local: true

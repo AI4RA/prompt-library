@@ -2,312 +2,75 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-05-20T00:00:00+00:00",
+  "exported_at": "2026-05-22T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
       "name": "Award Modification Intake & Classification",
-      "description": "Uploads a federal award amendment / modification document and returns a single structured JSON object covering the three blocks a Post-Award Specialist uses to enter the modification into Banner: identification (with modification-type classification), financial impact (amounts, F&A, rebudget routing), and compliance (prior-approval status, sponsor conditions, Financial-Unit routing). Output conforms to the award-modification-intake-udm component schema. The runtime mirrors the ui-insight/ProcessMapping award-modification-intake workflow's three parallel Extraction tasks plus a Consolidation Prompt; the source workflow's human-review (ApprovalNode) step is handled by Vandalizer's UI outside this manifest.",
+      "description": "Uploads a federal award amendment / modification document and returns an RA-friendly Markdown Modification Intake Summary covering modification classification, type-specific key-information tables (additional funds / NCE / PI change / rebudget), compliance & conditions, a type-specific processing checklist, pre-filled VERAS form values, and discrepancies & warnings. Mirrors the source ui-insight/ProcessMapping award-modification-intake consolidation.md conventions — including conditional Section 2 tables driven by the classified modification type and the `[DISCREPANCY: ...]` flag syntax for contradictions between tasks.",
       "steps": [
         {
-          "name": "Parallel Extraction",
+          "name": "Knowledge Base Context Lookup",
           "data": {},
           "is_output": false,
           "tasks": [
             {
-              "name": "Extraction",
+              "name": "KnowledgeBaseQuery",
+              "data": {
+                "name": "kb-context-lookup",
+                "kb_uuid": "",
+                "query": "award modification amendment additional funds no-cost extension NCE PI change rebudget scope change 2 CFR 200.308 prior approval Research Terms and Conditions cumulative total obligated",
+                "k": 8,
+                "_embedded_knowledge_base": {
+                  "title": "OMB Uniform Guidance (2 CFR 200)",
+                  "description": "Primary regulatory KB. For NSF modifications, swap in NSF PAPPG Reference. For NIH modifications, swap in NIH Grants Policy Statement."
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Parallel Extraction (Prompt)",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Prompt",
               "data": {
                 "name": "extract-modification-type-identification",
-                "prompt": "You are extracting the IDENTIFICATION block of an award\nmodification document — the modification-type classification plus\ncore identifiers. Mirrors TASK-01 of the source ProcessMapping\naward-modification-intake workflow.\n\nBe 100% accurate. Quote the document for identifiers; never\ninvent values. Use null for missing scalar fields.\n\nFor modification_type pick exactly one of the seven enum values\nbased on what the document primarily does:\n  - Additional Funds — adds money to the award\n  - No-Cost Extension — extends the period of performance without\n    adding money\n  - PI Change — replaces the Principal Investigator\n  - Rebudget — moves money between categories with no change in\n    the total\n  - Scope Change — changes the project's statement of work\n  - Administrative Change — corrects administrative information\n    (address, contact, sponsor ID)\n  - Combined (multiple types) — the modification genuinely\n    touches more than one of the above\n\nFor execution_status pick exactly one of:\n  - Unilateral (fully executed) — sponsor has already executed,\n    no university signature required\n  - Bilateral (requires signature) — the modification must be\n    countersigned by the university\n  - Not specified in the document — the document does not state\n\nPersonnel fields:\n  - pi_name = current PI\n  - old_pi / new_pi = populated ONLY for PI Change or Combined\n    modifications, otherwise null\n  - new_end_date = populated ONLY for NCE or Combined\n    modifications, otherwise null\n\nDates use ISO YYYY-MM-DD when the document is unambiguous; null\nwhen absent.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "Award Modification Identification",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Federal Award Identification Number (FAIN) or sponsor award number.",
-                      "searchtype": "extraction",
-                      "title": "award_number",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Amendment or modification number (e.g., Amendment 17, Mod 003).",
-                      "searchtype": "extraction",
-                      "title": "amendment_number",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Modification-type classification (Additional Funds, No-Cost Extension, PI Change, Rebudget, Scope Change, Administrative Change, Combined).",
-                      "searchtype": "extraction",
-                      "title": "modification_type",
-                      "is_optional": false,
-                      "enum_values": [
-                        "Additional Funds",
-                        "No-Cost Extension",
-                        "PI Change",
-                        "Rebudget",
-                        "Scope Change",
-                        "Administrative Change",
-                        "Combined (multiple types)"
-                      ]
-                    },
-                    {
-                      "searchphrase": "Whether the modification is unilateral (fully executed by sponsor) or bilateral (requires university signature).",
-                      "searchtype": "extraction",
-                      "title": "execution_status",
-                      "is_optional": false,
-                      "enum_values": [
-                        "Unilateral (fully executed)",
-                        "Bilateral (requires signature)",
-                        "Not specified in the document"
-                      ]
-                    },
-                    {
-                      "searchphrase": "Effective date of the modification, ISO YYYY-MM-DD when possible.",
-                      "searchtype": "extraction",
-                      "title": "effective_date",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Name of the sponsoring agency.",
-                      "searchtype": "extraction",
-                      "title": "sponsor_name",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Current Principal Investigator on the award.",
-                      "searchtype": "extraction",
-                      "title": "pi_name",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Previous PI name (PI Change modifications only); null otherwise.",
-                      "searchtype": "extraction",
-                      "title": "old_pi",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "New PI name (PI Change modifications only); null otherwise.",
-                      "searchtype": "extraction",
-                      "title": "new_pi",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "New project end date (NCE modifications only), ISO YYYY-MM-DD when possible; null otherwise.",
-                      "searchtype": "extraction",
-                      "title": "new_end_date",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Payment Management System code if applicable.",
-                      "searchtype": "extraction",
-                      "title": "pms_code",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Any changes to sponsor point-of-contact information.",
-                      "searchtype": "extraction",
-                      "title": "point_of_contact_changes",
-                      "is_optional": true,
-                      "enum_values": []
-                    }
-                  ]
-                },
-                "searchphrases": [
-                  "Federal Award Identification Number (FAIN) or sponsor award number.",
-                  "Amendment or modification number (e.g., Amendment 17, Mod 003).",
-                  "Modification-type classification (Additional Funds, No-Cost Extension, PI Change, Rebudget, Scope Change, Administrative Change, Combined).",
-                  "Whether the modification is unilateral (fully executed by sponsor) or bilateral (requires university signature).",
-                  "Effective date of the modification, ISO YYYY-MM-DD when possible.",
-                  "Name of the sponsoring agency.",
-                  "Current Principal Investigator on the award.",
-                  "Previous PI name (PI Change modifications only); null otherwise.",
-                  "New PI name (PI Change modifications only); null otherwise.",
-                  "New project end date (NCE modifications only), ISO YYYY-MM-DD when possible; null otherwise.",
-                  "Payment Management System code if applicable.",
-                  "Any changes to sponsor point-of-contact information."
+                "prompt": "You are identifying the modification type and extracting\ncore identifiers from a federal award modification /\namendment document. You receive the uploaded document AND\nany KB chunks.\n\nBe 100% accurate. Quote identifiers verbatim. Use null when\nabsent. Dates use ISO YYYY-MM-DD when unambiguous.\n\nEmit a JSON object with these keys:\n\n- award_number: STRING (FAIN or sponsor award number).\n- amendment_number: STRING (e.g., \"Amendment 17\", \"Mod 003\",\n  \"L21AC10545-03\").\n- modification_type: one of \"Additional Funds\",\n  \"No-Cost Extension\", \"PI Change\", \"Rebudget\",\n  \"Scope Change\", \"Administrative Change\",\n  \"Combined (multiple types)\".\n- classification_evidence: STRING. 2-3 sentence justification\n  for the modification_type choice, quoting document\n  language.\n- execution_status: one of \"Unilateral (fully executed)\",\n  \"Bilateral (requires signature)\",\n  \"Not specified in the document\".\n- effective_date: STRING (ISO YYYY-MM-DD or document's\n  wording).\n- sponsor_name, pi_name: STRING or null.\n- old_pi, new_pi: STRING (populated ONLY for PI Change /\n  Combined; null otherwise).\n- new_end_date: STRING (populated ONLY for NCE / Combined;\n  null otherwise).\n- pms_code: STRING or null.\n- point_of_contact_changes: STRING or null.\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
                 ]
               }
             },
             {
-              "name": "Extraction",
+              "name": "Prompt",
               "data": {
                 "name": "extract-financial-impact",
-                "prompt": "You are extracting the FINANCIAL block of an award modification\ndocument — monetary impact, F&A, cost share, and rebudget routing.\nMirrors TASK-02 of the source ProcessMapping\naward-modification-intake workflow.\n\nBe 100% accurate. Quote the document for all amounts and rates;\nnever invent numeric values.\n\nCRITICAL: monetary values are JSON NUMBERS, not quoted strings.\nConvert document language verbatim to a numeric value:\n  \"$1,234,567.89\" -> 1234567.89\n  \"$500,000\"      -> 500000\n  \"$0.5M\"         -> do NOT invent precision; emit null if the\n                    document only gives a rounded summary.\n\nfa_rate is a STRING because it often carries a base-type\nannotation (e.g., \"30% MTDC\", \"56.5% on MTDC\"). Preserve the\ndocument's exact phrasing.\n\nbudget_breakdown is an array of {category, approved_amount}\nobjects where category is the sponsor's exact label\n(e.g., \"Salaries\", \"Fringe\", \"Equipment\", \"F&A\") and\napproved_amount is a JSON number. Emit an empty array when the\ndocument does not break the modification down by category.\n\nrebudget_source_account / rebudget_destination_account are\npopulated ONLY when the modification involves a rebudget\n(modification_type \"Rebudget\" or \"Combined (multiple types)\");\nnull otherwise.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "Award Modification Financial Impact",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Dollar amount of the modification (additional funds or rebudget amount) as a JSON number.",
-                      "searchtype": "extraction",
-                      "title": "modification_amount",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Current total award amount before this modification as a JSON number.",
-                      "searchtype": "extraction",
-                      "title": "current_award_amount",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Total obligated amount after this modification as a JSON number.",
-                      "searchtype": "extraction",
-                      "title": "total_obligated_amount",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "F&A (indirect cost) rate including base-type annotation as a string (e.g., 30% MTDC).",
-                      "searchtype": "extraction",
-                      "title": "fa_rate",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "F&A dollar amount for this modification as a JSON number.",
-                      "searchtype": "extraction",
-                      "title": "fa_amount",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Budget breakdown by sponsor category as a JSON array of {category, approved_amount} objects.",
-                      "searchtype": "extraction",
-                      "title": "budget_breakdown",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Source budget account for a rebudget (e.g., OE/Account 30); null when not a rebudget.",
-                      "searchtype": "extraction",
-                      "title": "rebudget_source_account",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Destination budget account for a rebudget; null when not a rebudget.",
-                      "searchtype": "extraction",
-                      "title": "rebudget_destination_account",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Sponsor-imposed changes to cost-share commitments.",
-                      "searchtype": "extraction",
-                      "title": "cost_share_changes",
-                      "is_optional": true,
-                      "enum_values": []
-                    }
-                  ]
-                },
-                "searchphrases": [
-                  "Dollar amount of the modification (additional funds or rebudget amount) as a JSON number.",
-                  "Current total award amount before this modification as a JSON number.",
-                  "Total obligated amount after this modification as a JSON number.",
-                  "F&A (indirect cost) rate including base-type annotation as a string (e.g., 30% MTDC).",
-                  "F&A dollar amount for this modification as a JSON number.",
-                  "Budget breakdown by sponsor category as a JSON array of {category, approved_amount} objects.",
-                  "Source budget account for a rebudget (e.g., OE/Account 30); null when not a rebudget.",
-                  "Destination budget account for a rebudget; null when not a rebudget.",
-                  "Sponsor-imposed changes to cost-share commitments."
+                "prompt": "You are extracting financial impact from a federal award\nmodification document. You receive the uploaded document AND\nany KB chunks.\n\nBe 100% accurate. Monetary fields are FLAT STRINGS preserving\nthe document's $X,XXX.XX format. Use null when a field is\nabsent — never invent.\n\nEmit a JSON object with these keys:\n\n- modification_amount: STRING ($X). null for non-financial\n  modifications.\n- current_award_amount: STRING ($X). null when absent.\n- total_obligated_amount: STRING ($X). null when absent.\n- fa_rate: STRING (e.g., \"30% MTDC\"). null when absent.\n- fa_amount: STRING ($X). null when absent.\n- budget_breakdown: JSON ARRAY of {category, amount, account_code}\n  objects. Empty when not provided.\n- rebudget_source_account: STRING. null unless rebudget.\n- rebudget_destination_account: STRING. null unless rebudget.\n- rebudget_justification: STRING. Summary of why the rebudget\n  was requested. null unless rebudget.\n- cost_share_changes: STRING. null when no changes.\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
                 ]
               }
             },
             {
-              "name": "Extraction",
+              "name": "Prompt",
               "data": {
                 "name": "extract-compliance-requirements",
-                "prompt": "You are extracting the COMPLIANCE block of an award modification\ndocument — prior approval, sponsor conditions, regulatory\nreferences, and operational routing flags. Mirrors TASK-03 of the\nsource ProcessMapping award-modification-intake workflow.\n\nBe 100% accurate. Quote the document for any condition or\nregulatory reference. Booleans are JSON booleans, not the strings\n\"true\" / \"false\".\n\nprior_approval_required: true when the modification was granted\n(or requires) sponsor prior approval; false when the document\nmakes clear no prior approval was needed.\n\nend_date_change: true when the modification changes the project\nend date (NCE, certain Combined modifications); false otherwise.\n\nrequires_financial_unit: true for additional funds and NCE; false\nfor most rebudgets and administrative changes. Decide from the\ndocument and the inferred modification type, not from a default.\n\nsponsor_conditions: every condition / restriction the sponsor\nimposed, as an array of strings. Quote the document. Empty array\nwhen none.\n\nregulatory_references: an array of explicit citations the document\nmakes to regulations (e.g., \"2 CFR 200.308\", \"Research Terms and\nConditions\", \"NSF PAPPG VI.D\"). Empty array when none.\n\nibc_protocols_required: true / false when the document addresses\nbiosafety protocols; null when biosafety is not addressed at all.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "Award Modification Compliance Requirements",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Whether this modification required (or grants) sponsor prior approval as a JSON boolean.",
-                      "searchtype": "extraction",
-                      "title": "prior_approval_required",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Date the sponsor approved the modification (ISO YYYY-MM-DD).",
-                      "searchtype": "extraction",
-                      "title": "approval_date",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Conditions or restrictions imposed by the sponsor as a JSON array of strings.",
-                      "searchtype": "extraction",
-                      "title": "sponsor_conditions",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Explicit citations to regulations (e.g., 2 CFR 200.308, RTC, NSF PAPPG) as a JSON array of strings.",
-                      "searchtype": "extraction",
-                      "title": "regulatory_references",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Whether the modification changes the project end date as a JSON boolean.",
-                      "searchtype": "extraction",
-                      "title": "end_date_change",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Whether the modification requires Financial Unit processing as a JSON boolean.",
-                      "searchtype": "extraction",
-                      "title": "requires_financial_unit",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Whether Institutional Biosafety Committee protocols must be complete before processing; null when biosafety not addressed.",
-                      "searchtype": "extraction",
-                      "title": "ibc_protocols_required",
-                      "is_optional": true,
-                      "enum_values": []
-                    }
-                  ]
-                },
-                "searchphrases": [
-                  "Whether this modification required (or grants) sponsor prior approval as a JSON boolean.",
-                  "Date the sponsor approved the modification (ISO YYYY-MM-DD).",
-                  "Conditions or restrictions imposed by the sponsor as a JSON array of strings.",
-                  "Explicit citations to regulations (e.g., 2 CFR 200.308, RTC, NSF PAPPG) as a JSON array of strings.",
-                  "Whether the modification changes the project end date as a JSON boolean.",
-                  "Whether the modification requires Financial Unit processing as a JSON boolean.",
-                  "Whether Institutional Biosafety Committee protocols must be complete before processing; null when biosafety not addressed."
+                "prompt": "You are extracting compliance requirements from a federal\naward modification document. You receive the uploaded\ndocument AND any KB chunks.\n\nBe 100% accurate. Booleans are JSON booleans, not strings.\n\nEmit a JSON object with these keys:\n\n- prior_approval_required: BOOLEAN.\n- approval_date: STRING (ISO YYYY-MM-DD). null when absent.\n- sponsor_conditions: JSON ARRAY of STRINGS. Empty when none.\n- regulatory_references: JSON ARRAY of STRINGS (e.g.,\n  \"2 CFR 200.308\", \"NSF PAPPG VI.D\"). Empty when none.\n- end_date_change: BOOLEAN.\n- requires_financial_unit: BOOLEAN. Rule: true for\n  Additional Funds and NCE; false for Rebudget and most\n  Administrative Changes. Decide from the document.\n- ibc_protocols_required: BOOLEAN or null (null when\n  biosafety not addressed).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
                 ]
               }
             }
           ]
         },
         {
-          "name": "Consolidation",
+          "name": "Consolidation (Markdown deliverable)",
           "data": {},
           "is_output": true,
           "tasks": [
@@ -315,7 +78,7 @@
               "name": "Prompt",
               "data": {
                 "name": "award-modification-intake-consolidation",
-                "prompt": "You are the consolidation step of the Award Modification Intake &\nClassification workflow. You receive three extraction outputs from\nthe previous step (identification, financial impact, compliance\nrequirements) and must emit a SINGLE JSON object that validates\nagainst the award-modification-intake-udm@0.1.0 schema (schema.json\nin the component directory).\n\n## Output contract\n\nEmit exactly one JSON object. No preamble, no closing commentary,\nno markdown fences. If your runtime requires fenced output, wrap\nin a single ```json ... ``` block and emit nothing outside it.\n\nThe top-level keys (in this order) are: `identification`,\n`financial`, `compliance`.\n\n## Field-by-field assembly\n\n### identification (from extract-modification-type-identification)\n\nBuild the nested object with these keys:\n  award_number, amendment_number, modification_type,\n  execution_status, effective_date, sponsor_name, pi_name,\n  old_pi, new_pi, new_end_date, pms_code,\n  point_of_contact_changes.\n\nRequired fields (must not be null): award_number, amendment_number,\nmodification_type (one of the seven enum values),\nexecution_status (one of the three enum values).\n\nold_pi / new_pi: emit null unless modification_type is \"PI Change\"\nor \"Combined (multiple types)\".\n\nnew_end_date: emit null unless modification_type is\n\"No-Cost Extension\" or \"Combined (multiple types)\".\n\n### financial (from extract-financial-impact)\n\nBuild the nested object with these keys:\n  modification_amount, current_award_amount,\n  total_obligated_amount, fa_rate, fa_amount, budget_breakdown,\n  rebudget_source_account, rebudget_destination_account,\n  cost_share_changes.\n\nAll monetary fields (modification_amount, current_award_amount,\ntotal_obligated_amount, fa_amount, budget_breakdown[].approved_amount)\nMUST be JSON numbers, not strings. If the extractor emitted\nquoted dollar strings, convert them: \"$1,234,567.89\" -> 1234567.89.\nIf the document only gave a rounded qualitative summary, emit\nnull rather than fabricating precision.\n\nbudget_breakdown is required and is always an array. Empty array\nwhen the document does not break the modification down by\ncategory.\n\nrebudget_source_account / rebudget_destination_account: emit null\nunless modification_type is \"Rebudget\" or\n\"Combined (multiple types)\".\n\n### compliance (from extract-compliance-requirements)\n\nBuild the nested object with these keys:\n  prior_approval_required, approval_date, sponsor_conditions,\n  regulatory_references, end_date_change,\n  requires_financial_unit, ibc_protocols_required.\n\nRequired fields: prior_approval_required (boolean),\nsponsor_conditions (array, may be empty), regulatory_references\n(array, may be empty), end_date_change (boolean),\nrequires_financial_unit (boolean).\n\nibc_protocols_required: null when the document does not address\nbiosafety; true / false when it does.\n\n## Cross-field rules (CFR-01..CFR-04 from source workflow)\n\nEnforce these on the assembled JSON. When a rule cannot be\nsatisfied because the source document is internally inconsistent,\nDO NOT alter the document's values — emit them as stated and\nappend a flag string to `compliance.sponsor_conditions` that\ndescribes the discrepancy.\n\n1. If modification_type == \"Additional Funds\", then\n   financial.modification_amount must be a positive number > 0.\n   If the document shows additional funds but no positive\n   modification_amount, append a flag to sponsor_conditions:\n   \"FLAG: Additional Funds modification has no positive\n   modification_amount in the source document.\"\n\n2. If modification_type == \"No-Cost Extension\", then\n   identification.new_end_date must be populated.\n   If the document is an NCE but omits the new end date, append:\n   \"FLAG: No-Cost Extension modification omits new_end_date.\"\n\n3. If modification_type == \"PI Change\", then identification.old_pi\n   and identification.new_pi must both be populated.\n   If either is missing, append:\n   \"FLAG: PI Change modification omits old_pi and/or new_pi.\"\n\n4. If modification_type == \"Additional Funds\" AND all three of\n   current_award_amount, modification_amount,\n   total_obligated_amount are populated, then\n   total_obligated_amount should equal\n   current_award_amount + modification_amount.\n   If the identity does not hold, append:\n   \"FLAG: Additional Funds totals do not reconcile —\n   current_award_amount + modification_amount != total_obligated_amount.\"\n\n## Quality bar\n\n- Output validates against schema.json (draft 2020-12).\n- modification_type is one of the seven enum values.\n- execution_status is one of the three enum values.\n- All monetary fields are JSON numbers.\n- Booleans are JSON booleans.\n- No fact appears in two top-level blocks.",
+                "prompt": "You are the consolidation step of the Award Modification\nIntake & Classification workflow. You receive THREE JSON\nfragments (identification + financial + compliance).\n\nCross-validate the three fragments. When values contradict\nacross tasks, do NOT alter them — flag the contradiction\nwith the `[DISCREPANCY: Task X states ___ while Task Y\nstates ___]` syntax in SECTION 6. For Additional Funds:\nverify current_award_amount + modification_amount =\ntotal_obligated_amount; flag any reconciliation gap.\n\nRender a single RA-friendly Markdown Modification Intake\nSummary. Mirrors source consolidation.md exactly.\n\n## Required structure (in this exact order)\n\n# Modification Intake Summary: <award_number> / <amendment_number>\n\n### SECTION 1: MODIFICATION CLASSIFICATION\n\n- **Modification Type:** <modification_type>\n- **Classification Evidence:** <classification_evidence>\n- **Award Number:** <award_number>\n- **Amendment Number:** <amendment_number>\n- **Execution Status:** <execution_status>\n\n---\n\n### SECTION 2: KEY INFORMATION BY TYPE\n\nRender the Section 2 table CONDITIONAL on modification_type.\nONLY emit the table(s) matching the classified type. If\nmodification_type is \"Combined (multiple types)\", emit the\ntables for each component type.\n\n**If modification_type is \"Additional Funds\":**\n\n| Field | Value |\n|---|---|\n| Modification Amount | <modification_amount> |\n| Current Award Amount | <current_award_amount> |\n| Total Obligated | <total_obligated_amount> |\n| F&A Rate | <fa_rate> |\n| F&A Amount | <fa_amount> |\n\nFollowed by a Budget Breakdown sub-table if `budget_breakdown`\nis non-empty.\n\n**If modification_type is \"No-Cost Extension\":**\n\n| Field | Value |\n|---|---|\n| New End Date | <new_end_date> |\n| Effective Date | <effective_date> |\n| Financial Impact | None |\n\n**If modification_type is \"PI Change\":**\n\n| Field | Value |\n|---|---|\n| Old PI | <old_pi> |\n| New PI | <new_pi> |\n| Financial Impact | None |\n\n**If modification_type is \"Rebudget\":**\n\n| Field | Value |\n|---|---|\n| Rebudget Amount | <modification_amount> |\n| Source Account | <rebudget_source_account> |\n| Destination Account | <rebudget_destination_account> |\n| Justification | <rebudget_justification> |\n\n---\n\n### SECTION 3: COMPLIANCE & CONDITIONS\n\n- **Prior Approval Required:** <Yes / No>\n- **Approval Date:** <approval_date or \"Not specified\">\n- **End Date Change:** <Yes / No>\n- **Requires Financial Unit Processing:** <Yes / No>\n- **IBC Protocols Required:** <Yes / No / Not specified>\n\n**Sponsor Conditions:**\n- <bulleted list from sponsor_conditions, or \"None specified\">\n\n**Regulatory References:**\n- <bulleted list from regulatory_references, or \"2 CFR 200.308 (federal default)\">\n\n---\n\n### SECTION 4: PROCESSING CHECKLIST\n\nEmit the type-specific checklist matching the classified\nmodification_type (use GitHub-style `- [ ]` syntax).\n\n**Additional Funds Checklist:**\n- [ ] Verify cumulative amounts match (Current + Mod = Total)\n- [ ] Enter amendment details in VERAS mod processing form\n- [ ] Enter funding amounts and F&A rate\n- [ ] Enter budget by account category\n- [ ] Create journal entry in Banner (FGAJVCD)\n- [ ] Record journal number in mod form\n- [ ] Enter journal line item sequences\n- [ ] Verify journal in FGISUM\n- [ ] Update FOI text in Banner\n- [ ] Update current and cumulative amounts in Banner\n- [ ] Send correspondence to PI and DGAs\n- [ ] Forward to Financial Unit\n\n**NCE Checklist:**\n- [ ] Upload fully executed agreement to VERAS\n- [ ] Enter amendment details in mod processing form\n- [ ] Check PMS code in Banner\n- [ ] Extract and enter new end date\n- [ ] Update end dates in Banner (main + billing tab)\n- [ ] Update FOI text in Banner\n- [ ] Send correspondence to PI and DGAs\n- [ ] Reassign task to Financial Unit\n\n**PI Change Checklist:**\n- [ ] Verify amendment details (old/new PI)\n- [ ] Record sponsor approval details in SPAR form\n- [ ] Remove old PI in Banner (code 099)\n- [ ] Insert new PI in Banner (code 001)\n- [ ] Update PI on Banner main page\n- [ ] Update FOI text in Banner\n- [ ] Send correspondence to new PI and DGAs (remove financial info from template)\n- [ ] Update submission outcome\n\n**Rebudget Checklist:**\n- [ ] Upload sponsor approval to VERAS\n- [ ] Open SPAR form, enter details\n- [ ] Look up index in Banner FDM MACKEY\n- [ ] Verify budget accounts (source and destination)\n- [ ] Create journal entry in Banner (BDGJ)\n- [ ] Enter debit line (source account, negative amount)\n- [ ] Enter credit line (destination account, positive amount)\n- [ ] Record journal number in SPAR form\n- [ ] Send correspondence to PI and DGAs\n- [ ] Reset project status to Active (no Financial Unit handoff)\n\n---\n\n### SECTION 5: PRE-FILLED FORM VALUES\n\nFor direct entry into the VERAS mod processing form (note:\nVERAS does NOT accept commas in numeric fields):\n\n- **Date Processed:** <today's date or effective_date>\n- **Amendment Number:** <amendment_number>\n- **Amendment Type:** <modification_type>\n- **PMS Code:** <pms_code or \"N/A\">\n- **Modification Amount (no commas):** <modification_amount with commas stripped, or \"N/A\">\n- **Current Award Amount (no commas):** <current_award_amount with commas stripped, or \"N/A\">\n- **Total Obligated (no commas):** <total_obligated_amount with commas stripped, or \"N/A\">\n\n---\n\n### SECTION 6: DISCREPANCIES & WARNINGS\n\nBulleted list of:\n- Any cross-task contradictions in the\n  `[DISCREPANCY: Task X states ___ while Task Y states ___]`\n  format.\n- Any reconciliation gaps (Additional Funds where\n  current + mod ≠ total).\n- Missing required information.\n- Items requiring specialist attention.\n\nIf none, state \"No discrepancies or warnings identified.\"\n\n## Rendering rules\n\n- Conditional Section 2 tables — only emit table(s) matching\n  the classified type. Combined modifications emit multiple.\n- Bold every label with `**Label:**`.\n- Use literal \"- [ ]\" task-list syntax for SECTION 4\n  checkboxes.\n- Strip commas from numeric fields ONLY in SECTION 5 (VERAS\n  field-entry constraint).\n- If any field arrives as a nested JSON object, REWRITE into\n  prose / table.\n- No JSON code fences around the output.",
                 "input_source": "step_input"
               }
             }
@@ -330,62 +93,39 @@
           "check_id": "CHK-01",
           "check_name": "Modification type classification",
           "check_type": "completeness",
-          "check_description": "Verify modification_type is classified as one of the seven recognized enum values.",
-          "target_fields": [
-            "identification.modification_type"
-          ],
+          "check_description": "Verify modification_type is one of the seven recognized enum values.",
+          "target_fields": [],
           "severity": "error"
         },
         {
           "check_id": "CHK-02",
           "check_name": "Amendment number format",
           "check_type": "format",
-          "check_description": "Verify amendment_number is present and follows the document's stated format.",
-          "target_fields": [
-            "identification.amendment_number"
-          ],
+          "check_description": "Verify amendment_number is present in the Markdown deliverable.",
+          "target_fields": [],
           "severity": "error"
         },
         {
           "check_id": "CHK-03",
-          "check_name": "Monetary amount format",
+          "check_name": "Monetary amount preservation",
           "check_type": "format",
-          "check_description": "Verify monetary amounts are emitted as JSON numbers, not quoted strings.",
-          "target_fields": [
-            "financial.modification_amount",
-            "financial.total_obligated_amount",
-            "financial.fa_amount"
-          ],
+          "check_description": "Verify monetary amounts preserve the sponsor's exact formatting.",
+          "target_fields": [],
           "severity": "error"
         },
         {
           "check_id": "CHK-04",
-          "check_name": "Date validity",
-          "check_type": "format",
-          "check_description": "Verify dates are ISO YYYY-MM-DD when the document is unambiguous.",
-          "target_fields": [
-            "identification.effective_date",
-            "identification.new_end_date",
-            "compliance.approval_date"
-          ],
-          "severity": "error"
-        },
-        {
-          "check_id": "CHK-05",
-          "check_name": "Compliance requirements completeness",
-          "check_type": "completeness",
-          "check_description": "Verify prior_approval_required and sponsor_conditions are captured.",
-          "target_fields": [
-            "compliance.prior_approval_required",
-            "compliance.sponsor_conditions"
-          ],
+          "check_name": "Cross-validation flag emission",
+          "check_type": "consistency",
+          "check_description": "Verify any contradiction between identification / financial / compliance tasks is flagged with the `[DISCREPANCY - Task X states ___ while Task Y states ___]` syntax in SECTION 6.\n",
+          "target_fields": [],
           "severity": "warning"
         }
       ],
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/award-modification-intake/manifest.yaml",
-        "workflow_version": "0.1.0",
+        "workflow_version": "0.2.0",
         "status": "experimental",
         "components": [
           {

@@ -2,190 +2,64 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-04-30T00:00:00+00:00",
+  "exported_at": "2026-05-22T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Proposal Document Completeness Checker",
-      "description": "Uploads a proposal package (VERAS upload bundle, NSF or NIH proposal, plus the relevant solicitation) and returns a single structured JSON gap- analysis covering: senior key personnel, budget personnel, subaward presence, the four per-person required documents (biosketch, current & pending, collaboration & affiliation, synergistic activities), conditional requirements (mentoring plan when postdocs / letter of collaboration for TTP-P / etc.), and a prioritized list of missing items the analyst should ask the PI about. Output conforms to the proposal-document-completeness-udm component schema. The runtime mirrors the ui-insight/ProcessMapping proposal-document-completeness workflow (two parallel Extraction tasks plus a Consolidation Prompt).",
+      "name": "Proposal Document Completeness",
+      "description": "Uploads a federal proposal package (VERAS or sponsor portal export) plus the RFA / FOA for the announcement and returns an RA-friendly Markdown Completeness Report covering required-documents checklist, per-person document matrix, subaward document status, conditional requirements, personnel discrepancies, prioritized missing-documents summary for PI communication, and warnings. Mirrors the source ui-insight/ProcessMapping proposal-document-completeness consolidation.md conventions.",
       "steps": [
         {
-          "name": "Parallel Extraction",
+          "name": "Knowledge Base Context Lookup",
           "data": {},
           "is_output": false,
           "tasks": [
             {
-              "name": "Extraction",
+              "name": "KnowledgeBaseQuery",
               "data": {
-                "name": "extract-proposal-components",
-                "prompt": "You are extracting the as-found inventory from a proposal\npackage. Identify all senior key personnel, budget personnel,\nsubaward presence, and the per-person document matrix\ncovering biosketch, current & pending, collaboration &\naffiliation, and synergistic activities.\n\nBe 100% accurate. Only emit a person, document, or subaward\nwhen it is observable in the package; never invent. When a\nfield is not present, set it to null or — for arrays — return\nan empty array.\n\nBoolean flags must be derived from observable signals:\nhas_postdocs_or_grad_students is true only when the budget\nactually lists a postdoc or graduate-student line;\nhas_subawards is true only when a subaward commitment form,\nsubaward budget, or subaward narrative is present.\n\nSearch Section 2 (Personnel), Section 8 (Subawards), Section\n9.2 (Budget), Senior Key Personnel listings, and the proposal\ndocument inventory.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "Proposal Components Inventory",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Complete list of all documents currently uploaded in the proposal package.",
-                      "searchtype": "extraction",
-                      "title": "uploaded_documents",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "JSON array of {name, role, institution} for senior/key personnel listed in the proposal (PI, Co-PI, Senior Personnel).",
-                      "searchtype": "extraction",
-                      "title": "senior_key_personnel",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Flat list of personnel names identified from the budget document.",
-                      "searchtype": "extraction",
-                      "title": "budget_personnel",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Boolean. True iff the budget includes postdoctoral or graduate-student personnel lines.",
-                      "searchtype": "extraction",
-                      "title": "has_postdocs_or_grad_students",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Boolean. True iff the proposal includes subaward(s) (commitment form, subaward budget, or subaward narrative present).",
-                      "searchtype": "extraction",
-                      "title": "has_subawards",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "JSON array of {subawardee_name, commitment_form, budget, budget_justification, senior_key_docs, scope_of_work, facilities_equipment} booleans, one row per subawardee. Empty when has_subawards is false.",
-                      "searchtype": "extraction",
-                      "title": "subaward_documents_inventory",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "JSON array of {person_name, biosketch, current_and_pending, collaboration_and_affiliation, synergistic_activities} booleans, one row per senior-key person.",
-                      "searchtype": "extraction",
-                      "title": "per_person_document_matrix_inventory",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Proposal track type (e.g., TTP-P, standard, track-2) that may trigger additional requirements.",
-                      "searchtype": "extraction",
-                      "title": "proposal_track_type",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Discrepancies between budget personnel and senior-key-personnel listings (duplicates, missing entries, name mismatches).",
-                      "searchtype": "extraction",
-                      "title": "personnel_discrepancies",
-                      "is_optional": true,
-                      "enum_values": []
-                    }
-                  ]
-                },
-                "searchphrases": [
-                  "Complete list of all documents currently uploaded in the proposal package.",
-                  "JSON array of {name, role, institution} for senior/key personnel listed in the proposal (PI, Co-PI, Senior Personnel).",
-                  "Flat list of personnel names identified from the budget document.",
-                  "Boolean. True iff the budget includes postdoctoral or graduate-student personnel lines.",
-                  "Boolean. True iff the proposal includes subaward(s) (commitment form, subaward budget, or subaward narrative present).",
-                  "JSON array of {subawardee_name, commitment_form, budget, budget_justification, senior_key_docs, scope_of_work, facilities_equipment} booleans, one row per subawardee. Empty when has_subawards is false.",
-                  "JSON array of {person_name, biosketch, current_and_pending, collaboration_and_affiliation, synergistic_activities} booleans, one row per senior-key person.",
-                  "Proposal track type (e.g., TTP-P, standard, track-2) that may trigger additional requirements.",
-                  "Discrepancies between budget personnel and senior-key-personnel listings (duplicates, missing entries, name mismatches)."
+                "name": "kb-context-lookup",
+                "kb_uuid": "",
+                "query": "proposal document checklist senior key personnel biosketch current and pending support collaboration and affiliation synergistic activities mentoring plan subaward documents NSF PAPPG NIH GPS facilities and equipment data management plan",
+                "k": 8,
+                "_embedded_knowledge_base": {
+                  "title": "University of Idaho Office of Sponsored Programs",
+                  "description": "Primary KB — covers UI institutional document checklist requirements (7-day basic vs 10-day full review, per-person document expectations). For agency-specific document lists, swap in NSF PAPPG Reference (NSF proposals) or NIH Grants Policy Statement (NIH proposals). When the operator does not attach a KB, this step returns empty output and the extraction falls back to reading just the uploaded documents."
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Parallel Extraction (Prompt)",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-proposal-components-inventory",
+                "prompt": "You are extracting the inventory of uploaded proposal\ndocuments from a VERAS or sponsor-portal proposal package.\nYou receive the uploaded documents AND any KB chunks.\n\nBe 100% accurate. Quote document filenames, personnel names,\nand section labels verbatim. Use null when a field is absent.\n\nEmit a JSON object with these keys:\n\n- sponsor_name: STRING. Sponsoring agency name.\n- rfa_foa_number: STRING. RFA / FOA / NOFO identifier.\n- review_type: STRING — one of \"7-day basic\", \"10-day full\",\n  \"Not specified\".\n- senior_key_personnel: JSON ARRAY of\n  {name, role, institution} objects. role one of \"PI\",\n  \"Co-PI\", \"Senior/Key Personnel\".\n- subawardees: JSON ARRAY of {institution, co_pi_name}\n  objects representing subaward partners. Empty array when\n  no subawards.\n- documents_uploaded: JSON ARRAY of\n  {filename, document_type, associated_person} objects, one\n  per file in the proposal package. document_type uses the\n  sponsor's category names (e.g., \"Project Description\",\n  \"Biosketch\", \"Current and Pending Support\"). associated_person\n  is the person whose biosketch / C&P this is, or null for\n  proposal-level documents.\n- has_postdocs_or_grad_students: BOOLEAN. Inferred from\n  budget personnel.\n- has_subawards: BOOLEAN.\n- mentoring_plan_required: BOOLEAN. true when\n  has_postdocs_or_grad_students AND sponsor requires\n  mentoring plans.\n- personnel_discrepancies: JSON ARRAY of STRINGS describing\n  mismatches between budget personnel and proposal personnel.\n  Empty array when consistent.\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
                 ]
               }
             },
             {
-              "name": "Extraction",
+              "name": "Prompt",
               "data": {
                 "name": "extract-sponsor-requirements",
-                "prompt": "You are extracting the sponsor-required document set from the\nsolicitation (RFA / FOA / NOFO) and agency policy (NSF PAPPG,\nNIH GPS, etc.). Identify every document the sponsor requires,\nevery document that is conditionally required, the per-person\nrequired-document set, and the per-subawardee required-document\nset.\n\nBe 100% accurate. Only emit a requirement when the sponsor\ndocument or agency policy actually states it; never invent\nrequirements.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "Sponsor Requirements",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Sponsor agency name (e.g., \"National Science Foundation\").",
-                      "searchtype": "extraction",
-                      "title": "sponsor_name",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Solicitation number (e.g., \"NSF 26-508\").",
-                      "searchtype": "extraction",
-                      "title": "rfa_foa_number",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Review pathway (7-day basic review, 10-day full review, or Not specified).",
-                      "searchtype": "extraction",
-                      "title": "review_type",
-                      "is_optional": true,
-                      "enum_values": [
-                        "7-day basic review",
-                        "10-day full review",
-                        "Not specified"
-                      ]
-                    },
-                    {
-                      "searchphrase": "JSON array of {document_name, required_for, notes} for every document the sponsor requires for this proposal. The Consolidation Prompt sets the present boolean.",
-                      "searchtype": "extraction",
-                      "title": "required_documents_checklist",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "JSON array of {condition, document_name, notes} for documents required only when a condition holds (e.g., mentoring plan when postdocs present, letter of collaboration for TTP-P track).",
-                      "searchtype": "extraction",
-                      "title": "conditional_requirements",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Document names required per senior-key person (typically biosketch, current & pending, collaboration & affiliation, synergistic activities).",
-                      "searchtype": "extraction",
-                      "title": "per_person_required_documents",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Document names required per subawardee (commitment form, budget, budget justification, senior key docs, scope of work, facilities/equipment).",
-                      "searchtype": "extraction",
-                      "title": "subaward_required_documents",
-                      "is_optional": true,
-                      "enum_values": []
-                    }
-                  ]
-                },
-                "searchphrases": [
-                  "Sponsor agency name (e.g., \"National Science Foundation\").",
-                  "Solicitation number (e.g., \"NSF 26-508\").",
-                  "Review pathway (7-day basic review, 10-day full review, or Not specified).",
-                  "JSON array of {document_name, required_for, notes} for every document the sponsor requires for this proposal. The Consolidation Prompt sets the present boolean.",
-                  "JSON array of {condition, document_name, notes} for documents required only when a condition holds (e.g., mentoring plan when postdocs present, letter of collaboration for TTP-P track).",
-                  "Document names required per senior-key person (typically biosketch, current & pending, collaboration & affiliation, synergistic activities).",
-                  "Document names required per subawardee (commitment form, budget, budget justification, senior key docs, scope of work, facilities/equipment)."
+                "prompt": "You are extracting the sponsor's document requirements\nchecklist from an RFA / FOA / NOFO. You receive the uploaded\ndocuments AND any KB chunks (NSF PAPPG, NIH GPS, or UI OSP\nchecklist when attached).\n\nBe 100% accurate. Quote requirement text verbatim. Use null\nwhen a field is absent.\n\nEmit a JSON object with these keys:\n\n- required_documents: JSON ARRAY of\n  {document_name, description, page_limit_or_format}\n  objects. One entry per document the sponsor explicitly\n  requires of every applicant.\n- per_person_documents: JSON ARRAY of STRINGS naming the\n  documents required for each senior / key person (typical\n  set: Biosketch, Current and Pending Support, Collaboration\n  and Affiliation, Synergistic Activities). Empty array when\n  sponsor does not require per-person documents.\n- subaward_documents: JSON ARRAY of STRINGS naming the\n  documents required from each subawardee (typical set:\n  Commitment Form, Budget, Budget Justification, Senior Key\n  Documents, Scope of Work, Facilities/Equipment). Empty\n  when not applicable.\n- conditional_requirements: JSON ARRAY of\n  {condition, document_name} objects (e.g., {condition:\n  \"Postdocs or grad students in budget\", document_name:\n  \"Mentoring Plan\"}).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
                 ]
               }
             }
           ]
         },
         {
-          "name": "Consolidation & Gap Analysis",
+          "name": "Consolidation (Markdown deliverable)",
           "data": {},
           "is_output": true,
           "tasks": [
@@ -193,7 +67,7 @@
               "name": "Prompt",
               "data": {
                 "name": "proposal-document-completeness-consolidation",
-                "prompt": "You are assembling the Proposal Document Completeness gap\nanalysis. The input is the JSON fragment produced by the\nupstream parallel Extraction tasks (proposal components +\nsponsor requirements). Your job is to emit a single JSON object\nthat validates against the\nproposal-document-completeness-udm@0.1.0 schema.\n\nRules:\n1. Pass-through: sponsor_name, rfa_foa_number,\n   proposal_track_type, review_type, senior_key_personnel,\n   budget_personnel, has_postdocs_or_grad_students,\n   has_subawards, uploaded_documents,\n   per_person_required_documents, subaward_required_documents.\n2. required_documents_checklist: for each entry produced by\n   extract-sponsor-requirements, set the present boolean by\n   checking whether a matching document name appears in\n   uploaded_documents.\n3. conditional_requirements: for each entry, set triggered\n   based on observable signals (mentoring plan triggered when\n   has_postdocs_or_grad_students; TTP-P letter-of-\n   collaboration triggered when proposal_track_type contains\n   \"TTP\"; etc.).\n4. per_person_document_matrix: one row per senior_key_personnel\n   entry. Set the four document booleans by checking whether a\n   document of that type exists in uploaded_documents matching\n   that person's name. The missing field is the list of\n   false-valued document names.\n5. subaward_documents: when has_subawards is false, return an\n   empty array. Otherwise produce one row per subawardee with\n   the six document booleans and a missing list.\n6. personnel_discrepancies: pass through any items from the\n   upstream extractor and add any newly observed mismatches\n   between budget_personnel and senior_key_personnel names.\n7. prioritized_missing: rank the missing items in this order:\n   (a) compliance-critical items the sponsor will reject the\n   proposal for, (b) per-person required documents (one entry\n   per missing per-person document), (c) conditional\n   documents whose condition is triggered, (d) optional\n   improvements. Do not include items that are present.\n8. Use null for missing scalar fields; never invent values.\n9. Do not output any text outside the single JSON object.",
+                "prompt": "You are the consolidation step of the Proposal Document\nCompleteness workflow. You receive TWO JSON fragments from\nthe previous step (proposal components inventory + sponsor\nrequirements checklist).\n\nRender a single RA-friendly Markdown Completeness Report.\nMirrors source ui-insight/ProcessMapping\nproposal-document-completeness consolidation.md exactly.\n\n## Required structure (in this exact order)\n\n# Proposal Document Completeness Report\n\n### SECTION 1: PROPOSAL OVERVIEW\n\n- **Sponsor:** <sponsor_name or \"Not specified\">\n- **RFA/FOA:** <rfa_foa_number or \"Not specified\">\n- **Review Type:** <review_type>\n- **Total Senior Key Personnel:** <senior_key_personnel.length>\n- **Total Subawardees:** <subawardees.length>\n\n---\n\n### SECTION 2: REQUIRED DOCUMENTS CHECKLIST\n\n| # | Document | Required | Status | Notes |\n|---|----------|----------|--------|-------|\n\nOne row per entry in `required_documents`. Status: \"Present\"\nwhen a matching documents_uploaded entry exists; \"MISSING\"\n(UPPERCASE) otherwise.\n\n---\n\n### SECTION 3: PER-PERSON DOCUMENT MATRIX\n\n| Person | Role | Institution | Biosketch | Current & Pending | Collaboration & Affiliation | Synergistic Activities |\n|--------|------|-------------|-----------|-------------------|----------------------------|----------------------|\n\nOne row per senior_key_personnel entry. Each document column\nshows \"Present\" or \"MISSING\" based on whether\ndocuments_uploaded has a matching {document_type,\nassociated_person}. Only emit columns for per_person_documents\nthe sponsor actually requires — drop columns the sponsor\ndoesn't ask for.\n\n**Summary:** X of Y total per-person documents present. Z\ndocuments MISSING.\n\n---\n\n### SECTION 4: SUBAWARD DOCUMENT STATUS\n\nFor each subawardee, render a separate sub-section:\n\n#### <institution>\n\n| Document | Status |\n|----------|--------|\n| Commitment Form | Present/MISSING |\n| Budget | Present/MISSING |\n| Budget Justification | Present/MISSING |\n| Senior Key Documents | Present/MISSING |\n| Scope of Work | Present/MISSING |\n| Facilities/Equipment | Present/MISSING/N/A |\n\nIf subawardees is empty, state \"No subawards on this\nproposal.\"\n\n---\n\n### SECTION 5: CONDITIONAL REQUIREMENTS\n\n| Condition | Triggered? | Required Document | Status |\n|-----------|-----------|-------------------|--------|\n\nOne row per conditional_requirements entry. Triggered = Yes\nwhen the condition matches the proposal state (e.g., postdocs\npresent, TTP-P track). Status: Present / MISSING / N/A.\n\n---\n\n### SECTION 6: PERSONNEL DISCREPANCIES\n\nRender `personnel_discrepancies` as a bulleted list. If\nempty, state \"No personnel discrepancies identified — budget\nand proposal personnel sections match.\"\n\n---\n\n### SECTION 7: MISSING DOCUMENTS SUMMARY (FOR PI COMMUNICATION)\n\n**CRITICAL — Required documents not yet uploaded:**\n\nNumbered list of every SECTION 2 row with Status=MISSING.\n\n**Senior Key Personnel — Missing per-person documents:**\n\nFor each senior_key_personnel entry with any missing\nper-person document:\n- <name> (<role>): Missing <doc1>, <doc2>, …\n\n**Subaward documents — Missing from each institution:**\n\nFor each subawardee with missing documents:\n- <institution>: Missing <doc1>, <doc2>, …\n\n**Conditionally Required — Pending verification:**\n\nList any conditional requirement with Triggered=Yes and\nStatus=MISSING.\n\n---\n\n### SECTION 8: DISCREPANCIES & WARNINGS\n\nBulleted list combining personnel_discrepancies, duplicate\nentries observed, and any documents in documents_uploaded\nthat did not match a required-document entry (potentially\nmislabeled). If none, state \"No additional warnings.\"\n\n## Rendering rules\n\n- Use literal \"Present\" / \"MISSING\" status keys (MISSING in\n  UPPERCASE).\n- Bold every label with `**Label:**`.\n- If any field arrives as a nested JSON object, REWRITE\n  into prose / table.\n- No JSON code fences around the output.",
                 "input_source": "step_input"
               }
             }
@@ -206,42 +80,33 @@
       "validation_plan": [
         {
           "check_id": "CHK-01",
-          "check_name": "Personnel list completeness",
+          "check_name": "Required documents inventory completeness",
           "check_type": "completeness",
-          "check_description": "Every named senior-key person must appear in both senior_key_personnel and per_person_document_matrix; every budget personnel name must reconcile to a senior_key_personnel row or appear in personnel_discrepancies.",
-          "target_fields": [
-            "senior_key_personnel",
-            "budget_personnel",
-            "per_person_document_matrix",
-            "personnel_discrepancies"
-          ],
+          "check_description": "Verify every sponsor-required document has a Present/MISSING status row in SECTION 2.",
+          "target_fields": [],
           "severity": "error"
         },
         {
           "check_id": "CHK-02",
-          "check_name": "Required documents coverage",
+          "check_name": "Per-person document matrix completeness",
           "check_type": "completeness",
-          "check_description": "Every document declared required by the sponsor must appear in required_documents_checklist with a present/missing flag.",
-          "target_fields": [
-            "required_documents_checklist"
-          ],
+          "check_description": "Verify every senior / key person identified has a row in SECTION 3 with all four document statuses.",
+          "target_fields": [],
           "severity": "error"
         },
         {
           "check_id": "CHK-03",
-          "check_name": "Per-person document verification",
-          "check_type": "completeness",
-          "check_description": "Each per_person_document_matrix row's missing list must equal the set of false-valued document booleans for that row.",
-          "target_fields": [
-            "per_person_document_matrix"
-          ],
-          "severity": "error"
+          "check_name": "Conditional-requirement triggering",
+          "check_type": "consistency",
+          "check_description": "Verify conditional requirements (mentoring plan, letters of collaboration, etc.) are correctly marked Triggered/Not Triggered based on personnel and award type.",
+          "target_fields": [],
+          "severity": "warning"
         }
       ],
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/proposal-document-completeness/manifest.yaml",
-        "workflow_version": "0.1.0",
+        "workflow_version": "0.2.0",
         "status": "experimental",
         "components": [
           {

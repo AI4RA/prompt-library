@@ -4,32 +4,42 @@
 # this file by scripts/build_vandalizer_workflows.py and committed alongside.
 # Never hand-edit the generated JSON — update this manifest and rebuild.
 #
-# Runtime topology (v0.1.0):
-#   Step 1  Extraction
-#     1 Extraction task with an embedded SearchSet whose item titles mirror
-#     the prior-approval-extraction-udm@0.1.0 schema field names.
-#   Step 2  Consolidation
-#     1 Prompt task assembles the JSON fragment into a schema-conformant
-#     object with the nested budget_approvals, scope_timeline_approvals,
-#     and approval_procedures shapes.
+# === Topology (v0.2.0, Variant A + KB injection) ===
+#
+# v0.2.0 architectural changes vs. v0.1.0:
+#   1. Parallel "Extraction" tasks converted to Vandalizer Prompt tasks
+#      (full-document LLM reading).
+#   2. Output contract changed from JSON-against-schema to RA-friendly
+#      Markdown deliverable (mirroring the source ui-insight/ProcessMapping
+#      prior-approval-extraction formatting.md conventions). The component
+#      remains JSON-emitting for the evaluation harness.
+#   3. Step 0 KnowledgeBaseQuery added — primary KB hint is OMB Uniform
+#      Guidance (2 CFR 200) since §200.308 is the prior-approval section.
+#
+# Step 1  Knowledge Base Context Lookup
+# Step 2  Extraction (single Prompt) — full-document NLU reading, emits JSON
+# Step 3  Consolidation (Markdown deliverable) — bold-category-labels +
+#         six-column APPROVAL PROCEDURES table per source formatting.md
 
 name: Prior Approval Extraction
 description: >
-  Uploads a federal award notice or agreement and returns a single structured
-  JSON object covering all prior-approval requirements: budget-related
-  approvals, scope and timeline approvals, a normalized approval-procedures
-  table (threshold, documentation, authority, timeline, consequences), and
-  any Research Terms and Conditions waivers. Output conforms to the
-  prior-approval-extraction-udm component schema. The runtime mirrors the
-  ui-insight/ProcessMapping prior-approval-extraction workflow (one
-  Extraction task plus a Formatting/Consolidation task).
+  Uploads a federal award notice or agreement and returns an RA-friendly
+  Markdown reference covering prior-approval requirements: budget
+  approvals (rebudgeting thresholds, equipment, F&A changes), scope &
+  timeline approvals (NCE, PI / key personnel changes, scope changes),
+  the approval procedures matrix (Approval Type | Threshold | Required
+  Documentation | Approval Authority | Processing Timeline |
+  Consequences of Non-compliance), and any RTC expanded-authority
+  waivers. Mirrors the source ui-insight/ProcessMapping
+  prior-approval-extraction formatting.md conventions, including the
+  mandatory six-column APPROVAL PROCEDURES table.
 
-workflow_version: 0.1.0
+workflow_version: 0.2.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-04-30
-updated: 2026-04-30
+updated: 2026-05-22
 
 components:
   - slug: prior-approval-extraction-udm
@@ -37,127 +47,198 @@ components:
 
 validation_plan:
   - check_id: CHK-01
-    check_name: Threshold format validation
-    check_type: format
-    check_description: Verify dollar and percent thresholds in approval_procedures and budget_approvals preserve the document's exact wording.
-    target_fields:
-      - approval_procedures
-      - budget_approvals.rebudgeting_thresholds
-      - budget_approvals.equipment_approvals
-    severity: warning
-  - check_id: CHK-02
-    check_name: Approval procedure completeness
+    check_name: Approval-procedures table completeness
     check_type: completeness
-    check_description: Verify every approval type called out in narrative buckets has a corresponding row in approval_procedures with at minimum approval_type and either threshold or documentation populated.
-    target_fields:
-      - approval_procedures
+    check_description: Verify every prior-approval category captured has a row in the APPROVAL PROCEDURES six-column table.
+    target_fields: []
+    severity: error
+  - check_id: CHK-02
+    check_name: Approval-authority preservation
+    check_type: format
+    check_description: Verify Approval Authority text preserves the document's exact wording (e.g., "Grants Officer", "Cognizant Federal Agency").
+    target_fields: []
     severity: warning
+  - check_id: CHK-03
+    check_name: Threshold quotation
+    check_type: format
+    check_description: Verify thresholds quote the document verbatim (e.g., "25% of total award", "$10,000").
+    target_fields: []
+    severity: error
 
 steps:
-  - name: Extraction
+  - name: Knowledge Base Context Lookup
     tasks:
-      - name: extract-prior-approvals
-        kind: Extraction
-        input_source: workflow_documents
+      - name: kb-context-lookup
+        kind: KnowledgeBaseQuery
+        query: "prior approval 2 CFR 200.308 expanded authority Research Terms and Conditions rebudgeting threshold no-cost extension PI change scope change equipment threshold cognizant federal agency approval authority processing timeline"
+        k: 8
+        knowledge_base_hint:
+          title: "OMB Uniform Guidance (2 CFR 200)"
+          description: >
+            Primary regulatory KB — §200.308 is the prior-approval
+            section that drives every federal award's prior-approval
+            matrix. For NSF awards, swap in NSF PAPPG Reference. For
+            NIH awards, swap in NIH Grants Policy Statement. For
+            contract awards, swap in Federal Acquisition Regulation
+            (FAR) or DOD Research Funding & DFARS. When the operator
+            does not attach a KB, this step returns empty output
+            gracefully and the downstream extraction falls back to
+            reading just the uploaded award notice.
+
+  - name: Extraction (Prompt)
+    tasks:
+      - name: extract-prior-approval
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
           You are extracting prior-approval requirements from a federal
-          award document. Federal awards typically distinguish three
-          families of activities that require sponsor authorization before
-          they can occur: budget changes, scope/timeline changes, and
-          administrative changes (PI substitutions, foreign travel,
-          subawards, etc.).
+          award notice or agreement. You receive the uploaded document
+          AND any KB chunks the previous step retrieved in your
+          context.
 
-          Be 100% accurate. For each searchset item, return the value as
-          the document states it. Quote dollar thresholds, percent
-          thresholds, and day-counts verbatim ("$25,000", "25%", "30
-          days"). Use null when a field is not present — never invent
-          values.
+          Be 100% accurate. Quote thresholds, dollar amounts, and
+          approval-authority titles verbatim. Use null when a field is
+          absent — never invent values.
 
-          Search the entire document with attention to sections titled
-          "Prior Approval", "Pre-approval", "Written Approval", "Agency
-          Approval", "2 CFR 200", or "Research Terms and Conditions".
-          Keywords to follow: prior approval, pre-approval, written
-          approval, agency approval, permission, authorize, CFR 200, RTC,
-          waive, delegate, threshold.
+          Search every section with attention to titles like "Prior
+          Approval Requirements", "Terms and Conditions", "Special
+          Conditions", "Administrative Requirements", "Reporting and
+          Other Requirements", "Award Provisions". Keywords to follow:
+          prior approval, written approval, sponsor approval, 2 CFR
+          200.308, RTC, expanded authority, rebudget, NCE, no-cost
+          extension, PI change, key personnel change, scope change,
+          equipment, threshold, cognizant agency, grants officer.
 
-          rtc_waivers is for waived approvals only — items the RTC or
-          agency expanded authority lets the recipient handle without
-          sponsor sign-off. Do not duplicate kept approvals there.
-        searchset:
-          title: Prior Approval Extraction
-          domain: research-administration
-          items:
-            - title: award_number
-              searchphrase: Federal Award Identification Number (FAIN) printed on the award.
-            - title: rebudgeting_thresholds
-              searchphrase: Re-budgeting thresholds and restrictions requiring prior approval. Quote dollar/percent thresholds verbatim.
-              is_optional: true
-            - title: equipment_approvals
-              searchphrase: Equipment-purchase approval requirements (typically tied to a $ threshold).
-              is_optional: true
-            - title: subaward_approvals
-              searchphrase: Subcontracting / subaward approval requirements.
-              is_optional: true
-            - title: pi_change_requirements
-              searchphrase: Requirements for PI or key-personnel changes (substitution, reduction in effort).
-              is_optional: true
-            - title: nce_requirements
-              searchphrase: No-cost extension request requirements (notice period, supporting documentation, sponsor route).
-              is_optional: true
-            - title: foreign_travel_approvals
-              searchphrase: Foreign travel approval requirements when the award imposes them.
-              is_optional: true
-            - title: approval_procedures
-              searchphrase: Approval-procedures table with rows of {approval_type, threshold, documentation, authority, timeline, consequences}. Each row is one approval type.
-            - title: rtc_waivers
-              searchphrase: Research Terms and Conditions waivers and expanded-authority delegations the recipient can handle without sponsor sign-off.
-              is_optional: true
+          CRITICAL — descriptive fields must be FLAT STRINGS, not
+          nested objects. The downstream Consolidation renders these
+          verbatim into Markdown; nested JSON appears as literal
+          `{...}` in the deliverable.
 
-  - name: Consolidation
+          Extract these fields:
+
+          - award_number: STRING. Federal Award Identification Number
+            (FAIN). null when absent.
+          - pi_name: STRING. Principal Investigator. null when absent.
+          - budget_approvals: STRING. Description of budget-approval
+            requirements — rebudgeting thresholds (typically expressed
+            as "X% of total award"), category-specific approval
+            triggers (equipment over a threshold, participant support
+            changes, F&A changes, subaward approvals). Concatenate all
+            budget-related approval categories into one
+            natural-language description. null when the document does
+            not specify any.
+          - scope_timeline_approvals: STRING. Description of
+            scope-and-timeline approval requirements — no-cost
+            extensions, PI / key personnel changes, scope changes,
+            project-period changes. One natural-language description.
+            null when the document does not specify any.
+          - approval_procedures: JSON ARRAY of
+            {approval_type, threshold_or_trigger, required_documentation,
+             approval_authority, processing_timeline,
+             consequences_of_noncompliance} objects — one row per
+            distinct prior-approval category enumerated in the
+            document. Each field is a STRING quoting the document
+            verbatim. Empty array only when the document specifies no
+            prior-approval categories.
+          - rtc_waivers: JSON ARRAY of STRINGS. RTC (Research Terms
+            and Conditions) expanded-authority waivers explicitly
+            granted by the award. Empty array when none.
+          - regulatory_references: JSON ARRAY of STRINGS. References
+            to regulations cited for prior-approval requirements (e.g.,
+            "2 CFR 200.308", "Research Terms and Conditions",
+            "NSF PAPPG VI.B.3"). Empty array when none.
+
+          ## Output
+
+          Emit exactly one JSON object with the keys above. No
+          preamble, no markdown fences. The Consolidation step
+          parses this and renders the final Markdown deliverable.
+
+  - name: Consolidation (Markdown deliverable)
     is_output: true
     tasks:
       - name: prior-approval-consolidation
         kind: Prompt
         input_source: step_input
         prompt_inline: |
-          You are assembling the Prior Approval Extraction output. The
-          input is the JSON fragment produced by the upstream Extraction
-          task. Your job is to emit a single JSON object that validates
-          against the prior-approval-extraction-udm@0.1.0 schema.
+          You are the consolidation step of the Prior Approval
+          Extraction workflow. You receive ONE JSON object from the
+          previous Extraction step containing prior-approval
+          requirements pulled from a federal award notice.
 
-          Top-level shape:
-          {
-            "award_number": string|null,
-            "budget_approvals": {
-              "rebudgeting_thresholds": string|null,
-              "equipment_approvals": string|null,
-              "subaward_approvals": string|null
-            },
-            "scope_timeline_approvals": {
-              "pi_change_requirements": string|null,
-              "nce_requirements": string|null,
-              "foreign_travel_approvals": string|null
-            },
-            "approval_procedures": {approval_type, threshold, documentation, authority, timeline, consequences}[],
-            "rtc_waivers": string[]
-          }
+          Your job is to render a single RA-friendly Markdown
+          deliverable for the sponsored-programs / post-award analyst.
+          The deliverable is Markdown — NOT a JSON object, NOT a JSON
+          code fence.
 
-          Rules:
-          1. Collapse the three rebudgeting/equipment/subaward searchset
-             items into the budget_approvals object, and the three
-             pi/nce/foreign-travel items into the scope_timeline_approvals
-             object.
-          2. approval_procedures must be an array of objects, one per
-             approval type. Quote dollar thresholds and day-counts
-             verbatim. Each row needs at minimum approval_type populated.
-          3. Per-row procedure mechanics belong on the row, not duplicated
-             in the narrative bucket. The bucket fields hold descriptive
-             narrative; procedural specifics (authority, timeline,
-             consequences) belong in approval_procedures.
-          4. rtc_waivers is a flat list of strings naming waived approvals
-             only. Empty array when none are stated.
-          5. Use null for missing scalar fields; never invent values.
-          6. Do not output any text outside the single JSON object.
+          ## Required structure (in this exact order)
+
+          # Prior Approval Reference: <award_number or "Not specified">
+
+          **Principal Investigator:** <pi_name or "Not specified">
+
+          ---
+
+          ## BUDGET APPROVALS
+
+          Render `budget_approvals` as a natural-language paragraph.
+          If null, state "The document does not enumerate specific
+          budget-approval requirements beyond standard federal
+          defaults under 2 CFR 200.308."
+
+          ---
+
+          ## SCOPE & TIMELINE APPROVALS
+
+          Render `scope_timeline_approvals` as a natural-language
+          paragraph. If null, state "The document does not enumerate
+          specific scope-or-timeline approval requirements beyond
+          standard federal defaults under 2 CFR 200.308."
+
+          ---
+
+          ## APPROVAL PROCEDURES
+
+          Render `approval_procedures` as a Markdown table with header
+          separator (this six-column format is mandated by the source
+          workflow's formatting.md):
+
+          | Approval Type | Threshold / Trigger | Required Documentation | Approval Authority | Processing Timeline | Consequences of Non-compliance |
+          |---|---|---|---|---|---|
+
+          One row per array entry. If the array is empty, render:
+
+          | Not specified in the document | — | — | — | — | — |
+
+          ---
+
+          ## RTC EXPANDED-AUTHORITY WAIVERS
+
+          Render `rtc_waivers` as a bulleted list. If empty, state
+          "No RTC expanded-authority waivers granted."
+
+          ---
+
+          ## REGULATORY REFERENCES
+
+          Render `regulatory_references` as a bulleted list. If empty,
+          state "2 CFR 200.308 (federal default)."
+
+          ## Rendering rules
+
+          - Bold every category label using `**Category Name:**` where
+            appropriate.
+          - Preserve thresholds verbatim ("25% of total award",
+            "$10,000") and approval-authority titles verbatim
+            ("Grants Officer", "Cognizant Federal Agency").
+          - If any field arrives as a nested JSON object instead of a
+            string or expected structure, REWRITE it into prose / the
+            target table before emitting — do NOT pass through `{...}`
+            syntax into the Markdown.
+          - No JSON code fences around the output.
+          - Skip empty sub-bullets — do not emit "Field: —" placeholder
+            lines when a field is null.
 
 evals:
   workflow_local: true

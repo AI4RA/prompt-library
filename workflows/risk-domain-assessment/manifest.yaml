@@ -1,44 +1,38 @@
 # Authored source for the Risk Domain Assessment Vandalizer workflow.
 #
-# The companion risk-domain-assessment.vandalizer.json is generated from
-# this file by scripts/build_vandalizer_workflows.py and committed
-# alongside. Never hand-edit the generated JSON — update this manifest and
-# rebuild.
+# === Topology (v0.2.0, Variant A + KB injection) ===
 #
-# Runtime topology (v0.1.0):
-#   Step 1  Parallel Extraction
-#     6 Extraction tasks, each covering 2-4 of the 14 risk domains with
-#     embedded SearchSets whose item titles mirror the
-#     risk-domain-assessment-udm@0.1.0 schema field names. The six tasks
-#     mirror the source ProcessMapping workflow's TASK-1-1 through
-#     TASK-1-6 one-for-one (Domains 1+9, 2+8, 3+13, 4+5, 6+7,
-#     10+11+12+14).
-#   Step 2  Consolidation
-#     1 Prompt task assembles the six JSON fragments into a single object
-#     that validates against
-#     components/risk-domain-assessment-udm/schema.json, computes the
-#     aggregate metrics (total_risk_score, average_risk_score,
-#     overall_risk_level), and derives high_risk_domains /
-#     key_risk_findings / recommended_mitigations.
+# v0.2.0 changes vs. v0.1.0:
+#   1. Parallel Extraction tasks converted to Prompt tasks. The
+#      consolidation step still gets integer scores per domain (not
+#      strings) — scores are JSON integers in the mid-pipeline JSON
+#      fragments.
+#   2. Output contract: plain-text-style risk report wrapped in a
+#      ```text code block (mirrors source consolidation.md output
+#      template — dot-leader scores, underlined section headers).
+#      This is unique among the 15 workflows: it's the ONE workflow
+#      whose Markdown deliverable is wrapped in a code block rather
+#      than emitted as live Markdown.
+#   3. Step 0 KnowledgeBaseQuery added.
 
 name: Risk Domain Assessment
 description: >
-  Uploads one or more award documents (Notice of Award, FOA / NOFO / RFA,
-  modification, proposal) and returns a single structured JSON object
-  scoring 14 institutional risk domains on a 1-5 rubric with evidence-cited
-  justifications, plus aggregate metrics (total / average risk scores,
-  overall risk level enum, high-risk-domain list, key findings,
-  recommended mitigations). Output conforms to the
-  risk-domain-assessment-udm component schema. The runtime mirrors the
-  ui-insight/ProcessMapping risk-domain-assessment workflow's six parallel
-  Extraction tasks (each covering 2-4 domains) plus a Consolidation Prompt.
+  Uploads federal award documents (Notice of Award, FOA / NOFO / RFA,
+  modification, proposal) and returns an RA-friendly Risk Domain
+  Assessment Report scoring 14 institutional risk domains on a 1-5
+  rubric with evidence citations, aggregate metrics, high-risk-areas
+  list, key findings, and recommended mitigations. The deliverable is
+  rendered as plain-text inside a Markdown code block per the source
+  ui-insight/ProcessMapping risk-domain-assessment consolidation.md
+  output template — dot-leader score lines, underlined section
+  headers, fixed-width layout for legibility.
 
-workflow_version: 0.1.0
+workflow_version: 0.2.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-05-20
-updated: 2026-05-20
+updated: 2026-05-22
 
 components:
   - slug: risk-domain-assessment-udm
@@ -48,362 +42,209 @@ validation_plan:
   - check_id: CHK-01
     check_name: Score range validation
     check_type: range
-    check_description: Verify all 14 domain scores are JSON integers in [1, 5].
-    target_fields:
-      - domain_scores.domain_1_programmatic_complexity.score
-      - domain_scores.domain_2_financial_budgetary_risk.score
-      - domain_scores.domain_3_subrecipient_partner_risk.score
-      - domain_scores.domain_4_research_security.score
-      - domain_scores.domain_5_compliance_regulatory.score
-      - domain_scores.domain_6_reporting_burden.score
-      - domain_scores.domain_7_administrative_burden.score
-      - domain_scores.domain_8_audit_risk.score
-      - domain_scores.domain_9_strategic_alignment.score
-      - domain_scores.domain_10_sustainability_closeout.score
-      - domain_scores.domain_11_doj_bulk_data.score
-      - domain_scores.domain_12_ip_privacy.score
-      - domain_scores.domain_13_unusual_terms.score
-      - domain_scores.domain_14_reputational_risk.score
+    check_description: Verify all 14 domain scores are integers in [1, 5].
+    target_fields: []
     severity: error
   - check_id: CHK-02
     check_name: Justification completeness
     check_type: completeness
-    check_description: Verify all 14 domain scores have non-empty justifications.
-    target_fields:
-      - domain_scores.domain_1_programmatic_complexity.justification
-      - domain_scores.domain_2_financial_budgetary_risk.justification
-      - domain_scores.domain_3_subrecipient_partner_risk.justification
-      - domain_scores.domain_4_research_security.justification
-      - domain_scores.domain_5_compliance_regulatory.justification
-      - domain_scores.domain_6_reporting_burden.justification
-      - domain_scores.domain_7_administrative_burden.justification
-      - domain_scores.domain_8_audit_risk.justification
-      - domain_scores.domain_9_strategic_alignment.justification
-      - domain_scores.domain_10_sustainability_closeout.justification
-      - domain_scores.domain_11_doj_bulk_data.justification
-      - domain_scores.domain_12_ip_privacy.justification
-      - domain_scores.domain_13_unusual_terms.justification
-      - domain_scores.domain_14_reputational_risk.justification
+    check_description: Verify all 14 domain scores have non-empty evidence-cited justifications.
+    target_fields: []
     severity: error
   - check_id: CHK-03
     check_name: Aggregate score consistency
     check_type: arithmetic
-    check_description: Verify total_risk_score equals the sum of the 14 domain scores and average_risk_score equals total_risk_score / 14.
-    target_fields:
-      - aggregate_metrics.total_risk_score
-      - aggregate_metrics.average_risk_score
+    check_description: Verify total_risk_score equals the arithmetic sum of the 14 domain scores; average_risk_score equals total_risk_score / 14 rounded to one decimal place.
+    target_fields: []
     severity: warning
 
 steps:
-  - name: Parallel Risk Domain Extraction
+  - name: Knowledge Base Context Lookup
+    tasks:
+      - name: kb-context-lookup
+        kind: KnowledgeBaseQuery
+        query: "federal award risk programmatic complexity financial budgetary subrecipient research security foreign influence compliance regulatory reporting burden audit risk strategic alignment sustainability closeout sensitive data CJIS PII intellectual property data rights privacy unusual terms sponsor reliability reputational risk export control NSPM-33 CHIPS Act"
+        k: 8
+        knowledge_base_hint:
+          title: "OMB Uniform Guidance (2 CFR 200)"
+          description: >
+            Primary regulatory KB. For research-security-heavy
+            awards, swap in Export Control (EAR & ITAR) or Responsible
+            Conduct of Research (RCR). For agency-specific scoring,
+            swap in NSF PAPPG / NIH GPS / DOE / DOD / DFARS.
+
+  - name: Parallel Risk Domain Extraction (Prompt)
     tasks:
       - name: extract-programmatic-strategic
-        kind: Extraction
-        input_source: workflow_documents
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
           You are scoring Domain 1 (Programmatic Complexity) and
-          Domain 9 (Strategic / Mission Alignment) of the 14-domain risk
-          rubric. Mirrors TASK-1-1 of the source ProcessMapping
-          risk-domain-assessment workflow.
+          Domain 9 (Strategic / Mission Alignment) of the 14-domain
+          risk rubric. You receive the uploaded documents AND any KB
+          chunks.
 
-          Be evidence-based. Cite document sections in every
-          justification. When the document is insufficient, score
-          conservatively (1 or 2) and write
-          "Insufficient document evidence: ..." as the justification.
+          Evidence-based scoring only. Every score cites specific
+          document sections. When insufficient evidence: score
+          conservatively (1 or 2) with justification
+          "Insufficient document evidence: ...". Never infer.
 
-          Domain 1 score is a JSON INTEGER in [1, 5], not a quoted string.
-          Domain 9 score is a JSON INTEGER in [1, 5], not a quoted string.
+          CRITICAL — scores are JSON INTEGERS in [1, 5], never quoted
+          strings or enum entries.
 
-          For each searchset item return the document's evidence:
-          - project_title: title of the funded project.
-          - project_description_summary: brief summary of project scope.
-          - number_of_project_components: JSON integer or null.
-          - partnership_requirements: string or null.
-          - technical_sophistication_indicators: JSON array of strings.
-          - domain_1_score: JSON integer 1-5.
-          - domain_1_justification: evidence-cited string.
-          - institutional_mission_fit: string or null.
-          - institutional_resource_requirements: JSON array of strings.
-          - domain_9_score: JSON integer 1-5.
-          - domain_9_justification: evidence-cited string.
-        searchset:
-          title: Programmatic Complexity and Strategic Alignment
-          domain: research-administration
-          items:
-            - title: project_title
-              searchphrase: Title of the funded project as stated in the documents.
-            - title: project_description_summary
-              searchphrase: Brief summary of the project scope and objectives.
-            - title: number_of_project_components
-              searchphrase: Count of distinct project activities, phases, or components identified as a JSON integer.
-              is_optional: true
-            - title: partnership_requirements
-              searchphrase: Required partnerships, consortia, or collaborative structures.
-              is_optional: true
-            - title: technical_sophistication_indicators
-              searchphrase: Indicators of technical complexity as a JSON array of strings.
-              is_optional: true
-            - title: domain_1_score
-              searchphrase: Programmatic Complexity risk score 1-5 as a JSON integer.
-            - title: domain_1_justification
-              searchphrase: Evidence-based justification for the Programmatic Complexity score.
-            - title: institutional_mission_fit
-              searchphrase: Alignment between the project and institutional priorities as a string.
-              is_optional: true
-            - title: institutional_resource_requirements
-              searchphrase: Required institutional resources as a JSON array of strings.
-              is_optional: true
-            - title: domain_9_score
-              searchphrase: Strategic Alignment risk score 1-5 as a JSON integer.
-            - title: domain_9_justification
-              searchphrase: Evidence-based justification for the Strategic Alignment score.
+          Emit a JSON object with: project_title (STRING),
+          project_description_summary (STRING),
+          number_of_project_components (INTEGER or null),
+          partnership_requirements (STRING or null),
+          technical_sophistication_indicators (JSON ARRAY of STRINGS),
+          domain_1_score (JSON INTEGER 1-5),
+          domain_1_justification (STRING — evidence-cited),
+          institutional_mission_fit (STRING or null),
+          institutional_resource_requirements (JSON ARRAY of STRINGS),
+          domain_9_score (JSON INTEGER 1-5),
+          domain_9_justification (STRING — evidence-cited).
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
 
       - name: extract-financial-audit
-        kind: Extraction
-        input_source: workflow_documents
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
           You are scoring Domain 2 (Financial & Budgetary Risk) and
-          Domain 8 (Audit Risk). Mirrors TASK-1-2 of the source workflow.
+          Domain 8 (Audit Risk).
 
-          Domain 2 and Domain 8 scores are JSON INTEGERS in [1, 5], not
-          quoted strings.
+          Scores are JSON INTEGERS in [1, 5]. Monetary fields are
+          JSON numbers OR strings preserving the document's format
+          (your choice).
 
-          Monetary fields are JSON NUMBERS, not quoted strings.
-          Convert "$1,234,567" -> 1234567.
+          Emit a JSON object with: total_federal_funding (STRING or
+          number), total_anticipated_funding (STRING/number/null),
+          cost_share_required (BOOLEAN), cost_share_amount
+          (STRING/number/null), idc_rate_restriction (STRING),
+          budget_flexibility_restrictions (JSON ARRAY of STRINGS),
+          multiple_funding_streams (BOOLEAN or null),
+          domain_2_score (JSON INTEGER 1-5),
+          domain_2_justification (STRING),
+          pass_through_indicator (BOOLEAN or null),
+          audit_exposure_indicators (JSON ARRAY of STRINGS),
+          domain_8_score (JSON INTEGER 1-5),
+          domain_8_justification (STRING).
 
-          Booleans (cost_share_required, multiple_funding_streams,
-          pass_through_indicator) are JSON booleans.
-
-          For each searchset item return the document's evidence.
-        searchset:
-          title: Financial Budgetary and Audit Risk
-          domain: research-administration
-          items:
-            - title: total_federal_funding
-              searchphrase: Total federal funds awarded as a JSON number.
-            - title: total_anticipated_funding
-              searchphrase: Total anticipated funding across all periods as a JSON number; null when not specified.
-              is_optional: true
-            - title: cost_share_required
-              searchphrase: Whether cost sharing or matching is required as a JSON boolean.
-            - title: cost_share_amount
-              searchphrase: Required cost share or matching amount as a JSON number; null when not applicable.
-              is_optional: true
-            - title: idc_rate_restriction
-              searchphrase: Indirect cost rate restrictions or caps imposed by the award.
-            - title: budget_flexibility_restrictions
-              searchphrase: Specific budget restrictions as a JSON array of strings.
-              is_optional: true
-            - title: multiple_funding_streams
-              searchphrase: Whether the award involves multiple funding streams as a JSON boolean.
-              is_optional: true
-            - title: domain_2_score
-              searchphrase: Financial Budgetary Risk score 1-5 as a JSON integer.
-            - title: domain_2_justification
-              searchphrase: Evidence-based justification for the Financial Risk score.
-            - title: pass_through_indicator
-              searchphrase: Whether the award involves pass-through funding as a JSON boolean.
-              is_optional: true
-            - title: audit_exposure_indicators
-              searchphrase: Factors that increase audit scrutiny as a JSON array of strings.
-              is_optional: true
-            - title: domain_8_score
-              searchphrase: Audit Risk score 1-5 as a JSON integer.
-            - title: domain_8_justification
-              searchphrase: Evidence-based justification for the Audit Risk score.
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
 
       - name: extract-subrecipient-sponsor
-        kind: Extraction
-        input_source: workflow_documents
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
           You are scoring Domain 3 (Subrecipient / Partner Risk) and
-          Domain 13 (Unusual Terms and Conditions / Sponsor Reliability).
-          Mirrors TASK-1-3 of the source workflow.
+          Domain 13 (Unusual Terms / Sponsor Reliability).
 
-          Domain 3 and Domain 13 scores are JSON INTEGERS in [1, 5].
-        searchset:
-          title: Subrecipient and Sponsor Risk
-          domain: research-administration
-          items:
-            - title: number_of_subrecipients
-              searchphrase: Count of identified subrecipients or consortium partners as a JSON integer.
-              is_optional: true
-            - title: subrecipient_details
-              searchphrase: Subrecipients with names, amounts, and noted capacity concerns as a JSON array of strings.
-              is_optional: true
-            - title: foreign_partners_present
-              searchphrase: Whether foreign subrecipients or partners are involved as a JSON boolean.
-              is_optional: true
-            - title: subrecipient_risk_level
-              searchphrase: Overall subrecipient risk assessment as a string.
-              is_optional: true
-            - title: subrecipient_monitoring_requirements
-              searchphrase: Required monitoring activities for subrecipients as a string.
-              is_optional: true
-            - title: domain_3_score
-              searchphrase: Subrecipient Risk score 1-5 as a JSON integer.
-            - title: domain_3_justification
-              searchphrase: Evidence-based justification for the Subrecipient Risk score.
-            - title: non_standard_terms
-              searchphrase: Terms that deviate from 2 CFR 200 Uniform Guidance or standard federal practice as a JSON array of strings.
-              is_optional: true
-            - title: special_conditions
-              searchphrase: Special conditions, restrictions, or unique requirements imposed by the award as a JSON array of strings.
-              is_optional: true
-            - title: domain_13_score
-              searchphrase: Unusual Terms and Conditions score 1-5 as a JSON integer.
-            - title: domain_13_justification
-              searchphrase: Evidence-based justification for the Unusual Terms score.
+          Emit a JSON object with: number_of_subrecipients (INTEGER or
+          null), subrecipient_details (JSON ARRAY of STRINGS),
+          foreign_partners_present (BOOLEAN or null),
+          subrecipient_risk_level (STRING or null),
+          subrecipient_monitoring_requirements (STRING or null),
+          domain_3_score (JSON INTEGER 1-5),
+          domain_3_justification (STRING),
+          non_standard_terms (JSON ARRAY of STRINGS),
+          special_conditions (JSON ARRAY of STRINGS),
+          domain_13_score (JSON INTEGER 1-5),
+          domain_13_justification (STRING).
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
 
       - name: extract-security-compliance
-        kind: Extraction
-        input_source: workflow_documents
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
-          You are scoring Domain 4 (Research Security & Foreign Influence)
-          and Domain 5 (Compliance & Regulatory Requirements). Mirrors
-          TASK-1-4 of the source workflow.
+          You are scoring Domain 4 (Research Security & Foreign
+          Influence) and Domain 5 (Compliance & Regulatory).
 
-          Domain 4 and Domain 5 scores are JSON INTEGERS in [1, 5].
-        searchset:
-          title: Research Security and Compliance
-          domain: research-administration
-          items:
-            - title: foreign_collaboration_indicators
-              searchphrase: Any foreign affiliations or collaborations referenced in the award as a JSON array of strings.
-              is_optional: true
-            - title: export_control_concerns
-              searchphrase: Whether the project involves export-controlled technologies as a JSON boolean.
-              is_optional: true
-            - title: nspm33_chips_applicability
-              searchphrase: NSPM-33 and CHIPS Act compliance requirements as a string.
-              is_optional: true
-            - title: domain_4_score
-              searchphrase: Research Security risk score 1-5 as a JSON integer.
-            - title: domain_4_justification
-              searchphrase: Evidence-based justification for the Research Security score.
-            - title: compliance_requirements_identified
-              searchphrase: Regulatory compliance areas triggered by the project as a JSON array of strings.
-              is_optional: true
-            - title: compliance_requirement_type
-              searchphrase: Primary type of compliance requirement as a string.
-              is_optional: true
-            - title: compliance_risk_level
-              searchphrase: Risk level for the primary compliance requirement as a string.
-              is_optional: true
-            - title: cross_cutting_federal_requirements
-              searchphrase: Cross-cutting federal requirements referenced as a JSON array of strings.
-              is_optional: true
-            - title: domain_5_score
-              searchphrase: Compliance and Regulatory score 1-5 as a JSON integer.
-            - title: domain_5_justification
-              searchphrase: Evidence-based justification for the Compliance score.
+          Emit a JSON object with: foreign_collaboration_indicators
+          (JSON ARRAY of STRINGS), export_control_concerns (BOOLEAN or
+          null), nspm33_chips_applicability (STRING or null),
+          domain_4_score (JSON INTEGER 1-5),
+          domain_4_justification (STRING),
+          compliance_requirements_identified (JSON ARRAY of STRINGS),
+          compliance_requirement_type (STRING or null),
+          compliance_risk_level (STRING or null),
+          cross_cutting_federal_requirements (JSON ARRAY of STRINGS),
+          domain_5_score (JSON INTEGER 1-5),
+          domain_5_justification (STRING).
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
 
       - name: extract-reporting-administrative
-        kind: Extraction
-        input_source: workflow_documents
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
           You are scoring Domain 6 (Performance Measurement & Reporting
           Burden) and Domain 7 (Administrative / Operational Burden).
-          Mirrors TASK-1-5 of the source workflow.
 
-          Domain 6 and Domain 7 scores are JSON INTEGERS in [1, 5].
-        searchset:
-          title: Reporting and Administrative Burden
-          domain: research-administration
-          items:
-            - title: reporting_frequency
-              searchphrase: Required reporting frequency (annual, quarterly, monthly).
-            - title: reporting_requirements_detail
-              searchphrase: Detailed description of all required reports and submissions.
-            - title: performance_metrics_complexity
-              searchphrase: Complexity and number of required performance indicators as a string.
-              is_optional: true
-            - title: evaluator_required
-              searchphrase: Whether an external evaluator is required as a JSON boolean.
-              is_optional: true
-            - title: data_use_agreements_required
-              searchphrase: Whether data use agreements are required as a JSON boolean.
-              is_optional: true
-            - title: domain_6_score
-              searchphrase: Reporting Burden score 1-5 as a JSON integer.
-            - title: domain_6_justification
-              searchphrase: Evidence-based justification for the Reporting Burden score.
-            - title: prior_approval_requirements
-              searchphrase: Actions requiring prior approval from the sponsor as a JSON array of strings.
-              is_optional: true
-            - title: administrative_complexity_indicators
-              searchphrase: Indicators of administrative burden as a JSON array of strings.
-              is_optional: true
-            - title: pi_capacity_considerations
-              searchphrase: Assessment of PI experience and capacity as a string.
-              is_optional: true
-            - title: domain_7_score
-              searchphrase: Administrative Burden score 1-5 as a JSON integer.
-            - title: domain_7_justification
-              searchphrase: Evidence-based justification for the Administrative Burden score.
+          Emit a JSON object with: reporting_frequency (STRING),
+          reporting_requirements_detail (STRING),
+          performance_metrics_complexity (STRING or null),
+          evaluator_required (BOOLEAN or null),
+          data_use_agreements_required (BOOLEAN or null),
+          domain_6_score (JSON INTEGER 1-5),
+          domain_6_justification (STRING),
+          prior_approval_requirements (JSON ARRAY of STRINGS),
+          administrative_complexity_indicators (JSON ARRAY of STRINGS),
+          pi_capacity_considerations (STRING or null),
+          domain_7_score (JSON INTEGER 1-5),
+          domain_7_justification (STRING).
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
 
       - name: extract-data-sustainability-reputational
-        kind: Extraction
-        input_source: workflow_documents
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
-          You are scoring Domain 10 (Sustainability & Closeout Risk),
-          Domain 11 (DOJ Bulk Data & Sensitive Information), Domain 12
-          (IP, Data Rights & Privacy), and Domain 14 (Institutional /
-          Reputational Risk). Mirrors TASK-1-6 of the source workflow.
+          You are scoring Domain 10 (Sustainability & Closeout),
+          Domain 11 (DOJ Bulk Data & Sensitive Information),
+          Domain 12 (IP, Data Rights & Privacy), and Domain 14
+          (Institutional / Reputational Risk).
 
-          All four domain scores are JSON INTEGERS in [1, 5].
-        searchset:
-          title: Data Sustainability and Reputational Risk
-          domain: research-administration
-          items:
-            - title: post_award_obligations
-              searchphrase: Ongoing institutional obligations after the period of performance ends as a JSON array of strings.
-              is_optional: true
-            - title: closeout_requirements
-              searchphrase: Specific closeout requirements and timelines as a string.
-              is_optional: true
-            - title: property_equipment_obligations
-              searchphrase: Requirements for property or equipment management during and after the award as a string.
-              is_optional: true
-            - title: domain_10_score
-              searchphrase: Sustainability and Closeout Risk score 1-5 as a JSON integer.
-            - title: domain_10_justification
-              searchphrase: Evidence-based justification for the Sustainability score.
-            - title: sensitive_data_requirements
-              searchphrase: Requirements for handling sensitive data as a string.
-              is_optional: true
-            - title: data_security_standards
-              searchphrase: Required data security and encryption standards as a JSON array of strings.
-              is_optional: true
-            - title: domain_11_score
-              searchphrase: DOJ Bulk Data and Sensitive Information score 1-5 as a JSON integer.
-            - title: domain_11_justification
-              searchphrase: Evidence-based justification for the DOJ Data score.
-            - title: ip_ownership_terms
-              searchphrase: Intellectual property ownership clauses and restrictions as a string.
-              is_optional: true
-            - title: data_sharing_requirements
-              searchphrase: Required data sharing or open data mandates as a string.
-              is_optional: true
-            - title: publication_requirements
-              searchphrase: Publication restrictions or requirements imposed by the award as a string.
-              is_optional: true
-            - title: privacy_risk_indicators
-              searchphrase: Privacy concerns as a JSON array of strings.
-              is_optional: true
-            - title: domain_12_score
-              searchphrase: IP Data Rights and Privacy score 1-5 as a JSON integer.
-            - title: domain_12_justification
-              searchphrase: Evidence-based justification for the IP and Privacy score.
-            - title: reputational_risk_indicators
-              searchphrase: Factors that could affect institutional reputation as a JSON array of strings.
-              is_optional: true
-            - title: domain_14_score
-              searchphrase: Institutional and Reputational Risk score 1-5 as a JSON integer.
-            - title: domain_14_justification
-              searchphrase: Evidence-based justification for the Reputational Risk score.
+          Emit a JSON object with: post_award_obligations (JSON ARRAY
+          of STRINGS), closeout_requirements (STRING or null),
+          property_equipment_obligations (STRING or null),
+          domain_10_score (JSON INTEGER 1-5),
+          domain_10_justification (STRING),
+          sensitive_data_requirements (STRING or null),
+          data_security_standards (JSON ARRAY of STRINGS),
+          domain_11_score (JSON INTEGER 1-5),
+          domain_11_justification (STRING),
+          ip_ownership_terms (STRING or null),
+          data_sharing_requirements (STRING or null),
+          publication_requirements (STRING or null),
+          privacy_risk_indicators (JSON ARRAY of STRINGS),
+          domain_12_score (JSON INTEGER 1-5),
+          domain_12_justification (STRING),
+          reputational_risk_indicators (JSON ARRAY of STRINGS),
+          domain_14_score (JSON INTEGER 1-5),
+          domain_14_justification (STRING).
 
-  - name: Risk Profile Consolidation
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+  - name: Risk Profile Consolidation (Plain-text in code block)
     is_output: true
     tasks:
       - name: risk-domain-assessment-consolidation
@@ -411,94 +252,117 @@ steps:
         input_source: step_input
         prompt_inline: |
           You are the consolidation step of the Risk Domain Assessment
-          workflow. You receive six extraction outputs from the previous
-          step (each covering 2-4 of the 14 risk domains) and must emit
-          a SINGLE JSON object that validates against the
-          risk-domain-assessment-udm@0.1.0 schema (schema.json in the
-          component directory).
+          workflow. You receive SIX JSON fragments from the previous
+          step, covering all 14 domain scores plus award metadata
+          (extracted via the parallel tasks).
 
-          ## Output contract
+          CRITICAL — scores must be JSON integers throughout. Compute
+          aggregate metrics deterministically:
+          - total_risk_score = arithmetic sum of all 14 domain scores
+          - average_risk_score = total_risk_score / 14, rounded to one
+            decimal place
+          - overall_risk_level:
+            * "Low" if average 1.0-1.9
+            * "Moderate" if average 2.0-2.9
+            * "High" if average 3.0-3.9
+            * "Very High" if average 4.0-5.0
 
-          Emit exactly one JSON object. No preamble, no closing commentary,
-          no markdown fences. If your runtime requires fenced output, wrap
-          in a single ```json ... ``` block and emit nothing outside it.
+          Render the final deliverable as PLAIN TEXT inside a Markdown
+          code block. This is unique to this workflow — the source
+          consolidation.md output template uses fixed-width plain-text
+          formatting with dot-leader score lines and underlined section
+          headers. Do NOT use Markdown headers (## etc.) inside the
+          code block — use the underline style as shown.
 
-          Top-level keys (in this order): `award_metadata`,
-          `domain_scores`, `aggregate_metrics`.
+          ## Required output structure (EXACTLY this — wrap the entire
+          report in a ```text … ``` code block)
 
-          ## Field-by-field assembly
+          ```text
+          RISK DOMAIN ASSESSMENT REPORT
+          ==============================
 
-          ### award_metadata
+          Award: <award_number from extractions or "Not specified">
+          Sponsor: <sponsor_name from extractions>
+          PI: <pi_name from extractions>
+          Period: <period start> to <period end>
+          Funding: <total_federal_funding>
+          CFDA: <cfda_number or "Not specified">
+          Assessment Date: <today's date>
 
-          Pull award_number, cfda_number, sponsor_name, pi_name,
-          award_period_start, award_period_end from the input documents
-          (these are not split by the six extraction tasks — the
-          consolidator must surface them from any document section in
-          which they appear). assessment_date is today's date in ISO
-          YYYY-MM-DD, or null when the workflow runner does not provide
-          one.
+          RISK AREA SCORES
+          ----------------
+           1. Programmatic Complexity ............. <domain_1_score>/5
+           2. Financial & Budgetary Risk .......... <domain_2_score>/5
+           3. Subrecipient / Partner Risk ......... <domain_3_score>/5
+           4. Research Security & Foreign Influence  <domain_4_score>/5
+           5. Compliance & Regulatory ............. <domain_5_score>/5
+           6. Reporting Burden .................... <domain_6_score>/5
+           7. Administrative / Operational Burden . <domain_7_score>/5
+           8. Audit Risk .......................... <domain_8_score>/5
+           9. Strategic / Mission Alignment ....... <domain_9_score>/5
+          10. Sustainability & Closeout ........... <domain_10_score>/5
+          11. Sensitive Data & Information Security <domain_11_score>/5
+          12. IP, Data Rights & Privacy ........... <domain_12_score>/5
+          13. Unusual Terms / Sponsor Reliability . <domain_13_score>/5
+          14. Institutional / Reputational Risk ... <domain_14_score>/5
 
-          ### domain_scores
+          AGGREGATE METRICS
+          -----------------
+          Total Risk Score: <sum>/70
+          Average Risk Score: <average>/5.0
+          Overall Risk Level: <Low | Moderate | High | Very High>
 
-          Assemble 14 domain blocks (`domain_1_programmatic_complexity`
-          through `domain_14_reputational_risk`) by routing each
-          extraction's per-domain output to the matching block. Each
-          domain block must contain:
-          - score: JSON INTEGER 1-5 (never quoted, never an enum entry).
-          - justification: evidence-cited string. When the extractor
-            returned an empty justification but a non-null score, emit
-            a flag string in justification: "FLAG: extractor returned
-            score N with no justification — re-run domain extraction."
-          - all required evidence fields per the schema.
+          HIGH-RISK AREAS (Score >= 4)
+          ----------------------------
+          [List each risk area scoring 4-5 with its score and a brief
+           justification summary, one per line.]
+          [If none, write: "No risk areas scored 4 or above."]
 
-          CRITICAL: if any extractor surfaced a quoted score string
-          ("3"), convert it to a JSON integer (3) here.
+          KEY FINDINGS
+          ------------
+          [3-5 synthesized key findings with document evidence citations.
+           Each finding states the specific risk, cites the source
+           document (NOA, NOFO, Modification, etc.), and notes the
+           affected domain(s).]
 
-          ### aggregate_metrics
+          RECOMMENDED MITIGATIONS
+          ------------------------
+          [For each risk area scoring >= 3, provide a specific actionable
+           mitigation. One per line.]
+          [If none scored 3+, write: "No elevated risk areas requiring
+           mitigation."]
 
-          Compute deterministically from domain_scores:
+          DETAILED EVIDENCE BY RISK AREA
+          -------------------------------
+          [For each of the 14 risk areas, reproduce the score and
+           justification from the parallel extractions. Organize by
+           domain number. Format:
 
-          - total_risk_score: JSON INTEGER. Sum of the 14
-            domain_scores.*.score integers. Range [14, 70].
-          - average_risk_score: JSON NUMBER. total_risk_score / 14,
-            rounded to one decimal place. Range [1.0, 5.0].
-          - overall_risk_level: one of "Low" (avg 1.0-1.9), "Moderate"
-            (2.0-2.9), "High" (3.0-3.9), "Very High" (4.0-5.0).
-          - high_risk_domains: JSON array of domain names (e.g.,
-            "Domain 4 — Research Security & Foreign Influence") with
-            score >= 4. Empty array when none reach 4 or 5.
-          - key_risk_findings: JSON array of short evidence-cited
-            strings drawn from high-risk-domain justifications. Empty
-            array when overall risk is "Low".
-          - recommended_mitigations: JSON array of short mitigation
-            strategies tied to high-risk domains. Empty array when
-            overall risk is "Low".
+           1. Programmatic Complexity — Score: <N>/5
+              <justification text wrapped to ~75 columns>
 
-          ## Cross-field rules
+           2. Financial & Budgetary Risk — Score: <N>/5
+              <justification>
 
-          1. Every domain score is a JSON integer in [1, 5].
-          2. Every domain score has a non-empty justification (enforce
-             minLength: 1 via the FLAG path above when the extractor
-             omitted one).
-          3. When score >= 3, the justification cites specific document
-             evidence (mirrors source CFR-01). When the extractor
-             returned a >= 3 score with a generic justification, prepend
-             "FLAG: " and require a manual re-run.
-          4. total_risk_score equals the arithmetic sum of the 14
-             domain scores.
-          5. average_risk_score equals total_risk_score / 14 (rounded
-             to one decimal place).
+           …continued for all 14 domains.]
+          ```
 
-          ## Quality bar
+          ## Rendering rules
 
-          - Output validates against schema.json (draft 2020-12).
-          - All 14 domain scores are JSON integers, not quoted strings.
-          - total_risk_score is a JSON integer in [14, 70].
-          - average_risk_score is a JSON number in [1.0, 5.0].
-          - overall_risk_level is one of the four enum values.
-          - Required arrays (high_risk_domains, key_risk_findings,
-            recommended_mitigations) are always emitted; use [] when
-            empty rather than null.
+          - Wrap the ENTIRE report in a ```text … ``` Markdown code
+            block — the renderer will display it in fixed-width font.
+          - Use `=` underline for the title and `-` underline for
+            section headers.
+          - Dot-leader score lines exactly as shown.
+          - Two-digit domain numbers left-padded with a space.
+          - Preserve INTEGER scores in the dot-leader lines.
+          - When `domain_X_score` is null or missing, render as `?/5`
+            and add a line to KEY FINDINGS noting the missing domain.
+          - If a domain's justification was "Insufficient document
+            evidence: ...", carry that notation forward verbatim.
+          - Mitigations are specific actionable institutional actions,
+            not generic boilerplate.
+          - No JSON output outside the code block.
 
 evals:
   workflow_local: true

@@ -33,7 +33,8 @@ SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n(.*)$", re.DOTALL)
 
 DEFAULT_TASK_KIND = "Prompt"
-ALLOWED_TASK_KINDS = {"Prompt", "Extraction"}
+ALLOWED_TASK_KINDS = {"Prompt", "Extraction", "KnowledgeBaseQuery"}
+ALLOWED_INPUT_SOURCES = {"step_input", "workflow_documents", "select_document"}
 
 
 class BuildError(Exception):
@@ -133,6 +134,66 @@ def resolve_task_prompt(
 
     sha = hashlib.sha256(body.encode("utf-8")).hexdigest()
     return body, slug, sha
+
+
+def build_knowledge_base_query(task: dict, manifest_path: Path) -> dict:
+    """
+    Compile the manifest's KnowledgeBaseQuery task into the Vandalizer
+    task.data payload. KnowledgeBaseQueryNode.process() in
+    workflow_engine.py reads `kb_uuid`, `query`, and `k` (top-k chunks);
+    it returns empty output gracefully when kb_uuid is blank, so this
+    step works as a placeholder that the operator fills in via the
+    Vandalizer UI after import.
+
+    The optional `knowledge_base_hint` block in the manifest becomes the
+    `_embedded_knowledge_base` field on task.data. Vandalizer's
+    _reconstruct_task_references() (export_import_service.py) pops that
+    field on import and writes an `_import_note` to task.data telling
+    the operator which KB title to select from their local KB list.
+    """
+    task_name = task.get("name", "<unnamed>")
+    query = task.get("query")
+    if not isinstance(query, str) or not query.strip():
+        raise BuildError(
+            manifest_path,
+            f"task {task_name!r} kind: KnowledgeBaseQuery requires a non-empty `query` string",
+        )
+    k = task.get("k", 8)
+    if not isinstance(k, int) or k <= 0:
+        raise BuildError(
+            manifest_path,
+            f"task {task_name!r} kind: KnowledgeBaseQuery `k` must be a positive integer",
+        )
+    data: dict = {
+        "name": task_name,
+        "kb_uuid": "",
+        "query": query.strip(),
+        "k": k,
+    }
+    hint = task.get("knowledge_base_hint")
+    if hint is not None:
+        if not isinstance(hint, dict):
+            raise BuildError(
+                manifest_path,
+                f"task {task_name!r} knowledge_base_hint must be a mapping when present",
+            )
+        title = hint.get("title")
+        if not isinstance(title, str) or not title.strip():
+            raise BuildError(
+                manifest_path,
+                f"task {task_name!r} knowledge_base_hint.title must be a non-empty string",
+            )
+        embedded = {"title": title.strip()}
+        description = hint.get("description")
+        if description is not None:
+            if not isinstance(description, str):
+                raise BuildError(
+                    manifest_path,
+                    f"task {task_name!r} knowledge_base_hint.description must be a string when present",
+                )
+            embedded["description"] = description.strip()
+        data["_embedded_knowledge_base"] = embedded
+    return data
 
 
 def build_embedded_search_set(task: dict, manifest_path: Path) -> dict:
@@ -332,14 +393,46 @@ def build_workflow(manifest_path: Path) -> tuple[dict, Path]:
         built_tasks: list[dict] = []
         for task in step.get("tasks", []):
             kind = task.get("kind", DEFAULT_TASK_KIND)
+
+            # KnowledgeBaseQuery tasks have a different data shape — no prompt,
+            # no input_source (they always run on workflow-level inputs); they
+            # carry kb_uuid (blanked by Vandalizer's importer per design),
+            # query, k, and an optional _embedded_knowledge_base hint that
+            # Vandalizer turns into an _import_note so the operator knows
+            # which KB title to assign in the UI after import.
+            if kind == "KnowledgeBaseQuery":
+                task_data = build_knowledge_base_query(task, manifest_path)
+                built_tasks.append({"name": kind, "data": task_data})
+                continue
+
             body, source_slug, sha = resolve_task_prompt(task, manifest_path, declared_slugs)
             if source_slug and sha:
                 provenance[source_slug]["prompt_sha256"] = sha
-            task_data: dict = {
+            task_data = {
                 "name": task["name"],
                 "prompt": body,
-                "input_source": task.get("input_source", "step_input"),
             }
+            # Vandalizer's _resolve_input_sources() (workflow_engine.py) reads
+            # `input_sources` (plural list) FIRST, falling back to `input_source`
+            # (singular) when the list is absent. The plural form lets a single
+            # task pull context from MULTIPLE sources simultaneously — useful
+            # for "KB chunks (step_input) + uploaded PDF (workflow_documents)"
+            # combined into one LLM context block. We emit whichever form the
+            # manifest uses; default to the singular `step_input` when neither
+            # is set.
+            sources_list = task.get("input_sources")
+            if isinstance(sources_list, list) and sources_list:
+                unknown = [s for s in sources_list if s not in ALLOWED_INPUT_SOURCES]
+                if unknown:
+                    raise BuildError(
+                        manifest_path,
+                        f"task {task.get('name', '<unnamed>')!r} input_sources contains unknown "
+                        f"value(s) {unknown}; allowed: {sorted(ALLOWED_INPUT_SOURCES)}",
+                    )
+                task_data["input_sources"] = list(sources_list)
+            else:
+                task_data["input_source"] = task.get("input_source", "step_input")
+
             if kind == "Extraction":
                 embedded = build_embedded_search_set(task, manifest_path)
                 task_data["_embedded_search_set"] = embedded

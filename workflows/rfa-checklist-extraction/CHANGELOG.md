@@ -6,6 +6,15 @@ All notable changes to this workflow. Versions follow semver adapted to workflow
 - **MINOR** — prompt body tracking a referenced component MINOR, or additive step/task options that preserve the existing operator flow.
 - **PATCH** — step or task display-name edits, description polish, non-semantic manifest cleanup.
 
+## [0.3.0] — 2026-05-22
+
+- **MAJOR step-structure change + output-contract change.** Two-part overhaul to fix the broken-on-real-documents v0.2.0 runtime:
+  1. **Parallel tasks: Extraction → Prompt.** Vandalizer's `Extraction` task type drives keyword-based SearchSet retrieval, which expects the document to use the literal search-term wording (e.g., "Due Date") it was given. Grant documents in practice use varied phrasings ("Full Proposal Deadline", "Closing Date", "Application Deadline" — for the same concept), so SearchSet retrieval returns empty fragments and the Consolidation step has nothing to assemble. The seven parallel tasks are now Vandalizer `Prompt` tasks (the default kind) that receive the full uploaded document via `input_source: workflow_documents` and let the LLM read with NLU to find the right content regardless of wording. The `kind: Extraction`, `searchset:` blocks, and `_embedded_search_set` / `searchphrases` fields are removed.
+  2. **Output contract: JSON → Markdown.** The Consolidation step now emits an RA-friendly Markdown checklist (eight sections per the source `ui-insight/ProcessMapping` `consolidation.md` conventions) rather than a schema-conformant JSON object. The pinned `rfa-checklist-extraction-udm` COMPONENT remains JSON-emitting and is the evaluation-harness target via its `prompt.md`; this WORKFLOW is the Vandalizer end-user (sponsored-programs analyst) deliverable. Mid-pipeline handoff between the seven parallel tasks and the Consolidation step uses JSON fragments (Variant A) — a side-by-side variant `rfa-checklist-extraction-md` tests the Markdown-chunks alternative for comparison.
+- `validation_plan` rewritten to target the Markdown deliverable structure (eight sections present, placement contract, monetary preservation, eligibility completeness) rather than per-field JSON validation.
+- Eval golden cases shifted from `expected.json` to `expected.md` — the workflow is now a Markdown-output workflow with workflow-local evals separate from the JSON-against-schema component evals.
+- Component pin unchanged at `rfa-checklist-extraction-udm@0.1.0`.
+
 ## [0.2.0] — 2026-04-24
 
 - **MAJOR step-structure change.** Replaced the v0.1.0 single-Prompt runtime with the multi-extraction shape that mirrors the `ui-insight/ProcessMapping/workflows/rfa-checklist-extraction/` source workflow:

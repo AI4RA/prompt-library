@@ -1,48 +1,32 @@
 # Authored source for the Export to Banner Award Extraction Vandalizer workflow.
 #
-# The companion export-to-banner-extraction.vandalizer.json is generated
-# from this file by scripts/build_vandalizer_workflows.py and committed
-# alongside. Never hand-edit the generated JSON — update this manifest and
-# rebuild.
+# === Topology (v0.2.0, Variant A + KB injection) ===
 #
-# Runtime topology (v0.1.0):
-#   Step 1  Parallel Extraction
-#     6 Extraction tasks, each with an embedded SearchSet whose item titles
-#     mirror the export-to-banner-extraction-udm@0.1.0 schema field names.
-#     Mirrors the source ProcessMapping workflow's six parallel extraction
-#     tasks one-for-one (award-identification, dates-and-performance,
-#     sponsor-entity, budget-financial, billing-payment, reporting-special).
-#   Step 2  Consolidation
-#     1 Prompt task assembles the six JSON fragments into a single object
-#     that validates against
-#     components/export-to-banner-extraction-udm/schema.json, converts
-#     quoted dollar strings to JSON numbers, normalizes the four enums,
-#     and enforces the two source cross-field rules.
+# v0.2.0 changes vs. v0.1.0:
+#   1. Parallel Extraction tasks converted to Prompt tasks.
+#   2. Output contract: RA-friendly Markdown Export to Banner Reference
+#      Summary (seven SECTIONs per source consolidation.md).
+#   3. Step 0 KnowledgeBaseQuery added — UI OSP is the primary KB
+#      (covers Banner conventions).
 
 name: Export to Banner Award Extraction
 description: >
-  Uploads a fully-executed federal award document (notice of award,
-  cooperative agreement, contract, or modification) and returns a single
-  structured JSON object covering the six blocks needed to populate the
-  VERAS Export to Banner form: award identification (FAIN, title, PI, type,
-  pass-through, CFDA, NAICS, agency); dates and performance period
-  (current and overall, plus multi-year periods table); sponsor entity
-  classification (entity type, agency hierarchy, address, UEIs); budget
-  structure (line-item categories with JSON-number amounts, F&A rate /
-  base, cost share, program income); billing and payment terms (type
-  enum, frequency, PMS LOC code, payment terms); and reporting / special
-  requirements (reports table, record retention, carry-forward,
-  prior-approval, closeout, governing regs). Output conforms to the
-  export-to-banner-extraction-udm component schema. The runtime mirrors
-  the ui-insight/ProcessMapping export-to-banner-extraction workflow's
-  six parallel Extraction tasks plus a Consolidation Prompt.
+  Uploads a fully-executed federal award document and returns an
+  RA-friendly Markdown Export to Banner Reference Summary covering
+  the seven sections needed to populate VERAS's Export to Banner form:
+  award identification, dates & performance period, sponsor information,
+  budget summary, billing & payment, reporting & compliance, and
+  special terms & FOI items. Mirrors the source
+  ui-insight/ProcessMapping export-to-banner-extraction
+  consolidation.md conventions, including the `[DISCREPANCY - ...]`
+  flag syntax.
 
-workflow_version: 0.1.0
+workflow_version: 0.2.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-05-20
-updated: 2026-05-20
+updated: 2026-05-22
 
 components:
   - slug: export-to-banner-extraction-udm
@@ -53,465 +37,341 @@ validation_plan:
     check_name: Date range consistency
     check_type: consistency
     check_description: Verify award_start_date < award_end_date and performance_period_start <= award_start_date.
-    target_fields:
-      - dates_and_performance.award_start_date
-      - dates_and_performance.award_end_date
-      - dates_and_performance.performance_period_start
-      - dates_and_performance.performance_period_end
+    target_fields: []
     severity: error
   - check_id: CHK-02
     check_name: Monetary amount formatting
     check_type: format
-    check_description: Verify monetary amounts are emitted as JSON numbers, not quoted strings.
-    target_fields:
-      - budget_financial.total_award_amount
-      - budget_financial.total_anticipated_amount
-      - budget_financial.total_direct_costs
-      - budget_financial.total_indirect_costs
+    check_description: Verify monetary amounts preserve the source document's currency formatting verbatim.
+    target_fields: []
     severity: error
   - check_id: CHK-03
-    check_name: UEI format validation
+    check_name: UEI format
     check_type: format
-    check_description: Verify UEI follows the 12-character alphanumeric format when present.
-    target_fields:
-      - sponsor_entity.sponsor_uei
-      - sponsor_entity.awardee_uei
+    check_description: Verify UEIs follow the 12-character alphanumeric format when present.
+    target_fields: []
     severity: warning
   - check_id: CHK-04
     check_name: CFDA number format
     check_type: format
-    check_description: Verify cfda_number follows the XX.XXX format when present.
-    target_fields:
-      - award_identification.cfda_number
+    check_description: Verify CFDA number follows XX.XXX format when present.
+    target_fields: []
     severity: warning
 
 steps:
-  - name: Parallel Extraction
+  - name: Knowledge Base Context Lookup
+    tasks:
+      - name: kb-context-lookup
+        kind: KnowledgeBaseQuery
+        query: "federal award Banner ERP export FAIN CFDA NAICS sponsor entity classification budget period cost reimbursable letter of credit drawdown invoice payment terms reporting requirements UI institutional Banner FOI text fields"
+        k: 8
+        knowledge_base_hint:
+          title: "University of Idaho Office of Sponsored Programs"
+          description: >
+            Primary KB — contains UI institutional Banner conventions
+            and FOI text-field formatting standards. For agency-
+            specific terms, swap in NSF PAPPG / NIH GPS / DOE / DOD /
+            FAR. When the operator does not attach a KB, the
+            extraction falls back to reading just the uploaded award
+            document.
+
+  - name: Parallel Extraction (Prompt)
     tasks:
       - name: extract-award-identification
-        kind: Extraction
-        input_source: workflow_documents
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
-          You are extracting the AWARD IDENTIFICATION block of a
-          fully-executed federal award document. Mirrors TASK-01 of the
-          source ProcessMapping export-to-banner-extraction workflow.
+          You are extracting award identification fields from a
+          fully-executed federal award document. You receive the
+          uploaded document AND any KB chunks.
 
-          Be 100% accurate. Quote identifiers verbatim. Use null for
-          fields the document does not state.
+          Be 100% accurate. Quote identifiers verbatim. Use null when
+          absent.
 
-          For award_type pick exactly one of the four enum values
-          (Grant, Cooperative Agreement, Contract, Subcontract).
+          Emit a JSON object with: award_number (FAIN), project_title,
+          pi_name, award_type (one of "Grant", "Cooperative Agreement",
+          "Contract", "Subcontract"), is_pass_through (boolean),
+          prime_sponsor_name (STRING, populated only when is_pass_through
+          is true), cfda_number (STRING in XX.XXX format),
+          naics_code (STRING), federal_agency_name (STRING),
+          action_type (STRING — "New", "Continuation", "Amendment").
 
-          is_pass_through is a JSON boolean. When true, populate
-          prime_sponsor_name with the prime sponsor's full name. When
-          false, prime_sponsor_name is null.
+          ## Output
 
-          cfda_number uses the document's stated XX.XXX format. When
-          multiple CFDAs apply, comma-separate them as a single string.
-        searchset:
-          title: Award Identification and Title Information
-          domain: research-administration
-          items:
-            - title: award_number
-              searchphrase: Federal Award Identification Number (FAIN) or sponsor award number.
-            - title: project_title
-              searchphrase: Full project title as stated in the award document.
-            - title: pi_name
-              searchphrase: Principal Investigator name as listed on the award.
-            - title: award_type
-              searchphrase: Award type classification (Grant, Cooperative Agreement, Contract, Subcontract).
-              enum_values:
-                - Grant
-                - Cooperative Agreement
-                - Contract
-                - Subcontract
-            - title: is_pass_through
-              searchphrase: Whether the award is a pass-through (subaward) or a direct federal award as a JSON boolean.
-            - title: prime_sponsor_name
-              searchphrase: Name of the prime sponsor for pass-through awards; null for direct federal awards.
-              is_optional: true
-            - title: cfda_number
-              searchphrase: Catalog of Federal Domestic Assistance (CFDA) / Assistance Listing number in XX.XXX format.
-              is_optional: true
-            - title: naics_code
-              searchphrase: North American Industry Classification System code from the award header.
-              is_optional: true
-            - title: federal_agency_name
-              searchphrase: Name of the federal awarding agency.
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
 
       - name: extract-dates-and-performance
-        kind: Extraction
-        input_source: workflow_documents
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
-          You are extracting the DATES AND PERFORMANCE PERIOD block of a
-          fully-executed federal award document. Mirrors TASK-02 of the
-          source ProcessMapping export-to-banner-extraction workflow.
+          You are extracting date fields and performance period from a
+          federal award document. You receive the uploaded document AND
+          any KB chunks.
 
-          Dates use ISO YYYY-MM-DD when the document is unambiguous.
-          When the document gives a qualitative form
-          (e.g., "5 years from acceptance"), preserve the document's
-          stated form as a string. Do not invent precision.
+          Dates use ISO YYYY-MM-DD when unambiguous; preserve the
+          document's stated form otherwise. Use null when absent.
 
-          award_start_date / award_end_date are the current budget
-          period. performance_period_start / performance_period_end are
-          the overall project period (may extend beyond the current
-          budget period for multi-year incremental awards).
+          Emit a JSON object with: award_start_date, award_end_date,
+          performance_period_start, performance_period_end (all
+          STRINGS), budget_periods (JSON ARRAY of {period_number,
+          start_date, end_date, amount}), is_multi_year (BOOLEAN or
+          null).
 
-          budget_periods is a JSON array of
-          {period_number, start_date, end_date, amount} objects, one row
-          per budget period when the award is incrementally funded.
-          Empty array when the award is a single-period award.
+          ## Output
 
-          is_multi_year is true / false / null (null when not
-          determinable).
-        searchset:
-          title: Award Dates and Performance Period
-          domain: research-administration
-          items:
-            - title: award_start_date
-              searchphrase: Start date of the current award or budget period in ISO YYYY-MM-DD when unambiguous.
-            - title: award_end_date
-              searchphrase: End date of the current award or budget period in ISO YYYY-MM-DD when unambiguous.
-            - title: performance_period_start
-              searchphrase: Start date of the overall project performance period in ISO YYYY-MM-DD when unambiguous.
-            - title: performance_period_end
-              searchphrase: End date of the overall project performance period in ISO YYYY-MM-DD when unambiguous.
-            - title: budget_periods
-              searchphrase: Budget period rows as a JSON array of {period_number, start_date, end_date, amount} objects when multi-year incremental; empty array otherwise.
-              is_optional: true
-            - title: is_multi_year
-              searchphrase: Whether the award spans multiple budget periods with incremental funding as a JSON boolean.
-              is_optional: true
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
 
       - name: extract-sponsor-and-entity
-        kind: Extraction
-        input_source: workflow_documents
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
-          You are extracting the SPONSOR AND ENTITY CLASSIFICATION block
-          of a fully-executed federal award document. Mirrors TASK-03 of
-          the source ProcessMapping export-to-banner-extraction workflow.
+          You are extracting sponsor and entity classification from a
+          federal award document.
 
-          sponsor_entity_type picks exactly one of the seven enum values
-          (Federal, State Government, Non-Profit, Private Industry,
-          Foundation, University, Other).
+          Be 100% accurate.
 
-          sponsor_uei / awardee_uei are 12-character alphanumeric
-          strings when stated. Preserve case verbatim. Null when not
-          stated in the document.
-        searchset:
-          title: Sponsor and Entity Classification
-          domain: research-administration
-          items:
-            - title: sponsor_name
-              searchphrase: Full legal name of the sponsoring organization.
-            - title: sponsor_entity_type
-              searchphrase: Sponsor entity classification (Federal, State Government, Non-Profit, Private Industry, Foundation, University, Other).
-              enum_values:
-                - Federal
-                - State Government
-                - Non-Profit
-                - Private Industry
-                - Foundation
-                - University
-                - Other
-            - title: federal_agency_hierarchy
-              searchphrase: Full agency hierarchy (e.g., USDA > NIFA > Agriculture and Food Research Initiative).
-              is_optional: true
-            - title: sponsor_address
-              searchphrase: Sponsor mailing or billing address as stated in the award document.
-              is_optional: true
-            - title: sponsor_uei
-              searchphrase: Sponsor Unique Entity Identifier as a 12-character alphanumeric string.
-              is_optional: true
-            - title: awardee_organization
-              searchphrase: Name of the recipient institution as stated in the award.
-            - title: awardee_uei
-              searchphrase: Awardee Unique Entity Identifier as a 12-character alphanumeric string.
-              is_optional: true
+          Emit a JSON object with: sponsor_name (STRING, full legal
+          name), sponsor_entity_type (one of "Federal", "State Government",
+          "Non-Profit", "Private Industry", "Foundation", "University",
+          "Other"), classification_evidence (STRING — short note on how
+          the entity type was determined), federal_agency_hierarchy
+          (STRING), sponsor_address (STRING), sponsor_uei (STRING —
+          12-char alphanumeric), awardee_organization (STRING),
+          awardee_uei (STRING), grants_officer_name (STRING),
+          program_officer_name (STRING).
+
+          ## Output
+
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
 
       - name: extract-budget-and-financial
-        kind: Extraction
-        input_source: workflow_documents
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
-          You are extracting the BUDGET AND FINANCIAL TERMS block of a
-          fully-executed federal award document. Mirrors TASK-04 of the
-          source ProcessMapping export-to-banner-extraction workflow.
+          You are extracting budget and financial terms from a federal
+          award document.
 
-          CRITICAL: All monetary fields are JSON NUMBERS, not quoted
-          strings. Convert document language verbatim to numeric values:
-            "$1,234,567.89" -> 1234567.89
-            "$500,000"      -> 500000
+          Be 100% accurate. Monetary fields preserve $X,XXX.XX format
+          verbatim. Use null when absent.
 
-          Numeric fields: total_award_amount, total_anticipated_amount,
-          total_direct_costs, total_indirect_costs, cost_share_amount,
-          budget_categories[].approved_amount.
+          Emit a JSON object with: total_award_amount (STRING),
+          total_anticipated_amount (STRING or null),
+          budget_categories (JSON ARRAY of {category, approved_amount}),
+          total_direct_costs (STRING), total_indirect_costs (STRING),
+          fa_rate (STRING — e.g., "47.5%"), fa_rate_base (one of
+          "MTDC", "TDC", "Salary & Wages", "Other", or null),
+          fa_status (one of "Full Rate", "Reduced", "Waived", or null),
+          is_fa_waived (BOOLEAN or null), cost_share_amount (STRING or
+          null), cost_share_type (STRING or null), program_income
+          (STRING or null).
 
-          fa_rate is a STRING with the document's percentage notation
-          (e.g., "56.5%", "30% MTDC"). fa_rate_base picks exactly one of
-          MTDC, TDC, "Salary & Wages", Other, or null when the document
-          does not state it.
+          ## Output
 
-          budget_categories is a JSON array of
-          {category, approved_amount} objects, one entry per sponsor
-          category. category is the exact label (e.g., "Salary",
-          "Fringe", "Equipment", "Travel", "Operating/Supplies",
-          "Subcontracts", "Other"). approved_amount is a JSON number.
-
-          is_fa_waived is true when indirect costs are waived or
-          limited; false when the negotiated rate applies; null when not
-          determinable.
-        searchset:
-          title: Budget and Financial Terms
-          domain: research-administration
-          items:
-            - title: total_award_amount
-              searchphrase: Total amount of the current award action as a JSON number.
-            - title: total_anticipated_amount
-              searchphrase: Total anticipated funding across all periods as a JSON number; null when not specified.
-              is_optional: true
-            - title: budget_categories
-              searchphrase: Budget breakdown by sponsor category as a JSON array of {category, approved_amount} objects with approved_amount as JSON number.
-            - title: total_direct_costs
-              searchphrase: Total direct costs as a JSON number; null when not specified.
-              is_optional: true
-            - title: total_indirect_costs
-              searchphrase: Total indirect (F&A) costs as a JSON number; null when not specified.
-              is_optional: true
-            - title: fa_rate
-              searchphrase: Facilities & Administrative (indirect cost) rate as a percentage string with base annotation (e.g., 56.5%, 30% MTDC).
-              is_optional: true
-            - title: fa_rate_base
-              searchphrase: F&A rate base type (MTDC, TDC, Salary & Wages, Other) or null when not specified.
-              is_optional: true
-              enum_values:
-                - MTDC
-                - TDC
-                - Salary & Wages
-                - Other
-            - title: is_fa_waived
-              searchphrase: Whether indirect costs are waived or limited by the sponsor as a JSON boolean.
-              is_optional: true
-            - title: cost_share_amount
-              searchphrase: Required cost-sharing or matching amount as a JSON number; null when not applicable.
-              is_optional: true
-            - title: cost_share_type
-              searchphrase: Type of cost sharing (mandatory, voluntary committed, in-kind) as a string.
-              is_optional: true
-            - title: program_income
-              searchphrase: Program income provisions and handling requirements.
-              is_optional: true
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
 
       - name: extract-billing-and-payment
-        kind: Extraction
-        input_source: workflow_documents
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
-          You are extracting the BILLING AND PAYMENT TERMS block of a
-          fully-executed federal award document. Mirrors TASK-05 of the
-          source ProcessMapping export-to-banner-extraction workflow.
+          You are extracting billing and payment terms from a federal
+          award document.
 
-          billing_type picks exactly one of the four enum values
-          (Cost Reimbursement, Fixed Price, Letter of Credit, Milestone).
+          Emit a JSON object with: billing_type (one of "Cost Reimbursement",
+          "Fixed Price", "Letter of Credit", "Milestone"), billing_frequency
+          (STRING), billing_address (STRING), invoice_email (STRING),
+          pms_loc_code (STRING), payment_terms (STRING),
+          invoice_requirements (JSON ARRAY of STRINGS),
+          final_invoice_deadline (STRING), billing_contact (STRING).
 
-          billing_frequency is a string (Monthly, Quarterly,
-          Upon Milestone, etc.). Preserve the document's wording.
+          ## Output
 
-          invoice_requirements is a JSON array of strings (one per
-          required item). Empty array when none specified.
-
-          final_invoice_deadline preserves the document's wording
-          (e.g., "60 days", "90 days after project end"). String.
-        searchset:
-          title: Billing and Payment Terms
-          domain: research-administration
-          items:
-            - title: billing_type
-              searchphrase: Type of billing arrangement (Cost Reimbursement, Fixed Price, Letter of Credit, Milestone).
-              enum_values:
-                - Cost Reimbursement
-                - Fixed Price
-                - Letter of Credit
-                - Milestone
-            - title: billing_frequency
-              searchphrase: How often invoices should be submitted (Monthly, Quarterly, Upon Milestone).
-              is_optional: true
-            - title: billing_address
-              searchphrase: Physical or electronic address for invoice submission.
-              is_optional: true
-            - title: invoice_email
-              searchphrase: Email address for electronic invoice submission.
-              is_optional: true
-            - title: pms_loc_code
-              searchphrase: Payment Management System or Letter of Credit code for federal drawdowns.
-              is_optional: true
-            - title: payment_terms
-              searchphrase: Payment terms (e.g., Net 30, advance payment, reimbursement).
-              is_optional: true
-            - title: invoice_requirements
-              searchphrase: Items required on invoices as a JSON array of strings.
-              is_optional: true
-            - title: final_invoice_deadline
-              searchphrase: Deadline for submitting the final invoice after project end.
-              is_optional: true
-            - title: billing_contact
-              searchphrase: Name and contact information for the sponsor's billing or payment office.
-              is_optional: true
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
 
       - name: extract-reporting-and-special
-        kind: Extraction
-        input_source: workflow_documents
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
-          You are extracting the REPORTING AND SPECIAL REQUIREMENTS
-          block of a fully-executed federal award document. Mirrors
-          TASK-06 of the source ProcessMapping
-          export-to-banner-extraction workflow.
+          You are extracting reporting requirements and special terms
+          from a federal award document.
 
-          reporting_requirements is a JSON array of
-          {report_type, frequency, due_date_or_timing, submission_method}
-          objects. One entry per required report.
+          Emit a JSON object with: reporting_requirements (JSON ARRAY
+          of {report_type, frequency, due_date_or_timing, submission_method}),
+          record_retention_period (STRING),
+          carry_forward_policy (STRING),
+          prior_approval_requirements (JSON ARRAY of STRINGS),
+          special_terms (JSON ARRAY of STRINGS — terms beyond standard
+          federal requirements; publication restrictions; IP/data
+          provisions; non-standard terms),
+          closeout_requirements (STRING),
+          governing_regulations (JSON ARRAY of STRINGS — 2 CFR 200,
+          RTCs, agency-specific cited regs).
 
-          prior_approval_requirements, special_terms, and
-          governing_regulations are JSON arrays of strings. Empty arrays
-          when not specified.
+          ## Output
 
-          record_retention_period, carry_forward_policy, and
-          closeout_requirements are strings or null.
-        searchset:
-          title: Reporting and Special Requirements
-          domain: research-administration
-          items:
-            - title: reporting_requirements
-              searchphrase: Required reports as a JSON array of {report_type, frequency, due_date_or_timing, submission_method} objects.
-            - title: record_retention_period
-              searchphrase: Required record retention period (e.g., 3 years after final FFR).
-              is_optional: true
-            - title: carry_forward_policy
-              searchphrase: Whether unspent funds can be carried forward to subsequent budget periods and under what conditions.
-              is_optional: true
-            - title: prior_approval_requirements
-              searchphrase: Actions requiring prior written agency approval as a JSON array of strings.
-              is_optional: true
-            - title: special_terms
-              searchphrase: Special terms and conditions beyond standard federal requirements as a JSON array of strings.
-              is_optional: true
-            - title: closeout_requirements
-              searchphrase: Specific closeout requirements and timeline.
-              is_optional: true
-            - title: governing_regulations
-              searchphrase: Governing regulations and terms referenced as a JSON array of strings.
-              is_optional: true
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
 
-  - name: Consolidation
+  - name: Consolidation (Markdown deliverable)
     is_output: true
     tasks:
-      - name: export-to-banner-extraction-consolidation
+      - name: export-to-banner-consolidation
         kind: Prompt
         input_source: step_input
         prompt_inline: |
-          You are the consolidation step of the Export to Banner Award
-          Extraction workflow. You receive six extraction outputs from
-          the previous step (award_identification, dates_and_performance,
-          sponsor_entity, budget_financial, billing_payment,
-          reporting_special) and must emit a SINGLE JSON object that
-          validates against the export-to-banner-extraction-udm@0.1.0
-          schema (schema.json in the component directory).
+          You are the consolidation step of the Export to Banner
+          Award Extraction workflow. You receive SIX JSON fragments
+          from the previous step.
 
-          ## Output contract
+          Cross-validate the fragments. When values contradict, do
+          NOT alter them — flag with
+          `[DISCREPANCY - Task X states ___ while Task Y states ___]`
+          in the appropriate section.
 
-          Emit exactly one JSON object. No preamble, no closing commentary,
-          no markdown fences. If your runtime requires fenced output, wrap
-          in a single ```json ... ``` block and emit nothing outside it.
+          Render a single RA-friendly Markdown Export to Banner
+          Reference Summary. Mirrors source consolidation.md exactly.
 
-          Top-level keys (in this order): `award_identification`,
-          `dates_and_performance`, `sponsor_entity`, `budget_financial`,
-          `billing_payment`, `reporting_special`.
+          ## Required structure (in this exact order)
 
-          ## Field-by-field assembly
+          # Export to Banner Reference Summary: <award_number>
 
-          Pass the six extraction fragments through into the six
-          top-level blocks. Apply the following normalizations.
+          ### SECTION 1: AWARD IDENTIFICATION
 
-          ### award_identification
+          - **Award Number / FAIN:** <award_number>
+          - **CFDA Number:** <cfda_number or "Not specified">
+          - **NAICS Code:** <naics_code or "Not specified">
+          - **Full Project Title:** <project_title>
+          - **Principal Investigator:** <pi_name>
+          - **Award Type:** <award_type>
+          - **Action Type:** <action_type or "Not specified">
+          - **Federal Awarding Agency:** <federal_agency_name>
+          - **Federal Agency Hierarchy:** <federal_agency_hierarchy or "Not specified">
+          - **Pass-Through Status:** <"Direct Award" if !is_pass_through else "Pass-Through from " + prime_sponsor_name>
 
-          Required (must not be null): award_number, project_title,
-          pi_name, award_type (one of the four enum values),
-          is_pass_through (JSON boolean), federal_agency_name.
+          ---
 
-          prime_sponsor_name is null when is_pass_through is false.
+          ### SECTION 2: DATES & PERFORMANCE PERIOD
 
-          ### dates_and_performance
+          | Field | Date |
+          |---|---|
+          | Award Start Date | <award_start_date> |
+          | Award End Date | <award_end_date> |
+          | Performance Period Start | <performance_period_start> |
+          | Performance Period End | <performance_period_end> |
 
-          Required: award_start_date, award_end_date,
-          performance_period_start, performance_period_end. Use ISO
-          YYYY-MM-DD when the document is unambiguous.
+          Note: <"Single-period award" if !is_multi_year else "Multi-year incremental award with N periods">
 
-          budget_periods is required by the schema as an array. Empty
-          array for single-period awards.
+          When budget_periods is non-empty, render a sub-table:
 
-          ### sponsor_entity
+          | Period | Start | End | Amount |
+          |---|---|---|---|
 
-          Required: sponsor_name, sponsor_entity_type (one of the seven
-          enum values), awardee_organization.
+          ---
 
-          ### budget_financial
+          ### SECTION 3: SPONSOR INFORMATION
 
-          Required: total_award_amount (JSON number),
-          budget_categories (array of {category, approved_amount}
-          objects with approved_amount as JSON number).
+          - **Sponsor Legal Name:** <sponsor_name>
+          - **Sponsor Entity Type:** <sponsor_entity_type>
+          - **Classification Evidence:** <classification_evidence or "Per Federal Agency designation">
+          - **Sponsor Address:** <sponsor_address or "Not specified">
+          - **Sponsor UEI:** <sponsor_uei or "Not specified">
+          - **Awardee Organization:** <awardee_organization>
+          - **Awardee UEI:** <awardee_uei or "Not specified">
+          - **Grants Officer:** <grants_officer_name or "Not specified">
+          - **Program Officer:** <program_officer_name or "Not specified">
 
-          CRITICAL: If any extractor surfaced a quoted dollar string
-          (e.g., "$1,234,567.89"), convert it to a JSON number
-          (1234567.89) here. Apply to total_award_amount,
-          total_anticipated_amount, total_direct_costs,
-          total_indirect_costs, cost_share_amount, every
-          budget_categories[].approved_amount, every
-          budget_periods[].amount.
+          ---
 
-          fa_rate remains a string. fa_rate_base picks one of MTDC, TDC,
-          "Salary & Wages", Other, or null.
+          ### SECTION 4: BUDGET SUMMARY
 
-          ### billing_payment
+          | Category | Amount |
+          |---|---|
 
-          Required: billing_type (one of the four enum values).
+          One row per budget_categories entry, ending with:
+          | **Total Direct Costs** | **<total_direct_costs>** |
+          | **Total Indirect Costs** | **<total_indirect_costs>** |
+          | **Total Award Amount** | **<total_award_amount>** |
 
-          invoice_requirements is required by the schema as an array.
-          Empty array when none specified.
+          Followed by:
 
-          ### reporting_special
+          - **F&A Rate and Base:** <fa_rate> <fa_rate_base>
+          - **F&A Status:** <fa_status or "Full Rate">
+          - **Cost Sharing:** <cost_share_amount or "None required"> (<cost_share_type or "—">)
 
-          Required: reporting_requirements (array of objects).
+          ---
 
-          prior_approval_requirements, special_terms,
-          governing_regulations are required by the schema as arrays.
-          Empty array when none specified.
+          ### SECTION 5: BILLING & PAYMENT
 
-          ## Cross-field rules (from source workflow)
+          - **Billing Type:** <billing_type>
+          - **Billing Frequency:** <billing_frequency or "Not specified">
+          - **Invoice Submission:** <billing_address or "Not specified"> (<invoice_email or "no email">)
+          - **PMS / LOC Code:** <pms_loc_code or "Not specified">
+          - **Final Invoice Deadline:** <final_invoice_deadline or "Not specified">
+          - **Payment Terms:** <payment_terms or "Not specified">
 
-          1. CFR-01 (error): award_start_date < award_end_date.
-             When the document violates this, do not alter the dates —
-             append a flag string to reporting_special.special_terms:
-             "FLAG: award_start_date is not before award_end_date in
-             the source document."
+          **Required Invoice Elements:**
+          - <bulleted list from invoice_requirements, or "Not specified">
 
-          2. CFR-02 (warning): performance_period_start <=
-             award_start_date. When the document violates this,
-             do not alter the dates — append a flag string to
-             reporting_special.special_terms:
-             "FLAG: performance_period_start is later than
-             award_start_date in the source document."
+          ---
 
-          ## Quality bar
+          ### SECTION 6: REPORTING & COMPLIANCE
 
-          - Output validates against schema.json (draft 2020-12).
-          - award_type, sponsor_entity_type, fa_rate_base, and
-            billing_type are exact enum matches.
-          - All monetary fields are JSON numbers.
-          - Booleans are JSON booleans.
-          - Dates use ISO YYYY-MM-DD when unambiguous.
-          - Required arrays (budget_categories, budget_periods,
-            invoice_requirements, reporting_requirements,
-            prior_approval_requirements, special_terms,
-            governing_regulations) are always emitted; use [] when
-            empty rather than null.
+          **Required Reports:**
+
+          | Type | Frequency | Due Date |
+          |---|---|---|
+
+          One row per reporting_requirements entry.
+
+          - **Record Retention Period:** <record_retention_period or "3 years per 2 CFR 200.334">
+          - **Carry-Forward Policy:** <carry_forward_policy or "Standard federal default">
+
+          **Key Prior Approval Requirements:**
+          - <bulleted list from prior_approval_requirements>
+
+          **Governing Regulations:**
+          - <bulleted list from governing_regulations>
+
+          ---
+
+          ### SECTION 7: SPECIAL TERMS & FOI ITEMS
+
+          Banner FOI text fields — copy these into Banner FOI:
+
+          - <bulleted list from special_terms>
+          - **Closeout Requirements:** <closeout_requirements or "Standard federal closeout">
+
+          ---
+
+          ### FINAL VERIFICATION CHECKLIST
+
+          - [ ] All monetary amounts are exact (no rounding)
+          - [ ] All dates are in their original format
+          - [ ] Award number matches across all sections
+          - [ ] No information was lost during consolidation
+          - [ ] "Not specified in the document" preserved where appropriate
+          - [ ] No discrepancies remain unresolved (or all are flagged)
+
+          ## Rendering rules
+
+          - Bold every label.
+          - Reference document — concise and actionable, not narrative.
+          - Preserve monetary and date formats verbatim.
+          - Use `[DISCREPANCY - Task X states ___ while Task Y states ___]`
+            for any cross-task contradiction.
+          - If any field arrives as a nested JSON object, REWRITE
+            into prose / table.
+          - No JSON code fences around the output.
 
 evals:
   workflow_local: true
