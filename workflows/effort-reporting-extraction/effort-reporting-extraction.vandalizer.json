@@ -127,7 +127,22 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Federal Award Identification Number printed on the award.",
+                  "Principal Investigator full name.",
+                  "Full project title as stated in the award.",
+                  "Cadence at which effort must be certified (Monthly, Quarterly, Semi-Annual, Annual).",
+                  "Deadline for effort certification after each reporting period end.",
+                  "Effort certification method per 2 CFR 200.430(i) (After-the-Fact, Plan-Confirmation, Payroll-Based).",
+                  "PI committed effort using the sponsor's exact phrasing (e.g., \"2.0 summer months\", \"25% academic year\").",
+                  "PI committed effort expressed as person-months when the document provides it.",
+                  "JSON array of {name, role, committed_effort, person_months, cost_shared_effort, notes}, one row per named individual.",
+                  "Total cost-shared effort obligations across the award, when separately documented.",
+                  "Primary governing regulation cited (e.g., \"2 CFR 200.430\").",
+                  "Record retention period requirement (e.g., \"3 years\", \"per sponsor requirements\").",
+                  "Referenced governing documents (RTCs, CA-FATC, agency policy statements). Empty array when none are stated."
+                ]
               }
             }
           ]

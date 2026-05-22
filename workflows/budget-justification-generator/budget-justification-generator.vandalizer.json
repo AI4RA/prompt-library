@@ -111,7 +111,21 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Senior / Key Personnel table as a JSON array of {name, title, role, person_months, salary_basis, requested_salary} objects.",
+                  "Other Personnel table as a JSON array of {category, count, person_months, rate} objects.",
+                  "Total salary costs for all senior / key personnel as a JSON number.",
+                  "Total salary costs for all other personnel as a JSON number.",
+                  "Fringe benefit rates by personnel category as a JSON array of {category, rate, calculation_basis} objects.",
+                  "Total fringe benefit costs as a JSON number.",
+                  "Whether any personnel salary is subject to an agency salary cap as a JSON boolean.",
+                  "Agency salary cap amount as a JSON number; null when not applicable.",
+                  "Description of personnel effort or salary changes across budget years.",
+                  "Generated professional justification text for Section A (Senior/Key Personnel).",
+                  "Generated professional justification text for Section B (Other Personnel).",
+                  "Generated professional justification text for Section C (Fringe Benefits)."
+                ]
               }
             },
             {
@@ -211,7 +225,21 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Equipment items as a JSON array of {name, cost, purpose} objects.",
+                  "Total equipment costs as a JSON number.",
+                  "Equipment cost threshold used (e.g., standard $5,000 institutional, $10,000 per 2 CFR 200.313).",
+                  "Domestic trips as a JSON array of {destination, purpose, travelers, duration_days, total_cost} objects.",
+                  "Foreign trips as a JSON array of {destination, purpose, travelers, duration_days, total_cost} objects.",
+                  "Total domestic travel costs as a JSON number.",
+                  "Total foreign travel costs as a JSON number.",
+                  "Whether the NOFO restricts foreign travel as a JSON boolean.",
+                  "Basis for travel cost estimates (GSA rates, quotes, etc.).",
+                  "Generated professional justification text for Section D (Equipment).",
+                  "Generated professional justification text for Section E Domestic Travel.",
+                  "Generated professional justification text for Section E Foreign Travel."
+                ]
               }
             },
             {
@@ -332,7 +360,24 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Participant support cost breakdown as a JSON array of {category, cost} objects.",
+                  "Total participant / trainee support costs as a JSON number.",
+                  "Materials and supplies as a JSON array of {category, cost} objects.",
+                  "Publication and documentation costs as a JSON number.",
+                  "Consultants as a JSON array of {name, rate, days, total, scope} objects.",
+                  "Computing services and costs as a string.",
+                  "Subawards as a JSON array of {institution, pi, scope, total_cost} objects.",
+                  "Total subaward / subcontract costs as a JSON number.",
+                  "Equipment or facility rental costs as a string.",
+                  "Alteration and renovation costs as a string.",
+                  "Graduate student tuition remission costs as a JSON number.",
+                  "Other direct costs not fitting above categories as a JSON array of {category, cost} objects.",
+                  "Total of all Other Direct Cost subcategories as a JSON number.",
+                  "Generated professional justification text for Section F (Participant Support).",
+                  "Generated professional justification text for Section G (Other Direct Costs) covering G.1 through G.9."
+                ]
               }
             },
             {
@@ -488,7 +533,29 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Facilities and Administrative indirect cost rate as a JSON number 0-100 percent.",
+                  "F&A rate base type (MTDC, TDC, Salaries and Wages, etc.).",
+                  "Type of F&A rate (on-campus, off-campus, etc.).",
+                  "Items excluded from the MTDC base as a JSON array of strings.",
+                  "Whether the NOFO imposes a cap on the F&A rate as a JSON boolean.",
+                  "Details of any F&A rate cap from the NOFO.",
+                  "Total direct costs across all budget categories as a JSON number.",
+                  "Total indirect (F&A) costs as a JSON number.",
+                  "Total project costs (direct + indirect) as a JSON number.",
+                  "Whether cost sharing or matching is required as a JSON boolean.",
+                  "Total cost share commitment amount as a JSON number.",
+                  "Type of cost share (cash, in-kind, third-party, waived IDC).",
+                  "Sources of cost share contributions as a JSON array of strings.",
+                  "Year-by-year budget summary as a JSON array of {period_number, direct_costs, indirect_costs, total} objects.",
+                  "Explanation of year-over-year budget changes as a string.",
+                  "Agency-specific budget rules or restrictions from the NOFO as a JSON array of strings.",
+                  "Page limit for the budget justification from the NOFO.",
+                  "Generated professional justification text for Section H (Indirect Costs) including the MTDC calculation.",
+                  "Generated professional justification text for Cost Sharing.",
+                  "Generated budget summary overview with totals and year-over-year explanation."
+                ]
               }
             }
           ]

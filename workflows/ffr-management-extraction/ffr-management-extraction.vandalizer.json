@@ -145,7 +145,25 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Federal Award Identification Number (FAIN) printed on the award.",
+                  "Principal Investigator full name printed on the award.",
+                  "Annual FFR due window (e.g., 90 or 120 days after each budget period end). Quote the document verbatim.",
+                  "Final FFR deadline after project end (e.g., 120 days after project end).",
+                  "Interim financial reporting requirements when imposed.",
+                  "SF-272 or cash transaction reporting requirements.",
+                  "Primary submission system / platform (one of Payment Management System, ASAP, ACH, Grants.gov, Other).",
+                  "Account, role, or registration prerequisites for accessing the platform.",
+                  "eRA Commons integration details (NIH/HHS awards). Null otherwise.",
+                  "Roles and responsibilities for who may submit (e.g., AOR-only).",
+                  "Flat list of required reporting category labels exactly as the document names them (Personnel, Fringe, Equipment, Subawards, Cost share, Program income, etc.).",
+                  "Document language describing penalties for late FFR submission.",
+                  "Document language describing payment-system or drawdown restrictions tied to non-compliance.",
+                  "Document language describing impact on future awards or competing renewals.",
+                  "Document language describing supporting documentation or backup the recipient must retain.",
+                  "Countdown of preparation milestones derived from the document's own pre-submission timing language. Empty when the document does not describe a countdown."
+                ]
               }
             }
           ]

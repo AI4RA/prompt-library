@@ -97,7 +97,19 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Uniform Guidance (2 CFR 200) applicability details.",
+                  "Research Terms and Conditions applicability.",
+                  "Financial reporting frequency, deadlines, and systems.",
+                  "Progress report type, frequency, and format.",
+                  "Categorized list of prior-approval requirements (one entry per approval type).",
+                  "Budget modification restrictions and re-budgeting rules.",
+                  "Equipment and property management requirements.",
+                  "Deliverable requirements and deadlines.",
+                  "Enhanced monitoring, additional reporting, or specific restrictions tied to risk classification. Empty array when not high-risk.",
+                  "JSON array of {requirement_type, deadline, responsible_party, consequences}, one row per recurring or fixed deadline pulled from across the document."
+                ]
               }
             },
             {
@@ -193,7 +205,19 @@
                       ]
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Total award amount as a JSON number (no quotes, no currency symbol, no thousand-separators). \"$1,234,567\" becomes 1234567.",
+                  "JSON array of {period, start_date, end_date, amount} for multi-year awards. amount is a JSON number; period / start_date / end_date are strings. Empty array for single-period awards.",
+                  "Cost sharing/matching requirements (amount and type).",
+                  "Indirect cost rate percentage as stated (e.g., \"42.5%\").",
+                  "Base for F&A rate calculation (e.g., MTDC, TDC, Salary & Wages).",
+                  "Period of performance dates as stated.",
+                  "JSON array of {category_name, approved_amount, restrictions, prior_approval_required} for each budget category. approved_amount is a JSON number; the others are strings or boolean.",
+                  "Federal Financial Report frequency and deadlines.",
+                  "Audit requirements (Single Audit, A-133, Program-Specific Audit, Not applicable).",
+                  "Record retention requirements (3 years, 5 years, 7 years, Per sponsor requirements)."
+                ]
               }
             }
           ]

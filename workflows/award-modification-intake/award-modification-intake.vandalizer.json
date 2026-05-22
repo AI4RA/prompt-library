@@ -123,7 +123,21 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Federal Award Identification Number (FAIN) or sponsor award number.",
+                  "Amendment or modification number (e.g., Amendment 17, Mod 003).",
+                  "Modification-type classification (Additional Funds, No-Cost Extension, PI Change, Rebudget, Scope Change, Administrative Change, Combined).",
+                  "Whether the modification is unilateral (fully executed by sponsor) or bilateral (requires university signature).",
+                  "Effective date of the modification, ISO YYYY-MM-DD when possible.",
+                  "Name of the sponsoring agency.",
+                  "Current Principal Investigator on the award.",
+                  "Previous PI name (PI Change modifications only); null otherwise.",
+                  "New PI name (PI Change modifications only); null otherwise.",
+                  "New project end date (NCE modifications only), ISO YYYY-MM-DD when possible; null otherwise.",
+                  "Payment Management System code if applicable.",
+                  "Any changes to sponsor point-of-contact information."
+                ]
               }
             },
             {
@@ -202,7 +216,18 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Dollar amount of the modification (additional funds or rebudget amount) as a JSON number.",
+                  "Current total award amount before this modification as a JSON number.",
+                  "Total obligated amount after this modification as a JSON number.",
+                  "F&A (indirect cost) rate including base-type annotation as a string (e.g., 30% MTDC).",
+                  "F&A dollar amount for this modification as a JSON number.",
+                  "Budget breakdown by sponsor category as a JSON array of {category, approved_amount} objects.",
+                  "Source budget account for a rebudget (e.g., OE/Account 30); null when not a rebudget.",
+                  "Destination budget account for a rebudget; null when not a rebudget.",
+                  "Sponsor-imposed changes to cost-share commitments."
+                ]
               }
             },
             {
@@ -267,7 +292,16 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Whether this modification required (or grants) sponsor prior approval as a JSON boolean.",
+                  "Date the sponsor approved the modification (ISO YYYY-MM-DD).",
+                  "Conditions or restrictions imposed by the sponsor as a JSON array of strings.",
+                  "Explicit citations to regulations (e.g., 2 CFR 200.308, RTC, NSF PAPPG) as a JSON array of strings.",
+                  "Whether the modification changes the project end date as a JSON boolean.",
+                  "Whether the modification requires Financial Unit processing as a JSON boolean.",
+                  "Whether Institutional Biosafety Committee protocols must be complete before processing; null when biosafety not addressed."
+                ]
               }
             }
           ]

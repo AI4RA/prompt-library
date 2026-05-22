@@ -85,7 +85,16 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Personnel listed in VERAS Section 6.6 requiring SFI disclosures as a JSON array of name strings.",
+                  "PIs and Senior/Key Personnel from VERAS Section 2 as a JSON array of {name, role, department} objects.",
+                  "Deduplicated personnel list as a JSON array of {name, role, department, source_sections} objects.",
+                  "Whether the proposal is a Research, Non-Research, or Not specified proposal.",
+                  "Whether the sponsor is Federal, State, Non-Federal, or Not specified.",
+                  "Whether SFI and RST checks are required for this proposal as a JSON boolean.",
+                  "Differences between Section 6.6 and Section 2 personnel lists as a JSON array of strings."
+                ]
               }
             },
             {
@@ -136,7 +145,14 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Per-person SFI disclosure verification records as a JSON array of objects.",
+                  "ISO YYYY-MM-DD date of the RST completion spreadsheet used for verification.",
+                  "Source label for the RST completion spreadsheet (e.g., UI Bridge daily export).",
+                  "Per-person RST completion records as a JSON array of objects.",
+                  "Short string describing any source document that was not provided; null when both SFI records and RST spreadsheet were present."
+                ]
               }
             }
           ]

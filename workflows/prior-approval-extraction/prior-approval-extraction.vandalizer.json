@@ -90,7 +90,18 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Federal Award Identification Number (FAIN) printed on the award.",
+                  "Re-budgeting thresholds and restrictions requiring prior approval. Quote dollar/percent thresholds verbatim.",
+                  "Equipment-purchase approval requirements (typically tied to a $ threshold).",
+                  "Subcontracting / subaward approval requirements.",
+                  "Requirements for PI or key-personnel changes (substitution, reduction in effort).",
+                  "No-cost extension request requirements (notice period, supporting documentation, sponsor route).",
+                  "Foreign travel approval requirements when the award imposes them.",
+                  "Approval-procedures table with rows of {approval_type, threshold, documentation, authority, timeline, consequences}. Each row is one approval type.",
+                  "Research Terms and Conditions waivers and expanded-authority delegations the recipient can handle without sponsor sign-off."
+                ]
               }
             }
           ]

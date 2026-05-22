@@ -90,7 +90,18 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Complete list of all documents currently uploaded in the proposal package.",
+                  "JSON array of {name, role, institution} for senior/key personnel listed in the proposal (PI, Co-PI, Senior Personnel).",
+                  "Flat list of personnel names identified from the budget document.",
+                  "Boolean. True iff the budget includes postdoctoral or graduate-student personnel lines.",
+                  "Boolean. True iff the proposal includes subaward(s) (commitment form, subaward budget, or subaward narrative present).",
+                  "JSON array of {subawardee_name, commitment_form, budget, budget_justification, senior_key_docs, scope_of_work, facilities_equipment} booleans, one row per subawardee. Empty when has_subawards is false.",
+                  "JSON array of {person_name, biosketch, current_and_pending, collaboration_and_affiliation, synergistic_activities} booleans, one row per senior-key person.",
+                  "Proposal track type (e.g., TTP-P, standard, track-2) that may trigger additional requirements.",
+                  "Discrepancies between budget personnel and senior-key-personnel listings (duplicates, missing entries, name mismatches)."
+                ]
               }
             },
             {
@@ -159,7 +170,16 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Sponsor agency name (e.g., \"National Science Foundation\").",
+                  "Solicitation number (e.g., \"NSF 26-508\").",
+                  "Review pathway (7-day basic review, 10-day full review, or Not specified).",
+                  "JSON array of {document_name, required_for, notes} for every document the sponsor requires for this proposal. The Consolidation Prompt sets the present boolean.",
+                  "JSON array of {condition, document_name, notes} for documents required only when a condition holds (e.g., mentoring plan when postdocs present, letter of collaboration for TTP-P track).",
+                  "Document names required per senior-key person (typically biosketch, current & pending, collaboration & affiliation, synergistic activities).",
+                  "Document names required per subawardee (commitment form, budget, budget justification, senior key docs, scope of work, facilities/equipment)."
+                ]
               }
             }
           ]

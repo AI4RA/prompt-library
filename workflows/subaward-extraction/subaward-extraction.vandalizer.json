@@ -69,7 +69,15 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Pass-Through Entity name.",
+                  "Subrecipient organization name.",
+                  "PTE Federal Award Number (FAIN). Required by source workflow.",
+                  "Subaward number.",
+                  "Full project title.",
+                  "Federal awarding agency name. Required by source workflow."
+                ]
               }
             },
             {
@@ -211,7 +219,27 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "PTE Principal Investigator full name.",
+                  "PTE PI email address (character-perfect).",
+                  "PTE PI phone number (character-perfect).",
+                  "PTE Administrative Contact name.",
+                  "PTE Administrative Contact email (character-perfect).",
+                  "PTE Administrative Contact phone (character-perfect).",
+                  "PTE Financial Contact name.",
+                  "PTE Financial Contact email.",
+                  "PTE Financial Contact phone.",
+                  "Subrecipient PI full name.",
+                  "Subrecipient PI email (character-perfect).",
+                  "Subrecipient PI phone (character-perfect).",
+                  "Subrecipient Administrative Contact name.",
+                  "Subrecipient Administrative Contact email.",
+                  "Subrecipient Administrative Contact phone.",
+                  "Subrecipient Financial Contact name.",
+                  "Subrecipient Financial Contact email.",
+                  "Subrecipient Financial Contact phone."
+                ]
               }
             },
             {
@@ -273,7 +301,15 @@
                       ]
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Subaward budget period start date.",
+                  "Subaward budget period end date.",
+                  "Amount funded this action as a JSON number (no quotes, no currency symbol, no thousand-separators). \"$500,000\" becomes 500000.",
+                  "Total direct costs as a JSON number (no quotes, no currency symbol, no thousand-separators).",
+                  "Total indirect costs as a JSON number (no quotes, no currency symbol, no thousand-separators).",
+                  "Cost type classification (Cost Reimbursement, Fixed Price, Time and Materials)."
+                ]
               }
             },
             {
@@ -336,7 +372,15 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Invoicing frequency (Monthly, Quarterly, Semi-Annual, Annual). Required by source workflow.",
+                  "Final invoice due date / timeframe.",
+                  "Indirect cost (F&A) rate percentage as stated.",
+                  "Indirect cost calculation base (MTDC, TDC, etc.).",
+                  "Boolean. Whether cost sharing is required.",
+                  "Carryforward policy details."
+                ]
               }
             },
             {
@@ -373,7 +417,12 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "JSON array of {report_name, frequency, due, recipient} for required technical reports. Empty array when none required.",
+                  "JSON array of {report_name, frequency, due, recipient} for required financial reports. Empty array when none required.",
+                  "JSON array of {requirement, timing} for invention disclosure and reporting requirements."
+                ]
               }
             },
             {
@@ -438,7 +487,16 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "JSON array of {regulation, source} naming each governing instrument with the document section / attachment that calls it out.",
+                  "General prior-approval policy.",
+                  "Conflict of interest policy application.",
+                  "Data rights and sharing terms.",
+                  "Audit requirements and thresholds.",
+                  "Termination notice period and conditions.",
+                  "Record retention requirements."
+                ]
               }
             }
           ]

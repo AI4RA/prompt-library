@@ -83,7 +83,17 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "JSON array of {name, role, institution, effort, salary_requested} for senior/key personnel.",
+                  "Integer count of postdoctoral researchers in the budget.",
+                  "JSON array of {name, effort, salary_or_stipend} for postdoctoral researchers. Use \"TBN\" for unnamed slots.",
+                  "Integer count of graduate research/teaching assistants in the budget.",
+                  "JSON array of {name, type, stipend, tuition_remission} where type is \"RA\" or \"TA\".",
+                  "Integer count of undergraduate students in the budget.",
+                  "JSON array of {role, cost} for other personnel (technicians, programmers, administrative staff).",
+                  "Total personnel costs including salary and fringe (decimal number)."
+                ]
               }
             },
             {
@@ -166,7 +176,18 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "JSON array of {category_name, amount, notes} for each budget category.",
+                  "JSON array of {institution_name, sub_pi_name, amount} for subaward/subcontract recipients. Empty array when none.",
+                  "JSON array of {description, cost} for equipment items costing over $5,000 only.",
+                  "Summary of travel costs including domestic and foreign travel amounts.",
+                  "F&A (indirect cost) rate percentage as stated (e.g., \"42.5%\").",
+                  "Base for F&A rate calculation (MTDC, TDC, Salary & Wages).",
+                  "Cost sharing or matching amount and type if present in the budget.",
+                  "JSON object {total_direct_costs, total_indirect_costs, total_project_cost} (all decimal numbers).",
+                  "JSON array of {period_number, start_date, end_date, amount} for multi-year proposals. Empty array for single-period."
+                ]
               }
             }
           ]

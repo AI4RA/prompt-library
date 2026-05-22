@@ -116,7 +116,20 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Funding Opportunity Number / ID (e.g., PA-24-246, DE-FOA-0003117).",
+                  "CFDA Number and title.",
+                  "Federal Agency Name (NSF, NIH, DOD, DOE, NASA, USDA, EPA, DOT, DOC, ED, Other).",
+                  "FOA Title / Program Name.",
+                  "Total available funding as a JSON number (no quotes, no currency symbol, no thousand-separators). \"$10,000,000\" becomes 10000000.",
+                  "Expected number of awards as a JSON integer.",
+                  "Minimum and maximum award amounts (e.g., \"$300,000 to $750,000 per award\").",
+                  "Boolean. Whether cost sharing/matching is required.",
+                  "JSON array of {milestone, date_time, notes} for all gating milestones (LOI, pre-application, full application, panel review, anticipated start).",
+                  "Expected project duration range.",
+                  "Flat list of eligible applicant types as stated."
+                ]
               }
             },
             {
@@ -160,7 +173,13 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Total possible points or scoring scale (e.g., \"100 points\").",
+                  "JSON array of {criterion_name, weight, description, rating_definitions} for each evaluation criterion.",
+                  "How scores are calculated, tie resolution, weighting.",
+                  "Minimum score thresholds for funding consideration."
+                ]
               }
             },
             {
@@ -204,7 +223,13 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "JSON array of {stage_name, purpose, outcome} in sequential order.",
+                  "Types and composition of review panels.",
+                  "Flat list of initial-screening / disqualification factors.",
+                  "Estimated length of review process and notification timeline."
+                ]
               }
             },
             {
@@ -248,7 +273,13 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Agency mission relevant to this FOA.",
+                  "JSON array of {goal, objective, success_indicator} for each program goal.",
+                  "Flat list of priority areas in stated order of importance.",
+                  "Flat list of required deliverables / intended impacts."
+                ]
               }
             },
             {
@@ -292,7 +323,13 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Primary submission system (Grants.gov, eRA Commons, etc.).",
+                  "JSON array of {system_name, timeline, prerequisites} for SAM, UEI, eRA Commons, Grants.gov, agency portals.",
+                  "JSON array of {form_number, name, purpose, special_instructions} for required forms.",
+                  "JSON array of {component_name, required_or_optional, page_limit, format_requirements} for each component."
+                ]
               }
             },
             {
@@ -336,7 +373,13 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Flat list of required proposal sections in exact order.",
+                  "JSON array of {section, limit, what_counts, consequences} for each page-limit rule.",
+                  "Margin, font, spacing, and other formatting requirements.",
+                  "Acceptable file formats, sizes, naming conventions."
+                ]
               }
             }
           ]

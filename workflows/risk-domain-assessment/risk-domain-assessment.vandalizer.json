@@ -104,7 +104,20 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Title of the funded project as stated in the documents.",
+                  "Brief summary of the project scope and objectives.",
+                  "Count of distinct project activities, phases, or components identified as a JSON integer.",
+                  "Required partnerships, consortia, or collaborative structures.",
+                  "Indicators of technical complexity as a JSON array of strings.",
+                  "Programmatic Complexity risk score 1-5 as a JSON integer.",
+                  "Evidence-based justification for the Programmatic Complexity score.",
+                  "Alignment between the project and institutional priorities as a string.",
+                  "Required institutional resources as a JSON array of strings.",
+                  "Strategic Alignment risk score 1-5 as a JSON integer.",
+                  "Evidence-based justification for the Strategic Alignment score."
+                ]
               }
             },
             {
@@ -211,7 +224,22 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Total federal funds awarded as a JSON number.",
+                  "Total anticipated funding across all periods as a JSON number; null when not specified.",
+                  "Whether cost sharing or matching is required as a JSON boolean.",
+                  "Required cost share or matching amount as a JSON number; null when not applicable.",
+                  "Indirect cost rate restrictions or caps imposed by the award.",
+                  "Specific budget restrictions as a JSON array of strings.",
+                  "Whether the award involves multiple funding streams as a JSON boolean.",
+                  "Financial Budgetary Risk score 1-5 as a JSON integer.",
+                  "Evidence-based justification for the Financial Risk score.",
+                  "Whether the award involves pass-through funding as a JSON boolean.",
+                  "Factors that increase audit scrutiny as a JSON array of strings.",
+                  "Audit Risk score 1-5 as a JSON integer.",
+                  "Evidence-based justification for the Audit Risk score."
+                ]
               }
             },
             {
@@ -304,7 +332,20 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Count of identified subrecipients or consortium partners as a JSON integer.",
+                  "Subrecipients with names, amounts, and noted capacity concerns as a JSON array of strings.",
+                  "Whether foreign subrecipients or partners are involved as a JSON boolean.",
+                  "Overall subrecipient risk assessment as a string.",
+                  "Required monitoring activities for subrecipients as a string.",
+                  "Subrecipient Risk score 1-5 as a JSON integer.",
+                  "Evidence-based justification for the Subrecipient Risk score.",
+                  "Terms that deviate from 2 CFR 200 Uniform Guidance or standard federal practice as a JSON array of strings.",
+                  "Special conditions, restrictions, or unique requirements imposed by the award as a JSON array of strings.",
+                  "Unusual Terms and Conditions score 1-5 as a JSON integer.",
+                  "Evidence-based justification for the Unusual Terms score."
+                ]
               }
             },
             {
@@ -397,7 +438,20 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Any foreign affiliations or collaborations referenced in the award as a JSON array of strings.",
+                  "Whether the project involves export-controlled technologies as a JSON boolean.",
+                  "NSPM-33 and CHIPS Act compliance requirements as a string.",
+                  "Research Security risk score 1-5 as a JSON integer.",
+                  "Evidence-based justification for the Research Security score.",
+                  "Regulatory compliance areas triggered by the project as a JSON array of strings.",
+                  "Primary type of compliance requirement as a string.",
+                  "Risk level for the primary compliance requirement as a string.",
+                  "Cross-cutting federal requirements referenced as a JSON array of strings.",
+                  "Compliance and Regulatory score 1-5 as a JSON integer.",
+                  "Evidence-based justification for the Compliance score."
+                ]
               }
             },
             {
@@ -497,7 +551,21 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Required reporting frequency (annual, quarterly, monthly).",
+                  "Detailed description of all required reports and submissions.",
+                  "Complexity and number of required performance indicators as a string.",
+                  "Whether an external evaluator is required as a JSON boolean.",
+                  "Whether data use agreements are required as a JSON boolean.",
+                  "Reporting Burden score 1-5 as a JSON integer.",
+                  "Evidence-based justification for the Reporting Burden score.",
+                  "Actions requiring prior approval from the sponsor as a JSON array of strings.",
+                  "Indicators of administrative burden as a JSON array of strings.",
+                  "Assessment of PI experience and capacity as a string.",
+                  "Administrative Burden score 1-5 as a JSON integer.",
+                  "Evidence-based justification for the Administrative Burden score."
+                ]
               }
             },
             {
@@ -639,7 +707,27 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Ongoing institutional obligations after the period of performance ends as a JSON array of strings.",
+                  "Specific closeout requirements and timelines as a string.",
+                  "Requirements for property or equipment management during and after the award as a string.",
+                  "Sustainability and Closeout Risk score 1-5 as a JSON integer.",
+                  "Evidence-based justification for the Sustainability score.",
+                  "Requirements for handling sensitive data as a string.",
+                  "Required data security and encryption standards as a JSON array of strings.",
+                  "DOJ Bulk Data and Sensitive Information score 1-5 as a JSON integer.",
+                  "Evidence-based justification for the DOJ Data score.",
+                  "Intellectual property ownership clauses and restrictions as a string.",
+                  "Required data sharing or open data mandates as a string.",
+                  "Publication restrictions or requirements imposed by the award as a string.",
+                  "Privacy concerns as a JSON array of strings.",
+                  "IP Data Rights and Privacy score 1-5 as a JSON integer.",
+                  "Evidence-based justification for the IP and Privacy score.",
+                  "Factors that could affect institutional reputation as a JSON array of strings.",
+                  "Institutional and Reputational Risk score 1-5 as a JSON integer.",
+                  "Evidence-based justification for the Reputational Risk score."
+                ]
               }
             }
           ]

@@ -341,7 +341,23 @@ def build_workflow(manifest_path: Path) -> tuple[dict, Path]:
                 "input_source": task.get("input_source", "step_input"),
             }
             if kind == "Extraction":
-                task_data["_embedded_search_set"] = build_embedded_search_set(task, manifest_path)
+                embedded = build_embedded_search_set(task, manifest_path)
+                task_data["_embedded_search_set"] = embedded
+                # Vandalizer's ExtractionNode.process() reads `searchphrases` directly
+                # from task.data as its first-choice extraction key source (see
+                # backend/app/services/workflow_engine.py in ui-insight/vandalizer).
+                # The runtime does NOT fall back to a Mongo lookup by search_set_uuid
+                # if `searchphrases` is missing — it just runs with an empty key list
+                # and the extraction returns nothing. Emitting `searchphrases` inline
+                # makes the workflow runtime-executable even when import-time
+                # SearchSet reconstruction fails (e.g., a pydantic validator on a
+                # SearchSetItem rejects an entry and the SearchSet is silently dropped).
+                # This is a belt-and-suspenders pairing with `_embedded_search_set`:
+                # if import succeeds the runtime can use either; if import fails the
+                # runtime still has the searchphrases.
+                task_data["searchphrases"] = [
+                    item["searchphrase"] for item in embedded["items"]
+                ]
             built_tasks.append({"name": kind, "data": task_data})
         built_steps.append({
             "name": step["name"],

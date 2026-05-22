@@ -83,7 +83,17 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Combined sponsor-prefixed RFA identifier (e.g., NSF-26-508)",
+                  "Sponsor's announcement number without agency prefix (e.g., 26-508)",
+                  "Full title of the funding opportunity, including any track or component designation",
+                  "Full name of the lead sponsoring agency",
+                  "Sponsor's internal program or division code (e.g., NSF/TIP/ITE)",
+                  "Canonical URL of the announcement on the sponsor's site",
+                  "Grants.gov or portal opportunity ID when distinct from the announcement number",
+                  "CFDA / Assistance Listing number(s)"
+                ]
               }
             },
             {
@@ -106,7 +116,10 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "All dates and deadlines as a JSON array of {item, date_time, notes} objects"
+                ]
               }
             },
             {
@@ -129,7 +142,10 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Eligible institutions as a JSON array of {type, subcategory, examples, compliance_requirements} objects"
+                ]
               }
             },
             {
@@ -152,7 +168,10 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Eligible individuals as a JSON array of {type, criteria, compliance_requirements, conditions} objects"
+                ]
               }
             },
             {
@@ -196,7 +215,13 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Anticipated award duration",
+                  "Amount per award including matching, indirect, and restrictions",
+                  "Anticipated number of awards",
+                  "Anticipated award date"
+                ]
               }
             },
             {
@@ -240,7 +265,13 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Required application components as a JSON array of {name, description, special_requirements} objects",
+                  "Optional application components as a JSON array of {name, description, special_requirements} objects",
+                  "Submission method, portal, file-format requirements, naming conventions, and collaboration rules as a paragraph",
+                  "Special RFA requirements as a JSON array of strings"
+                ]
               }
             },
             {
@@ -317,7 +348,17 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Total program funding, per-year caps, and category-specific limits not already covered by amount_per_award",
+                  "Cost-sharing requirement status (Required, Voluntary, Prohibited, or Not Specified)",
+                  "Cost-sharing details — type, rate, calculation basis, documentation, source restrictions",
+                  "F&A / indirect cost policy — rate, base (MTDC / TDC / S&W), excluded categories, documentation",
+                  "Categories explicitly called out as allowable, as a JSON array of strings",
+                  "Categories explicitly called out as unallowable, as a JSON array of strings",
+                  "PI / key personnel effort requirements, salary caps, student and postdoc support",
+                  "Pre-award costs, program income, budget revisions, sponsor-specific budget forms"
+                ]
               }
             }
           ]

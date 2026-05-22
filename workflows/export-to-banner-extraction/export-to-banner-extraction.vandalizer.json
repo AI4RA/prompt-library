@@ -95,7 +95,18 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Federal Award Identification Number (FAIN) or sponsor award number.",
+                  "Full project title as stated in the award document.",
+                  "Principal Investigator name as listed on the award.",
+                  "Award type classification (Grant, Cooperative Agreement, Contract, Subcontract).",
+                  "Whether the award is a pass-through (subaward) or a direct federal award as a JSON boolean.",
+                  "Name of the prime sponsor for pass-through awards; null for direct federal awards.",
+                  "Catalog of Federal Domestic Assistance (CFDA) / Assistance Listing number in XX.XXX format.",
+                  "North American Industry Classification System code from the award header.",
+                  "Name of the federal awarding agency."
+                ]
               }
             },
             {
@@ -153,7 +164,15 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Start date of the current award or budget period in ISO YYYY-MM-DD when unambiguous.",
+                  "End date of the current award or budget period in ISO YYYY-MM-DD when unambiguous.",
+                  "Start date of the overall project performance period in ISO YYYY-MM-DD when unambiguous.",
+                  "End date of the overall project performance period in ISO YYYY-MM-DD when unambiguous.",
+                  "Budget period rows as a JSON array of {period_number, start_date, end_date, amount} objects when multi-year incremental; empty array otherwise.",
+                  "Whether the award spans multiple budget periods with incremental funding as a JSON boolean."
+                ]
               }
             },
             {
@@ -226,7 +245,16 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Full legal name of the sponsoring organization.",
+                  "Sponsor entity classification (Federal, State Government, Non-Profit, Private Industry, Foundation, University, Other).",
+                  "Full agency hierarchy (e.g., USDA > NIFA > Agriculture and Food Research Initiative).",
+                  "Sponsor mailing or billing address as stated in the award document.",
+                  "Sponsor Unique Entity Identifier as a 12-character alphanumeric string.",
+                  "Name of the recipient institution as stated in the award.",
+                  "Awardee Unique Entity Identifier as a 12-character alphanumeric string."
+                ]
               }
             },
             {
@@ -324,7 +352,20 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Total amount of the current award action as a JSON number.",
+                  "Total anticipated funding across all periods as a JSON number; null when not specified.",
+                  "Budget breakdown by sponsor category as a JSON array of {category, approved_amount} objects with approved_amount as JSON number.",
+                  "Total direct costs as a JSON number; null when not specified.",
+                  "Total indirect (F&A) costs as a JSON number; null when not specified.",
+                  "Facilities & Administrative (indirect cost) rate as a percentage string with base annotation (e.g., 56.5%, 30% MTDC).",
+                  "F&A rate base type (MTDC, TDC, Salary & Wages, Other) or null when not specified.",
+                  "Whether indirect costs are waived or limited by the sponsor as a JSON boolean.",
+                  "Required cost-sharing or matching amount as a JSON number; null when not applicable.",
+                  "Type of cost sharing (mandatory, voluntary committed, in-kind) as a string.",
+                  "Program income provisions and handling requirements."
+                ]
               }
             },
             {
@@ -408,7 +449,18 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Type of billing arrangement (Cost Reimbursement, Fixed Price, Letter of Credit, Milestone).",
+                  "How often invoices should be submitted (Monthly, Quarterly, Upon Milestone).",
+                  "Physical or electronic address for invoice submission.",
+                  "Email address for electronic invoice submission.",
+                  "Payment Management System or Letter of Credit code for federal drawdowns.",
+                  "Payment terms (e.g., Net 30, advance payment, reimbursement).",
+                  "Items required on invoices as a JSON array of strings.",
+                  "Deadline for submitting the final invoice after project end.",
+                  "Name and contact information for the sponsor's billing or payment office."
+                ]
               }
             },
             {
@@ -473,7 +525,16 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Required reports as a JSON array of {report_type, frequency, due_date_or_timing, submission_method} objects.",
+                  "Required record retention period (e.g., 3 years after final FFR).",
+                  "Whether unspent funds can be carried forward to subsequent budget periods and under what conditions.",
+                  "Actions requiring prior written agency approval as a JSON array of strings.",
+                  "Special terms and conditions beyond standard federal requirements as a JSON array of strings.",
+                  "Specific closeout requirements and timeline.",
+                  "Governing regulations and terms referenced as a JSON array of strings."
+                ]
               }
             }
           ]

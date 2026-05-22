@@ -62,7 +62,14 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "PI and Co-PI personnel from VERAS Section 2.1 as a JSON array of {name, role, institution} objects.",
+                  "Senior / Key Personnel from VERAS Section 2.2A as a JSON array of {name, role, institution} objects.",
+                  "Total number of personnel requiring verification as a JSON integer.",
+                  "Names of PI and Co-PI personnel requiring APM 45.22 eligibility verification as a JSON array of strings.",
+                  "Names of Senior / Key Personnel requiring org-code collection only as a JSON array of strings."
+                ]
               }
             },
             {
@@ -120,7 +127,15 @@
                       "enum_values": []
                     }
                   ]
-                }
+                },
+                "searchphrases": [
+                  "Per-person Banner NBAJOBS verification records as a JSON array of objects.",
+                  "Per-PI / Co-PI APM 45.22 eligibility records as a JSON array of objects (Senior / Key Personnel excluded).",
+                  "Unique timesheet org codes with the personnel using each code as a JSON array of objects.",
+                  "Per-org-code DGA mappings as a JSON array of {org_code, department_name, dga_names} objects.",
+                  "Per-DGA cross-reference against VERAS Section 2 participants as a JSON array of objects.",
+                  "Short string describing any workflow document that was not provided; null when all sources are present."
+                ]
               }
             }
           ]
