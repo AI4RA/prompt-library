@@ -4,7 +4,27 @@
 # this file by scripts/build_vandalizer_workflows.py and committed alongside.
 # Never hand-edit the generated JSON — update this manifest and rebuild.
 #
-# === Topology (v0.2.0, Variant A + KB injection) ===
+# === Topology (v0.3.0, Variant A + KB injection + schedule-table support) ===
+#
+# v0.3.0 prompt fixes vs. v0.2.0 (issue: BLM/DOI/USDA/USDOI/DOE NoAs
+# routinely give FFR cadence as an EXPLICIT FFR Cycle TABLE rather than
+# relative day-count policy language; the v0.2.0 prompt anchored the LLM
+# to the "90 days after" pattern and returned null on table-format docs):
+#   1. Extraction prompt now explicitly recognizes BOTH formats:
+#      (A) relative-day policy language ("90 days after period end")
+#      (B) explicit "Federal Financial Report Cycle" / "FFR Cycle" table
+#          with period_start / period_end / reporting_type / due_date rows.
+#   2. New `ffr_schedule_table` JSON ARRAY field captures the explicit
+#      table verbatim. annual_ffr_due / final_ffr_due now derive from
+#      this table when relative language is absent.
+#   3. pi_name field now recognizes "Grantee Project Director", "Project
+#      Director", "PD", "Recipient Project Manager", "RPM" as PI
+#      synonyms (federal NoAs use these terms heavily).
+#   4. submission_system_platform allowed values extended to include
+#      "GrantSolutions" and "ezFedGrants" (DOI / USDA portals).
+#   5. Consolidation prompt adds an "FFR REPORTING CYCLE" Markdown table
+#      section that renders ffr_schedule_table when present and is
+#      omitted entirely when empty.
 #
 # v0.2.0 architectural changes vs. v0.1.0:
 #   1. Parallel "Extraction" tasks converted to Vandalizer Prompt tasks
@@ -47,12 +67,12 @@ description: >
   readability, matching the source ui-insight/ProcessMapping
   ffr-management-extraction formatting.md conventions.
 
-workflow_version: 0.2.0
+workflow_version: 0.3.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-04-30
-updated: 2026-05-22
+updated: 2026-05-27
 
 components:
   - slug: ffr-management-extraction-udm
@@ -108,13 +128,25 @@ steps:
           "$0.5M"). Use null when a field is absent — never invent
           values.
 
-          Search every section of the document with attention to titles
-          like "Financial Reporting Requirements", "SF-425", "Federal
-          Financial Report", "Payment Management System", "Reporting
-          Schedule", or "Financial Monitoring". Keywords to follow:
-          FFR, SF-425, financial report, PMS, expenditure, deadline,
-          submit, days, budget period, project end, liquidation,
-          drawdown.
+          This document may state FFR cadence in either of TWO formats:
+            (A) RELATIVE POLICY LANGUAGE — e.g., "Annual FFR due 90
+                days after each budget period end."
+            (B) EXPLICIT SCHEDULE TABLE — most BLM, DOI, USDA, USDOI,
+                and DOE awards print a "Federal Financial Report Cycle"
+                or "FFR Cycle" table with columns: Reporting Period
+                Start, Reporting Period End, Reporting Type (Annual /
+                Semi-Annual / Quarterly / Final), Reporting Period Due
+                Date.
+          Search the document for BOTH. When the table is present, USE
+          IT — do not return null because the relative-day-count
+          phrasing is missing. Capture every row of the table verbatim
+          into `ffr_schedule_table`.
+
+          The project lead may be named under any of: "Principal
+          Investigator", "PI", "Project Director", "PD", "Grantee
+          Project Director", "Grantee Project Manager", "Recipient
+          Project Manager", "RPM". Treat any of these synonyms as the
+          PI for the `pi_name` field.
 
           CRITICAL — descriptive fields must be FLAT STRINGS, not
           nested objects. Specifically `annual_ffr_due`,
@@ -134,23 +166,43 @@ steps:
 
           - award_number: STRING. Federal Award Identification Number
             (FAIN) printed on the award. null when absent.
-          - pi_name: STRING. Principal Investigator full name. null
+          - pi_name: STRING. Full name of the project lead under
+            whichever of the synonyms above the document uses. null
             when absent.
-          - annual_ffr_due: STRING. Annual FFR due window
-            (e.g., "90 days after each budget period end",
-            "120 days after period end"). When the document does not
-            state it, use "Not specified in the document".
-          - final_ffr_due: STRING. Final FFR deadline
-            (e.g., "120 days after project end"). When the document
-            does not state it, use "Not specified in the document".
+          - ffr_schedule_table: JSON ARRAY of
+            {period_start, period_end, reporting_type, due_date}
+            objects. One row per row in the document's Federal
+            Financial Report Cycle table. Preserve the document's exact
+            date format (MM/DD/YYYY or YYYY-MM-DD). reporting_type is
+            the document's label verbatim ("Annual", "Semi-Annual",
+            "Quarterly", "Final"). Empty array when the document gives
+            no explicit FFR cycle table.
+          - annual_ffr_due: STRING. Derive as follows:
+            * If the document states relative policy language, quote
+              it verbatim ("90 days after each budget period end").
+            * Else if `ffr_schedule_table` has one or more Annual rows,
+              summarize as "Annual FFR due <month>/<day> following each
+              reporting period (<first annual due_date> through
+              <last annual due_date> per FFR Cycle table)".
+            * Else "Not specified in the document".
+          - final_ffr_due: STRING. Derive as follows:
+            * If the document states relative policy language, quote
+              it verbatim ("120 days after project end").
+            * Else if `ffr_schedule_table` has a Final row, summarize
+              as "<due_date> (Final FFR per FFR Cycle table, covering
+              reporting period <period_start> – <period_end>)".
+            * Else "Not specified in the document".
           - interim_reporting: STRING. Interim financial reporting
             requirements when imposed. null when absent.
           - cash_transaction_reporting: STRING. SF-272 / cash
             transaction reporting requirements. null when absent.
-          - submission_system_platform: STRING — one of
-            "Payment Management System", "ASAP", "ACH", "Grants.gov",
-            "Other", or null. Use "Other" only when the document
-            names a platform that is none of the listed values.
+          - submission_system_platform: STRING — one of "Payment
+            Management System", "ASAP", "ACH", "Grants.gov",
+            "GrantSolutions", "ezFedGrants", "Other", or null. Use the
+            document's stated platform. Use "Other" when the document
+            names a platform that is none of the listed values. Use
+            null when the document does not state a submission
+            platform — do not invent one.
           - submission_system_access_requirements: STRING. Account,
             role, or registration prerequisites for accessing the
             platform. null when absent.
@@ -158,13 +210,15 @@ steps:
             details (NIH/HHS awards). null when not applicable or
             absent.
           - submission_authorization: STRING. Roles and
-            responsibilities for who may submit (e.g., "AOR-only"). null
-            when absent.
+            responsibilities for who may submit (e.g., "AOR-only",
+            "GAO/GAR-only"). null when absent.
           - required_financial_data: JSON ARRAY OF STRINGS. Flat list
             of required reporting category labels exactly as the
-            document names them ("Personnel", "Fringe", "Equipment",
-            "Subawards", "Cost share", "Program income", etc.). Empty
-            array when not specified.
+            document names them ("Salaries and Wages", "Fringe
+            Benefits", "Equipment", "Supplies", "Travel",
+            "Construction", "Other", "Contractual", "Indirect Costs",
+            "Personnel", "Subawards", "Cost share", "Program income",
+            etc.). Empty array when not specified.
           - late_submission_penalties: STRING. Document language
             describing penalties for late FFR submission. null when
             absent.
@@ -251,6 +305,23 @@ steps:
 
           ---
 
+          ## FFR REPORTING CYCLE
+
+          If `ffr_schedule_table` is non-empty, render as a Markdown
+          table:
+
+          | Period Start | Period End | Type | Due Date |
+          |---|---|---|---|
+
+          One row per `ffr_schedule_table` entry, in document order.
+          Bold the row whose `reporting_type` is "Final" (wrap every
+          cell in **double asterisks**).
+
+          If `ffr_schedule_table` is empty, omit this section entirely
+          (do not render the heading or any placeholder text).
+
+          ---
+
           ## SUBMISSION SCHEDULE
 
           - **Annual FFR Due:** <annual_ffr_due>
@@ -308,6 +379,8 @@ steps:
             months").
           - Preserve any monetary amounts in the document's exact
             format ($1,234,567).
+          - Preserve dates in the document's exact format
+            (MM/DD/YYYY or YYYY-MM-DD as they appear).
           - If any field from the JSON arrives as a nested object
             instead of a string, REWRITE it into natural-language
             prose before emitting — do NOT pass through `{...}` JSON

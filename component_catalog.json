@@ -2430,7 +2430,7 @@
       "slug": "award-compliance-extraction",
       "name": "Award Compliance & Financial Overview Extraction",
       "description": "Uploads a fully-executed federal award notice or agreement and returns an RA-friendly Markdown Award Compliance & Financial Overview covering award header information, financial summary, approved budget & restrictions, governing regulations (prioritized), and key administrative requirements (reporting, prior approval, compliance deadlines). Mirrors the source ui-insight/ProcessMapping award-compliance-extraction consolidation.md conventions.",
-      "workflow_version": "0.2.0",
+      "workflow_version": "0.2.1",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -2483,8 +2483,8 @@
     {
       "slug": "budget-justification-generator",
       "name": "Budget Justification Generator",
-      "description": "Uploads a grant budget form, the project narrative / proposal, and optionally the funding opportunity announcement, and returns a publication-ready RA-friendly Markdown budget-justification narrative document organized in standard R&R Budget / SF-424A category order (A. Senior/Key Personnel through H. Indirect Costs, plus Cost Sharing and Budget Summary). Includes summary tables at fixed positions and a Cross-Validation Notes section marked as RA-only / not-for-submission. Mirrors the source ui-insight/ProcessMapping budget-justification-generator consolidation.md conventions.",
-      "workflow_version": "0.2.0",
+      "description": "Uploads a grant budget form, the project narrative / proposal, and optionally the funding opportunity announcement, and returns a publication-ready RA-friendly Markdown budget-justification narrative document organized in standard R&R Budget / SF-424A category order (A. Senior/Key Personnel through H. Indirect Costs, plus Cost Sharing and Budget Summary). Agency-agnostic — handles SF-424 R&R Detailed (NIH/NSF/DOE-research/DOD-research/EPA-research), SF-424A Non-Construction, numbered-section budget worksheets (HUD-424-CBW, DOI, USDA, ED, EPA, HHS, DOE non-research, DOD non-research, cooperative-agreement variants), and narrative-only budgets. Mirrors the source ui-insight/ProcessMapping budget-justification-generator consolidation.md conventions.",
+      "workflow_version": "0.5.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -2592,7 +2592,7 @@
       "slug": "ffr-management-extraction",
       "name": "FFR Management Extraction",
       "description": "Uploads a federal award notice or agreement and returns an RA-friendly Markdown FFR (SF-425) management reference covering the five buckets a sponsored-programs analyst uses when scheduling FFR submissions: submission schedule, submission system and procedures, required financial data categories, compliance consequences, and preparation timeline. The Markdown uses bold category labels for maximum readability, matching the source ui-insight/ProcessMapping ffr-management-extraction formatting.md conventions.",
-      "workflow_version": "0.2.0",
+      "workflow_version": "0.3.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -2618,8 +2618,8 @@
     {
       "slug": "foa-checklist-extraction",
       "name": "FOA Checklist Extraction",
-      "description": "Uploads a federal funding opportunity announcement (FOA / NOFO) and returns an RA-friendly Markdown FOA reference document covering FOA Summary, Key Dates and Deadlines, Funding Information, Eligibility Requirements, Application Components and Submission Requirements, Evaluation Process and Criteria, Program Priorities and Alignment, and Special Requirements. Mirrors the source ui-insight/ProcessMapping foa-checklist-extraction consolidation.md conventions, including the Table of Contents at the top and H1/H2/H3 hierarchical headings.",
-      "workflow_version": "0.2.0",
+      "description": "Uploads a federal funding opportunity announcement (FOA / NOFO) and returns an RA-friendly Markdown FOA reference document covering FOA Summary, Key Dates and Deadlines, Funding Information, Eligibility Requirements, Application Components and Submission Requirements, Evaluation Process and Criteria, Program Priorities and Alignment, and Special Requirements. Mirrors the source ui-insight/ProcessMapping foa-checklist-extraction conventions with H1/H2/H3 hierarchical headings and a placement contract that routes each fact to exactly one section.",
+      "workflow_version": "0.3.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -2757,7 +2757,7 @@
       "slug": "proposal-budget-personnel-extraction",
       "name": "Proposal Budget Personnel & Compliance Requirements Extraction",
       "description": "Uploads a proposal package (budget form, project narrative, sponsor RFA) and returns an RA-friendly Markdown Budget Personnel & Compliance Requirements Analysis covering the personnel summary table, trainee summary with mentoring-plan flag, compliance requirement flags driven by budget content, senior-key-personnel document requirements matrix, subaward document requirements, budget overview table, and cost details. Mirrors the source ui-insight/ProcessMapping proposal-budget-personnel-extraction consolidation.md conventions, including ✅/❌ for compliance flags and ☐ for document checklists.",
-      "workflow_version": "0.2.0",
+      "workflow_version": "0.5.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -2838,7 +2838,7 @@
       "slug": "risk-domain-assessment",
       "name": "Risk Domain Assessment",
       "description": "Uploads federal award documents (Notice of Award, FOA / NOFO / RFA, modification, proposal) and returns an RA-friendly Risk Domain Assessment Report scoring 14 institutional risk domains on a 1-5 rubric with evidence citations, aggregate metrics, high-risk-areas list, key findings, and recommended mitigations. The deliverable is rendered as plain-text inside a Markdown code block per the source ui-insight/ProcessMapping risk-domain-assessment consolidation.md output template — dot-leader score lines, underlined section headers, fixed-width layout for legibility.",
-      "workflow_version": "0.2.0",
+      "workflow_version": "0.3.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {

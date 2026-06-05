@@ -1,7 +1,19 @@
 # Authored source for the Award Compliance & Financial Overview Extraction
 # Vandalizer workflow.
 #
-# === Topology (v0.2.0, Variant A + KB injection) ===
+# === Topology (v0.2.1, Variant A + KB injection) ===
+#
+# v0.2.1 changes vs. v0.2.0:
+#   - validation_plan rewritten as a hand-authored, contract-aware
+#     CORE-CONTRACT plan in the Vandalizer RUNTIME schema
+#     ({id, name, description, category}) so it imports cleanly and runs
+#     in Vandalizer's editor "Validate" feature. The prior
+#     {check_id, check_type, severity, target_fields} schema was inert:
+#     Vandalizer's evaluator reads c["id"]/c["name"]/c["description"]/
+#     c["category"], so the old keys never matched (and would KeyError on
+#     Validate). No change to runnable steps or output.
+#   - category vocabulary is Vandalizer's: completeness | accuracy |
+#     content | formatting (scored x1.5 / x1.3 / x1.0 / x0.7).
 #
 # v0.2.0 changes vs. v0.1.1:
 #   1. Parallel Extraction tasks converted to Prompt tasks.
@@ -19,36 +31,90 @@ description: >
   deadlines). Mirrors the source ui-insight/ProcessMapping
   award-compliance-extraction consolidation.md conventions.
 
-workflow_version: 0.2.0
+workflow_version: 0.2.1
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-04-30
-updated: 2026-05-22
+updated: 2026-06-05
 
 components:
   - slug: award-compliance-extraction-udm
     pinned_version: 0.1.0
 
+# Hand-authored CORE-CONTRACT validation plan in Vandalizer's RUNTIME
+# schema. Each check: id (stable, unique), name (<=60 chars), description
+# (what the LLM evaluator looks for in the ACTUAL output), category (one of
+# completeness | accuracy | content | formatting). Vandalizer evaluates these
+# against the last <=3 completed runs' final output, cross-referenced with the
+# source document and intermediate step outputs. Clicking "Regenerate" in the
+# editor OVERWRITES this with an LLM-generated plan — re-import to restore.
 validation_plan:
-  - check_id: CHK-01
-    check_name: Date format consistency
-    check_type: format
-    check_description: Verify dates preserve the document's wording in the rendered Markdown.
-    target_fields: []
-    severity: error
-  - check_id: CHK-02
-    check_name: Monetary amount preservation
-    check_type: format
-    check_description: Verify total amounts and budget categories preserve the document's exact currency formatting.
-    target_fields: []
-    severity: error
-  - check_id: CHK-03
-    check_name: Compliance calendar completeness
-    check_type: completeness
-    check_description: Verify all reporting requirements and prior-approval requirements identified by the parallel extractions appear in the Markdown deliverable.
-    target_fields: []
-    severity: warning
+  - id: ac-sections-complete
+    category: completeness
+    name: Required sections present and ordered
+    description: >
+      The deliverable opens with an H1 title line "Award Compliance &
+      Financial Overview: <FAIN>" and contains all five H3 sections IN THIS
+      EXACT ORDER: AWARD HEADER INFORMATION, FINANCIAL SUMMARY, APPROVED
+      BUDGET & RESTRICTIONS, GOVERNING REGULATIONS, KEY ADMINISTRATIVE
+      REQUIREMENTS. FAIL if any of these five sections is missing, renamed,
+      or out of order.
+  - id: ac-header-financial-fields
+    category: completeness
+    name: Header and financial summary fields populated
+    description: >
+      AWARD HEADER INFORMATION lists Project Title, Awardee Organization,
+      Federal Award Identification Number (FAIN), and Period of Performance.
+      The FINANCIAL SUMMARY table contains all seven rows: Total Award
+      Amount, Total Anticipated Amount, Total Direct Costs, Total Indirect
+      Costs, F&A Rate (with its base), Cost Share, and Program Income. Every
+      field is either populated from the document or carries the literal
+      placeholder "Not specified in the document" / "Not required" — never
+      blank, and no row is dropped.
+  - id: ac-monetary-fain-fidelity
+    category: accuracy
+    name: Monetary and award-number fidelity to source
+    description: >
+      Total Award Amount, Total Direct Costs, Total Indirect Costs, each
+      Approved Budget category amount, and the FAIN match the source document
+      EXACTLY — dollar signs, commas, and decimals preserved verbatim, no
+      transposed digits, and no amounts or award numbers that do not appear
+      in the source document. Cross-reference every figure against the source
+      text; any value not grounded there is a hallucination and must FAIL.
+  - id: ac-admin-requirements-coverage
+    category: completeness
+    name: Key administrative requirements coverage
+    description: >
+      KEY ADMINISTRATIVE REQUIREMENTS contains the Reporting Requirements
+      table with columns Report Type / Frequency / Due Date or Timing /
+      Submission Method (one row per reporting obligation in the source),
+      plus Prior Approval Required For, Audit Requirements, Record Retention,
+      FFR Requirements (summary), and High-Risk Conditions. Empty categories
+      use the contract defaults (e.g., "Standard 2 CFR 200.308 prior
+      approvals", "None identified") instead of being omitted.
+  - id: ac-markdown-formatting
+    category: formatting
+    name: Markdown deliverable formatting
+    description: >
+      Output is rendered Markdown (NOT a JSON object and NOT wrapped in a
+      JSON/code fence), using bold "**Label:**" fields and three correctly
+      headed tables: FINANCIAL SUMMARY (Field | Value), APPROVED BUDGET &
+      RESTRICTIONS (Category | Approved Amount | Restrictions), and Reporting
+      Requirements (Report Type | Frequency | Due Date / Timing | Submission
+      Method). There is no surrounding code fence, no preamble, and no
+      apologetic "context does not contain" prose.
+  - id: ac-placeholder-discipline
+    category: content
+    name: Placeholder discipline for absent data
+    description: >
+      When a value is genuinely absent from the source, the deliverable uses
+      the contract's placeholder language ("Not specified in the document"
+      for required scalars, "—" for optional table cells, and each section's
+      empty-state phrase) rather than inventing data or silently dropping a
+      field. If every upstream field was empty, the closing warning line
+      ("the upstream extraction returned no data ... re-run the workflow") is
+      present.
 
 steps:
   - name: Knowledge Base Context Lookup

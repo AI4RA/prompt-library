@@ -1,6 +1,32 @@
 # Authored source for the FOA Checklist Extraction Vandalizer workflow.
 #
-# === Topology (v0.2.0, Variant A + KB injection) ===
+# === Topology (v0.3.0, Variant A + KB injection + RFA-aligned consolidation) ===
+#
+# v0.3.0 consolidation rewrite vs. v0.2.0 (issue: full-workflow runs
+# on this workflow failed at Step 3/3 Consolidation with a Vandalizer
+# "Connection error" while the parallel extractions and the
+# consolidation Test Step succeeded. The same Vandalizer instance ran
+# the sibling RFA Checklist workflow end-to-end on the same input PDF
+# without issue. The variable was the FOA consolidation prompt's
+# structural divergence from the working RFA pattern — terse field
+# references, no explicit fragment enumeration, no placement contract,
+# no anti-leakage anchor. Symptoms in the Test Step output (dropped
+# populated fields, verbatim PDF text appearing in sections that had
+# no corresponding JSON field) supported the LLM losing track of
+# what it was supposed to consume):
+#   1. Consolidation prompt rewritten to mirror the working RFA
+#      Checklist consolidation structure exactly:
+#      - Enumerates all six JSON fragments and their fields up front.
+#      - Replaces terse "Bulleted list from X" instructions with
+#        explicit field-by-field templates per section.
+#      - Adds a placement contract block that routes each fact to
+#        one section only (funding to Funding, eligibility to
+#        Eligibility, etc.) and explicitly forbids reading from
+#        workflow_documents directly.
+#      - Drops the static Table of Contents (markdown viewers render
+#        TOC automatically and the static block consumed output
+#        tokens for no end-user benefit).
+#   2. Workflow_version 0.2.0 -> 0.3.0; extraction prompts unchanged.
 #
 # v0.2.0 changes vs. v0.1.0:
 #   1. Parallel Extraction tasks converted to Prompt tasks.
@@ -18,16 +44,16 @@ description: >
   Requirements, Application Components and Submission Requirements,
   Evaluation Process and Criteria, Program Priorities and Alignment,
   and Special Requirements. Mirrors the source
-  ui-insight/ProcessMapping foa-checklist-extraction consolidation.md
-  conventions, including the Table of Contents at the top and
-  H1/H2/H3 hierarchical headings.
+  ui-insight/ProcessMapping foa-checklist-extraction conventions with
+  H1/H2/H3 hierarchical headings and a placement contract that routes
+  each fact to exactly one section.
 
-workflow_version: 0.2.0
+workflow_version: 0.3.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-04-30
-updated: 2026-05-22
+updated: 2026-05-27
 
 components:
   - slug: foa-checklist-extraction-udm
@@ -196,12 +222,35 @@ steps:
         input_source: step_input
         prompt_inline: |
           You are the consolidation step of the FOA Checklist
-          Extraction workflow. You receive SIX JSON fragments from the
-          previous step.
+          Extraction workflow. You receive SIX JSON object fragments
+          from the previous step:
 
-          Render a single RA-friendly Markdown FOA reference document.
-          Mirrors source consolidation.md exactly, including the H1/H2/H3
-          hierarchy and the table of contents at the top.
+          1. FOA summary (foa_number_or_id, cfda_number, cfda_title,
+             federal_agency, agency_office_bureau,
+             foa_title_or_program_name, program_authorization,
+             program_description)
+          2. Key dates (critical_dates: array of {event_or_milestone,
+             date_time, notes_or_requirements})
+          3. Funding information (total_funding, expected_awards,
+             award_size_range, project_duration, cost_sharing_required,
+             cost_sharing_details, award_instrument_type)
+          4. Eligibility (eligible_applicants, ineligible_applicants,
+             per_institution_limit, per_pi_limit,
+             special_eligibility_conditions)
+          5. Application and evaluation (registration_requirements,
+             required_forms, formatting_requirements,
+             required_components, submission_method, screening_criteria,
+             merit_review_criteria, review_timeline)
+          6. Priorities and special requirements (primary_goals,
+             priority_areas, expected_outcomes,
+             alignment_recommendations, special_requirements)
+
+          Your job is to render a single RA-friendly Markdown FOA
+          reference document for the sponsored-programs analyst (the
+          end-user). The deliverable is Markdown — NOT a JSON object
+          and NOT a JSON code fence. The audience is a research
+          administrator who will copy this into Word, paste into an
+          email to the proposal team, or save to a shared folder.
 
           ## CRITICAL — ALWAYS RENDER THE DELIVERABLE
 
@@ -218,9 +267,7 @@ steps:
             "Not specified in the document".
           - Optional table cells: substitute "—" (em dash).
           - Empty arrays: render the section with its empty-state
-            language already specified below (e.g., "No items identified",
-            "Defers to federal defaults", "None identified beyond
-            standard federal requirements").
+            language already specified below.
 
           If EVERY field across ALL upstream fragments is null (which
           means the document genuinely contained nothing extractable
@@ -237,65 +284,58 @@ steps:
 
           # FOA Reference: <foa_title_or_program_name>
 
-          ## Table of Contents
+          **FOA Number/ID:** <foa_number_or_id or "Not specified">
+          **CFDA Number / Title:** <cfda_number or "Not specified"> — <cfda_title or "—">
+          **Federal Agency:** <federal_agency or "Not specified"> (<agency_office_bureau or "—">)
+          **Program Authorization:** <program_authorization or "Not specified">
 
-          1. FOA Summary
-          2. Key Dates and Deadlines
-          3. Funding Information
-          4. Eligibility Requirements
-          5. Application Components and Submission Requirements
-          6. Evaluation Process and Criteria
-          7. Program Priorities and Alignment
-          8. Special Requirements
+          <program_description as a paragraph; if null, write "Not specified in the document.">
 
           ---
 
-          ## FOA Summary
+          ## KEY DATES AND DEADLINES
 
-          Render a concise summary block:
-
-          - **FOA Number/ID:** <foa_number_or_id or "Not specified">
-          - **CFDA Number / Title:** <cfda_number or "Not specified"> — <cfda_title or "—">
-          - **Federal Agency:** <federal_agency> (<agency_office_bureau or "—">)
-          - **FOA Title / Program Name:** <foa_title_or_program_name>
-          - **Program Authorization:** <program_authorization or "Not specified">
-
-          <program_description as a paragraph>
-
-          ---
-
-          ## Key Dates and Deadlines
+          A Markdown table with chronologically sorted rows:
 
           | Event / Milestone | Date and Time | Notes / Requirements |
           |---|---|---|
+          | (event_or_milestone) | (date_time) | (notes_or_requirements or "—") |
 
-          One row per critical_dates entry, sorted chronologically.
-          Use **bold** for critical deadlines.
+          One row per critical_dates entry. Use **bold** for entries
+          labeled as critical, application, or final deadlines. If
+          critical_dates is empty, render a single row:
+          | — | — | No dates identified in the document |.
 
           ---
 
-          ## Funding Information
+          ## FUNDING INFORMATION
 
-          - **Total Available Funding:** <total_funding>
-          - **Number of Anticipated Awards:** <expected_awards>
-          - **Award Size:** <award_size_range>
-          - **Project Duration:** <project_duration>
-          - **Cost Sharing Required:** <Yes / No / Not specified>
+          Render as a definition-style list:
+
+          - **Total Available Funding:** <total_funding or "Not specified">
+          - **Number of Anticipated Awards:** <expected_awards or "Not specified">
+          - **Award Size:** <award_size_range or "Not specified">
+          - **Project Duration:** <project_duration or "Not specified">
+          - **Cost Sharing Required:** <"Yes" when cost_sharing_required is true, "No" when false, "Not specified" when null>
           - **Cost Sharing Details:** <cost_sharing_details or "—">
-          - **Award Instrument Type:** <award_instrument_type>
+          - **Award Instrument Type:** <award_instrument_type or "Not specified">
 
           ---
 
-          ## Eligibility Requirements
+          ## ELIGIBILITY REQUIREMENTS
 
           ### Who can apply
 
-          Bulleted list from eligible_applicants.
+          Render eligible_applicants as a bulleted list. Each entry is
+          a flat string — render it as a single bullet without
+          sub-bullets. If empty or null, state "Not specified in the
+          document".
 
           ### Who cannot apply
 
-          Bulleted list from ineligible_applicants (or "Not specified
-          in the document").
+          Render ineligible_applicants as a bulleted list of flat
+          strings. If empty or null, state "Not specified in the
+          document".
 
           ### Limitations
 
@@ -304,91 +344,146 @@ steps:
 
           ### Special Eligibility Conditions
 
-          Bulleted list from special_eligibility_conditions (or "None").
+          Render special_eligibility_conditions as a bulleted list of
+          flat strings. If empty or null, state "None beyond standard
+          federal requirements".
 
           ---
 
-          ## Application Components and Submission Requirements
+          ## APPLICATION COMPONENTS AND SUBMISSION REQUIREMENTS
 
           ### Registration Requirements
 
-          Bulleted list from registration_requirements.
+          Bulleted list of registration_requirements entries. Each
+          entry is a single flat-string bullet. If empty or null,
+          state "Not specified in the document".
 
           ### Required Forms
 
-          Bulleted list from required_forms.
+          Bulleted list of required_forms entries. Each entry is a
+          single flat-string bullet. If empty or null, state "Not
+          specified in the document".
 
           ### Formatting Requirements
 
-          <formatting_requirements>
+          <formatting_requirements as a paragraph, or "Not specified in the document">
 
           ### Required Components Checklist
 
+          A Markdown table. Always present.
+
           | Component | Description | Page Limit / Format |
           |---|---|---|
+          | (component_name) | (description) | (page_limit_or_format or "—") |
 
-          One row per required_components entry.
+          One row per required_components entry. If empty or null,
+          render a single row:
+          | Not specified in this document | — | — |.
 
           ### Submission Method
 
-          <submission_method>
+          <submission_method as a paragraph, or "Not specified in the document">
 
           ---
 
-          ## Evaluation Process and Criteria
+          ## EVALUATION PROCESS AND CRITERIA
 
           ### Screening Criteria
 
-          Bulleted list from screening_criteria.
+          Render screening_criteria as a bulleted list of flat strings.
+          If empty or null, state "Not specified in the document".
 
           ### Merit Review Criteria
 
+          A Markdown table. Always present.
+
           | Criterion | Weight | Description |
           |---|---|---|
+          | (criterion) | (weight or "—") | (description or "—") |
 
-          One row per merit_review_criteria entry.
+          One row per merit_review_criteria entry. If empty or null,
+          render a single row:
+          | Not specified in this document | — | — |.
 
           ### Review Timeline
 
-          <review_timeline>
+          <review_timeline as a paragraph, or "Not specified in the document">
 
           ---
 
-          ## Program Priorities and Alignment
+          ## PROGRAM PRIORITIES AND ALIGNMENT
 
           ### Primary Goals
 
-          Bulleted list from primary_goals.
+          Render primary_goals as a bulleted list of flat strings. If
+          empty or null, state "Not specified in the document".
 
           ### Priority Areas
 
-          Bulleted list from priority_areas.
+          Render priority_areas as a bulleted list of flat strings. If
+          empty or null, state "Not specified in the document".
 
           ### Expected Outcomes
 
-          Bulleted list from expected_outcomes.
+          Render expected_outcomes as a bulleted list of flat strings.
+          If empty or null, state "Not specified in the document".
 
           ### Alignment Recommendations
 
-          <alignment_recommendations>
+          <alignment_recommendations as a paragraph, or "Not specified in the document">
 
           ---
 
-          ## Special Requirements
+          ## SPECIAL REQUIREMENTS
 
-          Bulleted list from special_requirements. If empty, state
-          "None identified beyond standard federal requirements."
+          Render special_requirements as a bulleted list of flat
+          strings. If empty or null, state "None identified beyond
+          standard federal requirements."
 
-          ## Rendering rules
+          ---
 
-          - H1 for the title, H2 for major sections, H3 for sub-sections
-            (matches source convention).
-          - Bold critical deadlines and key requirements.
-          - Preserve dates and monetary amounts verbatim.
-          - Horizontal rules between major sections.
-          - If any field arrives as a nested JSON object, REWRITE
-            into prose / table.
-          - No JSON code fences around the output.
+          ## Placement contract (enforce as you render)
+
+          1. **Funding amounts, award counts, project duration, and
+             cost-sharing details appear ONLY in FUNDING INFORMATION.**
+             Even if other fragments mention them, do not restate
+             elsewhere.
+          2. **Eligibility lists appear ONLY in ELIGIBILITY
+             REQUIREMENTS.** Even if priorities or special-requirements
+             fragments mention who can/cannot apply, do not duplicate.
+          3. **Per-component formatting rules (page limits, fonts,
+             margins) appear ONLY in APPLICATION COMPONENTS / Required
+             Components Checklist** (in the table's Page Limit / Format
+             column). Not in SPECIAL REQUIREMENTS.
+          4. **Submission mechanics (portal, file format, naming)
+             appear ONLY in APPLICATION COMPONENTS / Submission Method.**
+             Not in SPECIAL REQUIREMENTS.
+          5. **Strategic priorities and alignment statements appear
+             ONLY in PROGRAM PRIORITIES AND ALIGNMENT.** Not in PROGRAM
+             AUTHORIZATION or SPECIAL REQUIREMENTS.
+          6. **Use ONLY the six JSON fragments above. Do NOT reference
+             the original uploaded document directly.** If a field is
+             absent from the fragments, render the appropriate
+             placeholder — do not infer, fabricate, or pull from prior
+             knowledge of the document text.
+
+          ## Formatting rules
+
+          - Preserve the sponsor's monetary formatting verbatim
+            ($1,234,567 or $0.5M).
+          - Preserve dates exactly as stated, including time and
+            timezone components.
+          - Use **bold** for labels and critical action items.
+          - Use — (em dash) for empty optional fields in tables;
+            "Not specified in the document" for empty required fields.
+          - If any field from a JSON fragment arrives as a nested
+            object instead of a string, REWRITE it into natural-language
+            prose before emitting — do NOT pass through {"key": "value"}
+            syntax into the final Markdown.
+          - No JSON. No code fences around the output. No preamble.
+            No closing commentary about the rendering. The output is
+            the deliverable — render it as if you were writing the
+            document directly.
 
 evals:
   workflow_local: true
