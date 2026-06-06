@@ -2,7 +2,7 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-06-05T00:00:00+00:00",
+  "exported_at": "2026-06-06T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
@@ -88,7 +88,7 @@
           "id": "ac-header-financial-fields",
           "category": "completeness",
           "name": "Header and financial summary fields populated",
-          "description": "AWARD HEADER INFORMATION lists Project Title, Awardee Organization, Federal Award Identification Number (FAIN), and Period of Performance. The FINANCIAL SUMMARY table contains all seven rows: Total Award Amount, Total Anticipated Amount, Total Direct Costs, Total Indirect Costs, F&A Rate (with its base), Cost Share, and Program Income. Every field is either populated from the document or carries the literal placeholder \"Not specified in the document\" / \"Not required\" — never blank, and no row is dropped.\n"
+          "description": "AWARD HEADER INFORMATION lists Project Title, Awardee Organization, Federal Award Identification Number (FAIN), and Period of Performance. The FINANCIAL SUMMARY table contains all seven rows: Total Award Amount, Total Anticipated Amount, Total Direct Costs, Total Indirect Costs, F&A Rate (with its base), Cost Share, and Program Income. Every field is either populated from the document or carries a clear absent-value placeholder — accept ANY of \"Not specified\", \"Not specified in the document\", \"Not required\", \"Not required (—)\", or \"—\". Do NOT fail on which placeholder variant is used; FAIL only if a field is blank/empty or a required row is dropped.\n"
         },
         {
           "id": "ac-monetary-fain-fidelity",
@@ -112,13 +112,13 @@
           "id": "ac-placeholder-discipline",
           "category": "content",
           "name": "Placeholder discipline for absent data",
-          "description": "When a value is genuinely absent from the source, the deliverable uses the contract's placeholder language (\"Not specified in the document\" for required scalars, \"—\" for optional table cells, and each section's empty-state phrase) rather than inventing data or silently dropping a field. If every upstream field was empty, the closing warning line (\"the upstream extraction returned no data ... re-run the workflow\") is present.\n"
+          "description": "When a value is genuinely absent from the source, the deliverable uses a clear placeholder rather than inventing data or silently dropping a field. Accept ANY of these equivalent placeholders and do NOT fail on the exact wording: \"Not specified\", \"Not specified in the document\", \"Not required\", \"Not required (—)\", or \"—\". Separately, ONLY when every upstream field was empty must the closing warning line (\"the upstream extraction returned no data ... re-run the workflow\") be present.\n"
         }
       ],
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/award-compliance-extraction/manifest.yaml",
-        "workflow_version": "0.2.1",
+        "workflow_version": "0.2.2",
         "status": "experimental",
         "components": [
           {

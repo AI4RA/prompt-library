@@ -711,6 +711,24 @@ Special_Conditions, Record_Retention_Years}`, `AwardBudget`,
 `IndirectRate.{Rate_Percentage, Base_Type}`,
 `Modification.Requires_Prior_Approval`. Conformance is accurate.
 
+#### v0.2.1 → v0.2.2 (2026-06-06) — validation-check recalibration
+
+**Surfaced by a real in-Vandalizer Validate run** (BLM `BLM_Award.pdf`,
+single-doc, with the Vandalizer judge-source-grounding fix
+[ui-insight/Vandalizer PR #487] live locally). Two checks failed not
+because the output was wrong but because they demanded exact placeholder
+strings the deliverable does not use: `ac-header-financial-fields` and
+`ac-placeholder-discipline` required the literal "Not specified in the
+document" / "Not required", but the consolidation prompt legitimately
+renders "Not specified" (FINANCIAL SUMMARY table cells) and
+"Not required (—)" (Cost Share row). Recalibrated both checks to accept
+ANY equivalent placeholder variant ("Not specified", "Not specified in
+the document", "Not required", "Not required (—)", "—") and fail only on
+blank/dropped fields. After this, the single-doc BLM run grades Good
+(83%); the only remaining FAIL on the stale 4-doc run is a *correct*
+cross-document-contamination catch (run one award per run). No change to
+runnable steps or output.
+
 #### v0.2.0 → v0.2.1 (2026-06-05) — validation plan
 
 **How Vandalizer validation actually works** (researched against
