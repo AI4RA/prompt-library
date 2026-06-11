@@ -1,0 +1,666 @@
+{
+  "artifact": "vandalizer_search_set",
+  "captured_from": "vandalizer.validation-setup.v1 export",
+  "captured_at": "2026-06-11T20:50:25.587008+00:00",
+  "search_set": {
+    "uuid": "8d32c4a3-676e-43b6-acbc-557d5941fba6",
+    "title": "NSFAwardExtract",
+    "set_type": "extraction",
+    "extraction_config": {
+      "mode": "one_pass",
+      "one_pass": {
+        "structured": true
+      },
+      "key_chunking": {
+        "enabled": true,
+        "max_keys": 20
+      }
+    },
+    "items": [
+      {
+        "id": "69ea65e5a73ce3b4cc2832cc",
+        "searchphrase": "Award Number (FAIN)",
+        "title": "Award Number (FAIN)",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832cd",
+        "searchphrase": "Managing Division Abbreviation",
+        "title": "Managing Division Abbreviation",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832ce",
+        "searchphrase": "Amendment Number",
+        "title": "Amendment Number",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832cf",
+        "searchphrase": "Recipient Legal Business Name",
+        "title": "Recipient Legal Business Name",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832d0",
+        "searchphrase": "Recipient Address",
+        "title": "Recipient Address",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832d1",
+        "searchphrase": "Official Recipient Email Address",
+        "title": "Official Recipient Email Address",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832d2",
+        "searchphrase": "Unique Entity Identifier",
+        "title": "Unique Entity Identifier",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832d3",
+        "searchphrase": "Amendment Type",
+        "title": "Amendment Type",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832d4",
+        "searchphrase": "Amendment Date",
+        "title": "Amendment Date",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832d5",
+        "searchphrase": "Proposal Number",
+        "title": "Proposal Number",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832d6",
+        "searchphrase": "Amendment Description",
+        "title": "Amendment Description",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832d7",
+        "searchphrase": "Award Instrument",
+        "title": "Award Instrument",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832d8",
+        "searchphrase": "Award Date",
+        "title": "Award Date",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832d9",
+        "searchphrase": "Award Period of Performance Start Date",
+        "title": "Award Period of Performance Start Date",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832da",
+        "searchphrase": "Award Period of Performance End Date",
+        "title": "Award Period of Performance End Date",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832db",
+        "searchphrase": "Project Title",
+        "title": "Project Title",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832dc",
+        "searchphrase": "Research and Development Award",
+        "title": "Research and Development Award",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832dd",
+        "searchphrase": "Funding Opportunity",
+        "title": "Funding Opportunity",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832de",
+        "searchphrase": "Assistance Listing Number(s) and Name(s)",
+        "title": "Assistance Listing Number(s) and Name(s)",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832df",
+        "searchphrase": "Amount Obligated by This Amendment",
+        "title": "Amount Obligated by This Amendment",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832e0",
+        "searchphrase": "Total Intended Award Amount",
+        "title": "Total Intended Award Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832e1",
+        "searchphrase": "Total Approved Cost Share or Matching Amount",
+        "title": "Total Approved Cost Share or Matching Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832e2",
+        "searchphrase": "Total Amount Obligated to Date",
+        "title": "Total Amount Obligated to Date",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832e3",
+        "searchphrase": "Expenditure Limitation",
+        "title": "Expenditure Limitation",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832e4",
+        "searchphrase": "Principal Investigator Name",
+        "title": "Principal Investigator Name",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832e5",
+        "searchphrase": "Principal Investigator Email",
+        "title": "Principal Investigator Email",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832e6",
+        "searchphrase": "Principal Investigator Organization",
+        "title": "Principal Investigator Organization",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832e7",
+        "searchphrase": "Co‑Principal Investigator Name",
+        "title": "Co‑Principal Investigator Name",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832e8",
+        "searchphrase": "Co‑Principal Investigator Email",
+        "title": "Co‑Principal Investigator Email",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832e9",
+        "searchphrase": "Co‑Principal Investigator Organization",
+        "title": "Co‑Principal Investigator Organization",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832ea",
+        "searchphrase": "Managing Grants Official Name",
+        "title": "Managing Grants Official Name",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832eb",
+        "searchphrase": "Managing Grants Official Email",
+        "title": "Managing Grants Official Email",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832ec",
+        "searchphrase": "Managing Grants Official Phone",
+        "title": "Managing Grants Official Phone",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832ed",
+        "searchphrase": "Awarding Official Name",
+        "title": "Awarding Official Name",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832ee",
+        "searchphrase": "Awarding Official Email",
+        "title": "Awarding Official Email",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832ef",
+        "searchphrase": "Managing Program Officer Name",
+        "title": "Managing Program Officer Name",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832f0",
+        "searchphrase": "Managing Program Officer Email",
+        "title": "Managing Program Officer Email",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832f1",
+        "searchphrase": "Managing Program Officer Phone",
+        "title": "Managing Program Officer Phone",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832f2",
+        "searchphrase": "Senior Personnel Count",
+        "title": "Senior Personnel Count",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832f3",
+        "searchphrase": "Senior Personnel Calendar Months",
+        "title": "Senior Personnel Calendar Months",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832f4",
+        "searchphrase": "Senior Personnel Academic Months",
+        "title": "Senior Personnel Academic Months",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832f5",
+        "searchphrase": "Senior Personnel Summer Months",
+        "title": "Senior Personnel Summer Months",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832f6",
+        "searchphrase": "Senior Personnel Amount",
+        "title": "Senior Personnel Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832f7",
+        "searchphrase": "Post Doctoral Count",
+        "title": "Post Doctoral Count",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832f8",
+        "searchphrase": "Post Doctoral Calendar Months",
+        "title": "Post Doctoral Calendar Months",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832f9",
+        "searchphrase": "Post Doctoral Academic Months",
+        "title": "Post Doctoral Academic Months",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832fa",
+        "searchphrase": "Post Doctoral Summer Months",
+        "title": "Post Doctoral Summer Months",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832fb",
+        "searchphrase": "Post Doctoral Amount",
+        "title": "Post Doctoral Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832fc",
+        "searchphrase": "Other Professionals Count",
+        "title": "Other Professionals Count",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832fd",
+        "searchphrase": "Other Professionals Calendar Months",
+        "title": "Other Professionals Calendar Months",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832fe",
+        "searchphrase": "Other Professionals Academic Months",
+        "title": "Other Professionals Academic Months",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc2832ff",
+        "searchphrase": "Other Professionals Summer Months",
+        "title": "Other Professionals Summer Months",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283300",
+        "searchphrase": "Other Professionals Amount",
+        "title": "Other Professionals Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283301",
+        "searchphrase": "Graduate Students Count",
+        "title": "Graduate Students Count",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283302",
+        "searchphrase": "Graduate Students Amount",
+        "title": "Graduate Students Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283303",
+        "searchphrase": "Undergraduate Students Count",
+        "title": "Undergraduate Students Count",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283304",
+        "searchphrase": "Undergraduate Students Amount",
+        "title": "Undergraduate Students Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283305",
+        "searchphrase": "Secretarial Clerical Count",
+        "title": "Secretarial Clerical Count",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283306",
+        "searchphrase": "Secretarial Clerical Amount",
+        "title": "Secretarial Clerical Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283307",
+        "searchphrase": "Other Budget Count",
+        "title": "Other Budget Count",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283308",
+        "searchphrase": "Other Budget Amount",
+        "title": "Other Budget Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283309",
+        "searchphrase": "Total Salaries and Wages",
+        "title": "Total Salaries and Wages",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc28330a",
+        "searchphrase": "Fringe Benefits Amount",
+        "title": "Fringe Benefits Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc28330b",
+        "searchphrase": "Total Salaries Wages and Fringe Benefits",
+        "title": "Total Salaries Wages and Fringe Benefits",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc28330c",
+        "searchphrase": "Equipment Amount",
+        "title": "Equipment Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc28330d",
+        "searchphrase": "Travel Domestic Amount",
+        "title": "Travel Domestic Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc28330e",
+        "searchphrase": "Travel International Amount",
+        "title": "Travel International Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc28330f",
+        "searchphrase": "Participant Support Costs Stipends",
+        "title": "Participant Support Costs Stipends",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283310",
+        "searchphrase": "Participant Support Costs Travel",
+        "title": "Participant Support Costs Travel",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283311",
+        "searchphrase": "Participant Support Costs Subsistence",
+        "title": "Participant Support Costs Subsistence",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283312",
+        "searchphrase": "Participant Support Costs Other",
+        "title": "Participant Support Costs Other",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283313",
+        "searchphrase": "Total Number of Participants",
+        "title": "Total Number of Participants",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283314",
+        "searchphrase": "Total Participant Costs",
+        "title": "Total Participant Costs",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283315",
+        "searchphrase": "Materials Supplies Amount",
+        "title": "Materials Supplies Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283316",
+        "searchphrase": "Publication Costs Amount",
+        "title": "Publication Costs Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283317",
+        "searchphrase": "Consultant Services Amount",
+        "title": "Consultant Services Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283318",
+        "searchphrase": "Computer Services Amount",
+        "title": "Computer Services Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283319",
+        "searchphrase": "Subawards Amount",
+        "title": "Subawards Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc28331a",
+        "searchphrase": "Other Direct Costs Amount",
+        "title": "Other Direct Costs Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc28331b",
+        "searchphrase": "Total Other Direct Costs",
+        "title": "Total Other Direct Costs",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc28331c",
+        "searchphrase": "Total Direct Costs",
+        "title": "Total Direct Costs",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc28331d",
+        "searchphrase": "Indirect Costs Amount",
+        "title": "Indirect Costs Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc28331e",
+        "searchphrase": "Total Direct and Indirect Costs",
+        "title": "Total Direct and Indirect Costs",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc28331f",
+        "searchphrase": "Fees Amount",
+        "title": "Fees Amount",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283320",
+        "searchphrase": "Total Amount of Request",
+        "title": "Total Amount of Request",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283321",
+        "searchphrase": "Cost Sharing Proposed Level",
+        "title": "Cost Sharing Proposed Level",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283322",
+        "searchphrase": "Indirect Cost Rate Name",
+        "title": "Indirect Cost Rate Name",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea65e5a73ce3b4cc283323",
+        "searchphrase": "Indirect Cost Rate Value",
+        "title": "Indirect Cost Rate Value",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea6972e6642447cd570945",
+        "searchphrase": "COLLABORATIVE INFORMATION PROPOSAL ID",
+        "title": "COLLABORATIVE INFORMATION PROPOSAL ID",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea698be6642447cd570946",
+        "searchphrase": "COLLABORATIVE INFORMATION Lead",
+        "title": "COLLABORATIVE INFORMATION Lead",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea699aa73ce3b4cc283350",
+        "searchphrase": "COLLABORATIVE INFORMATION PI Name",
+        "title": "COLLABORATIVE INFORMATION PI Name",
+        "is_optional": false,
+        "enum_values": []
+      },
+      {
+        "id": "69ea69abe6642447cd570948",
+        "searchphrase": "COLLABORATIVE INFORMATION Organization",
+        "title": "COLLABORATIVE INFORMATION Organization",
+        "is_optional": false,
+        "enum_values": []
+      }
+    ]
+  }
+}
