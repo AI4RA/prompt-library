@@ -1,0 +1,227 @@
+# NSFAwardExtract (Vandalizer search set) -> nsf-award-notice-extraction-udm schema
+# Field-title mapping with normalization rules. Consumed by the AI4RA Evaluation
+# Explorer (backend/app/ingest/vandalizer.py) for ground-truth emission; titles
+# are matched case/punctuation-insensitively.
+version: 0.1.0
+target_component: nsf-award-notice-extraction-udm
+target_version: 1.1.0
+scalars:
+  - title: "Award Number (FAIN)"
+    path: award_number
+    normalize: str
+  - title: "Managing Division Abbreviation"
+    path: managing_division
+    normalize: str
+  - title: "Amendment Number"
+    path: amendment_number
+    normalize: str
+  - title: "Amendment Type"
+    path: amendment_type
+    normalize: str
+  - title: "Amendment Date"
+    path: amendment_date
+    normalize: date
+  - title: "Amendment Description"
+    path: amendment_description
+    normalize: str
+  - title: "Proposal Number"
+    path: proposal_number
+    normalize: str
+  - title: "Award Instrument"
+    path: award_instrument
+    normalize: str
+  - title: "Award Date"
+    path: award_date
+    normalize: date
+  - title: "Award Period of Performance Start Date"
+    path: start_date
+    normalize: date
+  - title: "Award Period of Performance End Date"
+    path: end_date
+    normalize: date
+  - title: "Project Title"
+    path: award_title
+    normalize: str
+  - title: "Research and Development Award"
+    path: is_research_and_development
+    normalize: bool
+  - title: "Amount Obligated by This Amendment"
+    path: amount_obligated_this_amendment
+    normalize: money
+  - title: "Total Intended Award Amount"
+    path: total_intended_amount
+    normalize: money
+  - title: "Total Approved Cost Share or Matching Amount"
+    path: cost_share_approved_amount
+    normalize: money
+  - title: "Total Amount Obligated to Date"
+    path: total_obligated_to_date
+    normalize: money
+  - title: "Expenditure Limitation"
+    path: expenditure_limitation
+    normalize: str
+  - title: "Indirect Cost Rate Value"
+    path: indirect_cost_rate_percent
+    normalize: percent
+  - title: "Indirect Cost Rate Name"
+    path: indirect_cost_base
+    normalize: str
+  - title: "Fees Amount"
+    path: fees
+    normalize: money
+  - title: "Recipient Legal Business Name"
+    path: recipient_organization.legal_name
+    normalize: str
+  - title: "Recipient Address"
+    path: recipient_organization.address
+    normalize: str
+  - title: "Official Recipient Email Address"
+    path: recipient_organization.email
+    normalize: str
+  - title: "Unique Entity Identifier"
+    path: recipient_organization.uei
+    normalize: str
+compound_splits:
+  - title: "Funding Opportunity"
+    paths: [funding_opportunity_number, funding_opportunity_title]
+  - title: "Assistance Listing Number(s) and Name(s)"
+    paths: [cfda_number, cfda_name]
+structured:
+  project_personnel: [PI, Co-PI from semicolon-delimited Name/Email/Organization triples]
+  sponsor_contacts: ["Managing Grants Official", "Awarding Official", "Managing Program Officer"]
+budget_categories:
+  - code: A
+    subcode: null
+    label: "Senior Personnel"
+    amount: "Senior Personnel Amount"
+    count: "Senior Personnel Count"
+    calendar_months: "Senior Personnel Calendar Months"
+    academic_months: "Senior Personnel Academic Months"
+    summer_months: "Senior Personnel Summer Months"
+  - code: B
+    subcode: "PostDoctoral"
+    label: "Post Doctoral Scholars"
+    amount: "Post Doctoral Amount"
+    count: "Post Doctoral Count"
+    calendar_months: "Post Doctoral Calendar Months"
+    academic_months: "Post Doctoral Academic Months"
+    summer_months: "Post Doctoral Summer Months"
+  - code: B
+    subcode: "OtherProfessionals"
+    label: "Other Professionals"
+    amount: "Other Professionals Amount"
+    count: "Other Professionals Count"
+    calendar_months: "Other Professionals Calendar Months"
+    academic_months: "Other Professionals Academic Months"
+    summer_months: "Other Professionals Summer Months"
+  - code: B
+    subcode: "GraduateStudents"
+    label: "Graduate Students"
+    amount: "Graduate Students Amount"
+    count: "Graduate Students Count"
+  - code: B
+    subcode: "UndergraduateStudents"
+    label: "Undergraduate Students"
+    amount: "Undergraduate Students Amount"
+    count: "Undergraduate Students Count"
+  - code: B
+    subcode: "SecretarialClerical"
+    label: "Secretarial - Clerical"
+    amount: "Secretarial Clerical Amount"
+    count: "Secretarial Clerical Count"
+  - code: B
+    subcode: "Other"
+    label: "Other"
+    amount: "Other Budget Amount"
+    count: "Other Budget Count"
+  - code: C
+    subcode: null
+    label: "Fringe Benefits"
+    amount: "Fringe Benefits Amount"
+  - code: D
+    subcode: null
+    label: "Equipment"
+    amount: "Equipment Amount"
+  - code: E
+    subcode: "Domestic"
+    label: "Domestic Travel"
+    amount: "Travel Domestic Amount"
+  - code: E
+    subcode: "International"
+    label: "International Travel"
+    amount: "Travel International Amount"
+  - code: F
+    subcode: "Stipends"
+    label: "Participant Support Costs - Stipends"
+    amount: "Participant Support Costs Stipends"
+  - code: F
+    subcode: "Travel"
+    label: "Participant Support Costs - Travel"
+    amount: "Participant Support Costs Travel"
+  - code: F
+    subcode: "Subsistence"
+    label: "Participant Support Costs - Subsistence"
+    amount: "Participant Support Costs Subsistence"
+  - code: F
+    subcode: "Other"
+    label: "Participant Support Costs - Other"
+    amount: "Participant Support Costs Other"
+  - code: F
+    subcode: "TotalParticipants"
+    label: "Total Number of Participants"
+    count: "Total Number of Participants"
+  - code: F
+    subcode: "Total"
+    label: "Total Participant Costs"
+    amount: "Total Participant Costs"
+  - code: G
+    subcode: "MaterialsSupplies"
+    label: "Materials and Supplies"
+    amount: "Materials Supplies Amount"
+  - code: G
+    subcode: "Publication"
+    label: "Publication Costs"
+    amount: "Publication Costs Amount"
+  - code: G
+    subcode: "ConsultantServices"
+    label: "Consultant Services"
+    amount: "Consultant Services Amount"
+  - code: G
+    subcode: "ComputerServices"
+    label: "Computer Services"
+    amount: "Computer Services Amount"
+  - code: G
+    subcode: "Subawards"
+    label: "Subawards"
+    amount: "Subawards Amount"
+  - code: G
+    subcode: "Other"
+    label: "Other"
+    amount: "Other Direct Costs Amount"
+  - code: G
+    subcode: "Total"
+    label: "Total Other Direct Costs"
+    amount: "Total Other Direct Costs"
+  - code: H
+    subcode: null
+    label: "Total Direct Costs"
+    amount: "Total Direct Costs"
+  - code: I
+    subcode: null
+    label: "Indirect Costs"
+    amount: "Indirect Costs Amount"
+  - code: J
+    subcode: null
+    label: "Total Direct and Indirect Costs"
+    amount: "Total Direct and Indirect Costs"
+  - code: L
+    subcode: null
+    label: "Amount of this Request"
+    amount: "Total Amount of Request"
+  - code: M
+    subcode: null
+    label: "Cost Sharing Proposed Level"
+    amount: "Cost Sharing Proposed Level"
+unmapped:  # no UDM target in v1.1.0
+  - "Total Salaries and Wages"
+  - "Total Salaries Wages and Fringe Benefits"
