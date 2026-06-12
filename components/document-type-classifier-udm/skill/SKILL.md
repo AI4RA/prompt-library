@@ -15,7 +15,7 @@ Classifies a research-administration document into one of 14 controlled codes so
 - A mixed folder of proposal and award documents needs triage before bulk processing
 - The user uploads a document and asks for classification before extraction
 
-For extracting the structured contents of a document rather than identifying its type, use a type-specific component (e.g., `award-document-extraction-udm`, `nsf-award-notice-extraction-udm`, `rfp-extraction-udm`).
+For extracting the structured contents of a document rather than identifying its type, use a type-specific component (e.g., `award-document-extraction-udm`, `nsf-award-notice-extraction-udm`, `rfa-checklist-extraction-udm`).
 
 ## Output contract
 
