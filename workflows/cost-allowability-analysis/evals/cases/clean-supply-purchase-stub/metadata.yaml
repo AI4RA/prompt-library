@@ -1,0 +1,67 @@
+# Case identity
+case: clean-supply-purchase-stub
+source: "Placeholder case shell — to be replaced with a single-expense federal award fixture (a routine, directly-allocable supply purchase against an active Uniform Guidance award) that drives the pipeline end-to-end to a clean Allowable determination with every Step 2 check passing and no regulated-activity flag."
+source_url: "https://www.ecfr.gov/current/title-2/subtitle-A/chapter-II/part-200"
+retrieved: 2026-05-21
+
+# Which structural features of the input documents this case exercises.
+structural_features:
+  - single-expense-transaction-input
+  - award-terms-document-with-allowability-language
+  - no-regulated-activity-implicated
+  - within-period-of-performance
+  - direct-cost-allocable-to-single-award
+
+# Workflow-level behaviors this case targets. These are pipeline-level
+# checks that no single component's evals can cover: the linear step model
+# carrying Step 1 normalization into the Step 2 checks, the nine checks
+# emitting the shared finding contract, and Step 3 synthesizing those
+# findings into one Markdown determination.
+workflow_features:
+  - step1_normalize_and_classify_feeds_step2
+  - step2_nine_checks_emit_shared_finding_contract
+  - step3_determination_receives_step2_findings
+  - regulated_activity_classifier_gates_protocol_approval_check
+  - determination_outcome_enum_allowable_potential_missing_notallowable
+  - clean_path_resolves_to_allowable
+  - markdown_determination_is_workflow_output
+
+# Validation metadata — REQUIRED.
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-05-21
+validated_against_version: "0.1.0"
+component_versions_at_validation:
+  expense-transaction-extraction: "0.1.0"
+  award-allowability-terms-extraction: "0.1.0"
+  regulated-activity-classifier: "0.1.0"
+  cost-period-check: "0.1.0"
+  cost-reasonableness-check: "0.1.0"
+  cost-allocability-check: "0.1.0"
+  cost-consistent-treatment-check: "0.1.0"
+  cost-award-terms-conformance-check: "0.1.0"
+  cost-prior-approval-check: "0.1.0"
+  cost-documentation-check: "0.1.0"
+  protocol-approval-allowability-check: "0.1.0"
+  cost-selected-item-check: "0.1.0"
+  cost-allowability-determination: "0.1.0"
+
+# Optional free-form notes on what was confirmed, what was surprising,
+# what should be re-checked on the next revalidation pass.
+notes: |
+  Scaffolded case shell only. The expected.md (the golden Markdown
+  determination), input-source.md (the synthetic expense + award-terms
+  input set), and any notes.md will be added once a Sponsored Programs
+  Administrator has reviewed the end-to-end Allowable path. This stub
+  exists so the workflow can declare evals.workflow_local: true per
+  docs/contracts.md while the real cases are assembled in
+  evaluation-data-sets.
+
+  Additional case shells should follow for the other scenarios named in
+  evals/README.md once this first shell is validated and the contract has
+  been exercised end-to-end:
+    - Travel charge over an award per-trip cap → Not allowable via the
+      award-terms conformance check.
+    - Participant-incentive gift cards with no IRB records → Missing info
+      with the compliance-oversight flag raised by the protocol-approval
+      check (the IRB / IACUC / IBC layer that distinguishes this workflow
+      from a plain 2 CFR 200 reviewer).

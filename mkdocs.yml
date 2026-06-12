@@ -86,12 +86,23 @@ nav:
       - By tag: browse/by-tag.md
   - Components:
       - Index: components/index.md
+      - award-allowability-terms-extraction: components/award-allowability-terms-extraction.md
       - award-compliance-extraction-udm: components/award-compliance-extraction-udm.md
       - award-modification-intake-udm: components/award-modification-intake-udm.md
       - budget-justification-generator-udm: components/budget-justification-generator-udm.md
       - compliance-personnel-verification-udm: components/compliance-personnel-verification-udm.md
+      - cost-allocability-check: components/cost-allocability-check.md
+      - cost-allowability-determination: components/cost-allowability-determination.md
+      - cost-award-terms-conformance-check: components/cost-award-terms-conformance-check.md
+      - cost-consistent-treatment-check: components/cost-consistent-treatment-check.md
+      - cost-documentation-check: components/cost-documentation-check.md
+      - cost-period-check: components/cost-period-check.md
+      - cost-prior-approval-check: components/cost-prior-approval-check.md
+      - cost-reasonableness-check: components/cost-reasonableness-check.md
+      - cost-selected-item-check: components/cost-selected-item-check.md
       - document-type-classifier-udm: components/document-type-classifier-udm.md
       - effort-reporting-extraction-udm: components/effort-reporting-extraction-udm.md
+      - expense-transaction-extraction: components/expense-transaction-extraction.md
       - export-to-banner-extraction-udm: components/export-to-banner-extraction-udm.md
       - ffr-management-extraction-udm: components/ffr-management-extraction-udm.md
       - foa-checklist-extraction-udm: components/foa-checklist-extraction-udm.md
@@ -113,6 +124,8 @@ nav:
       - prior-approval-extraction-udm: components/prior-approval-extraction-udm.md
       - proposal-budget-personnel-extraction-udm: components/proposal-budget-personnel-extraction-udm.md
       - proposal-document-completeness-udm: components/proposal-document-completeness-udm.md
+      - protocol-approval-allowability-check: components/protocol-approval-allowability-check.md
+      - regulated-activity-classifier: components/regulated-activity-classifier.md
       - rfa-checklist-extraction-udm: components/rfa-checklist-extraction-udm.md
       - risk-domain-assessment-udm: components/risk-domain-assessment-udm.md
       - section2-personnel-eligibility-udm: components/section2-personnel-eligibility-udm.md
