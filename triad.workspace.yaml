@@ -1,5 +1,8 @@
+# Machine-readable map of the AI4RA Evaluation Stack (formerly the "evaluation triad").
+# Filename kept as triad.workspace.yaml for cross-repo discovery; the stack now has
+# four repositories plus the shared UDM foundation.
 schema_version: 1
-workspace_name: ai4ra-evaluation-triad
+workspace_name: ai4ra-evaluation-stack
 current_repository: AI4RA/prompt-library
 
 repositories:
@@ -11,7 +14,7 @@ repositories:
       - agents
       - schemas
       - component contracts
-      - Vandalizer workflows
+      - workflows
     local_checkout_hints:
       sibling_dir_names:
         - AI4RAPromptLibrary
@@ -52,6 +55,30 @@ repositories:
     agent_guides:
       - AGENTS.md
       - CLAUDE.md
+  - github: AI4RA/evaluation-explorer
+    role: evaluation-explorer
+    owns:
+      - evaluation result index
+      - visualization / web UI
+      - NIST-aligned metrics
+      - validation workbench
+    consumes:
+      - prompt-library component_catalog.json
+      - evaluation-data-sets dataset_catalog.json + dataset cases
+      - evaluation-harness run artifacts (run-artifact format)
+    local_checkout_hints:
+      sibling_dir_names:
+        - AI4RA-Evaluation-Explorer
+        - evaluation-explorer
+    human_surface: README.md
+    machine_surface: backend/app/models.py
+    notes:
+      - downstream rebuildable index; the git repositories remain the system of record
+      - ingests via the harness run-artifact format and the sibling catalogs, pinned by commit SHA
+      - no published catalog of its own; it is a consumer, not a source of record
+    agent_guides:
+      - README.md
+      - PROJECT_PLAN.md
 
 shared_foundation:
   - github: ui-insight/AI4RA-UDM
@@ -68,6 +95,7 @@ coordination_policy:
     - a contract or schema crosses repository boundaries
     - a dataset id, validation policy, or scoring surface changes
     - vendored prompt snapshots or harness registration behavior must be refreshed
+    - the harness run-artifact format or explorer ingestion connectors change
     - observed upstream refs need to be re-pinned
   pin_external_refs_as: observed commit SHAs
   sync_human_and_machine_surfaces: true
