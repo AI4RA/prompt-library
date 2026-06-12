@@ -114,8 +114,6 @@ nav:
       - proposal-budget-personnel-extraction-udm: components/proposal-budget-personnel-extraction-udm.md
       - proposal-document-completeness-udm: components/proposal-document-completeness-udm.md
       - rfa-checklist-extraction-udm: components/rfa-checklist-extraction-udm.md
-      - rfp-extraction: components/rfp-extraction.md
-      - rfp-extraction-udm: components/rfp-extraction-udm.md
       - risk-domain-assessment-udm: components/risk-domain-assessment-udm.md
       - section2-personnel-eligibility-udm: components/section2-personnel-eligibility-udm.md
       - solicitation-doc-modifications-udm: components/solicitation-doc-modifications-udm.md

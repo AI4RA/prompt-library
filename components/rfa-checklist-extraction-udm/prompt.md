@@ -19,9 +19,9 @@ updated: 2026-04-24
 
 ## Relationship to other components
 
-`rfp-extraction-udm` v1.0.0 covers the same document family (RFP / RFA / FOA / NOFO / BAA / DCL) with a nine-array requirement-centric contract aimed at downstream ingest. This component is a **different cut** of the same source: an **eight-section pre-award checklist** contract that mirrors how a sponsored-programs analyst reads the announcement — dates, eligibility, award, components, budget, submission, special, notes — with **strict de-duplication rules** baked into the shape itself (award amount lives in `award_information` only; detailed financial rules live in `budget_requirements` only).
+This component is an **eight-section pre-award checklist** contract for federal funding announcements (RFA / FOA / NOFO / program solicitation) that mirrors how a sponsored-programs analyst reads the announcement — dates, eligibility, award, components, budget, submission, special, notes — with **strict de-duplication rules** baked into the shape itself (award amount lives in `award_information` only; detailed financial rules live in `budget_requirements` only).
 
-Runtime topology: this component is consumed by the `rfa-checklist-extraction` Vandalizer workflow, which implements the contract as six parallel Extraction tasks (one per logical section) followed by a single consolidation Prompt that enforces placement rules and renders the 8-section markdown deliverable.
+Runtime topology: this component is consumed by the `rfa-checklist-extraction` Vandalizer workflow, which implements the contract as seven parallel Prompt tasks (one per logical section, plus a metadata task) followed by a single consolidation Prompt that enforces placement rules and renders the 8-section markdown deliverable.
 
 ---
 

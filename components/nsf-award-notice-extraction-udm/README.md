@@ -59,12 +59,12 @@ Detected heuristically from the title prefix `"Collaborative Research:"` and/or 
 
 ## Relationship to other components
 
-| Concern | `rfp-extraction-udm` | `nsf-award-notice-extraction-udm` |
+| Concern | `rfa-checklist-extraction-udm` | `nsf-award-notice-extraction-udm` |
 | --- | --- | --- |
 | Input | Funding announcement (pre-award) | Award notice (post-award) |
 | Ingest target | RFA record | Award or AwardModification |
-| Requirements | Nine categorized requirement arrays | Budget categories, terms, special conditions, etc. |
-| Multi-round | Handled in `special_conditions` | Not applicable (one notice per amendment) |
+| Requirements | Eight pre-award checklist sections | Budget categories, terms, special conditions, etc. |
+| Multi-round | Handled in `dates_and_deadlines` | Not applicable (one notice per amendment) |
 
 ## Evals
 

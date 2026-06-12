@@ -34,19 +34,7 @@ See [`schema.json`](schema.json) for the authoritative definition and [`prompt.m
 
 ## Contract scope
 
-Repo-local, UDM-aligned. The scalar fields (`rfa_id`, `rfa_number`, `rfa_title`, `sponsor_name`, `cfda_number`, ...) follow the conventions set by `rfp-extraction-udm` 1.0.0 and resolve downstream to UDM entities (`RFA`, `Sponsor_Organization`). The structured sections do not duplicate any shared UDM schema — they are repo-local to this component and mirror the eight-section deliverable produced by the [`rfa-checklist-extraction` Vandalizer workflow](https://github.com/ui-insight/ProcessMapping/tree/main/workflows/rfa-checklist-extraction) in the ui-insight/ProcessMapping process-mapping corpus. Selected leaf fields reference UDM columns: `cost_sharing` → `CostShare`, `fa_policy` → `IndirectRate`, `personnel_effort` → `Effort`.
-
-## Relationship to `rfp-extraction-udm`
-
-| Concern | [`rfp-extraction-udm`](../rfp-extraction-udm/) | `rfa-checklist-extraction-udm` |
-| --- | --- | --- |
-| Audience | Ingest pipelines (flat arrays of typed requirements) | Pre-award offices (eight-section checklist) |
-| Shape | 18 scalars + nine requirement arrays with a common requirement shape | 8 scalars + eight typed section objects/arrays, each with a distinct field shape |
-| De-duplication | Not enforced by shape — every requirement is independent | Enforced by shape — award amount lives only in `award_information`, financial rules only in `budget_requirements` |
-| Checklist reconstruction | Requires caller to re-group by category | Direct 1:1 map to the eight-section markdown deliverable |
-| Typical downstream | UDM ingest service | Consolidation Prompt node rendering a markdown checklist |
-
-The two components are versioned independently. A single announcement can be extracted through both contracts for different consumers.
+Repo-local, UDM-aligned. The scalar fields (`rfa_id`, `rfa_number`, `rfa_title`, `sponsor_name`, `cfda_number`, ...) follow standard opportunity-metadata conventions and resolve downstream to UDM entities (`RFA`, `Sponsor_Organization`). The structured sections do not duplicate any shared UDM schema — they are repo-local to this component and mirror the eight-section deliverable produced by the [`rfa-checklist-extraction` Vandalizer workflow](https://github.com/ui-insight/ProcessMapping/tree/main/workflows/rfa-checklist-extraction) in the ui-insight/ProcessMapping process-mapping corpus. Selected leaf fields reference UDM columns: `cost_sharing` → `CostShare`, `fa_policy` → `IndirectRate`, `personnel_effort` → `Effort`.
 
 ## Triad integration
 
