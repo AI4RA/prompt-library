@@ -2,146 +2,61 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-04-30T00:00:00+00:00",
+  "exported_at": "2026-05-22T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Effort Reporting Compliance Extraction",
-      "description": "Uploads a federal award notice or agreement and returns a single structured JSON object covering effort-reporting and personnel-compliance requirements: cadence, certification method, PI commitments, per-person key-personnel commitments, cost-shared effort, governing regulation, record-retention requirement, and referenced governing documents. Output conforms to the effort-reporting-extraction-udm component schema. The runtime mirrors the ui-insight/ProcessMapping effort-reporting-extraction workflow (one Extraction task plus a Formatting/Consolidation task).",
+      "name": "Effort Reporting Extraction",
+      "description": "Uploads a federal award notice or agreement and returns an RA-friendly Markdown \"Effort Compliance Brief\" covering the governing regulation, certification cadence (per 2 CFR 200.430(i)), per-person key-personnel commitments table, cost-shared effort, record retention, and referenced governing documents. Mirrors the source ui-insight/ProcessMapping effort-reporting-extraction formatting.md conventions, including left-aligned column markers (`:---`) in the personnel commitments Markdown table.",
       "steps": [
         {
-          "name": "Extraction",
+          "name": "Knowledge Base Context Lookup",
           "data": {},
           "is_output": false,
           "tasks": [
             {
-              "name": "Extraction",
+              "name": "KnowledgeBaseQuery",
               "data": {
-                "name": "extract-effort-compliance",
-                "prompt": "You are extracting effort-reporting and personnel-compliance\nrequirements from a federal award document.\n\nBe 100% accurate. For each searchset item, return the value as\nthe document states it. Quote effort percentages, person-months,\nand day-counts verbatim (\"2.0 summer months\", \"25%\", \"30 days\").\nUse null when a field is not present — never invent values.\n\nSearch the entire document with attention to sections titled\n\"Effort Reporting\", \"Time and Effort\", \"Personnel\", \"Key\nPersonnel\", \"Budget Justification\", or \"Research Terms and\nConditions\". Keywords to follow: effort reporting, time and\neffort, personnel, key personnel, salary, certification, 2 CFR\n200.430, cost share effort, person-months, summer months, FATC,\nRTC, principal investigator, co-principal investigator.\n\nFor reporting_frequency return one of: Monthly, Quarterly,\nSemi-Annual, Annual. For certification_method return one of:\nAfter-the-Fact, Plan-Confirmation, Payroll-Based.\n\nkey_personnel_commitments is a JSON array; one row per named\nindividual with role, committed_effort, person_months, and any\ncost_shared_effort. The PI's row should mirror the\npi_committed_effort scalar exactly.\n\nreferenced_documents is for governing instruments only (RTCs,\nCA-FATC, NSF PAPPG, NIH GPS) — not for cited regulations\n(governing_regulation).",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "Effort Reporting Compliance Extraction",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Federal Award Identification Number printed on the award.",
-                      "searchtype": "extraction",
-                      "title": "award_number",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Principal Investigator full name.",
-                      "searchtype": "extraction",
-                      "title": "pi_name",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Full project title as stated in the award.",
-                      "searchtype": "extraction",
-                      "title": "project_title",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Cadence at which effort must be certified (Monthly, Quarterly, Semi-Annual, Annual).",
-                      "searchtype": "extraction",
-                      "title": "reporting_frequency",
-                      "is_optional": false,
-                      "enum_values": [
-                        "Monthly",
-                        "Quarterly",
-                        "Semi-Annual",
-                        "Annual"
-                      ]
-                    },
-                    {
-                      "searchphrase": "Deadline for effort certification after each reporting period end.",
-                      "searchtype": "extraction",
-                      "title": "certification_deadline",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Effort certification method per 2 CFR 200.430(i) (After-the-Fact, Plan-Confirmation, Payroll-Based).",
-                      "searchtype": "extraction",
-                      "title": "certification_method",
-                      "is_optional": true,
-                      "enum_values": [
-                        "After-the-Fact",
-                        "Plan-Confirmation",
-                        "Payroll-Based"
-                      ]
-                    },
-                    {
-                      "searchphrase": "PI committed effort using the sponsor's exact phrasing (e.g., \"2.0 summer months\", \"25% academic year\").",
-                      "searchtype": "extraction",
-                      "title": "pi_committed_effort",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "PI committed effort expressed as person-months when the document provides it.",
-                      "searchtype": "extraction",
-                      "title": "pi_person_months",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "JSON array of {name, role, committed_effort, person_months, cost_shared_effort, notes}, one row per named individual.",
-                      "searchtype": "extraction",
-                      "title": "key_personnel_commitments",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Total cost-shared effort obligations across the award, when separately documented.",
-                      "searchtype": "extraction",
-                      "title": "cost_shared_effort",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Primary governing regulation cited (e.g., \"2 CFR 200.430\").",
-                      "searchtype": "extraction",
-                      "title": "governing_regulation",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Record retention period requirement (e.g., \"3 years\", \"per sponsor requirements\").",
-                      "searchtype": "extraction",
-                      "title": "record_retention",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Referenced governing documents (RTCs, CA-FATC, agency policy statements). Empty array when none are stated.",
-                      "searchtype": "extraction",
-                      "title": "referenced_documents",
-                      "is_optional": true,
-                      "enum_values": []
-                    }
-                  ]
+                "name": "kb-context-lookup",
+                "kb_uuid": "",
+                "query": "effort reporting certification 2 CFR 200.430 personnel commitments key personnel committed effort cost share institutional base salary semi-annual certification record retention 200.334",
+                "k": 8,
+                "_embedded_knowledge_base": {
+                  "title": "Effort Reporting & Compensation",
+                  "description": "Purpose-built KB for federal effort reporting and personnel compensation rules. Do not swap — this KB is uniquely suited to the workflow's domain. When the operator does not attach a KB, the extraction falls back to reading just the uploaded award notice; 2 CFR 200.430(i) defaults apply."
                 }
               }
             }
           ]
         },
         {
-          "name": "Consolidation",
+          "name": "Extraction (Prompt)",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-effort-reporting",
+                "prompt": "You are extracting effort-reporting and personnel-compliance\nrequirements from a federal award notice or agreement. You\nreceive the uploaded document AND any KB chunks the previous\nstep retrieved in your context.\n\nBe 100% accurate. Quote percentages, person-months, and\ndeadlines verbatim. Use null when a field is absent. Do not\ninvent numeric values.\n\nSearch every section with attention to titles like \"Effort\nReporting\", \"Personnel\", \"Salaries and Wages\", \"Cost Share\",\n\"Terms and Conditions\", \"Reporting Requirements\", \"Time and\nEffort\", \"Compensation\". Keywords: effort, certification,\nperson-months, calendar months, summer months, academic\nyear, institutional base salary, IBS, salary cap, cost share,\ncommitted effort, key personnel, 2 CFR 200.430.\n\nCRITICAL — descriptive fields must be FLAT STRINGS, not\nnested objects.\n\nExtract these fields:\n\n- award_number: STRING. Federal Award Identification Number\n  (FAIN). null when absent.\n- pi_name: STRING. Principal Investigator full name. null\n  when absent.\n- project_title: STRING. Project title from the award. null\n  when absent.\n- project_period: STRING. Project period of performance\n  (e.g., \"07/01/2024–06/30/2027\"). null when absent.\n- governing_regulation: STRING. Primary governing regulation\n  cited for effort (e.g., \"2 CFR 200.430(i)\"). Use that\n  default when the document does not state.\n- reporting_frequency: STRING. Certification frequency\n  verbatim (\"Semi-annually\", \"Annually\"). null when absent.\n- certification_method: STRING. How effort is certified\n  (e.g., \"Plan-confirmation\", \"After-the-fact certification\").\n  null when absent.\n- certification_deadline: STRING. Deadline after the\n  reporting period for certification (e.g., \"60 days after\n  period end\"). null when absent.\n- pi_committed_effort: STRING. PI committed effort verbatim\n  (e.g., \"2.0 summer months\", \"10% calendar year\"). null\n  when absent.\n- pi_person_months: STRING. PI commitment expressed in\n  person-months (e.g., \"1.2 calendar months\"). null when\n  absent.\n- key_personnel_commitments: JSON ARRAY of\n  {name_or_role, committed_effort, cost_shared_effort, notes}\n  objects, one per key person identified in the award. Each\n  field is a STRING. Empty array when no key personnel are\n  specified beyond the PI. The PI's row MUST also appear\n  here (mirror with pi_committed_effort).\n- cost_shared_effort: STRING. Cost-shared effort details\n  beyond what appears per-person in\n  key_personnel_commitments (e.g., institutional cost-share\n  on summer effort). null when no cost share is required.\n- record_retention: STRING. Record retention requirement\n  (e.g., \"3 years from final expenditure report per\n  2 CFR 200.334\"). null when absent.\n- penalties_for_noncompliance: STRING. Penalties for missed\n  or late effort certification (e.g., \"Withholding of\n  payments, cost disallowance, or award suspension\"). null\n  when absent.\n- referenced_documents: JSON ARRAY of STRINGS. Documents\n  cited that govern effort compliance for this award (e.g.,\n  \"NSF Research Terms and Conditions\",\n  \"NIH Grants Policy Statement Chapter 7.9.1\"). Empty array\n  when none cited.\n\n## Output\n\nEmit exactly one JSON object with all the keys above. No\npreamble, no markdown fences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consolidation (Markdown deliverable)",
           "data": {},
           "is_output": true,
           "tasks": [
             {
               "name": "Prompt",
               "data": {
-                "name": "effort-compliance-consolidation",
-                "prompt": "You are assembling the Effort Reporting Compliance Extraction\noutput. The input is the JSON fragment produced by the upstream\nExtraction task. Your job is to emit a single JSON object that\nvalidates against the effort-reporting-extraction-udm@0.1.0\nschema.\n\nRules:\n1. Map each Extraction searchset item to the corresponding\n   top-level schema field.\n2. reporting_frequency and certification_method must use the\n   enum values exactly. Normalize document phrasings to the\n   closest enum; null when not specified.\n3. pi_committed_effort is required. Use the sponsor's exact\n   phrasing.\n4. key_personnel_commitments is required and must contain at\n   least one row. Ensure the PI is represented and that their\n   row mirrors pi_committed_effort and pi_person_months\n   exactly.\n5. referenced_documents is a flat list of governing-instrument\n   names; cited regulations belong in governing_regulation.\n6. Use null for missing scalar fields; never invent values.\n7. Do not output any text outside the single JSON object.",
+                "name": "effort-reporting-consolidation",
+                "prompt": "You are the consolidation step of the Effort Reporting\nExtraction workflow. You receive ONE JSON object from the\nExtraction step. Render the RA-friendly Markdown \"Effort\nCompliance Brief\" exactly per the source\nui-insight/ProcessMapping effort-reporting-extraction\nformatting.md conventions.\n\nThe deliverable is Markdown — NOT a JSON object, NOT a JSON\ncode fence.\n\n## CRITICAL — ALWAYS RENDER THE DELIVERABLE\n\nYou MUST render the FULL Markdown deliverable structure (every\nsection listed below), EVEN WHEN some fragment fields arrive\nas null, empty, missing, or sparse. NEVER refuse to render\nwith apologetic prose like \"The provided context does not\ncontain the required information.\" That output is unusable —\nthe operator needs the full structure with placeholders so\nthey can see which fields need to be chased.\n\nSubstitution rules when a field is null or missing:\n- Required scalar fields: substitute the literal string\n  \"Not specified in the document\".\n- Optional table cells: substitute \"—\" (em dash).\n- Empty arrays: render the section with its empty-state\n  language already specified below (e.g., \"No items identified\",\n  \"Defers to federal defaults\", \"None identified beyond\n  standard federal requirements\").\n\nIf EVERY field across ALL upstream fragments is null (which\nmeans the document genuinely contained nothing extractable\nOR the document was not attached to the run), STILL render\nthe full Markdown structure with \"Not specified in the\ndocument\" placeholders throughout, AND append a single line\nat the very end of the deliverable:\n\n> ⚠️ The upstream extraction returned no data from the\n> uploaded document. Verify the document was attached and\n> re-run the workflow.\n\n## Required structure (EXACTLY this, including heading levels)\n\n### Effort Compliance Brief: <award_number or \"Not specified\">\n\n* **Principal Investigator:** <pi_name or \"Not specified\">\n* **Project Title:** <project_title or \"Not specified\">\n* **Period of Performance:** <project_period or \"Not specified\">\n\n---\n\n#### Executive Summary of Obligations\n\nThe primary governing regulation for effort on this award is\n**<governing_regulation>**. Effort for all personnel charging\nsalary to this award must be certified\n**<reporting_frequency>**. <certification_method or \"\">\nAll commitments, including any cost-shared effort, must be\ntracked and documented in accordance with institutional and\nagency-specific policies. See the referenced documents\nsection for a full list of applicable terms.\n\n---\n\n#### Personnel Commitments & Effort\n\nThe following table details the specific effort commitments\nfor all personnel identified in the award notice and budget\njustification.\n\n| Personnel Name / Role       | Committed Effort | Cost-Shared Effort | Notes                               |\n| :-------------------------- | :--------------- | :----------------- | :---------------------------------- |\n\nPopulate one row per entry in `key_personnel_commitments`.\nThe PI's row MUST appear with their committed effort matching\n`pi_committed_effort` (de-duplicate: do NOT also state the PI\neffort in prose elsewhere; the table is the single source of\ntruth for specific personnel commitments).\n\nIf `key_personnel_commitments` is empty AND `pi_committed_effort`\nis null, render a single row:\n| Not specified in the document | — | — | — |\n\n---\n\n#### Detailed Compliance Framework\n\n* **Reporting Frequency:** <reporting_frequency or \"Not specified\">\n* **Certification Deadlines:** <certification_deadline or \"Not specified\">\n* **Cost Sharing Verification:** <cost_shared_effort or \"No cost sharing required\">\n* **Record Retention:** <record_retention or \"Not specified\">\n* **Penalties for Non-Compliance:** <penalties_for_noncompliance or \"Not specified\">\n\n---\n\n#### Referenced Documents\n\nThe following documents govern effort compliance for this\naward:\n\nRender `referenced_documents` as a bulleted list. If empty,\nstate \"* No documents explicitly referenced.\"\n\n## Rendering rules\n\n- Use `###` for the title and `####` for sub-sections (one\n  heading level deeper than the default — matches source\n  formatting.md).\n- Use `* **Label:**` bullet metadata pattern at the top\n  (matches source formatting.md).\n- Use `:---` left-alignment markers in the personnel\n  commitments table (matches source formatting.md).\n- De-duplicate mercilessly: PI effort appears in the table\n  ONLY, not also in the Executive Summary prose.\n- Preserve \"Not specified in the document\" phrasing verbatim\n  where it appears in the source fields.\n- If any field arrives as a nested JSON object, REWRITE it\n  into prose before emitting.\n- No JSON code fences around the output.",
                 "input_source": "step_input"
               }
             }
@@ -154,42 +69,33 @@
       "validation_plan": [
         {
           "check_id": "CHK-01",
-          "check_name": "Effort percentages sum",
-          "check_type": "arithmetic",
-          "check_description": "When effort is expressed as percentages across multiple months/periods, the sum should equal the document's stated total commitment.",
-          "target_fields": [
-            "pi_committed_effort",
-            "key_personnel_commitments"
-          ],
+          "check_name": "Certification cadence preserved",
+          "check_type": "format",
+          "check_description": "Verify reporting_frequency preserves the document's exact wording (e.g., \"Semi-annually\", \"Annually within 60 days of period end\").",
+          "target_fields": [],
           "severity": "error"
         },
         {
           "check_id": "CHK-02",
-          "check_name": "Person-months consistency",
-          "check_type": "consistency",
-          "check_description": "pi_person_months should match the PI's row in key_personnel_commitments and be derivable from pi_committed_effort.",
-          "target_fields": [
-            "pi_person_months",
-            "pi_committed_effort",
-            "key_personnel_commitments"
-          ],
+          "check_name": "Personnel commitments completeness",
+          "check_type": "completeness",
+          "check_description": "Verify every key person identified in the award has a row in the Personnel Commitments table with their committed effort.",
+          "target_fields": [],
           "severity": "warning"
         },
         {
           "check_id": "CHK-03",
-          "check_name": "Personnel table completeness",
-          "check_type": "completeness",
-          "check_description": "Every named individual in the document with a committed effort should appear in key_personnel_commitments (including the PI).",
-          "target_fields": [
-            "key_personnel_commitments"
-          ],
+          "check_name": "PI-mirror rule",
+          "check_type": "consistency",
+          "check_description": "Verify the PI's row in the personnel commitments table matches the standalone PI committed-effort field when both are stated.",
+          "target_fields": [],
           "severity": "warning"
         }
       ],
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/effort-reporting-extraction/manifest.yaml",
-        "workflow_version": "0.1.0",
+        "workflow_version": "0.2.0",
         "status": "experimental",
         "components": [
           {

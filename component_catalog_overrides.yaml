@@ -773,6 +773,387 @@ components:
           review-process, and submission-system focus across its eight
           reference sections.
 
+  budget-justification-generator-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local agency-agnostic budget-justification drafting
+        contract. Seven structured blocks (project_metadata, four
+        per-section data-and-narrative blocks, cross_validation,
+        final_justification_document) capture both the per-section
+        extracted financial data AND the generated narrative text for
+        each R&R Budget / SF-424A section (A-I), plus the final
+        assembled Markdown document and arithmetic / clarification /
+        missing-justification notes. The workflow's primary deliverable
+        is the final_justification_document Markdown string;
+        structured-data fields exist to support arithmetic re-validation.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. Canonical single-call
+        invocation surface is prompt.md. The companion top-level
+        workflows/budget-justification-generator Vandalizer workflow at
+        v0.1.0 implements the contract as four parallel Extraction tasks
+        (each both extracting data AND generating section narratives)
+        plus a Consolidation Prompt that computes four arithmetic checks
+        deterministically and renders final_justification_document as a
+        single Markdown string in R&R Budget / SF-424A category order.
+        Scoring is two-layered — structured fields validate against
+        schema.json and arithmetic_checks; narrative strings require
+        human review against the project narrative and budget form.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          Leaf fields bind to UDM entities: senior_key_personnel +
+          pi_name to Personnel; project_title to Proposal.Proposal_Title;
+          sponsoring_agency to Organization.Organization_Name; every
+          monetary leaf to ProposalBudget.Direct_Cost or
+          ProposalBudget.Indirect_Cost; budget_period_summary to
+          ProposalBudget.Period_Number; fa_rate_percentage and
+          fa_base_type and fa_rate_type to IndirectRate
+          (Rate_Percentage, Base_Type, Rate_Type); cost_share_required
+          / cost_share_amount / cost_share_type to CostShare
+          (Is_Mandatory, Committed_Amount, Commitment_Type). The
+          seven-block drafting shape itself is repo-local.
+    related_components:
+      - slug: nsf-budget-justification-udm
+        relationship: sibling_agency_specific_vs_agency_agnostic
+        notes: >
+          Both components draft a budget justification. This component
+          follows the agency-agnostic R&R Budget / SF-424A category
+          order (A-I);
+          nsf-budget-justification-udm follows NSF's eight-section
+          structure. Use this component when the agency is not NSF or
+          when the budget follows the standard R&R / SF-424A shape.
+      - slug: proposal-budget-personnel-extraction-udm
+        relationship: complementary_focus
+        notes: >
+          proposal-budget-personnel-extraction-udm extracts the budget
+          structure and personnel listing WITHOUT generating narrative
+          text. budget-justification-generator-udm does both — extracts
+          the structure and drafts the narrative.
+
+  risk-domain-assessment-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local 14-domain institutional risk-rubric contract. Three
+        structured blocks (award_metadata, domain_scores,
+        aggregate_metrics) where domain_scores is 14 typed blocks each
+        with a JSON integer score (1-5), an evidence-cited
+        justification, and domain-specific evidence fields. The
+        consolidator computes aggregate_metrics deterministically
+        (total_risk_score sum, average_risk_score quotient, four-value
+        overall_risk_level enum) and derives high_risk_domains,
+        key_risk_findings, recommended_mitigations from the per-domain
+        scores. All scores are JSON integers per the boss's PR #33
+        review feedback.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. Canonical single-call
+        invocation surface is prompt.md. The companion top-level
+        workflows/risk-domain-assessment Vandalizer workflow at v0.1.0
+        implements the contract as six parallel Extraction tasks (each
+        covering 2-4 of the 14 domains) plus a Consolidation Prompt
+        that assembles the 14 domain blocks, computes aggregate_metrics
+        deterministically, and derives high_risk_domains /
+        key_risk_findings / recommended_mitigations. Campaign authors
+        should record both single-call and post-consolidation signals
+        when both are available.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          award_metadata fields and selected evidence fields resolve to
+          UDM entities: award_number to Award.Award_Number;
+          award_period_start / award_period_end to
+          Award.Original_Start_Date / Original_End_Date; sponsor_name to
+          Organization.Organization_Name; cfda_number to
+          Award.CFDA_Number; domain_1.project_title to Award.Award_Title;
+          domain_2.total_federal_funding to Award.Current_Total_Funded;
+          domain_2.cost_share_required and cost_share_amount to
+          CostShare.Is_Mandatory and CostShare.Committed_Amount;
+          domain_2.idc_rate_restriction to IndirectRate.Rate_Percentage;
+          domain_3.subrecipient_risk_level and
+          subrecipient_monitoring_requirements to Subaward.Risk_Level
+          and Subaward.Monitoring_Plan; domain_5.compliance_requirement_type
+          and compliance_risk_level to ComplianceRequirement
+          (Requirement_Type, Risk_Level); domain_6.reporting_frequency
+          and reporting_requirements_detail to Terms.Invoicing_Frequency
+          and Terms.Reporting_Requirements; domain_8.pass_through_indicator
+          to Award.Flow_Through_Indicator; domain_10.closeout_requirements
+          and property_equipment_obligations to Terms.Closeout_Requirements
+          and Terms.Property_Requirements; domain_12.publication_requirements
+          to Terms.Publication_Requirements; domain_13.special_conditions
+          to Terms.Special_Conditions. The 14-domain rubric and
+          aggregate-metrics shape themselves are repo-local — no shared
+          UDM risk-rubric table exists yet.
+    related_components:
+      - slug: award-compliance-extraction-udm
+        relationship: complementary_focus
+        notes: >
+          risk-domain-assessment-udm produces a one-time institutional
+          risk profile (run at award acceptance and on major
+          modifications); award-compliance-extraction-udm runs
+          continuously through the award lifecycle to monitor the
+          compliance framework. The risk-assessment Domain 5
+          (Compliance & Regulatory) evidence fields overlap with the
+          award-compliance contract's compliance_framework block.
+      - slug: export-to-banner-extraction-udm
+        relationship: sibling_award_consumption
+        notes: >
+          Both components consume the same fully-executed award
+          document(s). risk-domain-assessment-udm produces an
+          institutional risk profile;
+          export-to-banner-extraction-udm produces operational Banner
+          ERP setup fields.
+
+  export-to-banner-extraction-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local Banner ERP-setup contract. Six structured blocks
+        (award_identification, dates_and_performance, sponsor_entity,
+        budget_financial, billing_payment, reporting_special) covering
+        the specific data points needed to populate the VERAS Export to
+        Banner form on its way into Banner ERP. Targets only the
+        operational fields Banner needs — complements
+        award-compliance-extraction-udm (broader compliance monitoring)
+        rather than duplicating it. All monetary fields are JSON numbers
+        per the boss's PR #33 review feedback.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. Canonical single-call
+        invocation surface is prompt.md. The companion top-level
+        workflows/export-to-banner-extraction Vandalizer workflow at
+        v0.1.0 implements the contract as six parallel Extraction tasks
+        plus a Consolidation Prompt that converts quoted-dollar strings
+        to JSON numbers, normalizes four enums (award_type,
+        sponsor_entity_type, fa_rate_base, billing_type), and enforces
+        the two source cross-field rules (CFR-01 award_start <
+        award_end; CFR-02 performance_period_start <= award_start_date)
+        as flag emissions on reporting_special.special_terms. Campaign
+        authors should record both single-call and post-consolidation
+        signals when both are available.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          Broad UDM alignment via leaf-field column bindings: Award
+          (Award_Number, Award_Title, Original_Start_Date,
+          Original_End_Date, Flow_Through_Indicator, CFDA_Number,
+          Current_Total_Funded, Total_Anticipated_Funding); Personnel
+          (First_Name, Last_Name); Organization (Organization_Name,
+          Organization_Type, UEI); AwardBudget; AwardBudgetPeriod;
+          IndirectRate (Rate_Percentage, Base_Type); CostShare
+          (Committed_Amount); ContactDetails (ContactDetails_Value);
+          Terms (Payment_Method, Invoicing_Frequency). The six-block
+          Banner-setup shape itself is repo-local.
+    related_components:
+      - slug: award-compliance-extraction-udm
+        relationship: complementary_focus
+        notes: >
+          export-to-banner-extraction-udm captures operational
+          Banner-setup fields from a fully-executed award document;
+          award-compliance-extraction-udm captures the broader
+          compliance framework (high-risk conditions, audit thresholds,
+          deliverable schedules) on the same award.
+      - slug: ffr-management-extraction-udm
+        relationship: complementary_focus
+        notes: >
+          ffr-management-extraction-udm covers FFR / SF-425 submission
+          cadence; export-to-banner-extraction-udm covers operational
+          billing and payment terms (billing_type / billing_frequency /
+          PMS LOC code).
+      - slug: award-modification-intake-udm
+        relationship: complementary_focus
+        notes: >
+          award-modification-intake-udm covers modification intake on
+          an amendment; export-to-banner-extraction-udm covers
+          operational Banner-setup fields on the original (fully-
+          executed) award. The two can be combined to refresh Banner
+          when a modification updates Banner-relevant fields.
+
+  section2-personnel-eligibility-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local VERAS Section 2 review contract for the University of
+        Idaho. Seven structured blocks (personnel_extraction,
+        personnel_verification, eligibility_check, org_code_compilation,
+        dga_mapping, dga_cross_reference, verification_summary) covering
+        APM 45.22 PI / Co-PI eligibility cross-checks, Banner NBAJOBS
+        verification, timesheet org-code compilation, Department List
+        org-code-to-DGA mapping, and per-DGA cross-reference against
+        Section 2 participants. The workflow requires three workflow
+        documents to be uploaded together (VERAS proposal, Banner
+        NBAJOBS extract, Department List); the APM 45.22 eligible-titles
+        list is consumed from the knowledge base / search corpus.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. Canonical single-call
+        invocation surface is prompt.md. The companion top-level
+        workflows/section2-personnel-eligibility Vandalizer workflow at
+        v0.1.0 implements the contract as two parallel Extraction tasks
+        (personnel extraction + eligibility / DGA verification) plus a
+        Consolidation Prompt that derives the seven verification_summary
+        counts and four flag arrays from the per-person / per-org-code /
+        per-DGA records. Campaign authors should record both single-call
+        and post-consolidation signals when both are available.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          section_21_personnel[].name and section_22_personnel[].name
+          resolve to UDM Personnel.First_Name / Personnel.Last_Name; the
+          proposal record itself resolves to UDM Proposal. The APM 45.22
+          eligibility surface, org-code -> DGA mapping, and per-DGA
+          cross-reference matrices are repo-local — no shared UDM table
+          exists for them yet.
+    related_components:
+      - slug: compliance-personnel-verification-udm
+        relationship: sibling_pre_award_personnel_check
+        notes: >
+          Both components run against the same VERAS Section 2
+          personnel. section2-personnel-eligibility-udm checks APM 45.22
+          PI / Co-PI eligibility (role state) and DGA mapping;
+          compliance-personnel-verification-udm checks SFI disclosure +
+          RST completion (compliance state).
+      - slug: proposal-document-completeness-udm
+        relationship: sibling_pre_award_review
+        notes: >
+          Both components run on a VERAS upload during pre-award review.
+          proposal-document-completeness-udm checks document-level
+          inventory and gap analysis;
+          section2-personnel-eligibility-udm checks per-person Section 2
+          eligibility and DGA coverage.
+
+  compliance-personnel-verification-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local SFI + RST personnel-verification contract for federal
+        research proposals. Six structured blocks (proposal_metadata,
+        personnel_identification, sfi_verification, rst_verification,
+        non_compliant_personnel, verification_status) covering the
+        consolidated cross-section personnel list, per-person SFI / RST
+        status with five-value and three-value enums, derived
+        non-compliance flags with priority, and overall summary counts.
+        The workflow requires three workflow documents to be uploaded
+        together (VERAS proposal, SFI disclosure records, daily RST
+        completion spreadsheet); missing sources do not produce silent
+        compliance — they produce non-compliant defaults and a notes
+        gap-flag.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. Canonical single-call
+        invocation surface is prompt.md. The companion top-level
+        workflows/compliance-personnel-verification Vandalizer workflow
+        at v0.1.0 implements the contract as two parallel Extraction
+        tasks (personnel identification + compliance status
+        verification) plus a Consolidation Prompt that derives
+        non_compliant_personnel from the SFI / RST per-person status
+        records and computes the five verification_status counts.
+        Campaign authors should record both single-call and
+        post-consolidation signals when both are available.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          section_2_personnel[].name resolves to UDM
+          Personnel.First_Name / Personnel.Last_Name; the proposal
+          record itself resolves to UDM Proposal. The per-person SFI /
+          RST verification matrices are repo-local — no shared UDM
+          compliance table exists for them yet.
+    related_components:
+      - slug: section2-personnel-eligibility-udm
+        relationship: sibling_pre_award_personnel_check
+        notes: >
+          Both components run against the same VERAS Section 2
+          personnel. compliance-personnel-verification-udm checks SFI
+          disclosure + RST completion (compliance state);
+          section2-personnel-eligibility-udm checks APM 45.22 PI / Co-PI
+          eligibility (role state).
+      - slug: proposal-document-completeness-udm
+        relationship: sibling_pre_award_review
+        notes: >
+          Both components run on a VERAS upload during pre-award review.
+          proposal-document-completeness-udm checks document-level
+          inventory and gap analysis;
+          compliance-personnel-verification-udm checks per-person SFI
+          and RST compliance.
+
+  award-modification-intake-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local post-award modification intake & classification
+        contract. Three structured blocks (identification, financial,
+        compliance) covering the seven-value modification_type
+        classification, monetary impact with rebudget routing, and
+        prior-approval / sponsor-conditions / Financial-Unit routing
+        flags that a Post-Award Specialist uses to enter the
+        modification into Banner. Source workflow's STEP-03 ApprovalNode
+        is intentionally omitted (handled by Vandalizer's UI as a
+        runtime concern).
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. Canonical single-call
+        invocation surface is prompt.md. The companion top-level
+        workflows/award-modification-intake Vandalizer workflow at
+        v0.1.0 implements the contract as three parallel Extraction
+        tasks plus a Consolidation Prompt that assembles the three
+        fragments and enforces the four source cross-field rules
+        (CFR-01..CFR-04) as flag emissions on
+        compliance.sponsor_conditions when the source document is
+        internally inconsistent. Campaign authors should record both
+        single-call and post-consolidation signals when both are
+        available.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          award_number resolves to UDM Award.Award_Number or
+          Award.Federal_Award_ID; sponsor_name to
+          Organization.Organization_Name; pi_name to UDM Personnel;
+          modification_amount to Modification.Funding_Amount_Change;
+          current_award_amount to Award.Current_Total_Funded; fa_rate to
+          IndirectRate.Rate_Percentage; budget_breakdown rows to
+          AwardBudget; cost_share_changes to CostShare.Committed_Amount;
+          sponsor_conditions to Terms.Special_Conditions;
+          prior_approval_required to Modification.Requires_Prior_Approval.
+          The three-block intake shape itself is repo-local.
+    related_components:
+      - slug: prior-approval-extraction-udm
+        relationship: complementary_drilldown
+        notes: >
+          award-modification-intake-udm captures the prior-approval
+          STATUS (boolean) and approval date on a single modification;
+          prior-approval-extraction-udm captures the procedural
+          MECHANICS (threshold / authority / documentation / timeline /
+          consequences) for each prior-approval CATEGORY across the
+          award lifecycle.
+      - slug: ffr-management-extraction-udm
+        relationship: complementary_focus
+        notes: >
+          ffr-management-extraction-udm covers post-award FFR / SF-425
+          submission cadence on the parent award; this component covers
+          modification intake on a specific amendment.
+      - slug: award-compliance-extraction-udm
+        relationship: complementary_focus
+        notes: >
+          award-compliance-extraction-udm captures the broader
+          compliance framework (high-risk conditions, audit thresholds,
+          deliverable schedules) on the parent award; this component
+          captures the modification-specific compliance fields and
+          routing flags needed to enter the modification into Banner.
+
   subaward-extraction-udm:
     output_contract:
       format: json_object

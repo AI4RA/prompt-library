@@ -1,0 +1,768 @@
+# Authored source for the Risk Domain Assessment Vandalizer workflow.
+#
+# === Topology (v0.3.0, Variant A + KB injection + inline rubrics + Domain 9 polarity fix) ===
+#
+# v0.3.0 accuracy fixes vs. v0.2.0 (surfaced by full 4-document HUD
+# test package — output had four contradictions against the workflow's
+# own verification.html spec):
+#   1. Award / Sponsor / PI / Period all returned "Not specified" even
+#      though documents clearly contained them (HUD sponsor in RFP,
+#      Overton named as PI in budget+narrative). v0.2.0 prompts didn't
+#      include PI synonym list or proposal-only-context fallback.
+#   2. Domain 9 (Strategic / Mission Alignment) polarity INVERTED: LLM
+#      scored "Directly supports HUD's CDBG impact evaluation goals,
+#      strong mission fit" as 5/5 — but rubric says 5 = "Clear
+#      misalignment; significant mission conflict". Strong fit -> 1.
+#      Root cause: rubric table not in prompt, LLM defaulted to
+#      training prior of "higher = better".
+#   3. Funding amount $950,000 instead of proposal-specific
+#      $243,763.06 — LLM grabbed program-wide RFP total instead of
+#      proposal budget.
+#   4. Domain 14 (Institutional / Reputational Risk) missing from
+#      DETAILED EVIDENCE section even though Domain 14 score (3/5)
+#      appeared in the score table. Output stopped at Domain 13.
+#
+# Fixes:
+#   - All six extraction prompts now include the full rubric table
+#     (1-5 score levels with criteria) inline, pulled verbatim from
+#     verification.html. The LLM no longer has to guess any rubric.
+#   - Task 1 (extract-programmatic-strategic) adds an explicit
+#     "POLARITY REVERSED" warning before the Domain 9 rubric plus a
+#     WRONG/CORRECT worked example: "strong mission fit -> score 1,
+#     NOT score 5". Also adds the PI synonym list ("Principal
+#     Investigator", "PI", "Project Director", "PD", "Lead
+#     Investigator", "Grantee Project Director", etc.) plus a
+#     proposal-only-context fallback (when no explicit PI label,
+#     designate first-listed prime investigator).
+#   - Task 2 (extract-financial-audit) adds a funding-amount
+#     disambiguation section with the exact $950K-vs-$243K HUD test
+#     example labeled CORRECT vs WRONG.
+#   - Task 3 (extract-subrecipient-sponsor) adds a note that ANY
+#     subaward (e.g., a single domestic university subcontract) is
+#     at least score 2, not 1.
+#   - Task 4 (extract-security-compliance) clarifies that standard
+#     cross-cutting federal requirements alone don't elevate
+#     Domain 5 above 2.
+#   - Task 6 (extract-data-sustainability-reputational) adds a
+#     CRITICAL anchor: ALL FOUR domains (10, 11, 12, 14) MUST be
+#     populated. Domain 14 is the final required domain.
+#   - Consolidation adds award-metadata-fallback logic for
+#     proposal-only contexts (Award = "Pending (FAIN not yet
+#     assigned; proposed under <RFP/FOA number>)", PI from Task 1's
+#     pi_name, Sponsor from RFP) plus an explicit "ALL 14 domains in
+#     DETAILED EVIDENCE" rule.
+#   - "Score conservatively (1 or 2)" default replaced with "lean
+#     toward the middle (3)" to match verification.html line 511.
+#     The previous default undershoots risk; the new default matches
+#     the verification's intent of conservative-toward-moderate when
+#     evidence is weak.
+#
+# v0.2.0 changes vs. v0.1.0:
+#   1. Parallel Extraction tasks converted to Prompt tasks. The
+#      consolidation step still gets integer scores per domain (not
+#      strings) — scores are JSON integers in the mid-pipeline JSON
+#      fragments.
+#   2. Output contract: plain-text-style risk report wrapped in a
+#      ```text code block (mirrors source consolidation.md output
+#      template — dot-leader scores, underlined section headers).
+#      This is unique among the workflows: it's the ONE workflow
+#      whose Markdown deliverable is wrapped in a code block rather
+#      than emitted as live Markdown.
+#   3. Step 0 KnowledgeBaseQuery added.
+
+name: Risk Domain Assessment
+description: >
+  Uploads federal award documents (Notice of Award, FOA / NOFO / RFA,
+  modification, proposal) and returns an RA-friendly Risk Domain
+  Assessment Report scoring 14 institutional risk domains on a 1-5
+  rubric with evidence citations, aggregate metrics, high-risk-areas
+  list, key findings, and recommended mitigations. The deliverable is
+  rendered as plain-text inside a Markdown code block per the source
+  ui-insight/ProcessMapping risk-domain-assessment consolidation.md
+  output template — dot-leader score lines, underlined section
+  headers, fixed-width layout for legibility.
+
+workflow_version: 0.3.0
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-05-20
+updated: 2026-05-27
+
+components:
+  - slug: risk-domain-assessment-udm
+    pinned_version: 0.1.0
+
+validation_plan:
+  - check_id: CHK-01
+    check_name: Score range validation
+    check_type: range
+    check_description: Verify all 14 domain scores are integers in [1, 5].
+    target_fields: []
+    severity: error
+  - check_id: CHK-02
+    check_name: Justification completeness
+    check_type: completeness
+    check_description: Verify all 14 domain scores have non-empty evidence-cited justifications.
+    target_fields: []
+    severity: error
+  - check_id: CHK-03
+    check_name: Aggregate score consistency
+    check_type: arithmetic
+    check_description: Verify total_risk_score equals the arithmetic sum of the 14 domain scores; average_risk_score equals total_risk_score / 14 rounded to one decimal place.
+    target_fields: []
+    severity: warning
+
+steps:
+  - name: Knowledge Base Context Lookup
+    tasks:
+      - name: kb-context-lookup
+        kind: KnowledgeBaseQuery
+        query: "federal award risk programmatic complexity financial budgetary subrecipient research security foreign influence compliance regulatory reporting burden audit risk strategic alignment sustainability closeout sensitive data CJIS PII intellectual property data rights privacy unusual terms sponsor reliability reputational risk export control NSPM-33 CHIPS Act"
+        k: 8
+        knowledge_base_hint:
+          title: "OMB Uniform Guidance (2 CFR 200)"
+          description: >
+            Primary regulatory KB. For research-security-heavy
+            awards, swap in Export Control (EAR & ITAR) or Responsible
+            Conduct of Research (RCR). For agency-specific scoring,
+            swap in NSF PAPPG / NIH GPS / DOE / DOD / DFARS.
+
+  - name: Parallel Risk Domain Extraction (Prompt)
+    tasks:
+      - name: extract-programmatic-strategic
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are scoring Domain 1 (Programmatic Complexity) and
+          Domain 9 (Strategic / Mission Alignment) of the 14-domain
+          risk rubric. You receive the uploaded documents AND any KB
+          chunks.
+
+          Evidence-based scoring only. Every score cites specific
+          document sections. When insufficient evidence: lean toward
+          the middle of the scale (3) rather than guessing, and add
+          "Insufficient document evidence: ..." to the justification.
+          Never infer.
+
+          CRITICAL — scores are JSON INTEGERS in [1, 5], never quoted
+          strings or enum entries.
+
+          ## Domain 1 — Programmatic Complexity rubric
+
+          How complicated is the program design (activities,
+          deliverables, technical requirements, partnership structures)?
+
+          | Score | Level | Criteria |
+          |---|---|---|
+          | 1 | Very Low | Simple, single-activity project; no special expertise needed |
+          | 2 | Low | Minor complexities; straightforward implementation |
+          | 3 | Moderate | Several components; moderate technical demands |
+          | 4 | High | Multiple complex deliverables, advanced methodologies, intensive coordination |
+          | 5 | Very High | Highly technical, multi-tier projects; new models; major uncertainty or innovation |
+
+          ## Domain 9 — Strategic / Mission Alignment rubric (POLARITY REVERSED)
+
+          CRITICAL — Domain 9 is an ALIGNMENT-RISK score. Higher score
+          means MORE risk = WORSE alignment with the institution's
+          mission, NOT better alignment. Read the rubric carefully.
+
+          | Score | Level | Criteria |
+          |---|---|---|
+          | 1 | Very Low | Perfect alignment; strong institutional support |
+          | 2 | Low | Mostly aligned |
+          | 3 | Moderate | Partial fit; worth evaluating |
+          | 4 | High | Misalignment with major institutional priorities |
+          | 5 | Very High | Clear misalignment; significant mission conflict |
+
+          Worked example — CORRECT: A HUD-funded CDBG impact-evaluation
+          project at a research university with an active urban-policy
+          center directly supports the institution's research mission.
+          -> domain_9_score = 1 (Very Low alignment risk; strong fit).
+
+          Worked example — WRONG: Scoring the same project 5/5 because
+          of "strong mission fit". Score 5 means CLEAR MISALIGNMENT
+          (i.e., bad fit), NOT strong fit. Strong fit -> score 1.
+
+          ## Project metadata extraction
+
+          Extract project_title and pi_name even when the documents are
+          a proposal package (no Notice of Award yet). The PI may be
+          named under any of: "Principal Investigator", "PI", "Project
+          Director", "PD", "Lead Investigator", "Grantee Project
+          Director", "Grantee Project Manager", "Recipient Project
+          Manager", "RPM". When the documents are a proposal and don't
+          explicitly label a PI, designate the FIRST-LISTED investigator
+          at the prime institution as PI. The project_title may be on a
+          proposal cover page, the RFP/NOFO title page, or in the
+          project narrative's opening section.
+
+          Emit a JSON object with: project_title (STRING — never null
+          when a title exists anywhere in the documents),
+          project_description_summary (STRING),
+          pi_name (STRING — the prime PI; null only when genuinely no
+          investigators are named),
+          number_of_project_components (INTEGER or null),
+          partnership_requirements (STRING or null),
+          technical_sophistication_indicators (JSON ARRAY of STRINGS),
+          domain_1_score (JSON INTEGER 1-5),
+          domain_1_justification (STRING — evidence-cited),
+          institutional_mission_fit (STRING or null),
+          institutional_resource_requirements (JSON ARRAY of STRINGS),
+          domain_9_score (JSON INTEGER 1-5),
+          domain_9_justification (STRING — evidence-cited per the
+          POLARITY-REVERSED rubric above).
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-financial-audit
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are scoring Domain 2 (Financial & Budgetary Risk) and
+          Domain 8 (Audit Risk).
+
+          Scores are JSON INTEGERS in [1, 5]. Monetary fields are
+          JSON numbers OR strings preserving the document's format
+          (your choice). When insufficient evidence: lean toward the
+          middle (3), state "Insufficient document evidence" in the
+          justification.
+
+          ## Domain 2 — Financial & Budgetary Risk rubric
+
+          | Score | Level | Criteria |
+          |---|---|---|
+          | 1 | Very Low | Standard costs; no restrictions; simple budget |
+          | 2 | Low | Minor restrictions; manageable rebudgeting rules |
+          | 3 | Moderate | Some cost-share, participant support, tight IDC limit |
+          | 4 | High | Required match; strict rebudgeting; multiple funding streams |
+          | 5 | Very High | High match requirement; significant budget inflexibility; complex multi-phase funding |
+
+          ## Domain 8 — Audit Risk rubric
+
+          | Score | Level | Criteria |
+          |---|---|---|
+          | 1 | Very Low | Low-dollar, low-risk award |
+          | 2 | Low | Standard compliance areas; typical award size |
+          | 3 | Moderate | Cost share; multiple subs; agency known for strict audits |
+          | 4 | High | High dollars; high audit visibility |
+          | 5 | Very High | Very high dollars, heavy pass-through; recurring audit flags |
+
+          ## CRITICAL — funding amount disambiguation
+
+          When the documents include BOTH a proposal-level budget
+          (specific to this applicant's request) AND a program-wide
+          total (from the RFP/NOFO describing total funding available
+          across all awards), use the PROPOSAL BUDGET for
+          total_federal_funding, NOT the program-wide total.
+
+          Worked example — CORRECT: HUD RFP states "$950,000 in
+          program-wide funding for two awards" and the applicant's
+          budget requests $243,763.06 for this specific proposal.
+          -> total_federal_funding = "$243,763.06"
+
+          Worked example — WRONG: total_federal_funding = "$950,000"
+          (this is the program total, not the proposal request).
+
+          When the documents are a Notice of Award, use the NoA's
+          "Total Federal Funding" / "Amount of Financial Assistance"
+          line. When both an NoA and a proposal are provided and they
+          differ, prefer the NoA (it's the executed value) and flag the
+          discrepancy in domain_2_justification.
+
+          Emit a JSON object with: total_federal_funding (STRING or
+          number), total_anticipated_funding (STRING/number/null),
+          cost_share_required (BOOLEAN), cost_share_amount
+          (STRING/number/null), idc_rate_restriction (STRING),
+          budget_flexibility_restrictions (JSON ARRAY of STRINGS),
+          multiple_funding_streams (BOOLEAN or null),
+          domain_2_score (JSON INTEGER 1-5),
+          domain_2_justification (STRING),
+          pass_through_indicator (BOOLEAN or null),
+          audit_exposure_indicators (JSON ARRAY of STRINGS),
+          domain_8_score (JSON INTEGER 1-5),
+          domain_8_justification (STRING).
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-subrecipient-sponsor
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are scoring Domain 3 (Subrecipient / Partner Risk) and
+          Domain 13 (Unusual Terms / Sponsor Reliability).
+
+          Scores are JSON INTEGERS in [1, 5]. When insufficient
+          evidence: lean toward the middle (3), state "Insufficient
+          document evidence" in the justification.
+
+          ## Domain 3 — Subrecipient / Partner Risk rubric
+
+          | Score | Level | Criteria |
+          |---|---|---|
+          | 1 | Very Low | No subs; no external partners |
+          | 2 | Low | One experienced subrecipient; low oversight |
+          | 3 | Moderate | Multiple subs or contractors; moderate monitoring |
+          | 4 | High | Complex consortium; new/foreign partners; heavy monitoring |
+          | 5 | Very High | Many partners; high oversight burden; high audit exposure |
+
+          NOTE on Domain 3 scoring: a single subaward to a known
+          domestic university is typically score 2 (one experienced
+          subrecipient, low oversight). Do not score 1 when ANY
+          subaward, subcontract, or consortium partner exists. Score 1
+          is reserved for awards with no external partners at all.
+
+          Identify subawards from:
+          - HUD-424-CBW / SF-424A Section 7 "Contracts and Sub-Grantees"
+          - SF-424 R&R Detailed line F (Other Direct Costs) /
+            G.5 Subawards / Section H Consortium
+          - Narrative phrases like "subcontract with X", "subaward to X",
+            "consortium with X"
+
+          ## Domain 13 — Unusual Terms / Sponsor Reliability rubric
+
+          | Score | Level | Criteria |
+          |---|---|---|
+          | 1 | Very Low | Standard terms; reliable federal sponsor |
+          | 2 | Low | Slight deviations; minor concerns |
+          | 3 | Moderate | Non-standard terms; new program; vague requirements |
+          | 4 | High | Major deviations; unclear payment processes |
+          | 5 | Very High | High-risk sponsor; restrictive conditions; unclear authority |
+
+          Standard, established federal agencies (HUD, NIH, NSF, DOE,
+          DOD, USDA, DOI, ED, EPA, HHS) with no non-standard award
+          terms score 1.
+
+          Emit a JSON object with: number_of_subrecipients (INTEGER or
+          null), subrecipient_details (JSON ARRAY of STRINGS),
+          foreign_partners_present (BOOLEAN or null),
+          subrecipient_risk_level (STRING or null),
+          subrecipient_monitoring_requirements (STRING or null),
+          domain_3_score (JSON INTEGER 1-5),
+          domain_3_justification (STRING),
+          non_standard_terms (JSON ARRAY of STRINGS),
+          special_conditions (JSON ARRAY of STRINGS),
+          domain_13_score (JSON INTEGER 1-5),
+          domain_13_justification (STRING).
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-security-compliance
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are scoring Domain 4 (Research Security & Foreign
+          Influence) and Domain 5 (Compliance & Regulatory).
+
+          Scores are JSON INTEGERS in [1, 5]. When insufficient
+          evidence: lean toward the middle (3), state "Insufficient
+          document evidence" in the justification.
+
+          ## Domain 4 — Research Security & Foreign Influence rubric
+
+          | Score | Level | Criteria |
+          |---|---|---|
+          | 1 | Very Low | No foreign elements; no sensitive tech |
+          | 2 | Low | Some foreign collaboration but low risk |
+          | 3 | Moderate | Foreign entities involved; OR technical area is sensitive |
+          | 4 | High | Sensitive technology, export-controlled data, restricted country presence |
+          | 5 | Very High | High-risk partners; prohibited collaborations; MFTRP concerns |
+
+          Do NOT assume foreign involvement or security concerns
+          unless the documents specifically reference them. A typical
+          domestic federal-agency research grant with no foreign
+          collaboration scores 1.
+
+          ## Domain 5 — Compliance & Regulatory rubric
+
+          | Score | Level | Criteria |
+          |---|---|---|
+          | 1 | Very Low | No compliance components |
+          | 2 | Low | Minor compliance (e.g., basic IRB) |
+          | 3 | Moderate | Multiple compliance areas; moderate regulatory load |
+          | 4 | High | Significant IRB/IACUC/IBC + federal cross-cutting requirements |
+          | 5 | Very High | High-stakes compliance (biosafety, environmental impact, multi-agency compliance) |
+
+          Distinguish between compliance requirements EXPLICITLY
+          triggered by this specific project (human subjects, animal
+          subjects, biosafety, environmental) versus standard cross-
+          cutting federal requirements (2 CFR 200, lobbying
+          restrictions, civil rights) that apply to ALL federal
+          awards. Standard cross-cutting requirements alone do not
+          elevate the score above 2.
+
+          Emit a JSON object with: foreign_collaboration_indicators
+          (JSON ARRAY of STRINGS), export_control_concerns (BOOLEAN or
+          null), nspm33_chips_applicability (STRING or null),
+          domain_4_score (JSON INTEGER 1-5),
+          domain_4_justification (STRING),
+          compliance_requirements_identified (JSON ARRAY of STRINGS),
+          compliance_requirement_type (STRING or null),
+          compliance_risk_level (STRING or null),
+          cross_cutting_federal_requirements (JSON ARRAY of STRINGS),
+          domain_5_score (JSON INTEGER 1-5),
+          domain_5_justification (STRING).
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-reporting-administrative
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are scoring Domain 6 (Performance Measurement & Reporting
+          Burden) and Domain 7 (Administrative / Operational Burden).
+
+          Scores are JSON INTEGERS in [1, 5]. When insufficient
+          evidence: lean toward the middle (3), state "Insufficient
+          document evidence" in the justification.
+
+          ## Domain 6 — Performance Measurement & Reporting Burden rubric
+
+          | Score | Level | Criteria |
+          |---|---|---|
+          | 1 | Very Low | Standard reporting; annual |
+          | 2 | Low | Quarterly reporting; simple metrics |
+          | 3 | Moderate | Complex performance indicators; multiple datasets |
+          | 4 | High | Intensive reporting; evaluator involvement; DUAs |
+          | 5 | Very High | Extremely complex data/metrics; real-time reporting; third-party evaluations |
+
+          ## Domain 7 — Administrative / Operational Burden rubric
+
+          | Score | Level | Criteria |
+          |---|---|---|
+          | 1 | Very Low | Experienced PI; low admin burden |
+          | 2 | Low | Some administrative requirements; PI has basic experience |
+          | 3 | Moderate | New PI OR moderately complex administration |
+          | 4 | High | New PI + complex reporting/attachments/approvals |
+          | 5 | Very High | Very inexperienced PI, complex operations, high oversight needed |
+
+          NOTE on Domain 7: PI experience level often cannot be
+          determined from award documents alone. When PI experience
+          is unknown, score based on observable administrative burden
+          indicators only and state "PI experience level not
+          determinable from documents" in the justification.
+
+          Emit a JSON object with: reporting_frequency (STRING),
+          reporting_requirements_detail (STRING),
+          performance_metrics_complexity (STRING or null),
+          evaluator_required (BOOLEAN or null),
+          data_use_agreements_required (BOOLEAN or null),
+          domain_6_score (JSON INTEGER 1-5),
+          domain_6_justification (STRING),
+          prior_approval_requirements (JSON ARRAY of STRINGS),
+          administrative_complexity_indicators (JSON ARRAY of STRINGS),
+          pi_capacity_considerations (STRING or null),
+          domain_7_score (JSON INTEGER 1-5),
+          domain_7_justification (STRING).
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-data-sustainability-reputational
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are scoring Domain 10 (Sustainability & Closeout),
+          Domain 11 (Sensitive Data & Information Security), Domain 12
+          (IP, Data Rights & Privacy), and Domain 14 (Institutional /
+          Reputational Risk).
+
+          Scores are JSON INTEGERS in [1, 5]. When insufficient
+          evidence: lean toward the middle (3), state "Insufficient
+          document evidence" in the justification.
+
+          CRITICAL — ALL FOUR DOMAINS MUST be populated (score +
+          justification). Never omit Domain 14 — it is the final domain
+          in the rubric and the consolidation step will produce an
+          incomplete report if it's missing.
+
+          ## Domain 10 — Sustainability & Closeout rubric
+
+          | Score | Level | Criteria |
+          |---|---|---|
+          | 1 | Very Low | No post-award commitments |
+          | 2 | Low | Minimal reporting or equipment tracking |
+          | 3 | Moderate | Some sustainment expected |
+          | 4 | High | Institutional service continuation required; staffing risk |
+          | 5 | Very High | Long-term obligations; ongoing costs after funding ends |
+
+          ## Domain 11 — Sensitive Data & Information Security rubric
+
+          | Score | Level | Criteria |
+          |---|---|---|
+          | 1 | Very Low | No sensitive data |
+          | 2 | Low | Some restricted data; manageable |
+          | 3 | Moderate | DUAs; moderate security needs |
+          | 4 | High | CJIS-level controls, restricted storage |
+          | 5 | Very High | Large sensitive datasets, high-exposure breach implications |
+
+          NOTE on Domain 11: If the award is NOT from DOJ/BJA/NIJ/OJP
+          and involves no criminal justice data, score 1 and state the
+          rationale ("Award is not from DOJ/BJA/NIJ/OJP and involves
+          no criminal justice data; standard data security applies").
+
+          ## Domain 12 — IP, Data Rights & Privacy rubric
+
+          | Score | Level | Criteria |
+          |---|---|---|
+          | 1 | Very Low | Standard terms; no special rights |
+          | 2 | Low | Minor non-standard conditions |
+          | 3 | Moderate | Required data sharing; some IP limitations |
+          | 4 | High | Restrictive IP clauses; privacy risk |
+          | 5 | Very High | Sponsor demands ownership or broad rights; major privacy exposure |
+
+          Distinguish standard Bayh-Dole Act provisions (which give
+          the institution standard rights to inventions and score 1)
+          from non-standard sponsor IP demands.
+
+          ## Domain 14 — Institutional / Reputational Risk rubric
+
+          | Score | Level | Criteria |
+          |---|---|---|
+          | 1 | Very Low | Completely non-controversial; no external sensitivities |
+          | 2 | Low | Limited visibility; little chance of confusion or controversy |
+          | 3 | Moderate | Topic may generate mixed reactions; moderate visibility |
+          | 4 | High | Likely public, donor, or political sensitivity; could create friction |
+          | 5 | Very High | High likelihood of controversy, legislative concern, or donor impact |
+
+          NOTE on Domain 14: Base the assessment ONLY on what is
+          observable in the documents — do not speculate about
+          external political contexts not referenced in the documents.
+
+          Emit a JSON object with: post_award_obligations (JSON ARRAY
+          of STRINGS), closeout_requirements (STRING or null),
+          property_equipment_obligations (STRING or null),
+          domain_10_score (JSON INTEGER 1-5),
+          domain_10_justification (STRING),
+          sensitive_data_requirements (STRING or null),
+          data_security_standards (JSON ARRAY of STRINGS),
+          domain_11_score (JSON INTEGER 1-5),
+          domain_11_justification (STRING),
+          ip_ownership_terms (STRING or null),
+          data_sharing_requirements (STRING or null),
+          publication_requirements (STRING or null),
+          privacy_risk_indicators (JSON ARRAY of STRINGS),
+          domain_12_score (JSON INTEGER 1-5),
+          domain_12_justification (STRING),
+          reputational_risk_indicators (JSON ARRAY of STRINGS),
+          domain_14_score (JSON INTEGER 1-5),
+          domain_14_justification (STRING).
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences. ALL FOUR domain score + justification pairs must be
+          present (10, 11, 12, 14).
+
+  - name: Risk Profile Consolidation (Plain-text in code block)
+    is_output: true
+    tasks:
+      - name: risk-domain-assessment-consolidation
+        kind: Prompt
+        input_source: step_input
+        prompt_inline: |
+          You are the consolidation step of the Risk Domain Assessment
+          workflow. You receive SIX JSON fragments from the previous
+          step, covering all 14 domain scores plus award metadata
+          (extracted via the parallel tasks).
+
+          CRITICAL — scores must be JSON integers throughout. Compute
+          aggregate metrics deterministically:
+          - total_risk_score = arithmetic sum of all 14 domain scores
+          - average_risk_score = total_risk_score / 14, rounded to one
+            decimal place
+          - overall_risk_level:
+            * "Low" if average 1.0-1.9
+            * "Moderate" if average 2.0-2.9
+            * "High" if average 3.0-3.9
+            * "Very High" if average 4.0-5.0
+
+          ## Award metadata extraction with proposal-context fallback
+
+          The award identification block at the top of the report
+          needs: Award, Sponsor, PI, Period (Start + End), Funding,
+          CFDA, Assessment Date.
+
+          When the documents are a POST-AWARD package (Notice of Award
+          present), use the NoA's explicit fields:
+          - Award = FAIN / Federal Award Identification Number
+          - Sponsor = federal agency name
+          - PI = "Principal Investigator" / "Project Director" /
+            "Grantee Project Director" named on the NoA
+          - Period = NoA project period start / end dates
+          - Funding = NoA total federal funding
+          - CFDA = NoA CFDA / Assistance Listing number
+
+          When the documents are a PRE-AWARD proposal package (no NoA
+          yet), use the proposal context:
+          - Award = "Pending (FAIN not yet assigned; proposed under
+            <RFP/FOA number>)"
+          - Sponsor = federal agency named in the RFP/FOA
+          - PI = first-listed prime-institution investigator (from
+            Task 1's pi_name extraction)
+          - Period = proposed period of performance from the project
+            narrative (or "Proposed period: <start> to <end>" if the
+            narrative gives one)
+          - Funding = proposal budget total (NOT program-wide total)
+          - CFDA = RFP/FOA CFDA number when given
+
+          NEVER emit "Not specified in the document" for Sponsor, PI,
+          or Funding when the documents clearly contain them — Sponsor
+          is in the RFP/NOFO; PI is in the proposal narrative or
+          budget; Funding is in the budget. Apply the synonym handling
+          from the upstream tasks.
+
+          Render the final deliverable as PLAIN TEXT inside a Markdown
+          code block. This is unique to this workflow — the source
+          consolidation.md output template uses fixed-width plain-text
+          formatting with dot-leader score lines and underlined section
+          headers. Do NOT use Markdown headers (## etc.) inside the
+          code block — use the underline style as shown.
+
+          ## CRITICAL — ALWAYS RENDER THE DELIVERABLE
+
+          You MUST render the FULL Markdown deliverable structure (every
+          section listed below), EVEN WHEN some fragment fields arrive
+          as null, empty, missing, or sparse. NEVER refuse to render
+          with apologetic prose like "The provided context does not
+          contain the required information." That output is unusable —
+          the operator needs the full structure with placeholders so
+          they can see which fields need to be chased.
+
+          Substitution rules when a field is null or missing:
+          - Award identification fields: apply the proposal-context
+            fallback rules above; substitute "Not specified in the
+            document" ONLY when documents truly contain nothing.
+          - Optional table cells: substitute "—" (em dash).
+          - Empty arrays: render the section with its empty-state
+            language already specified below (e.g., "No items
+            identified", "No risk areas scored 4 or above").
+
+          If EVERY field across ALL upstream fragments is null (which
+          means the document genuinely contained nothing extractable
+          OR the document was not attached to the run), STILL render
+          the full Markdown structure with "Not specified in the
+          document" placeholders throughout, AND append a single line
+          at the very end of the deliverable:
+
+          > ⚠️ The upstream extraction returned no data from the
+          > uploaded document. Verify the document was attached and
+          > re-run the workflow.
+
+          ## Required output structure (EXACTLY this — wrap the entire
+          report in a ```text ... ``` code block)
+
+          ```text
+          RISK DOMAIN ASSESSMENT REPORT
+          ==============================
+
+          Award: <award_number or proposal-context fallback>
+          Sponsor: <sponsor_name>
+          PI: <pi_name>
+          Period: <period start> to <period end>
+          Funding: <total_federal_funding>
+          CFDA: <cfda_number or "Not specified">
+          Assessment Date: <today's date>
+
+          RISK AREA SCORES
+          ----------------
+           1. Programmatic Complexity ............. <domain_1_score>/5
+           2. Financial & Budgetary Risk .......... <domain_2_score>/5
+           3. Subrecipient / Partner Risk ......... <domain_3_score>/5
+           4. Research Security & Foreign Influence  <domain_4_score>/5
+           5. Compliance & Regulatory ............. <domain_5_score>/5
+           6. Reporting Burden .................... <domain_6_score>/5
+           7. Administrative / Operational Burden . <domain_7_score>/5
+           8. Audit Risk .......................... <domain_8_score>/5
+           9. Strategic / Mission Alignment ....... <domain_9_score>/5
+          10. Sustainability & Closeout ........... <domain_10_score>/5
+          11. Sensitive Data & Information Security <domain_11_score>/5
+          12. IP, Data Rights & Privacy ........... <domain_12_score>/5
+          13. Unusual Terms / Sponsor Reliability . <domain_13_score>/5
+          14. Institutional / Reputational Risk ... <domain_14_score>/5
+
+          AGGREGATE METRICS
+          -----------------
+          Total Risk Score: <sum>/70
+          Average Risk Score: <average>/5.0
+          Overall Risk Level: <Low | Moderate | High | Very High>
+
+          HIGH-RISK AREAS (Score >= 4)
+          ----------------------------
+          [List each risk area scoring 4-5 with its score and a brief
+           justification summary, one per line.]
+          [If none, write: "No risk areas scored 4 or above."]
+
+          KEY FINDINGS
+          ------------
+          [3-5 synthesized key findings with document evidence citations.
+           Each finding states the specific risk, cites the source
+           document (NOA, NOFO, Modification, etc.), and notes the
+           affected domain(s).]
+
+          RECOMMENDED MITIGATIONS
+          ------------------------
+          [For each risk area scoring >= 3, provide a specific actionable
+           mitigation. One per line.]
+          [If none scored 3+, write: "No elevated risk areas requiring
+           mitigation."]
+
+          DETAILED EVIDENCE BY RISK AREA
+          -------------------------------
+          [For ALL 14 risk areas, reproduce the score and justification
+           from the parallel extractions. Organize by domain number.
+           ALL 14 MUST appear — do NOT stop at Domain 13. Domain 14 is
+           the final required domain.]
+
+          [Format:
+
+           1. Programmatic Complexity — Score: <N>/5
+              <justification text wrapped to ~75 columns>
+
+           2. Financial & Budgetary Risk — Score: <N>/5
+              <justification>
+
+           ...continued for ALL 14 domains, ending with:
+
+          14. Institutional / Reputational Risk — Score: <N>/5
+              <justification>]
+          ```
+
+          ## Rendering rules
+
+          - Wrap the ENTIRE report in a ```text ... ``` Markdown code
+            block — the renderer will display it in fixed-width font.
+          - Use `=` underline for the title and `-` underline for
+            section headers.
+          - Dot-leader score lines exactly as shown.
+          - Two-digit domain numbers left-padded with a space.
+          - Preserve INTEGER scores in the dot-leader lines.
+          - When `domain_X_score` is null or missing, render as `?/5`
+            and add a line to KEY FINDINGS noting the missing domain.
+          - If a domain's justification was "Insufficient document
+            evidence: ...", carry that notation forward verbatim.
+          - Mitigations are specific actionable institutional actions,
+            not generic boilerplate.
+          - ALL 14 domains MUST appear in DETAILED EVIDENCE BY RISK
+            AREA. If a fragment didn't return a Domain 14 score,
+            emit "14. Institutional / Reputational Risk — Score: ?/5
+            / Insufficient evidence" so the section is structurally
+            complete.
+          - No JSON output outside the code block.
+
+evals:
+  workflow_local: true

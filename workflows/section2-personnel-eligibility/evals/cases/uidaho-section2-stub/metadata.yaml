@@ -1,0 +1,47 @@
+# Case identity
+case: uidaho-section2-stub
+source: "Placeholder case shell — to be replaced with a synthetic University of Idaho proposal package (deliberately mixed APM 45.22 eligibility profile) paired with stub Banner NBAJOBS records and a stub Department List."
+source_url: "https://www.uidaho.edu/research/faculty/sponsored-programs"
+retrieved: 2026-05-20
+
+# Which structural features of the three input documents this case exercises.
+structural_features:
+  - veras-section-21-pi-copis
+  - veras-section-22a-senior-key-personnel
+  - mixed-apm-45-22-eligibility
+  - missing-dga-section-2
+  - unmapped-org-code
+
+# Workflow-level behaviors this case targets. These are pipeline-level
+# checks that no single component's evals can cover (seven-block
+# consolidation, derivation of verification_summary counts and flag arrays,
+# no-assumption-of-eligibility rule).
+workflow_features:
+  - seven_block_consolidation
+  - verification_summary_counts_derivation
+  - eligibility_enum_eligible_not_eligible_review_required
+  - action_needed_enum_no_action_flag_must_be_added
+  - missing_dga_flag_aggregation
+  - unmapped_org_code_path
+  - senior_key_personnel_excluded_from_eligibility_check
+  - missing_source_document_gap_flagging
+
+# Validation metadata — REQUIRED.
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-05-20
+validated_against_version: "0.1.0"
+component_versions_at_validation:
+  section2-personnel-eligibility-udm: "0.1.0"
+
+# Optional free-form notes on what was confirmed, what was surprising,
+# what should be re-checked on the next revalidation pass.
+notes: |
+  Scaffolded case shell only. The expected.json, input-source.md, and
+  three input-document fixtures (synthetic VERAS package, synthetic
+  Banner NBAJOBS extract, synthetic Department List) will be added once
+  a Sponsored Programs Administrator has reviewed and validated the
+  consolidated workflow output. The APM 45.22 eligible-titles list will
+  need to exist in the knowledge base / search corpus before the workflow
+  can run end-to-end. This stub exists so the workflow can declare
+  workflow_local: true per docs/contracts.md while the real case is
+  being assembled in evaluation-data-sets.

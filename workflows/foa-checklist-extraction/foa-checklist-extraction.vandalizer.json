@@ -2,347 +2,108 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-04-30T00:00:00+00:00",
+  "exported_at": "2026-05-27T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "FOA Checklist Maker Extraction",
-      "description": "Uploads a Federal Funding Opportunity Announcement (FOA) and returns a single structured JSON object covering the eight reference sections a federal-grants office uses for FOA review: FOA summary and key dates, funding and eligibility, evaluation criteria with weights, multi-stage review process, agency priorities and program goals, submission platform and forms, application components, and formatting requirements. Output conforms to the foa-checklist-extraction-udm component schema. The runtime mirrors the ui-insight/ProcessMapping foa-checklist-extraction workflow (six parallel Extraction tasks plus a Consolidation Prompt).",
+      "name": "FOA Checklist Extraction",
+      "description": "Uploads a federal funding opportunity announcement (FOA / NOFO) and returns an RA-friendly Markdown FOA reference document covering FOA Summary, Key Dates and Deadlines, Funding Information, Eligibility Requirements, Application Components and Submission Requirements, Evaluation Process and Criteria, Program Priorities and Alignment, and Special Requirements. Mirrors the source ui-insight/ProcessMapping foa-checklist-extraction conventions with H1/H2/H3 hierarchical headings and a placement contract that routes each fact to exactly one section.",
       "steps": [
         {
-          "name": "Parallel Extraction",
+          "name": "Knowledge Base Context Lookup",
           "data": {},
           "is_output": false,
           "tasks": [
             {
-              "name": "Extraction",
+              "name": "KnowledgeBaseQuery",
               "data": {
-                "name": "extract-foa-identification-and-timeline",
-                "prompt": "Extract FOA identifying information, funding details, critical\ndates timeline, period of performance, and eligibility overview.\n\nBe 100% accurate. Match the schema's type for each field\nexactly:\n  - total_funding is a JSON number (no quotes, no currency\n    symbol, no thousand-separators).\n  - expected_awards is a JSON integer.\n  - cost_sharing_required is a JSON boolean (or null).\n  - award_range, performance_period, and the date strings\n    inside critical_dates are STRINGS, quoted verbatim\n    preserving \"$300,000 to $750,000 per award\" / date format /\n    etc.\n\nFor federal_agency return one of: NSF, NIH, DOD, DOE, NASA,\nUSDA, EPA, DOT, DOC, ED, Other.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "FOA Identification & Timeline",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Funding Opportunity Number / ID (e.g., PA-24-246, DE-FOA-0003117).",
-                      "searchtype": "extraction",
-                      "title": "foa_number",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "CFDA Number and title.",
-                      "searchtype": "extraction",
-                      "title": "cfda_number",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Federal Agency Name (NSF, NIH, DOD, DOE, NASA, USDA, EPA, DOT, DOC, ED, Other).",
-                      "searchtype": "extraction",
-                      "title": "federal_agency",
-                      "is_optional": false,
-                      "enum_values": [
-                        "NSF",
-                        "NIH",
-                        "DOD",
-                        "DOE",
-                        "NASA",
-                        "USDA",
-                        "EPA",
-                        "DOT",
-                        "DOC",
-                        "ED",
-                        "Other"
-                      ]
-                    },
-                    {
-                      "searchphrase": "FOA Title / Program Name.",
-                      "searchtype": "extraction",
-                      "title": "foa_title",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Total available funding as a JSON number (no quotes, no currency symbol, no thousand-separators). \"$10,000,000\" becomes 10000000.",
-                      "searchtype": "extraction",
-                      "title": "total_funding",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Expected number of awards as a JSON integer.",
-                      "searchtype": "extraction",
-                      "title": "expected_awards",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Minimum and maximum award amounts (e.g., \"$300,000 to $750,000 per award\").",
-                      "searchtype": "extraction",
-                      "title": "award_range",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Boolean. Whether cost sharing/matching is required.",
-                      "searchtype": "extraction",
-                      "title": "cost_sharing_required",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "JSON array of {milestone, date_time, notes} for all gating milestones (LOI, pre-application, full application, panel review, anticipated start).",
-                      "searchtype": "extraction",
-                      "title": "critical_dates",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Expected project duration range.",
-                      "searchtype": "extraction",
-                      "title": "performance_period",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Flat list of eligible applicant types as stated.",
-                      "searchtype": "extraction",
-                      "title": "eligible_applicants",
-                      "is_optional": false,
-                      "enum_values": []
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Extraction",
-              "data": {
-                "name": "extract-evaluation-criteria",
-                "prompt": "Extract all evaluation criteria with weights, scoring system\noverview, methodology, and minimum thresholds. Quote weights\nverbatim — points or percentages as the FOA states them.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "Evaluation Criteria",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Total possible points or scoring scale (e.g., \"100 points\").",
-                      "searchtype": "extraction",
-                      "title": "total_points",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "JSON array of {criterion_name, weight, description, rating_definitions} for each evaluation criterion.",
-                      "searchtype": "extraction",
-                      "title": "evaluation_criteria",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "How scores are calculated, tie resolution, weighting.",
-                      "searchtype": "extraction",
-                      "title": "scoring_methodology",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Minimum score thresholds for funding consideration.",
-                      "searchtype": "extraction",
-                      "title": "minimum_threshold",
-                      "is_optional": true,
-                      "enum_values": []
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Extraction",
-              "data": {
-                "name": "extract-review-process",
-                "prompt": "Extract review stages, review personnel types, initial screening\ncriteria, and review timeline. review_stages is sequential —\neach stage's outcome is what proceeds to the next.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "Review Process",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "JSON array of {stage_name, purpose, outcome} in sequential order.",
-                      "searchtype": "extraction",
-                      "title": "review_stages",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Types and composition of review panels.",
-                      "searchtype": "extraction",
-                      "title": "review_personnel",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Flat list of initial-screening / disqualification factors.",
-                      "searchtype": "extraction",
-                      "title": "screening_criteria",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Estimated length of review process and notification timeline.",
-                      "searchtype": "extraction",
-                      "title": "review_timeline",
-                      "is_optional": true,
-                      "enum_values": []
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Extraction",
-              "data": {
-                "name": "extract-agency-priorities-and-goals",
-                "prompt": "Extract agency mission alignment, program goals and objectives,\npriority areas (in stated order of importance), and expected\noutcomes.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "Agency Priorities & Goals",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Agency mission relevant to this FOA.",
-                      "searchtype": "extraction",
-                      "title": "agency_mission",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "JSON array of {goal, objective, success_indicator} for each program goal.",
-                      "searchtype": "extraction",
-                      "title": "program_goals",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Flat list of priority areas in stated order of importance.",
-                      "searchtype": "extraction",
-                      "title": "priority_areas",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Flat list of required deliverables / intended impacts.",
-                      "searchtype": "extraction",
-                      "title": "expected_outcomes",
-                      "is_optional": true,
-                      "enum_values": []
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Extraction",
-              "data": {
-                "name": "extract-forms-and-submission-systems",
-                "prompt": "Extract submission platform details, required registrations\n(SAM, UEI, eRA Commons, Grants.gov, agency portals), required\nforms, and the application-components checklist with page\nlimits.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "Forms & Submission Systems",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Primary submission system (Grants.gov, eRA Commons, etc.).",
-                      "searchtype": "extraction",
-                      "title": "submission_platform",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "JSON array of {system_name, timeline, prerequisites} for SAM, UEI, eRA Commons, Grants.gov, agency portals.",
-                      "searchtype": "extraction",
-                      "title": "required_registrations",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "JSON array of {form_number, name, purpose, special_instructions} for required forms.",
-                      "searchtype": "extraction",
-                      "title": "required_forms",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "JSON array of {component_name, required_or_optional, page_limit, format_requirements} for each component.",
-                      "searchtype": "extraction",
-                      "title": "application_components",
-                      "is_optional": false,
-                      "enum_values": []
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Extraction",
-              "data": {
-                "name": "extract-formatting-requirements",
-                "prompt": "Extract document structure, page limits with what-counts rules,\nformatting standards, and file requirements.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "Formatting Requirements",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Flat list of required proposal sections in exact order.",
-                      "searchtype": "extraction",
-                      "title": "document_structure",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "JSON array of {section, limit, what_counts, consequences} for each page-limit rule.",
-                      "searchtype": "extraction",
-                      "title": "page_limits",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Margin, font, spacing, and other formatting requirements.",
-                      "searchtype": "extraction",
-                      "title": "formatting_standards",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Acceptable file formats, sizes, naming conventions.",
-                      "searchtype": "extraction",
-                      "title": "file_requirements",
-                      "is_optional": true,
-                      "enum_values": []
-                    }
-                  ]
+                "name": "kb-context-lookup",
+                "kb_uuid": "",
+                "query": "federal funding opportunity announcement FOA NOFO eligibility budget cost sharing F&A indirect cost rates allowable unallowable personnel effort submission deadlines compliance evaluation criteria peer review CFDA program authorization",
+                "k": 8,
+                "_embedded_knowledge_base": {
+                  "title": "OMB Uniform Guidance (2 CFR 200)",
+                  "description": "Primary regulatory KB. Swap in NSF PAPPG Reference (NSF FOAs), NIH Grants Policy Statement (NIH NOFOs), DOE Financial Assistance Rules (DOE), or DOD Research Funding & DFARS (DOD) as appropriate for the announcement's sponsor."
                 }
               }
             }
           ]
         },
         {
-          "name": "Consolidation",
+          "name": "Parallel Extraction (Prompt)",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-foa-summary",
+                "prompt": "You are extracting FOA summary fields. You receive the\nuploaded document AND any KB chunks.\n\nEmit a JSON object with: foa_number_or_id, cfda_number,\ncfda_title, federal_agency, agency_office_bureau,\nfoa_title_or_program_name, program_authorization,\nprogram_description (1-3 sentence summary). All STRINGS;\nnull when absent.\n\n## Output\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-key-dates",
+                "prompt": "You are extracting key dates and deadlines from a FOA.\nPreserve the sponsor's date format verbatim including time\nand timezone.\n\nEmit a JSON object with one key: critical_dates (JSON ARRAY\nof {event_or_milestone, date_time, notes_or_requirements}\nobjects sorted chronologically).\n\n## Output\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-funding-information",
+                "prompt": "You are extracting funding information from a FOA. Preserve\nmonetary amounts verbatim ($X,XXX,XXX format).\n\nEmit a JSON object with: total_funding (STRING), expected_awards\n(STRING — e.g., \"10-15\"), award_size_range (STRING — e.g.,\n\"$100,000 to $500,000\"), project_duration (STRING),\ncost_sharing_required (BOOLEAN or null), cost_sharing_details\n(STRING or null), award_instrument_type (STRING — Grant /\nCooperative Agreement / Contract).\n\n## Output\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-eligibility",
+                "prompt": "You are extracting eligibility requirements from a FOA.\n\nEmit a JSON object with: eligible_applicants (JSON ARRAY of\nSTRINGS), ineligible_applicants (JSON ARRAY of STRINGS or\nempty), per_institution_limit (STRING or null),\nper_pi_limit (STRING or null), special_eligibility_conditions\n(JSON ARRAY of STRINGS).\n\n## Output\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-application-and-evaluation",
+                "prompt": "You are extracting application components, submission\nrequirements, and evaluation criteria from a FOA.\n\nEmit a JSON object with:\n- registration_requirements: JSON ARRAY of STRINGS\n  (SAM.gov, Grants.gov, eRA Commons, etc.).\n- required_forms: JSON ARRAY of STRINGS.\n- formatting_requirements: STRING (page limits, font,\n  margins).\n- required_components: JSON ARRAY of\n  {component_name, description, page_limit_or_format}\n  objects.\n- submission_method: STRING (portal / email / hardcopy).\n- screening_criteria: JSON ARRAY of STRINGS.\n- merit_review_criteria: JSON ARRAY of\n  {criterion, weight, description} objects.\n- review_timeline: STRING.\n\n## Output\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-priorities-and-special",
+                "prompt": "You are extracting program priorities and special requirements\nfrom a FOA.\n\nEmit a JSON object with: primary_goals (JSON ARRAY of\nSTRINGS), priority_areas (JSON ARRAY of STRINGS),\nexpected_outcomes (JSON ARRAY of STRINGS),\nalignment_recommendations (STRING),\nspecial_requirements (JSON ARRAY of STRINGS — unique aspects\nnot fitting other sections).\n\n## Output\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consolidation (Markdown deliverable)",
           "data": {},
           "is_output": true,
           "tasks": [
@@ -350,7 +111,7 @@
               "name": "Prompt",
               "data": {
                 "name": "foa-checklist-consolidation",
-                "prompt": "You are assembling the FOA Checklist extraction output. The\ninput is the JSON fragment produced by the upstream six\nparallel Extraction tasks. Your job is to emit a single JSON\nobject that validates against the\nfoa-checklist-extraction-udm@0.1.0 schema (31 fields).\n\nRules:\n1. Pass-through every field from the six fragments verbatim.\n   The schema has no nested re-shaping for this workflow — the\n   fragments map directly to top-level fields.\n2. Verify cross-field consistency: critical_dates entries\n   chronological (LOI/pre-app < full-app < panel review);\n   expected_awards * max(award_range) <= total_funding.\n   Preserve document values when they conflict; surface the\n   conflict via validation_plan.\n3. federal_agency must use the enum value exactly. Normalize\n   document phrasings to the closest enum.\n4. Use null for missing scalar fields and empty arrays for\n   missing list fields; never invent values.\n5. Do not output any text outside the single JSON object.",
+                "prompt": "You are the consolidation step of the FOA Checklist\nExtraction workflow. You receive SIX JSON object fragments\nfrom the previous step:\n\n1. FOA summary (foa_number_or_id, cfda_number, cfda_title,\n   federal_agency, agency_office_bureau,\n   foa_title_or_program_name, program_authorization,\n   program_description)\n2. Key dates (critical_dates: array of {event_or_milestone,\n   date_time, notes_or_requirements})\n3. Funding information (total_funding, expected_awards,\n   award_size_range, project_duration, cost_sharing_required,\n   cost_sharing_details, award_instrument_type)\n4. Eligibility (eligible_applicants, ineligible_applicants,\n   per_institution_limit, per_pi_limit,\n   special_eligibility_conditions)\n5. Application and evaluation (registration_requirements,\n   required_forms, formatting_requirements,\n   required_components, submission_method, screening_criteria,\n   merit_review_criteria, review_timeline)\n6. Priorities and special requirements (primary_goals,\n   priority_areas, expected_outcomes,\n   alignment_recommendations, special_requirements)\n\nYour job is to render a single RA-friendly Markdown FOA\nreference document for the sponsored-programs analyst (the\nend-user). The deliverable is Markdown — NOT a JSON object\nand NOT a JSON code fence. The audience is a research\nadministrator who will copy this into Word, paste into an\nemail to the proposal team, or save to a shared folder.\n\n## CRITICAL — ALWAYS RENDER THE DELIVERABLE\n\nYou MUST render the FULL Markdown deliverable structure (every\nsection listed below), EVEN WHEN some fragment fields arrive\nas null, empty, missing, or sparse. NEVER refuse to render\nwith apologetic prose like \"The provided context does not\ncontain the required information.\" That output is unusable —\nthe operator needs the full structure with placeholders so\nthey can see which fields need to be chased.\n\nSubstitution rules when a field is null or missing:\n- Required scalar fields: substitute the literal string\n  \"Not specified in the document\".\n- Optional table cells: substitute \"—\" (em dash).\n- Empty arrays: render the section with its empty-state\n  language already specified below.\n\nIf EVERY field across ALL upstream fragments is null (which\nmeans the document genuinely contained nothing extractable\nOR the document was not attached to the run), STILL render\nthe full Markdown structure with \"Not specified in the\ndocument\" placeholders throughout, AND append a single line\nat the very end of the deliverable:\n\n> ⚠️ The upstream extraction returned no data from the\n> uploaded document. Verify the document was attached and\n> re-run the workflow.\n\n## Required structure (in this exact order)\n\n# FOA Reference: <foa_title_or_program_name>\n\n**FOA Number/ID:** <foa_number_or_id or \"Not specified\">\n**CFDA Number / Title:** <cfda_number or \"Not specified\"> — <cfda_title or \"—\">\n**Federal Agency:** <federal_agency or \"Not specified\"> (<agency_office_bureau or \"—\">)\n**Program Authorization:** <program_authorization or \"Not specified\">\n\n<program_description as a paragraph; if null, write \"Not specified in the document.\">\n\n---\n\n## KEY DATES AND DEADLINES\n\nA Markdown table with chronologically sorted rows:\n\n| Event / Milestone | Date and Time | Notes / Requirements |\n|---|---|---|\n| (event_or_milestone) | (date_time) | (notes_or_requirements or \"—\") |\n\nOne row per critical_dates entry. Use **bold** for entries\nlabeled as critical, application, or final deadlines. If\ncritical_dates is empty, render a single row:\n| — | — | No dates identified in the document |.\n\n---\n\n## FUNDING INFORMATION\n\nRender as a definition-style list:\n\n- **Total Available Funding:** <total_funding or \"Not specified\">\n- **Number of Anticipated Awards:** <expected_awards or \"Not specified\">\n- **Award Size:** <award_size_range or \"Not specified\">\n- **Project Duration:** <project_duration or \"Not specified\">\n- **Cost Sharing Required:** <\"Yes\" when cost_sharing_required is true, \"No\" when false, \"Not specified\" when null>\n- **Cost Sharing Details:** <cost_sharing_details or \"—\">\n- **Award Instrument Type:** <award_instrument_type or \"Not specified\">\n\n---\n\n## ELIGIBILITY REQUIREMENTS\n\n### Who can apply\n\nRender eligible_applicants as a bulleted list. Each entry is\na flat string — render it as a single bullet without\nsub-bullets. If empty or null, state \"Not specified in the\ndocument\".\n\n### Who cannot apply\n\nRender ineligible_applicants as a bulleted list of flat\nstrings. If empty or null, state \"Not specified in the\ndocument\".\n\n### Limitations\n\n- **Per Institution:** <per_institution_limit or \"Not specified\">\n- **Per PI:** <per_pi_limit or \"Not specified\">\n\n### Special Eligibility Conditions\n\nRender special_eligibility_conditions as a bulleted list of\nflat strings. If empty or null, state \"None beyond standard\nfederal requirements\".\n\n---\n\n## APPLICATION COMPONENTS AND SUBMISSION REQUIREMENTS\n\n### Registration Requirements\n\nBulleted list of registration_requirements entries. Each\nentry is a single flat-string bullet. If empty or null,\nstate \"Not specified in the document\".\n\n### Required Forms\n\nBulleted list of required_forms entries. Each entry is a\nsingle flat-string bullet. If empty or null, state \"Not\nspecified in the document\".\n\n### Formatting Requirements\n\n<formatting_requirements as a paragraph, or \"Not specified in the document\">\n\n### Required Components Checklist\n\nA Markdown table. Always present.\n\n| Component | Description | Page Limit / Format |\n|---|---|---|\n| (component_name) | (description) | (page_limit_or_format or \"—\") |\n\nOne row per required_components entry. If empty or null,\nrender a single row:\n| Not specified in this document | — | — |.\n\n### Submission Method\n\n<submission_method as a paragraph, or \"Not specified in the document\">\n\n---\n\n## EVALUATION PROCESS AND CRITERIA\n\n### Screening Criteria\n\nRender screening_criteria as a bulleted list of flat strings.\nIf empty or null, state \"Not specified in the document\".\n\n### Merit Review Criteria\n\nA Markdown table. Always present.\n\n| Criterion | Weight | Description |\n|---|---|---|\n| (criterion) | (weight or \"—\") | (description or \"—\") |\n\nOne row per merit_review_criteria entry. If empty or null,\nrender a single row:\n| Not specified in this document | — | — |.\n\n### Review Timeline\n\n<review_timeline as a paragraph, or \"Not specified in the document\">\n\n---\n\n## PROGRAM PRIORITIES AND ALIGNMENT\n\n### Primary Goals\n\nRender primary_goals as a bulleted list of flat strings. If\nempty or null, state \"Not specified in the document\".\n\n### Priority Areas\n\nRender priority_areas as a bulleted list of flat strings. If\nempty or null, state \"Not specified in the document\".\n\n### Expected Outcomes\n\nRender expected_outcomes as a bulleted list of flat strings.\nIf empty or null, state \"Not specified in the document\".\n\n### Alignment Recommendations\n\n<alignment_recommendations as a paragraph, or \"Not specified in the document\">\n\n---\n\n## SPECIAL REQUIREMENTS\n\nRender special_requirements as a bulleted list of flat\nstrings. If empty or null, state \"None identified beyond\nstandard federal requirements.\"\n\n---\n\n## Placement contract (enforce as you render)\n\n1. **Funding amounts, award counts, project duration, and\n   cost-sharing details appear ONLY in FUNDING INFORMATION.**\n   Even if other fragments mention them, do not restate\n   elsewhere.\n2. **Eligibility lists appear ONLY in ELIGIBILITY\n   REQUIREMENTS.** Even if priorities or special-requirements\n   fragments mention who can/cannot apply, do not duplicate.\n3. **Per-component formatting rules (page limits, fonts,\n   margins) appear ONLY in APPLICATION COMPONENTS / Required\n   Components Checklist** (in the table's Page Limit / Format\n   column). Not in SPECIAL REQUIREMENTS.\n4. **Submission mechanics (portal, file format, naming)\n   appear ONLY in APPLICATION COMPONENTS / Submission Method.**\n   Not in SPECIAL REQUIREMENTS.\n5. **Strategic priorities and alignment statements appear\n   ONLY in PROGRAM PRIORITIES AND ALIGNMENT.** Not in PROGRAM\n   AUTHORIZATION or SPECIAL REQUIREMENTS.\n6. **Use ONLY the six JSON fragments above. Do NOT reference\n   the original uploaded document directly.** If a field is\n   absent from the fragments, render the appropriate\n   placeholder — do not infer, fabricate, or pull from prior\n   knowledge of the document text.\n\n## Formatting rules\n\n- Preserve the sponsor's monetary formatting verbatim\n  ($1,234,567 or $0.5M).\n- Preserve dates exactly as stated, including time and\n  timezone components.\n- Use **bold** for labels and critical action items.\n- Use — (em dash) for empty optional fields in tables;\n  \"Not specified in the document\" for empty required fields.\n- If any field from a JSON fragment arrives as a nested\n  object instead of a string, REWRITE it into natural-language\n  prose before emitting — do NOT pass through {\"key\": \"value\"}\n  syntax into the final Markdown.\n- No JSON. No code fences around the output. No preamble.\n  No closing commentary about the rendering. The output is\n  the deliverable — render it as if you were writing the\n  document directly.",
                 "input_source": "step_input"
               }
             }
@@ -363,41 +124,33 @@
       "validation_plan": [
         {
           "check_id": "CHK-01",
-          "check_name": "FOA number format",
+          "check_name": "Date / deadline preservation",
           "check_type": "format",
-          "check_description": "Verify foa_number matches a known agency format pattern (e.g., NIH PA/PAR/RFA, DOE DE-FOA, NSF program-solicitation).",
-          "target_fields": [
-            "foa_number"
-          ],
-          "severity": "warning"
-        },
-        {
-          "check_id": "CHK-02",
-          "check_name": "Date consistency",
-          "check_type": "consistency",
-          "check_description": "Verify critical_dates entries are chronologically ordered and that LOI/pre-application precedes full-application precedes panel review.",
-          "target_fields": [
-            "critical_dates"
-          ],
+          "check_description": "Verify dates preserve the FOA's stated granularity and timezone.",
+          "target_fields": [],
           "severity": "error"
         },
         {
+          "check_id": "CHK-02",
+          "check_name": "Cross-field consistency",
+          "check_type": "consistency",
+          "check_description": "Verify expected_awards × max(award_range) ≤ total_funding when all three are stated.",
+          "target_fields": [],
+          "severity": "warning"
+        },
+        {
           "check_id": "CHK-03",
-          "check_name": "Funding vs per-award amounts",
+          "check_name": "Evaluation-criteria weights sum",
           "check_type": "arithmetic",
-          "check_description": "Verify expected_awards * max(award_range) <= total_funding.",
-          "target_fields": [
-            "total_funding",
-            "expected_awards",
-            "award_range"
-          ],
+          "check_description": "Verify the sum of evaluation-criteria weights equals 100% when weights are stated as percentages.",
+          "target_fields": [],
           "severity": "warning"
         }
       ],
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/foa-checklist-extraction/manifest.yaml",
-        "workflow_version": "0.1.0",
+        "workflow_version": "0.3.0",
         "status": "experimental",
         "components": [
           {

@@ -2,204 +2,64 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-05-20T00:00:00+00:00",
+  "exported_at": "2026-06-06T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
       "name": "Award Compliance & Financial Overview Extraction",
-      "description": "Uploads a federal award notice or agreement and returns a single structured JSON object covering both the compliance framework (Uniform Guidance applicability, RTC, financial reporting, progress reporting, prior approvals, budget modification rules, property, deliverables, high-risk conditions, compliance calendar) and the financial management structure (total award amount, budget periods, cost share, F&A rate and base, performance period, budget categories, FFR, audit, record retention). Output conforms to the award-compliance-extraction-udm component schema. The runtime mirrors the ui-insight/ProcessMapping award-compliance-extraction workflow (two parallel Extraction tasks plus a Consolidation Prompt).",
+      "description": "Uploads a fully-executed federal award notice or agreement and returns an RA-friendly Markdown Award Compliance & Financial Overview covering award header information, financial summary, approved budget & restrictions, governing regulations (prioritized), and key administrative requirements (reporting, prior approval, compliance deadlines). Mirrors the source ui-insight/ProcessMapping award-compliance-extraction consolidation.md conventions.",
       "steps": [
         {
-          "name": "Parallel Extraction",
+          "name": "Knowledge Base Context Lookup",
           "data": {},
           "is_output": false,
           "tasks": [
             {
-              "name": "Extraction",
+              "name": "KnowledgeBaseQuery",
               "data": {
-                "name": "extract-compliance-framework",
-                "prompt": "You are extracting the compliance framework from a federal\naward document: Uniform Guidance applicability, RTC\napplicability, financial and progress reporting requirements,\nprior-approval categories, budget modification restrictions,\nproperty requirements, deliverable requirements, high-risk\nconditions, and a consolidated compliance calendar.\n\nBe 100% accurate. For each searchset item, return the value as\nthe document states it. Use null for missing scalars and empty\narrays for missing lists; never invent values.\n\nprior_approval_requirements is a categorized list of approval\ntypes only — the procedural mechanics (threshold, timeline,\nconsequences) live in the prior-approval-extraction-udm\ncomponent. Do not duplicate that work here.\n\ncompliance_calendar is the consolidated deadline view. Pull\nevery recurring or fixed deadline mentioned across the document\n(FFR, progress reports, equipment inventory, audit submission,\nRTC milestones) and emit one row per deadline with\n{requirement_type, deadline, responsible_party, consequences}.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "Award Compliance Framework",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Uniform Guidance (2 CFR 200) applicability details.",
-                      "searchtype": "extraction",
-                      "title": "uniform_guidance_applicability",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Research Terms and Conditions applicability.",
-                      "searchtype": "extraction",
-                      "title": "rtc_applicability",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Financial reporting frequency, deadlines, and systems.",
-                      "searchtype": "extraction",
-                      "title": "financial_reporting_requirements",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Progress report type, frequency, and format.",
-                      "searchtype": "extraction",
-                      "title": "progress_reporting_requirements",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Categorized list of prior-approval requirements (one entry per approval type).",
-                      "searchtype": "extraction",
-                      "title": "prior_approval_requirements",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Budget modification restrictions and re-budgeting rules.",
-                      "searchtype": "extraction",
-                      "title": "budget_modification_restrictions",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Equipment and property management requirements.",
-                      "searchtype": "extraction",
-                      "title": "property_requirements",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Deliverable requirements and deadlines.",
-                      "searchtype": "extraction",
-                      "title": "deliverable_requirements",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Enhanced monitoring, additional reporting, or specific restrictions tied to risk classification. Empty array when not high-risk.",
-                      "searchtype": "extraction",
-                      "title": "high_risk_conditions",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "JSON array of {requirement_type, deadline, responsible_party, consequences}, one row per recurring or fixed deadline pulled from across the document.",
-                      "searchtype": "extraction",
-                      "title": "compliance_calendar",
-                      "is_optional": false,
-                      "enum_values": []
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Extraction",
-              "data": {
-                "name": "extract-financial-management",
-                "prompt": "You are extracting the financial management structure from a\nfederal award document: total award amount, multi-year budget\nperiods, cost share, F&A rate and base, performance period,\nbudget categories, FFR cadence, audit requirements, and record\nretention.\n\nBe 100% accurate. Match the schema's type for each field\nexactly:\n  - Number-typed fields (total_award_amount,\n    budget_period_amounts[].amount, budget_categories[].approved_amount)\n    are JSON numbers — no quotes, no currency symbol, no\n    thousand-separators. \"$1,234,567.89\" in the document\n    becomes 1234567.89 in JSON.\n  - String-typed fields (cost_share_requirements, fa_rate,\n    fa_rate_base, performance_period, ffr_requirements, etc.)\n    are quoted verbatim — preserve currency symbols, percent\n    signs, and date format.\nUse null for missing scalars and empty arrays for missing\nlists.\n\nbudget_period_amounts is empty for single-period awards. The\nsum across budget_period_amounts should reconcile to\ntotal_award_amount (cross-field check CFR-01).\n\nfa_rate and fa_rate_base are two distinct STRING fields.\n\"42.5% MTDC\" becomes fa_rate: \"42.5%\" (string, percent sign\npreserved) and fa_rate_base: \"MTDC\".\n\nFor audit_requirements return one of: Single Audit, A-133,\nProgram-Specific Audit, Not applicable. For record_retention\nreturn one of: 3 years, 5 years, 7 years, Per sponsor\nrequirements.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "Award Financial Management",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Total award amount as a JSON number (no quotes, no currency symbol, no thousand-separators). \"$1,234,567\" becomes 1234567.",
-                      "searchtype": "extraction",
-                      "title": "total_award_amount",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "JSON array of {period, start_date, end_date, amount} for multi-year awards. amount is a JSON number; period / start_date / end_date are strings. Empty array for single-period awards.",
-                      "searchtype": "extraction",
-                      "title": "budget_period_amounts",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Cost sharing/matching requirements (amount and type).",
-                      "searchtype": "extraction",
-                      "title": "cost_share_requirements",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Indirect cost rate percentage as stated (e.g., \"42.5%\").",
-                      "searchtype": "extraction",
-                      "title": "fa_rate",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Base for F&A rate calculation (e.g., MTDC, TDC, Salary & Wages).",
-                      "searchtype": "extraction",
-                      "title": "fa_rate_base",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Period of performance dates as stated.",
-                      "searchtype": "extraction",
-                      "title": "performance_period",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "JSON array of {category_name, approved_amount, restrictions, prior_approval_required} for each budget category. approved_amount is a JSON number; the others are strings or boolean.",
-                      "searchtype": "extraction",
-                      "title": "budget_categories",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Federal Financial Report frequency and deadlines.",
-                      "searchtype": "extraction",
-                      "title": "ffr_requirements",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Audit requirements (Single Audit, A-133, Program-Specific Audit, Not applicable).",
-                      "searchtype": "extraction",
-                      "title": "audit_requirements",
-                      "is_optional": true,
-                      "enum_values": [
-                        "Single Audit",
-                        "A-133",
-                        "Program-Specific Audit",
-                        "Not applicable"
-                      ]
-                    },
-                    {
-                      "searchphrase": "Record retention requirements (3 years, 5 years, 7 years, Per sponsor requirements).",
-                      "searchtype": "extraction",
-                      "title": "record_retention",
-                      "is_optional": true,
-                      "enum_values": [
-                        "3 years",
-                        "5 years",
-                        "7 years",
-                        "Per sponsor requirements"
-                      ]
-                    }
-                  ]
+                "name": "kb-context-lookup",
+                "kb_uuid": "",
+                "query": "federal award compliance framework reporting requirements prior approval audit thresholds high-risk conditions financial overview budget periods F&A rate cost sharing 2 CFR 200 Uniform Guidance deliverable schedule",
+                "k": 8,
+                "_embedded_knowledge_base": {
+                  "title": "OMB Uniform Guidance (2 CFR 200)",
+                  "description": "Primary regulatory KB. Swap in agency-specific KBs (NSF PAPPG, NIH GPS, DOE Financial Assistance Rules, DOD Research Funding & DFARS) when the award is from one of those agencies. Pair with Responsible Conduct of Research (RCR) or Export Control (EAR & ITAR) for awards with security or compliance specialty."
                 }
               }
             }
           ]
         },
         {
-          "name": "Consolidation",
+          "name": "Parallel Extraction (Prompt)",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-compliance-framework",
+                "prompt": "You are extracting the compliance framework from a federal\naward document. You receive the uploaded document AND any\nKB chunks.\n\nBe 100% accurate. Quote regulations and deadlines verbatim.\nUse null when absent.\n\nEmit a JSON object with these keys:\n\n- award_number: STRING (FAIN).\n- project_title: STRING.\n- awardee_organization: STRING.\n- performance_period: STRING.\n- reporting_requirements: JSON ARRAY of\n  {report_type, frequency, due_date_or_timing, submission_method}\n  objects.\n- prior_approval_requirements: JSON ARRAY of STRINGS\n  (categorized prior-approval triggers — budget changes >X%,\n  equipment, PI change, NCE, foreign travel).\n- audit_requirements: STRING (Single Audit threshold,\n  cognizant agency).\n- record_retention: STRING (e.g., \"3 years per 2 CFR 200.334\").\n- high_risk_conditions: JSON ARRAY of STRINGS (any\n  special-conditions language indicating high-risk\n  designation). Empty when none.\n- special_conditions: JSON ARRAY of STRINGS (terms beyond\n  standard federal requirements).\n- cross_cutting_federal_requirements: JSON ARRAY of STRINGS\n  (2 CFR 200, agency-specific regs, RTC).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-financial-management",
+                "prompt": "You are extracting financial management details from a\nfederal award document. You receive the uploaded document\nAND any KB chunks.\n\nBe 100% accurate. Monetary fields preserve the document's\n$X,XXX.XX format verbatim. Use null when absent.\n\nEmit a JSON object with these keys:\n\n- total_award_amount: STRING ($X).\n- total_anticipated_amount: STRING ($X). null when absent.\n- budget_periods: JSON ARRAY of\n  {period_number, start_date, end_date, amount} objects.\n- budget_categories: JSON ARRAY of {category, approved_amount,\n  restrictions} objects (one per category: Salary, Fringe,\n  Equipment, Travel, Supplies, Subcontracts, Other, F&A).\n- total_direct_costs: STRING ($X).\n- total_indirect_costs: STRING ($X).\n- fa_rate: STRING (e.g., \"56.5% MTDC\"). null when absent.\n- fa_base: STRING. null when absent.\n- cost_share_amount: STRING ($X). null when not required.\n- cost_share_type: STRING. null when not required.\n- program_income: STRING. null when absent.\n- ffr_requirements: STRING (one-line summary — full FFR\n  detail belongs to ffr-management-extraction-udm).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consolidation (Markdown deliverable)",
           "data": {},
           "is_output": true,
           "tasks": [
@@ -207,7 +67,7 @@
               "name": "Prompt",
               "data": {
                 "name": "award-compliance-consolidation",
-                "prompt": "You are assembling the Award Compliance & Financial Overview\nextraction output. The input is the JSON fragment produced by\nthe upstream parallel Extraction tasks (compliance framework +\nfinancial management). Your job is to emit a single JSON object\nthat validates against the award-compliance-extraction-udm@0.1.0\nschema.\n\nTop-level shape:\n{\n  \"award_number\": string|null,\n  \"compliance_framework\": { ...10 keys... },\n  \"financial_management\": { ...10 keys... }\n}\n\nRules:\n1. Pass the compliance framework fragment into\n   compliance_framework verbatim. Pass the financial management\n   fragment into financial_management verbatim.\n2. award_number is a top-level scalar drawn from whichever\n   fragment carries it; null when neither does.\n3. audit_requirements and record_retention must use enum values\n   exactly. Normalize document phrasings to the closest enum.\n4. compliance_calendar must consolidate deadlines from across\n   the document — if both fragments produced calendar entries,\n   merge them, dedupe by (requirement_type, deadline) tuple,\n   and preserve responsible_party and consequences from the\n   more specific entry.\n5. budget_period_amounts is an empty array for single-period\n   awards. When non-empty, the sum should reconcile to\n   total_award_amount (cross-field check CFR-01); flag in\n   validation_plan if not.\n6. Use null for missing scalar fields; never invent values.\n7. Do not output any text outside the single JSON object.",
+                "prompt": "You are the consolidation step of the Award Compliance &\nFinancial Overview workflow. You receive TWO JSON fragments\nfrom the previous step.\n\nRender a single RA-friendly Markdown Award Compliance &\nFinancial Overview. Mirrors source consolidation.md exactly.\n\n## CRITICAL — ALWAYS RENDER THE DELIVERABLE\n\nYou MUST render the FULL Markdown deliverable structure (every\nsection listed below), EVEN WHEN some fragment fields arrive\nas null, empty, missing, or sparse. NEVER refuse to render\nwith apologetic prose like \"The provided context does not\ncontain the required information.\" That output is unusable —\nthe operator needs the full structure with placeholders so\nthey can see which fields need to be chased.\n\nSubstitution rules when a field is null or missing:\n- Required scalar fields: substitute the literal string\n  \"Not specified in the document\".\n- Optional table cells: substitute \"—\" (em dash).\n- Empty arrays: render the section with its empty-state\n  language already specified below (e.g., \"No items identified\",\n  \"Defers to federal defaults\", \"None identified beyond\n  standard federal requirements\").\n\nIf EVERY field across ALL upstream fragments is null (which\nmeans the document genuinely contained nothing extractable\nOR the document was not attached to the run), STILL render\nthe full Markdown structure with \"Not specified in the\ndocument\" placeholders throughout, AND append a single line\nat the very end of the deliverable:\n\n> ⚠️ The upstream extraction returned no data from the\n> uploaded document. Verify the document was attached and\n> re-run the workflow.\n\n## Required structure (in this exact order)\n\n# Award Compliance & Financial Overview: <award_number>\n\n### AWARD HEADER INFORMATION\n\n- **Project Title:** <project_title>\n- **Awardee Organization:** <awardee_organization>\n- **Federal Award Identification Number (FAIN):** <award_number>\n- **Period of Performance:** <performance_period>\n\n---\n\n### FINANCIAL SUMMARY\n\n| Field | Value |\n|---|---|\n| Total Award Amount | <total_award_amount> |\n| Total Anticipated Amount | <total_anticipated_amount or \"Not specified\"> |\n| Total Direct Costs | <total_direct_costs> |\n| Total Indirect Costs | <total_indirect_costs> |\n| F&A Rate | <fa_rate or \"Not specified\"> on <fa_base or \"Not specified\"> |\n| Cost Share | <cost_share_amount or \"Not required\"> (<cost_share_type or \"—\">) |\n| Program Income | <program_income or \"Not specified\"> |\n\n**Budget Periods:**\n\nOne bullet per budget_periods entry:\n- Period <period_number>: <start_date> — <end_date>, <amount>\n\n---\n\n### APPROVED BUDGET & RESTRICTIONS\n\n| Category | Approved Amount | Restrictions |\n|---|---|---|\n\nOne row per budget_categories entry.\n\n---\n\n### GOVERNING REGULATIONS\n\nRender in priority order:\n1. Cross-cutting (2 CFR 200, RTC)\n2. Agency-specific\n3. Award-specific terms\n\nBulleted list combining cross_cutting_federal_requirements +\nspecial_conditions, sorted by priority.\n\n---\n\n### KEY ADMINISTRATIVE REQUIREMENTS\n\n**Reporting Requirements:**\n\n| Report Type | Frequency | Due Date / Timing | Submission Method |\n|---|---|---|---|\n\nOne row per reporting_requirements entry.\n\n**Prior Approval Required For:**\n\nBulleted list of prior_approval_requirements (or \"Standard 2 CFR 200.308 prior approvals\" when empty).\n\n**Audit Requirements:** <audit_requirements or \"Standard Single Audit per 2 CFR 200 Subpart F\">\n\n**Record Retention:** <record_retention or \"3 years per 2 CFR 200.334\">\n\n**FFR Requirements (summary):** <ffr_requirements or \"See sponsor FFR schedule\">\n*For full FFR detail, run the FFR Management Extraction workflow.*\n\n**High-Risk Conditions (if any):**\n\nBulleted list of high_risk_conditions (or \"None identified\").\n\n## Rendering rules\n\n- Bold every label with `**Label:**`.\n- Preserve monetary amounts verbatim.\n- If any field arrives as a nested JSON object, REWRITE\n  into prose / table.\n- No JSON code fences around the output.",
                 "input_source": "step_input"
               }
             }
@@ -219,43 +79,46 @@
       "resource_config": {},
       "validation_plan": [
         {
-          "check_id": "CHK-01",
-          "check_name": "Monetary amount format",
-          "check_type": "format",
-          "check_description": "Verify total_award_amount, budget_period_amounts, and budget_categories.approved_amount preserve the document's currency formatting and are valid numbers.",
-          "target_fields": [
-            "financial_management.total_award_amount",
-            "financial_management.budget_period_amounts",
-            "financial_management.budget_categories"
-          ],
-          "severity": "error"
+          "id": "ac-sections-complete",
+          "category": "completeness",
+          "name": "Required sections present and ordered",
+          "description": "The deliverable opens with an H1 title line \"Award Compliance & Financial Overview: <FAIN>\" and contains all five H3 sections IN THIS EXACT ORDER: AWARD HEADER INFORMATION, FINANCIAL SUMMARY, APPROVED BUDGET & RESTRICTIONS, GOVERNING REGULATIONS, KEY ADMINISTRATIVE REQUIREMENTS. FAIL if any of these five sections is missing, renamed, or out of order.\n"
         },
         {
-          "check_id": "CHK-02",
-          "check_name": "Date validity",
-          "check_type": "format",
-          "check_description": "Verify performance_period and budget_period_amounts dates are well-formed and chronologically consistent.",
-          "target_fields": [
-            "financial_management.performance_period",
-            "financial_management.budget_period_amounts"
-          ],
-          "severity": "error"
+          "id": "ac-header-financial-fields",
+          "category": "completeness",
+          "name": "Header and financial summary fields populated",
+          "description": "AWARD HEADER INFORMATION lists Project Title, Awardee Organization, Federal Award Identification Number (FAIN), and Period of Performance. The FINANCIAL SUMMARY table contains all seven rows: Total Award Amount, Total Anticipated Amount, Total Direct Costs, Total Indirect Costs, F&A Rate (with its base), Cost Share, and Program Income. Every field is either populated from the document or carries a clear absent-value placeholder — accept ANY of \"Not specified\", \"Not specified in the document\", \"Not required\", \"Not required (—)\", or \"—\". Do NOT fail on which placeholder variant is used; FAIL only if a field is blank/empty or a required row is dropped.\n"
         },
         {
-          "check_id": "CHK-03",
-          "check_name": "Compliance calendar completeness",
-          "check_type": "completeness",
-          "check_description": "Verify every recurring or fixed deadline mentioned across the document (FFR, progress reports, equipment inventory, audit) appears as a row in compliance_calendar.",
-          "target_fields": [
-            "compliance_framework.compliance_calendar"
-          ],
-          "severity": "warning"
+          "id": "ac-monetary-fain-fidelity",
+          "category": "accuracy",
+          "name": "Monetary and award-number fidelity to source",
+          "description": "Total Award Amount, Total Direct Costs, Total Indirect Costs, each Approved Budget category amount, and the FAIN match the source document EXACTLY — dollar signs, commas, and decimals preserved verbatim, no transposed digits, and no amounts or award numbers that do not appear in the source document. Cross-reference every figure against the source text; any value not grounded there is a hallucination and must FAIL.\n"
+        },
+        {
+          "id": "ac-admin-requirements-coverage",
+          "category": "completeness",
+          "name": "Key administrative requirements coverage",
+          "description": "KEY ADMINISTRATIVE REQUIREMENTS contains the Reporting Requirements table with columns Report Type / Frequency / Due Date or Timing / Submission Method (one row per reporting obligation in the source), plus Prior Approval Required For, Audit Requirements, Record Retention, FFR Requirements (summary), and High-Risk Conditions. Empty categories use the contract defaults (e.g., \"Standard 2 CFR 200.308 prior approvals\", \"None identified\") instead of being omitted.\n"
+        },
+        {
+          "id": "ac-markdown-formatting",
+          "category": "formatting",
+          "name": "Markdown deliverable formatting",
+          "description": "Output is rendered Markdown (NOT a JSON object and NOT wrapped in a JSON/code fence), using bold \"**Label:**\" fields and three correctly headed tables: FINANCIAL SUMMARY (Field | Value), APPROVED BUDGET & RESTRICTIONS (Category | Approved Amount | Restrictions), and Reporting Requirements (Report Type | Frequency | Due Date / Timing | Submission Method). There is no surrounding code fence, no preamble, and no apologetic \"context does not contain\" prose.\n"
+        },
+        {
+          "id": "ac-placeholder-discipline",
+          "category": "content",
+          "name": "Placeholder discipline for absent data",
+          "description": "When a value is genuinely absent from the source, the deliverable uses a clear placeholder rather than inventing data or silently dropping a field. Accept ANY of these equivalent placeholders and do NOT fail on the exact wording: \"Not specified\", \"Not specified in the document\", \"Not required\", \"Not required (—)\", or \"—\". Separately, ONLY when every upstream field was empty must the closing warning line (\"the upstream extraction returned no data ... re-run the workflow\") be present.\n"
         }
       ],
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/award-compliance-extraction/manifest.yaml",
-        "workflow_version": "0.1.1",
+        "workflow_version": "0.2.2",
         "status": "experimental",
         "components": [
           {

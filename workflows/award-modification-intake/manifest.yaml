@@ -1,0 +1,421 @@
+# Authored source for the Award Modification Intake & Classification Vandalizer workflow.
+#
+# The companion award-modification-intake.vandalizer.json is generated from
+# this file by scripts/build_vandalizer_workflows.py and committed alongside.
+# Never hand-edit the generated JSON — update this manifest and rebuild.
+#
+# === Topology (v0.2.0, Variant A + KB injection) ===
+#
+# v0.2.0 changes vs. v0.1.0:
+#   1. Parallel Extraction tasks converted to Prompt tasks.
+#   2. Output contract: RA-friendly Markdown Modification Intake Summary
+#      with type-branching SECTION 2 tables and type-specific SECTION 4
+#      checklists per source consolidation.md.
+#   3. Step 0 KnowledgeBaseQuery added — OMB Uniform Guidance is the
+#      primary KB; agency-specific KBs available for swap.
+#
+# Source workflow's STEP-03 ApprovalNode is still intentionally omitted
+# — operator review of the Markdown deliverable is handled in
+# Vandalizer's UI outside this manifest.
+
+name: Award Modification Intake & Classification
+description: >
+  Uploads a federal award amendment / modification document and returns
+  an RA-friendly Markdown Modification Intake Summary covering
+  modification classification, type-specific key-information tables
+  (additional funds / NCE / PI change / rebudget), compliance &
+  conditions, a type-specific processing checklist, pre-filled VERAS
+  form values, and discrepancies & warnings. Mirrors the source
+  ui-insight/ProcessMapping award-modification-intake consolidation.md
+  conventions — including conditional Section 2 tables driven by the
+  classified modification type and the `[DISCREPANCY: ...]` flag
+  syntax for contradictions between tasks.
+
+workflow_version: 0.2.0
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-05-20
+updated: 2026-05-22
+
+components:
+  - slug: award-modification-intake-udm
+    pinned_version: 0.1.0
+
+validation_plan:
+  - check_id: CHK-01
+    check_name: Modification type classification
+    check_type: completeness
+    check_description: Verify modification_type is one of the seven recognized enum values.
+    target_fields: []
+    severity: error
+  - check_id: CHK-02
+    check_name: Amendment number format
+    check_type: format
+    check_description: Verify amendment_number is present in the Markdown deliverable.
+    target_fields: []
+    severity: error
+  - check_id: CHK-03
+    check_name: Monetary amount preservation
+    check_type: format
+    check_description: Verify monetary amounts preserve the sponsor's exact formatting.
+    target_fields: []
+    severity: error
+  - check_id: CHK-04
+    check_name: Cross-validation flag emission
+    check_type: consistency
+    check_description: >
+      Verify any contradiction between identification / financial /
+      compliance tasks is flagged with the
+      `[DISCREPANCY - Task X states ___ while Task Y states ___]`
+      syntax in SECTION 6.
+    target_fields: []
+    severity: warning
+
+steps:
+  - name: Knowledge Base Context Lookup
+    tasks:
+      - name: kb-context-lookup
+        kind: KnowledgeBaseQuery
+        query: "award modification amendment additional funds no-cost extension NCE PI change rebudget scope change 2 CFR 200.308 prior approval Research Terms and Conditions cumulative total obligated"
+        k: 8
+        knowledge_base_hint:
+          title: "OMB Uniform Guidance (2 CFR 200)"
+          description: >
+            Primary regulatory KB. For NSF modifications, swap in NSF
+            PAPPG Reference. For NIH modifications, swap in NIH Grants
+            Policy Statement.
+
+  - name: Parallel Extraction (Prompt)
+    tasks:
+      - name: extract-modification-type-identification
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are identifying the modification type and extracting
+          core identifiers from a federal award modification /
+          amendment document. You receive the uploaded document AND
+          any KB chunks.
+
+          Be 100% accurate. Quote identifiers verbatim. Use null when
+          absent. Dates use ISO YYYY-MM-DD when unambiguous.
+
+          Emit a JSON object with these keys:
+
+          - award_number: STRING (FAIN or sponsor award number).
+          - amendment_number: STRING (e.g., "Amendment 17", "Mod 003",
+            "L21AC10545-03").
+          - modification_type: one of "Additional Funds",
+            "No-Cost Extension", "PI Change", "Rebudget",
+            "Scope Change", "Administrative Change",
+            "Combined (multiple types)".
+          - classification_evidence: STRING. 2-3 sentence justification
+            for the modification_type choice, quoting document
+            language.
+          - execution_status: one of "Unilateral (fully executed)",
+            "Bilateral (requires signature)",
+            "Not specified in the document".
+          - effective_date: STRING (ISO YYYY-MM-DD or document's
+            wording).
+          - sponsor_name, pi_name: STRING or null.
+          - old_pi, new_pi: STRING (populated ONLY for PI Change /
+            Combined; null otherwise).
+          - new_end_date: STRING (populated ONLY for NCE / Combined;
+            null otherwise).
+          - pms_code: STRING or null.
+          - point_of_contact_changes: STRING or null.
+
+          ## Output
+
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-financial-impact
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are extracting financial impact from a federal award
+          modification document. You receive the uploaded document AND
+          any KB chunks.
+
+          Be 100% accurate. Monetary fields are FLAT STRINGS preserving
+          the document's $X,XXX.XX format. Use null when a field is
+          absent — never invent.
+
+          Emit a JSON object with these keys:
+
+          - modification_amount: STRING ($X). null for non-financial
+            modifications.
+          - current_award_amount: STRING ($X). null when absent.
+          - total_obligated_amount: STRING ($X). null when absent.
+          - fa_rate: STRING (e.g., "30% MTDC"). null when absent.
+          - fa_amount: STRING ($X). null when absent.
+          - budget_breakdown: JSON ARRAY of {category, amount, account_code}
+            objects. Empty when not provided.
+          - rebudget_source_account: STRING. null unless rebudget.
+          - rebudget_destination_account: STRING. null unless rebudget.
+          - rebudget_justification: STRING. Summary of why the rebudget
+            was requested. null unless rebudget.
+          - cost_share_changes: STRING. null when no changes.
+
+          ## Output
+
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-compliance-requirements
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are extracting compliance requirements from a federal
+          award modification document. You receive the uploaded
+          document AND any KB chunks.
+
+          Be 100% accurate. Booleans are JSON booleans, not strings.
+
+          Emit a JSON object with these keys:
+
+          - prior_approval_required: BOOLEAN.
+          - approval_date: STRING (ISO YYYY-MM-DD). null when absent.
+          - sponsor_conditions: JSON ARRAY of STRINGS. Empty when none.
+          - regulatory_references: JSON ARRAY of STRINGS (e.g.,
+            "2 CFR 200.308", "NSF PAPPG VI.D"). Empty when none.
+          - end_date_change: BOOLEAN.
+          - requires_financial_unit: BOOLEAN. Rule: true for
+            Additional Funds and NCE; false for Rebudget and most
+            Administrative Changes. Decide from the document.
+          - ibc_protocols_required: BOOLEAN or null (null when
+            biosafety not addressed).
+
+          ## Output
+
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+  - name: Consolidation (Markdown deliverable)
+    is_output: true
+    tasks:
+      - name: award-modification-intake-consolidation
+        kind: Prompt
+        input_source: step_input
+        prompt_inline: |
+          You are the consolidation step of the Award Modification
+          Intake & Classification workflow. You receive THREE JSON
+          fragments (identification + financial + compliance).
+
+          Cross-validate the three fragments. When values contradict
+          across tasks, do NOT alter them — flag the contradiction
+          with the `[DISCREPANCY: Task X states ___ while Task Y
+          states ___]` syntax in SECTION 6. For Additional Funds:
+          verify current_award_amount + modification_amount =
+          total_obligated_amount; flag any reconciliation gap.
+
+          Render a single RA-friendly Markdown Modification Intake
+          Summary. Mirrors source consolidation.md exactly.
+
+          ## CRITICAL — ALWAYS RENDER THE DELIVERABLE
+
+          You MUST render the FULL Markdown deliverable structure (every
+          section listed below), EVEN WHEN some fragment fields arrive
+          as null, empty, missing, or sparse. NEVER refuse to render
+          with apologetic prose like "The provided context does not
+          contain the required information." That output is unusable —
+          the operator needs the full structure with placeholders so
+          they can see which fields need to be chased.
+
+          Substitution rules when a field is null or missing:
+          - Required scalar fields: substitute the literal string
+            "Not specified in the document".
+          - Optional table cells: substitute "—" (em dash).
+          - Empty arrays: render the section with its empty-state
+            language already specified below (e.g., "No items identified",
+            "Defers to federal defaults", "None identified beyond
+            standard federal requirements").
+
+          If EVERY field across ALL upstream fragments is null (which
+          means the document genuinely contained nothing extractable
+          OR the document was not attached to the run), STILL render
+          the full Markdown structure with "Not specified in the
+          document" placeholders throughout, AND append a single line
+          at the very end of the deliverable:
+
+          > ⚠️ The upstream extraction returned no data from the
+          > uploaded document. Verify the document was attached and
+          > re-run the workflow.
+
+          ## Required structure (in this exact order)
+
+          # Modification Intake Summary: <award_number> / <amendment_number>
+
+          ### SECTION 1: MODIFICATION CLASSIFICATION
+
+          - **Modification Type:** <modification_type>
+          - **Classification Evidence:** <classification_evidence>
+          - **Award Number:** <award_number>
+          - **Amendment Number:** <amendment_number>
+          - **Execution Status:** <execution_status>
+
+          ---
+
+          ### SECTION 2: KEY INFORMATION BY TYPE
+
+          Render the Section 2 table CONDITIONAL on modification_type.
+          ONLY emit the table(s) matching the classified type. If
+          modification_type is "Combined (multiple types)", emit the
+          tables for each component type.
+
+          **If modification_type is "Additional Funds":**
+
+          | Field | Value |
+          |---|---|
+          | Modification Amount | <modification_amount> |
+          | Current Award Amount | <current_award_amount> |
+          | Total Obligated | <total_obligated_amount> |
+          | F&A Rate | <fa_rate> |
+          | F&A Amount | <fa_amount> |
+
+          Followed by a Budget Breakdown sub-table if `budget_breakdown`
+          is non-empty.
+
+          **If modification_type is "No-Cost Extension":**
+
+          | Field | Value |
+          |---|---|
+          | New End Date | <new_end_date> |
+          | Effective Date | <effective_date> |
+          | Financial Impact | None |
+
+          **If modification_type is "PI Change":**
+
+          | Field | Value |
+          |---|---|
+          | Old PI | <old_pi> |
+          | New PI | <new_pi> |
+          | Financial Impact | None |
+
+          **If modification_type is "Rebudget":**
+
+          | Field | Value |
+          |---|---|
+          | Rebudget Amount | <modification_amount> |
+          | Source Account | <rebudget_source_account> |
+          | Destination Account | <rebudget_destination_account> |
+          | Justification | <rebudget_justification> |
+
+          ---
+
+          ### SECTION 3: COMPLIANCE & CONDITIONS
+
+          - **Prior Approval Required:** <Yes / No>
+          - **Approval Date:** <approval_date or "Not specified">
+          - **End Date Change:** <Yes / No>
+          - **Requires Financial Unit Processing:** <Yes / No>
+          - **IBC Protocols Required:** <Yes / No / Not specified>
+
+          **Sponsor Conditions:**
+          - <bulleted list from sponsor_conditions, or "None specified">
+
+          **Regulatory References:**
+          - <bulleted list from regulatory_references, or "2 CFR 200.308 (federal default)">
+
+          ---
+
+          ### SECTION 4: PROCESSING CHECKLIST
+
+          Emit the type-specific checklist matching the classified
+          modification_type (use GitHub-style `- [ ]` syntax).
+
+          **Additional Funds Checklist:**
+          - [ ] Verify cumulative amounts match (Current + Mod = Total)
+          - [ ] Enter amendment details in VERAS mod processing form
+          - [ ] Enter funding amounts and F&A rate
+          - [ ] Enter budget by account category
+          - [ ] Create journal entry in Banner (FGAJVCD)
+          - [ ] Record journal number in mod form
+          - [ ] Enter journal line item sequences
+          - [ ] Verify journal in FGISUM
+          - [ ] Update FOI text in Banner
+          - [ ] Update current and cumulative amounts in Banner
+          - [ ] Send correspondence to PI and DGAs
+          - [ ] Forward to Financial Unit
+
+          **NCE Checklist:**
+          - [ ] Upload fully executed agreement to VERAS
+          - [ ] Enter amendment details in mod processing form
+          - [ ] Check PMS code in Banner
+          - [ ] Extract and enter new end date
+          - [ ] Update end dates in Banner (main + billing tab)
+          - [ ] Update FOI text in Banner
+          - [ ] Send correspondence to PI and DGAs
+          - [ ] Reassign task to Financial Unit
+
+          **PI Change Checklist:**
+          - [ ] Verify amendment details (old/new PI)
+          - [ ] Record sponsor approval details in SPAR form
+          - [ ] Remove old PI in Banner (code 099)
+          - [ ] Insert new PI in Banner (code 001)
+          - [ ] Update PI on Banner main page
+          - [ ] Update FOI text in Banner
+          - [ ] Send correspondence to new PI and DGAs (remove financial info from template)
+          - [ ] Update submission outcome
+
+          **Rebudget Checklist:**
+          - [ ] Upload sponsor approval to VERAS
+          - [ ] Open SPAR form, enter details
+          - [ ] Look up index in Banner FDM MACKEY
+          - [ ] Verify budget accounts (source and destination)
+          - [ ] Create journal entry in Banner (BDGJ)
+          - [ ] Enter debit line (source account, negative amount)
+          - [ ] Enter credit line (destination account, positive amount)
+          - [ ] Record journal number in SPAR form
+          - [ ] Send correspondence to PI and DGAs
+          - [ ] Reset project status to Active (no Financial Unit handoff)
+
+          ---
+
+          ### SECTION 5: PRE-FILLED FORM VALUES
+
+          For direct entry into the VERAS mod processing form (note:
+          VERAS does NOT accept commas in numeric fields):
+
+          - **Date Processed:** <today's date or effective_date>
+          - **Amendment Number:** <amendment_number>
+          - **Amendment Type:** <modification_type>
+          - **PMS Code:** <pms_code or "N/A">
+          - **Modification Amount (no commas):** <modification_amount with commas stripped, or "N/A">
+          - **Current Award Amount (no commas):** <current_award_amount with commas stripped, or "N/A">
+          - **Total Obligated (no commas):** <total_obligated_amount with commas stripped, or "N/A">
+
+          ---
+
+          ### SECTION 6: DISCREPANCIES & WARNINGS
+
+          Bulleted list of:
+          - Any cross-task contradictions in the
+            `[DISCREPANCY: Task X states ___ while Task Y states ___]`
+            format.
+          - Any reconciliation gaps (Additional Funds where
+            current + mod ≠ total).
+          - Missing required information.
+          - Items requiring specialist attention.
+
+          If none, state "No discrepancies or warnings identified."
+
+          ## Rendering rules
+
+          - Conditional Section 2 tables — only emit table(s) matching
+            the classified type. Combined modifications emit multiple.
+          - Bold every label with `**Label:**`.
+          - Use literal "- [ ]" task-list syntax for SECTION 4
+            checkboxes.
+          - Strip commas from numeric fields ONLY in SECTION 5 (VERAS
+            field-entry constraint).
+          - If any field arrives as a nested JSON object, REWRITE into
+            prose / table.
+          - No JSON code fences around the output.
+
+evals:
+  workflow_local: true

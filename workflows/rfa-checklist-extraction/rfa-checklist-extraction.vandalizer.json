@@ -2,328 +2,119 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-04-24T00:00:00+00:00",
+  "exported_at": "2026-05-22T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
       "name": "RFA Checklist Extraction",
-      "description": "Uploads a federal funding announcement (RFA, FOA, NOFO, or program solicitation) and returns a single structured JSON object covering the eight checklist sections a pre-award office uses when triaging a new opportunity: dates and deadlines, eligible institutions, eligible individuals, award information, required and optional application components, budget requirements and policies, submission details, special requirements, and important notes. Output conforms to the rfa-checklist-extraction-udm component schema. The runtime mirrors the ui-insight/ProcessMapping rfa-checklist-extraction workflow: six parallel Extraction tasks (one per logical section) plus a seventh metadata Extraction for opportunity scalars, followed by a single Consolidation Prompt that emits the schema-conformant JSON.",
+      "description": "Uploads a federal funding announcement (RFA, FOA, NOFO, or program solicitation) and returns a single RA-friendly Markdown checklist organized in the eight pre-award sections a sponsored-programs analyst uses when triaging an opportunity: Dates & Deadlines, Eligibility, Award Information, Application Components, Budget Requirements & Policies, Submission Details, Special Requirements, and Important Notes. The pipeline runs seven parallel Prompt tasks (each emitting a JSON fragment for its block) plus a Consolidation Prompt that renders the final Markdown checklist with strict de-duplication. Mirrors the ui-insight/ProcessMapping rfa-checklist-extraction workflow's eight consolidated sections and placement contract.",
       "steps": [
         {
-          "name": "Parallel Extraction",
+          "name": "Knowledge Base Context Lookup",
           "data": {},
           "is_output": false,
           "tasks": [
             {
-              "name": "Extraction",
+              "name": "KnowledgeBaseQuery",
               "data": {
-                "name": "extract-opportunity-metadata",
-                "prompt": "You are extracting the scalar opportunity metadata fields from a\nfederal funding announcement (RFA / FOA / NOFO / program\nsolicitation). For each searchset item, return the value exactly as\nstated in the document. Use null when a field is not present —\nnever invent values.\n\n- rfa_id: combine sponsor code and opportunity number when both\n  exist (e.g., \"NSF-26-508\", \"NIH-PA-24-246\", \"DOE-DE-FOA-0003117\");\n  null otherwise.\n- rfa_number: the sponsor's announcement number without agency\n  prefix (e.g., \"26-508\", \"PA-24-246\", \"DE-FOA-0003117\").\n- rfa_title: the full title including any track or component\n  designation.\n- sponsor_name: the full name of the lead sponsoring agency\n  (e.g., \"National Science Foundation\"); never an abbreviation.\n- program_code: the sponsor's internal program or division code\n  (e.g., \"NSF/TIP/ITE\"); null if not stated.\n- announcement_url: the canonical announcement URL on the\n  sponsor's site; null if not present.\n- opportunity_number: the Grants.gov or portal opportunity ID\n  when distinct from rfa_number; null otherwise.\n- cfda_number: the CFDA / Assistance Listing number(s); when\n  multiple, comma-separate (e.g., \"47.070, 47.076\").",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "RFA Opportunity Metadata",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Combined sponsor-prefixed RFA identifier (e.g., NSF-26-508)",
-                      "searchtype": "extraction",
-                      "title": "rfa_id",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Sponsor's announcement number without agency prefix (e.g., 26-508)",
-                      "searchtype": "extraction",
-                      "title": "rfa_number",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Full title of the funding opportunity, including any track or component designation",
-                      "searchtype": "extraction",
-                      "title": "rfa_title",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Full name of the lead sponsoring agency",
-                      "searchtype": "extraction",
-                      "title": "sponsor_name",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Sponsor's internal program or division code (e.g., NSF/TIP/ITE)",
-                      "searchtype": "extraction",
-                      "title": "program_code",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Canonical URL of the announcement on the sponsor's site",
-                      "searchtype": "extraction",
-                      "title": "announcement_url",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Grants.gov or portal opportunity ID when distinct from the announcement number",
-                      "searchtype": "extraction",
-                      "title": "opportunity_number",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "CFDA / Assistance Listing number(s)",
-                      "searchtype": "extraction",
-                      "title": "cfda_number",
-                      "is_optional": true,
-                      "enum_values": []
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Extraction",
-              "data": {
-                "name": "extract-dates-and-deadlines",
-                "prompt": "You are extracting the DATES & DEADLINES section of a federal\nfunding announcement. Return a JSON array under the\n`dates_and_deadlines` field where each entry is\n`{item, date_time, notes}`:\n\n- item: the event label exactly as stated (e.g., \"Letter of\n  Intent Due\", \"Full Proposal Deadline\", \"Award Notification\").\n- date_time: full date plus any time and timezone as published\n  (e.g., \"2026-09-15 5:00 PM ET\", \"2026-10-01\", \"Rolling\").\n  Preserve the sponsor's granularity — do not invent precision.\n- notes: conditions, round identifiers, or clarifications\n  attached to this date (e.g., \"Track 1 only\"); null when none.\n\nInclude every unique date or time-bound event, chronologically.\nFor multi-round solicitations, include every round's LOI,\npre-proposal, and full proposal deadlines.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "RFA Dates and Deadlines",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "All dates and deadlines as a JSON array of {item, date_time, notes} objects",
-                      "searchtype": "extraction",
-                      "title": "dates_and_deadlines",
-                      "is_optional": false,
-                      "enum_values": []
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Extraction",
-              "data": {
-                "name": "extract-eligible-institutions",
-                "prompt": "You are extracting the ELIGIBLE INSTITUTIONS subsection. Return a\nJSON array under the `eligible_institutions` field where each\nentry is `{type, subcategory, examples, compliance_requirements}`:\n\n- type: institution category as stated (e.g., \"Institutions of\n  Higher Education\", \"Nonprofit Organizations Other Than IHEs\",\n  \"Small Businesses\").\n- subcategory: more specific classification when given (e.g.,\n  \"R1 research universities\", \"HBCUs\"); null otherwise.\n- examples: short comma-separated examples the sponsor supplies;\n  null when none.\n- compliance_requirements: institutional prerequisites\n  (SAM.gov registration, domestic-only, A-133 audit status);\n  null when none. Do NOT put PI-level rules here.\n\nThe array MUST be non-empty. If truly nothing is stated, emit a\nsingle entry with type \"Not specified in this document\".",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "RFA Eligible Institutions",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Eligible institutions as a JSON array of {type, subcategory, examples, compliance_requirements} objects",
-                      "searchtype": "extraction",
-                      "title": "eligible_institutions",
-                      "is_optional": false,
-                      "enum_values": []
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Extraction",
-              "data": {
-                "name": "extract-eligible-individuals",
-                "prompt": "You are extracting the ELIGIBLE INDIVIDUALS subsection. Return a\nJSON array under the `eligible_individuals` field where each\nentry is `{type, criteria, compliance_requirements, conditions}`:\n\n- type: individual eligibility category (e.g., \"Principal\n  Investigator\", \"Early-Career Investigator\", \"Co-Investigator\").\n- criteria: qualifying criteria (degree, career stage,\n  appointment type, citizenship); null when none.\n- compliance_requirements: ORCID, mentoring plans, or other PI\n  compliance items; null when none.\n- conditions: restrictions, limits, or preferences (e.g.,\n  \"One nomination per institution\", \"Not eligible if prior\n  RFA-awarded\"); null when none.\n\nThe array MUST be non-empty. If truly nothing is stated, emit a\nsingle entry with type \"Not specified in this document\".",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "RFA Eligible Individuals",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Eligible individuals as a JSON array of {type, criteria, compliance_requirements, conditions} objects",
-                      "searchtype": "extraction",
-                      "title": "eligible_individuals",
-                      "is_optional": false,
-                      "enum_values": []
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Extraction",
-              "data": {
-                "name": "extract-award-information",
-                "prompt": "You are extracting the AWARD INFORMATION section. This section is\nthe SOLE location for primary award parameters — do NOT capture\ndetailed financial rules here (those belong to budget extraction).\n\nReturn values for each searchset item:\n- award_duration: anticipated duration as stated (e.g., \"3 years\",\n  \"Up to 5 years with option for 2-year extension\").\n- amount_per_award: per-award amount including whether the figure\n  is total-costs or direct-costs and any restrictions bundled\n  into the headline number (e.g., \"$500,000 total costs\n  including indirect\", \"$250,000 direct costs per year\").\n- number_of_awards: anticipated count as stated (e.g., \"10-15\",\n  \"Subject to availability of funds\"); null only when truly\n  absent.\n- anticipated_award_date: as stated; ISO date when given,\n  otherwise free text (e.g., \"Spring 2027\"); null when absent.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "RFA Award Information",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Anticipated award duration",
-                      "searchtype": "extraction",
-                      "title": "award_duration",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Amount per award including matching, indirect, and restrictions",
-                      "searchtype": "extraction",
-                      "title": "amount_per_award",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Anticipated number of awards",
-                      "searchtype": "extraction",
-                      "title": "number_of_awards",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Anticipated award date",
-                      "searchtype": "extraction",
-                      "title": "anticipated_award_date",
-                      "is_optional": true,
-                      "enum_values": []
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Extraction",
-              "data": {
-                "name": "extract-application-components",
-                "prompt": "You are extracting the APPLICATION COMPONENTS, SUBMISSION\nDETAILS, and SPECIAL REQUIREMENTS sections. Page limits, font\nand margin rules, template names, and naming conventions live\non the individual component (in special_requirements).\nSubmission mechanics — portal, file format, upload method —\nlive in submission_details, not on individual components.\n\nReturn values for each searchset item:\n- required_components: JSON array of {name, description,\n  special_requirements} objects. MUST be non-empty; emit a\n  single \"Not specified in this document\" entry only when truly\n  absent.\n- optional_components: JSON array with the same shape; [] when\n  none.\n- submission_details: a single coherent paragraph covering\n  submission method / portal, technical and file-format\n  requirements, file-naming conventions, and collaboration\n  rules; null only when the announcement contains no submission\n  guidance at all.\n- special_requirements: JSON array of unique RFA aspects that\n  do not fit any other section (conference travel obligations,\n  data-sharing commitments beyond federal defaults, workshop\n  participation); [] when none.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "RFA Application Components, Submission, and Special Requirements",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Required application components as a JSON array of {name, description, special_requirements} objects",
-                      "searchtype": "extraction",
-                      "title": "required_components",
-                      "is_optional": false,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Optional application components as a JSON array of {name, description, special_requirements} objects",
-                      "searchtype": "extraction",
-                      "title": "optional_components",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Submission method, portal, file-format requirements, naming conventions, and collaboration rules as a paragraph",
-                      "searchtype": "extraction",
-                      "title": "submission_details",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Special RFA requirements as a JSON array of strings",
-                      "searchtype": "extraction",
-                      "title": "special_requirements",
-                      "is_optional": true,
-                      "enum_values": []
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Extraction",
-              "data": {
-                "name": "extract-budget-requirements",
-                "prompt": "You are extracting the BUDGET REQUIREMENTS & POLICIES section.\nThis section is the SOLE location for detailed financial rules —\ndo NOT restate award amount or duration here.\n\nReturn values for each searchset item:\n- funding_limits: program-wide or per-year caps and category\n  limits not already covered by amount_per_award; null when\n  absent.\n- cost_sharing_status: one of \"Required\", \"Voluntary\",\n  \"Prohibited\", \"Not Specified\" (the four-value enum).\n- cost_sharing_details: type (cash / in-kind / third-party),\n  rate, calculation basis, documentation, source restrictions;\n  null when status is \"Prohibited\" or \"Not Specified\". Quote\n  the sponsor's language when status is \"Required\" or\n  \"Voluntary\".\n- fa_policy: indirect-cost rate, base (MTDC / TDC / S&W),\n  excluded categories, documentation; null when absent.\n- allowable_costs: JSON array of categories the sponsor\n  EXPLICITLY enumerates as allowable; [] when the announcement\n  simply defers to federal defaults.\n- unallowable_costs: JSON array of categories the sponsor\n  EXPLICITLY enumerates as unallowable; [] when none.\n- personnel_effort: PI / key-personnel effort floor or ceiling,\n  salary caps, student / postdoc support, consultant limits;\n  null when absent.\n- other_considerations: pre-award costs, program income,\n  budget revisions, sponsor-specific budget forms; null when\n  absent.\n\nQuote the sponsor's language verbatim for cost-sharing\n(when status is anything other than Not Specified), salary\ncaps, and unallowable-cost language.",
-                "input_source": "workflow_documents",
-                "_embedded_search_set": {
-                  "title": "RFA Budget Requirements and Policies",
-                  "extraction_config": {},
-                  "domain": "research-administration",
-                  "cross_field_rules": [],
-                  "items": [
-                    {
-                      "searchphrase": "Total program funding, per-year caps, and category-specific limits not already covered by amount_per_award",
-                      "searchtype": "extraction",
-                      "title": "funding_limits",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Cost-sharing requirement status (Required, Voluntary, Prohibited, or Not Specified)",
-                      "searchtype": "extraction",
-                      "title": "cost_sharing_status",
-                      "is_optional": false,
-                      "enum_values": [
-                        "Required",
-                        "Voluntary",
-                        "Prohibited",
-                        "Not Specified"
-                      ]
-                    },
-                    {
-                      "searchphrase": "Cost-sharing details — type, rate, calculation basis, documentation, source restrictions",
-                      "searchtype": "extraction",
-                      "title": "cost_sharing_details",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "F&A / indirect cost policy — rate, base (MTDC / TDC / S&W), excluded categories, documentation",
-                      "searchtype": "extraction",
-                      "title": "fa_policy",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Categories explicitly called out as allowable, as a JSON array of strings",
-                      "searchtype": "extraction",
-                      "title": "allowable_costs",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Categories explicitly called out as unallowable, as a JSON array of strings",
-                      "searchtype": "extraction",
-                      "title": "unallowable_costs",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "PI / key personnel effort requirements, salary caps, student and postdoc support",
-                      "searchtype": "extraction",
-                      "title": "personnel_effort",
-                      "is_optional": true,
-                      "enum_values": []
-                    },
-                    {
-                      "searchphrase": "Pre-award costs, program income, budget revisions, sponsor-specific budget forms",
-                      "searchtype": "extraction",
-                      "title": "other_considerations",
-                      "is_optional": true,
-                      "enum_values": []
-                    }
-                  ]
+                "name": "kb-context-lookup",
+                "kb_uuid": "",
+                "query": "RFA FOA NOFO eligibility budget cost sharing F&A indirect cost rates allowable unallowable personnel effort submission deadlines compliance requirements Uniform Guidance",
+                "k": 8,
+                "_embedded_knowledge_base": {
+                  "title": "OMB Uniform Guidance (2 CFR 200)",
+                  "description": "Primary regulatory KB for federal funding announcement interpretation. The KnowledgeBaseQueryNode runs against this KB and returns the top-8 chunks matching the query above. Downstream parallel extraction tasks read both the KB chunks (via step_input) and the uploaded RFA PDF (via workflow_documents) into their LLM context. When the operator does not attach a KB in Vandalizer's UI, this step returns empty output gracefully and the parallel tasks fall back to reading just the PDF. The operator can alternatively swap in an agency-specific KB (NSF PAPPG Reference, NIH Grants Policy Statement, DOE Financial Assistance Rules, DOD Research Funding & DFARS) when the RFA's sponsor calls for one."
                 }
               }
             }
           ]
         },
         {
-          "name": "Consolidation",
+          "name": "Parallel Extraction (Prompt)",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-opportunity-metadata",
+                "prompt": "You are extracting the scalar OPPORTUNITY METADATA from a\nfederal funding announcement (RFA / FOA / NOFO / program\nsolicitation). You receive the full uploaded document as your\ncontext. Read the entire document — cover page, header,\nprogram description, sponsor information, instructions.\n\nExtract these fields. Quote the document for every value;\nnever invent. Use null when the document does not state a\nvalue.\n\n- rfa_id: Combined sponsor-prefixed RFA identifier when both\n  a sponsor code and opportunity number exist (e.g.,\n  \"NSF-26-508\", \"NIH-PA-24-246\", \"DOE-DE-FOA-0003117\"). null\n  otherwise.\n- rfa_number: The sponsor's announcement number without\n  agency prefix (e.g., \"26-508\", \"PA-24-246\",\n  \"DE-FOA-0003117\").\n- rfa_title: Full title of the funding opportunity, including\n  any track or component designation. Required.\n- sponsor_name: Full name of the lead sponsoring agency\n  (e.g., \"National Science Foundation\"); never an\n  abbreviation. Required.\n- program_code: Sponsor's internal program or division code\n  (e.g., \"NSF/TIP/ITE\"); null if not stated.\n- announcement_url: Canonical URL of the announcement on the\n  sponsor's site; null if not present.\n- opportunity_number: Grants.gov or portal opportunity ID\n  when distinct from rfa_number; null otherwise.\n- cfda_number: CFDA / Assistance Listing number(s); when\n  multiple, comma-separate (e.g., \"47.070, 47.076\").\n\n## Output\n\nEmit exactly one JSON object with these eight keys. No\npreamble, no closing commentary, no markdown fences. Example\nshape:\n\n{\n  \"rfa_id\": \"NSF-26-508\",\n  \"rfa_number\": \"26-508\",\n  \"rfa_title\": \"Mid-Scale Research Infrastructure-2 (Mid-scale RI-2)\",\n  \"sponsor_name\": \"National Science Foundation\",\n  \"program_code\": \"NSF/TIP\",\n  \"announcement_url\": \"https://www.nsf.gov/funding/...\",\n  \"opportunity_number\": null,\n  \"cfda_number\": \"47.083\"\n}",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-dates-and-deadlines",
+                "prompt": "You are extracting the DATES & DEADLINES block of a federal\nfunding announcement. You receive the full uploaded document\nas your context. Search every section of the document\nincluding the main body, appendices, footnotes, sidebar\ncallouts.\n\nExtract every unique date or time-bound event in the\nannouncement. For multi-round solicitations include every\nround's LOI, pre-proposal, and full proposal deadlines.\n\nFor each date emit an object with these three keys:\n\n- item: The event label exactly as stated in the document\n  (e.g., \"Letter of Intent Due\", \"Full Proposal Deadline\",\n  \"Award Notification\"). Required.\n- date_time: Full date plus any time and timezone as\n  published (e.g., \"2026-09-15 5:00 PM ET\", \"2026-10-01\",\n  \"Rolling\"). Preserve the sponsor's granularity exactly. Do\n  not invent precision. Required.\n- notes: Any conditions, round identifiers, or clarifications\n  attached to this date (e.g., \"Track 1 only\", \"Optional but\n  encouraged\"). null when none.\n\n## Output\n\nEmit exactly one JSON object with one key,\n`dates_and_deadlines`, whose value is a JSON array of date\nobjects sorted chronologically. No preamble, no markdown\nfences. Example:\n\n{\n  \"dates_and_deadlines\": [\n    {\"item\": \"Letter of Intent Due\", \"date_time\": \"2026-08-01 5:00 PM ET\", \"notes\": \"Required for full proposal eligibility\"},\n    {\"item\": \"Full Proposal Deadline\", \"date_time\": \"2026-10-15 5:00 PM ET\", \"notes\": null}\n  ]\n}",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-eligible-institutions",
+                "prompt": "You are extracting the ELIGIBLE INSTITUTIONS subsection of a\nfederal funding announcement. You receive the full uploaded\ndocument as your context. Read the eligibility section, any\nappendix or attached eligibility guidance, and any sponsor\nterms-and-conditions referenced inline.\n\nList every distinct institution category the sponsor names.\nPut institutional prerequisites (SAM.gov registration,\ndomestic-only restrictions, A-133 audit status) in\ncompliance_requirements. Do NOT put PI-level rules here —\nthose belong to extract-eligible-individuals.\n\nFor each institution category emit an object with these four\nkeys:\n\n- type: Institution category label as stated (e.g.,\n  \"Institutions of Higher Education\", \"Nonprofit\n  Organizations Other Than Institutions of Higher Education\",\n  \"Small Businesses\"). Required.\n- subcategory: More specific classification when given (e.g.,\n  \"R1 research universities\", \"HBCUs\", \"EPSCoR-eligible\").\n  null when the type has no subcategorization.\n- examples: Sponsor-supplied examples that illustrate the\n  category, as a short comma-separated list. null when the\n  announcement gives none.\n- compliance_requirements: Registrations, certifications, or\n  institutional prerequisites attached to this type. null\n  when no institutional compliance terms are attached.\n\n## Output\n\nEmit exactly one JSON object with one key,\n`eligible_institutions`, whose value is a JSON array. MUST\nbe non-empty — if truly nothing is stated, emit a single\nentry with type \"Not specified in this document\". No\npreamble, no markdown fences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-eligible-individuals",
+                "prompt": "You are extracting the ELIGIBLE INDIVIDUALS subsection of a\nfederal funding announcement. You receive the full uploaded\ndocument as your context. Read the eligibility section and\nany PI-eligibility appendix.\n\nList every distinct PI / Co-PI / Senior Key Personnel\ncategory the sponsor names. Include citizenship,\ncareer-stage, degree, appointment type, and prior-award\nrestrictions in criteria or conditions. Limits like \"one\nnomination per institution\" belong to conditions here, not\nin Special Requirements.\n\nFor each individual category emit an object with these four\nkeys:\n\n- type: Individual eligibility category (e.g., \"Principal\n  Investigator\", \"Early-Career Investigator\",\n  \"Co-Investigator\"). Required.\n- criteria: Qualifying criteria (degree, career stage,\n  appointment type, citizenship); null when none.\n- compliance_requirements: ORCID, mentoring plans, or other\n  PI compliance items; null when none.\n- conditions: Restrictions, limits, or preferences (e.g.,\n  \"One nomination per institution\", \"Not eligible if prior\n  RFA-awarded\"); null when none.\n\n## Output\n\nEmit exactly one JSON object with one key,\n`eligible_individuals`, whose value is a JSON array. MUST be\nnon-empty — if truly nothing is stated, emit a single entry\nwith type \"Not specified in this document\". No preamble, no\nmarkdown fences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-award-information",
+                "prompt": "You are extracting the AWARD INFORMATION block of a federal\nfunding announcement. You receive the full uploaded document\nas your context. Read the award-information section, program\ndescription, and any appendix that states funding amounts.\n\nThis block is the SOLE location for primary award parameters\nin the final deliverable — do NOT capture detailed financial\nrules (those belong to extract-budget-requirements).\n\nExtract these four fields:\n\n- award_duration: Anticipated duration as stated (e.g.,\n  \"3 years\", \"Up to 5 years with option for 2-year\n  extension\"). Required.\n- amount_per_award: Per-award amount including whether the\n  figure is total-costs or direct-costs and any restrictions\n  bundled into the headline number (e.g., \"$500,000 total\n  costs including indirect\", \"$250,000 direct costs per\n  year\"). Preserve the sponsor's exact formatting (dollar\n  sign, commas, basis annotation). Required.\n- number_of_awards: Anticipated count as stated (e.g.,\n  \"10-15\", \"Subject to availability of funds\"). null only\n  when truly absent.\n- anticipated_award_date: As stated; ISO YYYY-MM-DD when\n  given, otherwise free text (e.g., \"Spring 2027\"). null\n  when absent.\n\n## Output\n\nEmit exactly one JSON object with these four keys. No\npreamble, no markdown fences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-application-components",
+                "prompt": "You are extracting the APPLICATION COMPONENTS, SUBMISSION\nDETAILS, and SPECIAL REQUIREMENTS blocks of a federal\nfunding announcement. You receive the full uploaded document\nas your context. Read every section that describes what to\nsubmit and how to submit it.\n\nPage limits, font and margin rules, template names, and\nnaming conventions live on the INDIVIDUAL component (in\nspecial_requirements for that component). Submission\nmechanics — portal, file format, upload method — live in\nsubmission_details, NOT on individual components.\n\nExtract these four fields:\n\n- required_components: JSON array of {name, description,\n  special_requirements} objects, one per required proposal\n  component. MUST be non-empty.\n  - name: Component name as stated (e.g., \"Project\n    Description\", \"Biographical Sketch\", \"Data Management\n    Plan\"). Required.\n  - description: What the component must contain, in the\n    sponsor's own terms. Required.\n  - special_requirements: Page limits, font/margin rules,\n    template requirements, or naming conventions specific to\n    this component. null when none.\n- optional_components: Same item shape as\n  required_components; empty array when none.\n- submission_details: A single coherent paragraph covering\n  submission method / portal, technical and file-format\n  requirements, file-naming conventions, and collaboration\n  rules. null only when the announcement contains no\n  submission guidance at all.\n- special_requirements: JSON array of strings — unique RFA\n  aspects that do not fit into any other section (conference\n  travel obligations, data-sharing commitments beyond federal\n  defaults, workshop participation). Empty array when none.\n\n## Output\n\nEmit exactly one JSON object with these four keys. No\npreamble, no markdown fences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-budget-requirements",
+                "prompt": "You are extracting the BUDGET REQUIREMENTS & POLICIES block\nof a federal funding announcement. You receive the full\nuploaded document as your context. Read every section that\nstates budget rules, cost principles, and personnel effort\nrequirements.\n\nThis block is the SOLE location for detailed financial rules\nin the final deliverable — do NOT restate award amount or\nduration here (those belong to extract-award-information).\n\nExtract these eight fields. Quote the sponsor's language\nverbatim for cost-sharing status (when not \"Not Specified\"),\nsalary caps, and unallowable-cost categories.\n\nCRITICAL — descriptive fields must be FLAT STRINGS, not\nnested objects. The fields `funding_limits`,\n`cost_sharing_details`, `fa_policy`, `personnel_effort`, and\n`other_considerations` MUST be emitted as single\nnatural-language strings (or null). Do NOT emit them as\nnested JSON objects with sub-keys — the downstream\nConsolidation step renders them verbatim into Markdown, and\nnested JSON appears as literal `{...}` in the final\ndeliverable, which is unreadable. Describe each field as a\nshort paragraph or comma-joined clause.\n\nExample of WRONG output for cost_sharing_details:\n  {\"type\": [\"cash\", \"in-kind\"], \"rate\": \"≥100% of award\",\n   \"documentation\": \"Matching Fund Verification Letter\"}\nExample of CORRECT output for cost_sharing_details:\n  \"Cash and in-kind, matching contributions equal to or\n   greater than the FFAR funding request (≥100% of the FFAR\n   award), with at least 50% of matching funds in cash;\n   documented via Matching Fund Verification Letter(s); must\n   come from non–U.S. Federal entities.\"\n\n- funding_limits: STRING. Program-wide or per-year caps and\n  category-specific limits not already covered by\n  amount_per_award. null when absent.\n- cost_sharing_status: one of \"Required\", \"Voluntary\",\n  \"Prohibited\", \"Not Specified\". Required.\n- cost_sharing_details: STRING (single natural-language\n  paragraph). Type (cash / in-kind / third-party), rate,\n  calculation basis, documentation, source restrictions —\n  all concatenated into one readable sentence or short\n  paragraph. null when status is \"Prohibited\" or \"Not\n  Specified\".\n- fa_policy: STRING (single natural-language paragraph).\n  F&A / indirect cost policy — rate, base (MTDC / TDC / S&W),\n  excluded categories, documentation — concatenated into one\n  readable description. null when absent.\n- allowable_costs: JSON array of CATEGORY-LABEL STRINGS the\n  sponsor EXPLICITLY enumerates as allowable. Empty array\n  when the announcement simply defers to federal defaults.\n- unallowable_costs: JSON array of CATEGORY-LABEL STRINGS\n  the sponsor EXPLICITLY enumerates as unallowable. Empty\n  array when none.\n- personnel_effort: STRING. PI / key-personnel effort floor\n  or ceiling, salary caps, student / postdoc support,\n  consultant limits. null when absent.\n- other_considerations: STRING (single natural-language\n  paragraph). Pre-award costs, program income, budget\n  revisions, sponsor-specific budget forms — concatenated\n  into one readable description. null when\n  absent.\n\n## Output\n\nEmit exactly one JSON object with these eight keys. No\npreamble, no markdown fences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consolidation (Markdown deliverable)",
           "data": {},
           "is_output": true,
           "tasks": [
@@ -331,7 +122,7 @@
               "name": "Prompt",
               "data": {
                 "name": "rfa-checklist-consolidation",
-                "prompt": "You are the consolidation step of the RFA Checklist Extraction\nworkflow. You receive seven extraction outputs from the previous\nstep (opportunity metadata, dates and deadlines, eligible\ninstitutions, eligible individuals, award information,\napplication components, and budget requirements) and must emit\na SINGLE JSON object that validates against the\nrfa-checklist-extraction-udm@0.1.0 schema (schema.json in the\ncomponent directory).\n\n## Output contract\n\nEmit exactly one JSON object. No preamble, no closing\ncommentary, no markdown fences. If your runtime requires fenced\noutput, wrap in a single ```json ... ``` block and emit nothing\noutside it.\n\nThe top-level keys (in this order) are:\n\n```\nrfa_id, rfa_number, rfa_title, sponsor_name, program_code,\nannouncement_url, opportunity_number, cfda_number,\ndates_and_deadlines, eligible_institutions,\neligible_individuals, award_information, required_components,\noptional_components, budget_requirements, submission_details,\nspecial_requirements, important_notes\n```\n\nEvery key in the schema's `required` list MUST appear:\nrfa_title, sponsor_name, dates_and_deadlines,\neligible_institutions, eligible_individuals, award_information,\nrequired_components, optional_components, budget_requirements,\nsubmission_details, special_requirements, important_notes.\n\nArrays with no entries are emitted as `[]`, never `null`,\nEXCEPT eligible_institutions, eligible_individuals, and\nrequired_components which are minItems=1 — if the announcement\ntruly contains nothing, emit a single entry whose primary field\nis \"Not specified in this document\". Optional scalar fields are\n`null` when absent.\n\n## Field-by-field assembly\n\n### Scalar opportunity metadata (from extract-opportunity-metadata)\n\nPass through `rfa_id`, `rfa_number`, `rfa_title`, `sponsor_name`,\n`program_code`, `announcement_url`, `opportunity_number`,\n`cfda_number`. Use null for any value the metadata extractor\nleft blank.\n\n### dates_and_deadlines (from extract-dates-and-deadlines)\n\nPass through the array as-is. Each entry is\n`{item, date_time, notes}`. Sort chronologically when the\nextractor did not.\n\n### eligible_institutions / eligible_individuals\n\nPass through. minItems=1; ensure a \"Not specified in this\ndocument\" placeholder entry if either is empty.\n\n### award_information (from extract-award-information)\n\nBuild the nested object:\n```\n{\n  \"award_duration\": <award_duration>,\n  \"amount_per_award\": <amount_per_award>,\n  \"number_of_awards\": <number_of_awards or null>,\n  \"anticipated_award_date\": <anticipated_award_date or null>\n}\n```\nDo NOT include any cost-sharing, F&A, or personnel-effort\ninformation here, even if the extractor mentioned it.\n\n### required_components / optional_components / submission_details / special_requirements (from extract-application-components)\n\n- required_components: pass through (minItems=1; placeholder\n  entry if empty).\n- optional_components: pass through; [] when none.\n- submission_details: pass through; null when absent.\n- special_requirements: pass through; [] when none.\n\nPage limits, font/margin rules, template names, and naming\nconventions live in the special_requirements field of the\nINDIVIDUAL component, not in the top-level special_requirements\narray. Move any such item that the extractor placed at the top\nlevel back onto the matching component.\n\n### budget_requirements (from extract-budget-requirements)\n\nBuild the nested object, mapping the flat extraction output\ninto the schema's nested cost_sharing object:\n```\n{\n  \"funding_limits\": <funding_limits or null>,\n  \"cost_sharing\": {\n    \"status\": <cost_sharing_status>,\n    \"details\": <cost_sharing_details or null>\n  },\n  \"fa_policy\": <fa_policy or null>,\n  \"allowable_costs\": <allowable_costs or []>,\n  \"unallowable_costs\": <unallowable_costs or []>,\n  \"personnel_effort\": <personnel_effort or null>,\n  \"other_considerations\": <other_considerations or null>\n}\n```\nWhen `cost_sharing.status` is \"Prohibited\" or \"Not Specified\",\nset `cost_sharing.details` to null even if the extractor\nprovided text.\n\n### important_notes (you generate these)\n\nSynthesize 0-5 critical warnings or pitfalls a reviewer would\notherwise miss. Pull from across the seven extractions — not\nfrom the document directly. Examples:\n- \"Coordinate with OSP at least 6 weeks before submission —\n  requires institutional approval\"\n- \"One nomination per institution — selection process must be\n  run internally before the LOI deadline\"\n- \"Cost-sharing is mandatory at 25%; identify match sources at\n  proposal scoping\"\n\nKeep this short. Do NOT use it as an overflow bucket. Emit\n`[]` when no critical warnings rise to this bar.\n\n## Placement contract — the most important rule\n\nEvery fact appears in exactly ONE section:\n- Award amount and duration -> award_information ONLY.\n- Detailed financial rules (cost-sharing, F&A, allowable /\n  unallowable, personnel effort) -> budget_requirements ONLY.\n- Submission mechanics (portal, format, naming) ->\n  submission_details ONLY.\n- Per-component formatting rules -> the component's own\n  special_requirements field, NOT the top-level\n  special_requirements array.\n\nIf you find the same fact in two extraction outputs, choose\nthe canonical location per the rules above and drop it from\nthe other.\n\n## Quality bar\n\n- Output validates against schema.json (draft 2020-12).\n- cost_sharing.status is one of the four enum values.\n- Dates preserve the sponsor's original granularity and\n  timezone.\n- Monetary amounts preserve the sponsor's original formatting\n  (`$`, commas, basis annotation).\n- No fact appears in two top-level sections.",
+                "prompt": "You are the consolidation step of the RFA Checklist\nExtraction workflow. You receive SEVEN JSON object fragments\nfrom the previous step:\n\n1. Opportunity metadata (rfa_id, rfa_number, rfa_title,\n   sponsor_name, program_code, announcement_url,\n   opportunity_number, cfda_number)\n2. Dates and deadlines (array of {item, date_time, notes})\n3. Eligible institutions (array of {type, subcategory,\n   examples, compliance_requirements})\n4. Eligible individuals (array of {type, criteria,\n   compliance_requirements, conditions})\n5. Award information (award_duration, amount_per_award,\n   number_of_awards, anticipated_award_date)\n6. Application components (required_components,\n   optional_components, submission_details,\n   special_requirements)\n7. Budget requirements (funding_limits, cost_sharing_status,\n   cost_sharing_details, fa_policy, allowable_costs,\n   unallowable_costs, personnel_effort, other_considerations)\n\nYour job is to render a single, well-formatted Markdown\nchecklist for the sponsored-programs analyst (the\nend-user). The deliverable is Markdown — NOT a JSON object\nand NOT a JSON code fence. The audience is a research\nadministrator who will copy this into Word, paste into an\nemail to the proposal team, or save to a shared folder.\n\n## CRITICAL — ALWAYS RENDER THE DELIVERABLE\n\nYou MUST render the FULL Markdown deliverable structure (every\nsection listed below), EVEN WHEN some fragment fields arrive\nas null, empty, missing, or sparse. NEVER refuse to render\nwith apologetic prose like \"The provided context does not\ncontain the required information.\" That output is unusable —\nthe operator needs the full structure with placeholders so\nthey can see which fields need to be chased.\n\nSubstitution rules when a field is null or missing:\n- Required scalar fields: substitute the literal string\n  \"Not specified in the document\".\n- Optional table cells: substitute \"—\" (em dash).\n- Empty arrays: render the section with its empty-state\n  language already specified below (e.g., \"No items identified\",\n  \"Defers to federal defaults\", \"None identified beyond\n  standard federal requirements\").\n\nIf EVERY field across ALL upstream fragments is null (which\nmeans the document genuinely contained nothing extractable\nOR the document was not attached to the run), STILL render\nthe full Markdown structure with \"Not specified in the\ndocument\" placeholders throughout, AND append a single line\nat the very end of the deliverable:\n\n> ⚠️ The upstream extraction returned no data from the\n> uploaded document. Verify the document was attached and\n> re-run the workflow.\n\n## Required structure (in this exact order)\n\n# RFA Checklist: <rfa_title>\n\n**Sponsor:** <sponsor_name>\n**RFA ID / Number:** <rfa_id> / <rfa_number>\n**Program Code:** <program_code or \"Not specified\">\n**Announcement URL:** <announcement_url or \"Not specified\">\n**Opportunity Number:** <opportunity_number or \"Not specified\">\n**CFDA Number:** <cfda_number or \"Not specified\">\n\n---\n\n## DATES & DEADLINES\n\nA Markdown table with these three columns and chronologically\nsorted rows:\n\n| Deadline / Event | Date / Time | Notes |\n|---|---|---|\n| (item) | (date_time) | (notes or \"—\") |\n\n---\n\n## ELIGIBILITY\n\n### Eligible Institutions\n\nRender each entry as a bulleted item with the type in\n**bold**. Add sub-bullets ONLY for subcategory, examples, and\ncompliance_requirements WHEN THOSE FIELDS ARE POPULATED in\nthe fragment. Skip any sub-field that is null. If a category\nhas NO non-null sub-fields, render just the bold type with\nno sub-bullets. Example with all sub-fields populated:\n\n- **Institutions of Higher Education**\n  - Subcategory: R1 research universities\n  - Examples: NSF EPSCoR-eligible institutions\n  - Compliance: SAM.gov registration required\n\nExample with no sub-fields populated:\n\n- **Institutions of Higher Education**\n\n### Eligible Individuals\n\nSame bulleted shape — type in **bold** plus sub-bullets for\ncriteria, compliance_requirements, conditions WHEN THOSE\nFIELDS ARE POPULATED. Skip null sub-fields entirely; do NOT\nemit \"Criteria: —\" placeholder lines. Bold key limitations\nlike **one nomination per institution** when they appear.\n\n---\n\n## AWARD INFORMATION\n\nThis is the **sole location** for award parameters. Render as\na definition-style list:\n\n- **Award Duration:** <award_duration>\n- **Amount per Award:** <amount_per_award>\n- **Anticipated Number of Awards:** <number_of_awards or \"Not specified\">\n- **Anticipated Award Date:** <anticipated_award_date or \"Not specified\">\n\nDo NOT include any cost-sharing, F&A, or personnel-effort\ninformation here — that goes in BUDGET REQUIREMENTS &\nPOLICIES.\n\n---\n\n## APPLICATION COMPONENTS\n\n### Required Components\n\nA Markdown table with these three columns. Always present.\n\n| Component Name | Description / Details | Special Requirements |\n|---|---|---|\n\n### Optional Components\n\nSame three-column table. If empty, include a single row:\n\n| Not specified in this document | — | — |\n\n---\n\n## BUDGET REQUIREMENTS & POLICIES\n\nThis is the **sole location** for detailed financial rules.\nRender as a bulleted list with bold labels. CRITICAL — all\nthe descriptive fields (`funding_limits`,\n`cost_sharing_details`, `fa_policy`, `personnel_effort`,\n`other_considerations`) are flat strings emitted by the\nextraction step. Render them as flat prose. If a fragment\narrives as a nested JSON object instead of a string,\nREWRITE it into natural-language prose before emitting —\ndo NOT pass through `{\"key\": \"value\"}` syntax into the\nfinal Markdown.\n\n- **Funding Limits:** <funding_limits prose, or \"Not specified\">\n- **Cost Sharing:** <cost_sharing_status>\n    - When status is \"Required\" or \"Voluntary\", include\n      cost_sharing_details as a natural-language sub-bullet\n      paragraph (NOT as JSON).\n- **F&A / Indirect Cost Policy:** <fa_policy prose, or \"Not specified\">\n- **Allowable Costs:** bulleted list of allowable_costs,\n  or \"Defers to federal defaults\" when the array is empty.\n- **Unallowable Costs:** bulleted list of unallowable_costs,\n  or \"None explicitly enumerated\" when the array is empty.\n- **Personnel Effort:** <personnel_effort prose, or \"Not specified\">\n- **Other Considerations:** <other_considerations prose, or \"—\">\n\n---\n\n## SUBMISSION DETAILS\n\nRender submission_details as a single coherent paragraph. If\nnull, state \"Not specified in the document.\"\n\n---\n\n## SPECIAL REQUIREMENTS\n\nRender special_requirements as a bulleted list. If empty,\nstate \"None identified beyond standard federal requirements.\"\n\n---\n\n## IMPORTANT NOTES\n\nSynthesize 0–5 critical warnings or pitfalls a reviewer would\notherwise miss. Pull from across the seven fragments — not\nfrom the document directly. Render as a bulleted list with\neach item starting with a bold lead like **Coordinate with\nOSP at least 6 weeks before submission** — explanation\nfollows. Keep this short. If no critical warnings rise to\nthis bar, state \"No critical reviewer warnings beyond what\nappears in the sections above.\"\n\n---\n\n## Placement contract (enforce as you render)\n\n1. **Award amount and duration appear ONLY in AWARD\n   INFORMATION.** Even if the budget fragment mentions them,\n   do not restate.\n2. **Detailed financial rules appear ONLY in BUDGET\n   REQUIREMENTS & POLICIES.** Even if the award-info fragment\n   mentions matching or indirect-cost notes, move those rules\n   to budget.\n3. **Per-component formatting rules (page limits, fonts,\n   naming) appear ONLY on the individual component's Special\n   Requirements column** in the APPLICATION COMPONENTS\n   table. Not in the top-level SPECIAL REQUIREMENTS section.\n4. **Submission mechanics (portal, file format, naming)\n   appear ONLY in SUBMISSION DETAILS.**\n\n## Formatting rules\n\n- Preserve the sponsor's monetary formatting verbatim\n  (`$1,234,567`, `$0.5M`, `30% MTDC`).\n- Preserve dates exactly as stated, including time and\n  timezone components.\n- Use `**bold**` for labels and critical action items; use\n  `*italics*` sparingly for warnings.\n- Use `—` (em dash) for empty optional fields in tables;\n  \"Not specified in the document\" for empty required fields.\n- No JSON. No code fences around the output. No preamble. No\n  closing commentary about the rendering. The output is the\n  deliverable — render it as if you were writing the document\n  directly.",
                 "input_source": "step_input"
               }
             }
@@ -344,49 +135,41 @@
       "validation_plan": [
         {
           "check_id": "CHK-01",
-          "check_name": "Date format consistency",
-          "check_type": "format",
-          "check_description": "Verify all dates use consistent format and preserve sponsor granularity.",
-          "target_fields": [
-            "dates_and_deadlines"
-          ],
+          "check_name": "Eight sections present",
+          "check_type": "completeness",
+          "check_description": "Verify the Markdown deliverable contains all eight sections in order (Dates & Deadlines, Eligibility, Award Information, Application Components, Budget Requirements & Policies, Submission Details, Special Requirements, Important Notes).",
+          "target_fields": [],
           "severity": "error"
         },
         {
           "check_id": "CHK-02",
-          "check_name": "Monetary amount validation",
-          "check_type": "format",
-          "check_description": "Verify monetary amounts preserve the sponsor's currency formatting in award_information and budget_requirements.",
-          "target_fields": [
-            "award_information.amount_per_award",
-            "budget_requirements.funding_limits"
-          ],
-          "severity": "error"
-        },
-        {
-          "check_id": "CHK-03",
-          "check_name": "Eligibility criteria completeness",
-          "check_type": "completeness",
-          "check_description": "Verify both institutional and individual eligibility are captured (minItems=1 on each).",
-          "target_fields": [
-            "eligible_institutions",
-            "eligible_individuals"
-          ],
+          "check_name": "Placement contract enforcement",
+          "check_type": "consistency",
+          "check_description": "Verify award amount and duration appear only in the Award Information section, and detailed financial rules only in the Budget Requirements & Policies section.",
+          "target_fields": [],
           "severity": "warning"
         },
         {
-          "check_id": "CHK-04",
-          "check_name": "De-duplication validation",
-          "check_type": "consistency",
-          "check_description": "Ensure award amount and duration appear only in award_information, and detailed financial rules only in budget_requirements.",
+          "check_id": "CHK-03",
+          "check_name": "Monetary amount preservation",
+          "check_type": "format",
+          "check_description": "Verify monetary amounts preserve the sponsor's original currency formatting (dollar signs, commas, basis annotation).",
           "target_fields": [],
-          "severity": "info"
+          "severity": "error"
+        },
+        {
+          "check_id": "CHK-04",
+          "check_name": "Eligibility completeness",
+          "check_type": "completeness",
+          "check_description": "Verify both Eligible Institutions and Eligible Individuals subsections are present and non-empty.",
+          "target_fields": [],
+          "severity": "warning"
         }
       ],
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/rfa-checklist-extraction/manifest.yaml",
-        "workflow_version": "0.2.0",
+        "workflow_version": "0.4.0",
         "status": "experimental",
         "components": [
           {

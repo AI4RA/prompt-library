@@ -1,0 +1,313 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/risk-domain-assessment-udm/schema.json",
+  "title": "Risk Domain Assessment — UDM Output",
+  "description": "JSON contract for an institutional risk profile derived from one or more award documents (Notice of Award, FOA / NOFO / RFA, modification, proposal) using a standardized 14-domain 1-5 rubric. Each domain produces a JSON integer score plus an evidence-cited justification plus domain-specific evidence fields. The consolidator derives aggregate metrics (total / average risk scores, overall risk level, high-risk-domain list, key findings, recommended mitigations). Mirrors the source ui-insight/ProcessMapping risk-domain-assessment workflow's six parallel extraction tasks plus a Consolidation Prompt.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["award_metadata", "domain_scores", "aggregate_metrics"],
+  "$defs": {
+    "domain_score_integer": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "JSON integer score 1-5 inclusive. 1 = minimal risk; 5 = maximum risk. Mirrors the source workflow's Field_Type: Integer; do not encode as a quoted string."
+    },
+    "justification_string": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Evidence-based justification citing specific document sections. When the document is insufficient, format as 'Insufficient document evidence: ...' rather than fabricating a rationale."
+    }
+  },
+  "properties": {
+    "award_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "award_number",
+        "sponsor_name",
+        "pi_name",
+        "award_period_start",
+        "award_period_end"
+      ],
+      "properties": {
+        "award_number": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Federal Award Identification Number (FAIN) or sponsor award number. Required by source workflow. Resolves to UDM Award.Award_Number."
+        },
+        "cfda_number": {
+          "type": ["string", "null"],
+          "description": "CFDA / Assistance Listing number. Resolves to UDM Award.CFDA_Number."
+        },
+        "sponsor_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the sponsoring agency. Required by source workflow. Resolves to UDM Organization.Organization_Name."
+        },
+        "pi_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Principal Investigator / Project Director name. Required by source workflow."
+        },
+        "award_period_start": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Award period of performance start date (ISO YYYY-MM-DD when unambiguous). Required by source workflow. Resolves to UDM Award.Original_Start_Date."
+        },
+        "award_period_end": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Award period of performance end date (ISO YYYY-MM-DD when unambiguous). Required by source workflow. Resolves to UDM Award.Original_End_Date."
+        },
+        "assessment_date": {
+          "type": ["string", "null"],
+          "description": "ISO YYYY-MM-DD date the risk assessment was performed."
+        }
+      }
+    },
+    "domain_scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domain_1_programmatic_complexity",
+        "domain_2_financial_budgetary_risk",
+        "domain_3_subrecipient_partner_risk",
+        "domain_4_research_security",
+        "domain_5_compliance_regulatory",
+        "domain_6_reporting_burden",
+        "domain_7_administrative_burden",
+        "domain_8_audit_risk",
+        "domain_9_strategic_alignment",
+        "domain_10_sustainability_closeout",
+        "domain_11_doj_bulk_data",
+        "domain_12_ip_privacy",
+        "domain_13_unusual_terms",
+        "domain_14_reputational_risk"
+      ],
+      "properties": {
+        "domain_1_programmatic_complexity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "justification", "project_title", "project_description_summary", "technical_sophistication_indicators"],
+          "properties": {
+            "score": {"$ref": "#/$defs/domain_score_integer"},
+            "justification": {"$ref": "#/$defs/justification_string"},
+            "project_title": {"type": "string", "minLength": 1, "description": "Resolves to UDM Award.Award_Title."},
+            "project_description_summary": {"type": "string", "minLength": 1},
+            "number_of_project_components": {"type": ["integer", "null"], "minimum": 0},
+            "partnership_requirements": {"type": ["string", "null"]},
+            "technical_sophistication_indicators": {"type": "array", "items": {"type": "string", "minLength": 1}}
+          }
+        },
+        "domain_2_financial_budgetary_risk": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "justification", "total_federal_funding", "cost_share_required", "idc_rate_restriction", "budget_flexibility_restrictions"],
+          "properties": {
+            "score": {"$ref": "#/$defs/domain_score_integer"},
+            "justification": {"$ref": "#/$defs/justification_string"},
+            "total_federal_funding": {"type": "number", "description": "JSON number, not quoted string. Resolves to UDM Award.Current_Total_Funded."},
+            "total_anticipated_funding": {"type": ["number", "null"], "description": "JSON number. Resolves to UDM Award.Total_Anticipated_Funding."},
+            "cost_share_required": {"type": "boolean", "description": "Resolves to UDM CostShare.Is_Mandatory."},
+            "cost_share_amount": {"type": ["number", "null"], "description": "JSON number. Resolves to UDM CostShare.Committed_Amount."},
+            "idc_rate_restriction": {"type": "string", "minLength": 1, "description": "Resolves to UDM IndirectRate.Rate_Percentage."},
+            "budget_flexibility_restrictions": {"type": "array", "items": {"type": "string", "minLength": 1}},
+            "multiple_funding_streams": {"type": ["boolean", "null"]}
+          }
+        },
+        "domain_3_subrecipient_partner_risk": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "justification", "subrecipient_details"],
+          "properties": {
+            "score": {"$ref": "#/$defs/domain_score_integer"},
+            "justification": {"$ref": "#/$defs/justification_string"},
+            "number_of_subrecipients": {"type": ["integer", "null"], "minimum": 0},
+            "subrecipient_details": {"type": "array", "items": {"type": "string", "minLength": 1}},
+            "foreign_partners_present": {"type": ["boolean", "null"]},
+            "subrecipient_risk_level": {"type": ["string", "null"], "description": "Resolves to UDM Subaward.Risk_Level."},
+            "subrecipient_monitoring_requirements": {"type": ["string", "null"], "description": "Resolves to UDM Subaward.Monitoring_Plan."}
+          }
+        },
+        "domain_4_research_security": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "justification", "foreign_collaboration_indicators"],
+          "properties": {
+            "score": {"$ref": "#/$defs/domain_score_integer"},
+            "justification": {"$ref": "#/$defs/justification_string"},
+            "foreign_collaboration_indicators": {"type": "array", "items": {"type": "string", "minLength": 1}},
+            "export_control_concerns": {"type": ["boolean", "null"]},
+            "nspm33_chips_applicability": {"type": ["string", "null"]}
+          }
+        },
+        "domain_5_compliance_regulatory": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "justification", "compliance_requirements_identified", "cross_cutting_federal_requirements"],
+          "properties": {
+            "score": {"$ref": "#/$defs/domain_score_integer"},
+            "justification": {"$ref": "#/$defs/justification_string"},
+            "compliance_requirements_identified": {"type": "array", "items": {"type": "string", "minLength": 1}},
+            "compliance_requirement_type": {"type": ["string", "null"], "description": "Resolves to UDM ComplianceRequirement.Requirement_Type."},
+            "compliance_risk_level": {"type": ["string", "null"], "description": "Resolves to UDM ComplianceRequirement.Risk_Level."},
+            "cross_cutting_federal_requirements": {"type": "array", "items": {"type": "string", "minLength": 1}}
+          }
+        },
+        "domain_6_reporting_burden": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "justification", "reporting_frequency", "reporting_requirements_detail"],
+          "properties": {
+            "score": {"$ref": "#/$defs/domain_score_integer"},
+            "justification": {"$ref": "#/$defs/justification_string"},
+            "reporting_frequency": {"type": "string", "minLength": 1, "description": "Resolves to UDM Terms.Invoicing_Frequency."},
+            "reporting_requirements_detail": {"type": "string", "minLength": 1, "description": "Resolves to UDM Terms.Reporting_Requirements."},
+            "performance_metrics_complexity": {"type": ["string", "null"]},
+            "evaluator_required": {"type": ["boolean", "null"]},
+            "data_use_agreements_required": {"type": ["boolean", "null"]}
+          }
+        },
+        "domain_7_administrative_burden": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "justification", "prior_approval_requirements", "administrative_complexity_indicators"],
+          "properties": {
+            "score": {"$ref": "#/$defs/domain_score_integer"},
+            "justification": {"$ref": "#/$defs/justification_string"},
+            "prior_approval_requirements": {"type": "array", "items": {"type": "string", "minLength": 1}},
+            "administrative_complexity_indicators": {"type": "array", "items": {"type": "string", "minLength": 1}},
+            "pi_capacity_considerations": {"type": ["string", "null"]}
+          }
+        },
+        "domain_8_audit_risk": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "justification", "audit_exposure_indicators"],
+          "properties": {
+            "score": {"$ref": "#/$defs/domain_score_integer"},
+            "justification": {"$ref": "#/$defs/justification_string"},
+            "pass_through_indicator": {"type": ["boolean", "null"], "description": "Resolves to UDM Award.Flow_Through_Indicator."},
+            "audit_exposure_indicators": {"type": "array", "items": {"type": "string", "minLength": 1}}
+          }
+        },
+        "domain_9_strategic_alignment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "justification", "institutional_resource_requirements"],
+          "properties": {
+            "score": {"$ref": "#/$defs/domain_score_integer"},
+            "justification": {"$ref": "#/$defs/justification_string"},
+            "institutional_mission_fit": {"type": ["string", "null"]},
+            "institutional_resource_requirements": {"type": "array", "items": {"type": "string", "minLength": 1}}
+          }
+        },
+        "domain_10_sustainability_closeout": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "justification", "post_award_obligations"],
+          "properties": {
+            "score": {"$ref": "#/$defs/domain_score_integer"},
+            "justification": {"$ref": "#/$defs/justification_string"},
+            "post_award_obligations": {"type": "array", "items": {"type": "string", "minLength": 1}},
+            "closeout_requirements": {"type": ["string", "null"], "description": "Resolves to UDM Terms.Closeout_Requirements."},
+            "property_equipment_obligations": {"type": ["string", "null"], "description": "Resolves to UDM Terms.Property_Requirements."}
+          }
+        },
+        "domain_11_doj_bulk_data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "justification", "data_security_standards"],
+          "properties": {
+            "score": {"$ref": "#/$defs/domain_score_integer"},
+            "justification": {"$ref": "#/$defs/justification_string"},
+            "sensitive_data_requirements": {"type": ["string", "null"]},
+            "data_security_standards": {"type": "array", "items": {"type": "string", "minLength": 1}}
+          }
+        },
+        "domain_12_ip_privacy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "justification", "privacy_risk_indicators"],
+          "properties": {
+            "score": {"$ref": "#/$defs/domain_score_integer"},
+            "justification": {"$ref": "#/$defs/justification_string"},
+            "ip_ownership_terms": {"type": ["string", "null"]},
+            "data_sharing_requirements": {"type": ["string", "null"]},
+            "publication_requirements": {"type": ["string", "null"], "description": "Resolves to UDM Terms.Publication_Requirements."},
+            "privacy_risk_indicators": {"type": "array", "items": {"type": "string", "minLength": 1}}
+          }
+        },
+        "domain_13_unusual_terms": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "justification", "non_standard_terms", "special_conditions"],
+          "properties": {
+            "score": {"$ref": "#/$defs/domain_score_integer"},
+            "justification": {"$ref": "#/$defs/justification_string"},
+            "non_standard_terms": {"type": "array", "items": {"type": "string", "minLength": 1}},
+            "special_conditions": {"type": "array", "items": {"type": "string", "minLength": 1}, "description": "Resolves to UDM Terms.Special_Conditions."}
+          }
+        },
+        "domain_14_reputational_risk": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["score", "justification", "reputational_risk_indicators"],
+          "properties": {
+            "score": {"$ref": "#/$defs/domain_score_integer"},
+            "justification": {"$ref": "#/$defs/justification_string"},
+            "reputational_risk_indicators": {"type": "array", "items": {"type": "string", "minLength": 1}}
+          }
+        }
+      }
+    },
+    "aggregate_metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_risk_score",
+        "average_risk_score",
+        "overall_risk_level",
+        "high_risk_domains",
+        "key_risk_findings",
+        "recommended_mitigations"
+      ],
+      "properties": {
+        "total_risk_score": {
+          "type": "integer",
+          "minimum": 14,
+          "maximum": 70,
+          "description": "Sum of the 14 domain scores. JSON integer, not quoted string."
+        },
+        "average_risk_score": {
+          "type": "number",
+          "minimum": 1.0,
+          "maximum": 5.0,
+          "description": "total_risk_score / 14, rounded to one decimal place. JSON number."
+        },
+        "overall_risk_level": {
+          "type": "string",
+          "enum": ["Low", "Moderate", "High", "Very High"],
+          "description": "Low = avg 1.0-1.9; Moderate = 2.0-2.9; High = 3.0-3.9; Very High = 4.0-5.0."
+        },
+        "high_risk_domains": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Names of domains with score >= 4. Empty array when no domain reaches 4 or 5."
+        },
+        "key_risk_findings": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Top evidence-cited findings across high-risk domains. Empty array when overall risk is Low."
+        },
+        "recommended_mitigations": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Mitigation strategies for high-risk domains. Empty array when overall risk is Low."
+        }
+      }
+    }
+  }
+}

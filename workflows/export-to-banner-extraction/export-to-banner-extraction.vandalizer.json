@@ -1,0 +1,172 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "exported_at": "2026-05-22T00:00:00+00:00",
+  "exported_by": "ui-insight",
+  "items": [
+    {
+      "name": "Export to Banner Award Extraction",
+      "description": "Uploads a fully-executed federal award document and returns an RA-friendly Markdown Export to Banner Reference Summary covering the seven sections needed to populate VERAS's Export to Banner form: award identification, dates & performance period, sponsor information, budget summary, billing & payment, reporting & compliance, and special terms & FOI items. Mirrors the source ui-insight/ProcessMapping export-to-banner-extraction consolidation.md conventions, including the `[DISCREPANCY - ...]` flag syntax.",
+      "steps": [
+        {
+          "name": "Knowledge Base Context Lookup",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "KnowledgeBaseQuery",
+              "data": {
+                "name": "kb-context-lookup",
+                "kb_uuid": "",
+                "query": "federal award Banner ERP export FAIN CFDA NAICS sponsor entity classification budget period cost reimbursable letter of credit drawdown invoice payment terms reporting requirements UI institutional Banner FOI text fields",
+                "k": 8,
+                "_embedded_knowledge_base": {
+                  "title": "University of Idaho Office of Sponsored Programs",
+                  "description": "Primary KB — contains UI institutional Banner conventions and FOI text-field formatting standards. For agency- specific terms, swap in NSF PAPPG / NIH GPS / DOE / DOD / FAR. When the operator does not attach a KB, the extraction falls back to reading just the uploaded award document."
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Parallel Extraction (Prompt)",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-award-identification",
+                "prompt": "You are extracting award identification fields from a\nfully-executed federal award document. You receive the\nuploaded document AND any KB chunks.\n\nBe 100% accurate. Quote identifiers verbatim. Use null when\nabsent.\n\nEmit a JSON object with: award_number (FAIN), project_title,\npi_name, award_type (one of \"Grant\", \"Cooperative Agreement\",\n\"Contract\", \"Subcontract\"), is_pass_through (boolean),\nprime_sponsor_name (STRING, populated only when is_pass_through\nis true), cfda_number (STRING in XX.XXX format),\nnaics_code (STRING), federal_agency_name (STRING),\naction_type (STRING — \"New\", \"Continuation\", \"Amendment\").\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-dates-and-performance",
+                "prompt": "You are extracting date fields and performance period from a\nfederal award document. You receive the uploaded document AND\nany KB chunks.\n\nDates use ISO YYYY-MM-DD when unambiguous; preserve the\ndocument's stated form otherwise. Use null when absent.\n\nEmit a JSON object with: award_start_date, award_end_date,\nperformance_period_start, performance_period_end (all\nSTRINGS), budget_periods (JSON ARRAY of {period_number,\nstart_date, end_date, amount}), is_multi_year (BOOLEAN or\nnull).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-sponsor-and-entity",
+                "prompt": "You are extracting sponsor and entity classification from a\nfederal award document.\n\nBe 100% accurate.\n\nEmit a JSON object with: sponsor_name (STRING, full legal\nname), sponsor_entity_type (one of \"Federal\", \"State Government\",\n\"Non-Profit\", \"Private Industry\", \"Foundation\", \"University\",\n\"Other\"), classification_evidence (STRING — short note on how\nthe entity type was determined), federal_agency_hierarchy\n(STRING), sponsor_address (STRING), sponsor_uei (STRING —\n12-char alphanumeric), awardee_organization (STRING),\nawardee_uei (STRING), grants_officer_name (STRING),\nprogram_officer_name (STRING).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-budget-and-financial",
+                "prompt": "You are extracting budget and financial terms from a federal\naward document.\n\nBe 100% accurate. Monetary fields preserve $X,XXX.XX format\nverbatim. Use null when absent.\n\nEmit a JSON object with: total_award_amount (STRING),\ntotal_anticipated_amount (STRING or null),\nbudget_categories (JSON ARRAY of {category, approved_amount}),\ntotal_direct_costs (STRING), total_indirect_costs (STRING),\nfa_rate (STRING — e.g., \"47.5%\"), fa_rate_base (one of\n\"MTDC\", \"TDC\", \"Salary & Wages\", \"Other\", or null),\nfa_status (one of \"Full Rate\", \"Reduced\", \"Waived\", or null),\nis_fa_waived (BOOLEAN or null), cost_share_amount (STRING or\nnull), cost_share_type (STRING or null), program_income\n(STRING or null).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-billing-and-payment",
+                "prompt": "You are extracting billing and payment terms from a federal\naward document.\n\nEmit a JSON object with: billing_type (one of \"Cost Reimbursement\",\n\"Fixed Price\", \"Letter of Credit\", \"Milestone\"), billing_frequency\n(STRING), billing_address (STRING), invoice_email (STRING),\npms_loc_code (STRING), payment_terms (STRING),\ninvoice_requirements (JSON ARRAY of STRINGS),\nfinal_invoice_deadline (STRING), billing_contact (STRING).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-reporting-and-special",
+                "prompt": "You are extracting reporting requirements and special terms\nfrom a federal award document.\n\nEmit a JSON object with: reporting_requirements (JSON ARRAY\nof {report_type, frequency, due_date_or_timing, submission_method}),\nrecord_retention_period (STRING),\ncarry_forward_policy (STRING),\nprior_approval_requirements (JSON ARRAY of STRINGS),\nspecial_terms (JSON ARRAY of STRINGS — terms beyond standard\nfederal requirements; publication restrictions; IP/data\nprovisions; non-standard terms),\ncloseout_requirements (STRING),\ngoverning_regulations (JSON ARRAY of STRINGS — 2 CFR 200,\nRTCs, agency-specific cited regs).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consolidation (Markdown deliverable)",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "export-to-banner-consolidation",
+                "prompt": "You are the consolidation step of the Export to Banner\nAward Extraction workflow. You receive SIX JSON fragments\nfrom the previous step.\n\nCross-validate the fragments. When values contradict, do\nNOT alter them — flag with\n`[DISCREPANCY - Task X states ___ while Task Y states ___]`\nin the appropriate section.\n\nRender a single RA-friendly Markdown Export to Banner\nReference Summary. Mirrors source consolidation.md exactly.\n\n## CRITICAL — ALWAYS RENDER THE DELIVERABLE\n\nYou MUST render the FULL Markdown deliverable structure (every\nsection listed below), EVEN WHEN some fragment fields arrive\nas null, empty, missing, or sparse. NEVER refuse to render\nwith apologetic prose like \"The provided context does not\ncontain the required information.\" That output is unusable —\nthe operator needs the full structure with placeholders so\nthey can see which fields need to be chased.\n\nSubstitution rules when a field is null or missing:\n- Required scalar fields: substitute the literal string\n  \"Not specified in the document\".\n- Optional table cells: substitute \"—\" (em dash).\n- Empty arrays: render the section with its empty-state\n  language already specified below (e.g., \"No items identified\",\n  \"Defers to federal defaults\", \"None identified beyond\n  standard federal requirements\").\n\nIf EVERY field across ALL upstream fragments is null (which\nmeans the document genuinely contained nothing extractable\nOR the document was not attached to the run), STILL render\nthe full Markdown structure with \"Not specified in the\ndocument\" placeholders throughout, AND append a single line\nat the very end of the deliverable:\n\n> ⚠️ The upstream extraction returned no data from the\n> uploaded document. Verify the document was attached and\n> re-run the workflow.\n\n## Required structure (in this exact order)\n\n# Export to Banner Reference Summary: <award_number>\n\n### SECTION 1: AWARD IDENTIFICATION\n\n- **Award Number / FAIN:** <award_number>\n- **CFDA Number:** <cfda_number or \"Not specified\">\n- **NAICS Code:** <naics_code or \"Not specified\">\n- **Full Project Title:** <project_title>\n- **Principal Investigator:** <pi_name>\n- **Award Type:** <award_type>\n- **Action Type:** <action_type or \"Not specified\">\n- **Federal Awarding Agency:** <federal_agency_name>\n- **Federal Agency Hierarchy:** <federal_agency_hierarchy or \"Not specified\">\n- **Pass-Through Status:** <\"Direct Award\" if !is_pass_through else \"Pass-Through from \" + prime_sponsor_name>\n\n---\n\n### SECTION 2: DATES & PERFORMANCE PERIOD\n\n| Field | Date |\n|---|---|\n| Award Start Date | <award_start_date> |\n| Award End Date | <award_end_date> |\n| Performance Period Start | <performance_period_start> |\n| Performance Period End | <performance_period_end> |\n\nNote: <\"Single-period award\" if !is_multi_year else \"Multi-year incremental award with N periods\">\n\nWhen budget_periods is non-empty, render a sub-table:\n\n| Period | Start | End | Amount |\n|---|---|---|---|\n\n---\n\n### SECTION 3: SPONSOR INFORMATION\n\n- **Sponsor Legal Name:** <sponsor_name>\n- **Sponsor Entity Type:** <sponsor_entity_type>\n- **Classification Evidence:** <classification_evidence or \"Per Federal Agency designation\">\n- **Sponsor Address:** <sponsor_address or \"Not specified\">\n- **Sponsor UEI:** <sponsor_uei or \"Not specified\">\n- **Awardee Organization:** <awardee_organization>\n- **Awardee UEI:** <awardee_uei or \"Not specified\">\n- **Grants Officer:** <grants_officer_name or \"Not specified\">\n- **Program Officer:** <program_officer_name or \"Not specified\">\n\n---\n\n### SECTION 4: BUDGET SUMMARY\n\n| Category | Amount |\n|---|---|\n\nOne row per budget_categories entry, ending with:\n| **Total Direct Costs** | **<total_direct_costs>** |\n| **Total Indirect Costs** | **<total_indirect_costs>** |\n| **Total Award Amount** | **<total_award_amount>** |\n\nFollowed by:\n\n- **F&A Rate and Base:** <fa_rate> <fa_rate_base>\n- **F&A Status:** <fa_status or \"Full Rate\">\n- **Cost Sharing:** <cost_share_amount or \"None required\"> (<cost_share_type or \"—\">)\n\n---\n\n### SECTION 5: BILLING & PAYMENT\n\n- **Billing Type:** <billing_type>\n- **Billing Frequency:** <billing_frequency or \"Not specified\">\n- **Invoice Submission:** <billing_address or \"Not specified\"> (<invoice_email or \"no email\">)\n- **PMS / LOC Code:** <pms_loc_code or \"Not specified\">\n- **Final Invoice Deadline:** <final_invoice_deadline or \"Not specified\">\n- **Payment Terms:** <payment_terms or \"Not specified\">\n\n**Required Invoice Elements:**\n- <bulleted list from invoice_requirements, or \"Not specified\">\n\n---\n\n### SECTION 6: REPORTING & COMPLIANCE\n\n**Required Reports:**\n\n| Type | Frequency | Due Date |\n|---|---|---|\n\nOne row per reporting_requirements entry.\n\n- **Record Retention Period:** <record_retention_period or \"3 years per 2 CFR 200.334\">\n- **Carry-Forward Policy:** <carry_forward_policy or \"Standard federal default\">\n\n**Key Prior Approval Requirements:**\n- <bulleted list from prior_approval_requirements>\n\n**Governing Regulations:**\n- <bulleted list from governing_regulations>\n\n---\n\n### SECTION 7: SPECIAL TERMS & FOI ITEMS\n\nBanner FOI text fields — copy these into Banner FOI:\n\n- <bulleted list from special_terms>\n- **Closeout Requirements:** <closeout_requirements or \"Standard federal closeout\">\n\n---\n\n### FINAL VERIFICATION CHECKLIST\n\n- [ ] All monetary amounts are exact (no rounding)\n- [ ] All dates are in their original format\n- [ ] Award number matches across all sections\n- [ ] No information was lost during consolidation\n- [ ] \"Not specified in the document\" preserved where appropriate\n- [ ] No discrepancies remain unresolved (or all are flagged)\n\n## Rendering rules\n\n- Bold every label.\n- Reference document — concise and actionable, not narrative.\n- Preserve monetary and date formats verbatim.\n- Use `[DISCREPANCY - Task X states ___ while Task Y states ___]`\n  for any cross-task contradiction.\n- If any field arrives as a nested JSON object, REWRITE\n  into prose / table.\n- No JSON code fences around the output.",
+                "input_source": "step_input"
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "check_id": "CHK-01",
+          "check_name": "Date range consistency",
+          "check_type": "consistency",
+          "check_description": "Verify award_start_date < award_end_date and performance_period_start <= award_start_date.",
+          "target_fields": [],
+          "severity": "error"
+        },
+        {
+          "check_id": "CHK-02",
+          "check_name": "Monetary amount formatting",
+          "check_type": "format",
+          "check_description": "Verify monetary amounts preserve the source document's currency formatting verbatim.",
+          "target_fields": [],
+          "severity": "error"
+        },
+        {
+          "check_id": "CHK-03",
+          "check_name": "UEI format",
+          "check_type": "format",
+          "check_description": "Verify UEIs follow the 12-character alphanumeric format when present.",
+          "target_fields": [],
+          "severity": "warning"
+        },
+        {
+          "check_id": "CHK-04",
+          "check_name": "CFDA number format",
+          "check_type": "format",
+          "check_description": "Verify CFDA number follows XX.XXX format when present.",
+          "target_fields": [],
+          "severity": "warning"
+        }
+      ],
+      "validation_inputs": [],
+      "x_ai4ra": {
+        "workflow_source": "workflows/export-to-banner-extraction/manifest.yaml",
+        "workflow_version": "0.2.0",
+        "status": "experimental",
+        "components": [
+          {
+            "slug": "export-to-banner-extraction-udm",
+            "version": "0.1.0"
+          }
+        ]
+      }
+    }
+  ]
+}

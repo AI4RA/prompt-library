@@ -1,0 +1,345 @@
+# Authored source for the Section 2 Personnel Eligibility Verification Vandalizer workflow.
+#
+# The companion section2-personnel-eligibility.vandalizer.json is generated
+# from this file by scripts/build_vandalizer_workflows.py and committed
+# alongside. Never hand-edit the generated JSON — update this manifest and
+# rebuild.
+#
+# === Topology (v0.2.0, Variant A + KB injection) ===
+#
+# v0.2.0 changes vs. v0.1.0:
+#   1. Parallel Extraction tasks converted to Prompt tasks.
+#   2. Output contract: RA-friendly Markdown Section 2 Review Report
+#      mirroring source consolidation.md exactly (six SECTIONs).
+#   3. Step 0 KnowledgeBaseQuery added — University of Idaho Office of
+#      Sponsored Programs is the primary KB (it contains the APM 45.22
+#      source content — do NOT swap).
+#
+# Multi-source input model preserved: VERAS + Banner NBAJOBS extract +
+# Department List + APM 45.22 (from KB).
+
+name: Section 2 Personnel Eligibility Verification
+description: >
+  Uploads three workflow documents together — the VERAS proposal
+  package, the Banner NBAJOBS extract, and the institutional Department
+  List — and returns an RA-friendly Markdown Section 2 Review Report
+  covering the per-person eligibility matrix (with APM 45.22 status),
+  org-code-to-DGA mapping, DGA completeness assessment, action items
+  for ineligible personnel and missing DGAs, and a review-completion
+  checklist. Mirrors the source ui-insight/ProcessMapping
+  section2-personnel-eligibility consolidation.md conventions.
+
+workflow_version: 0.2.0
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-05-20
+updated: 2026-05-22
+
+components:
+  - slug: section2-personnel-eligibility-udm
+    pinned_version: 0.1.0
+
+validation_plan:
+  - check_id: CHK-01
+    check_name: Personnel extraction completeness
+    check_type: completeness
+    check_description: Verify all personnel from VERAS Sections 2.1 and 2.2A are reflected in the matrix.
+    target_fields: []
+    severity: error
+  - check_id: CHK-02
+    check_name: Eligibility check completeness
+    check_type: completeness
+    check_description: Verify every PI and Co-PI has an APM 45.22 eligibility determination.
+    target_fields: []
+    severity: error
+  - check_id: CHK-03
+    check_name: Org code extraction completeness
+    check_type: completeness
+    check_description: Verify every person has a timesheet org code recorded or is flagged when no Banner record exists.
+    target_fields: []
+    severity: error
+  - check_id: CHK-04
+    check_name: DGA mapping completeness
+    check_type: completeness
+    check_description: Verify every unique org code maps to a DGA or is flagged in the unmapped-org-codes summary.
+    target_fields: []
+    severity: error
+
+steps:
+  - name: Knowledge Base Context Lookup
+    tasks:
+      - name: kb-context-lookup
+        kind: KnowledgeBaseQuery
+        query: "APM 45.22 Principal Investigator eligibility Co-PI Senior Key Personnel VERAS Section 2.1 Section 2.2A Banner NBAJOBS Departmental Grant Administrator DGA timesheet org code job title professor research associate"
+        k: 8
+        knowledge_base_hint:
+          title: "University of Idaho Office of Sponsored Programs"
+          description: >
+            Primary KB — this KB contains the APM Section 45.22
+            eligible-titles list that drives PI / Co-PI eligibility
+            determinations. Do NOT swap. When the operator does not
+            attach a KB, every PI / Co-PI will come back as "Review
+            Required" because the workflow cannot evaluate eligibility
+            without the APM 45.22 reference.
+
+  - name: Parallel Extraction (Prompt)
+    tasks:
+      - name: extract-section-2-personnel
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are extracting Section 2 personnel from a VERAS proposal
+          package. You receive the workflow documents AND any KB chunks
+          the previous step retrieved.
+
+          Be 100% accurate. Quote names and roles verbatim. Do not
+          invent personnel. Use null when a field is absent.
+
+          Emit a JSON object with these keys:
+
+          - section_21_personnel: JSON ARRAY of {name, role, institution}
+            objects from VERAS Section 2.1. role is one of "PI",
+            "Co-PI". institution is null when not stated. MUST contain
+            at least one entry.
+          - section_22_personnel: JSON ARRAY of {name, role, institution}
+            objects from VERAS Section 2.2A. role is always
+            "Senior/Key Personnel". Empty array when Section 2.2A is
+            not populated.
+          - proposal_identifier: STRING. Proposal identifier (number
+            or title). null when absent.
+          - total_personnel_count: INTEGER.
+          - pi_copis_requiring_eligibility: JSON ARRAY of STRINGS
+            (names from section_21_personnel).
+          - personnel_requiring_org_code_only: JSON ARRAY of STRINGS
+            (names from section_22_personnel).
+
+          ## Output
+
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-eligibility-and-dga-verification
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are performing eligibility and DGA verification. You
+          receive the workflow documents (VERAS, Banner NBAJOBS extract,
+          Department List) AND KB chunks (APM 45.22 eligible-titles
+          list).
+
+          Be 100% accurate. Do NOT assume employment, eligibility, or
+          DGA mapping. When a job title is ambiguous (clinical faculty,
+          lecturer, adjunct, dual appointment), emit eligibility_status
+          "Review Required" — never "Eligible" or "Not Eligible". When
+          a workflow document is missing, emit non-compliant defaults
+          and capture the gap in notes_about_missing_sources.
+
+          Senior / Key Personnel from Section 2.2A do NOT need
+          eligibility checks — they need org-code collection only.
+          Emit eligibility_status "N/A" for those rows.
+
+          Emit a JSON object with these keys:
+
+          - personnel_verification: JSON ARRAY of per-person
+            {name, found_in_banner, current_employee, job_title,
+             timesheet_org_code, notes} objects. One entry per person
+            from Section 2.1 + Section 2.2A combined.
+          - eligibility_check: JSON ARRAY of per-PI / Co-PI
+            {name, role, job_title, eligibility_status, evidence}
+            objects. status one of "Eligible", "Not Eligible",
+            "Review Required". evidence is a short APM 45.22 citation
+            or rationale.
+          - org_code_compilation: JSON ARRAY of
+            {org_code, personnel_names, count} objects.
+          - dga_mapping: JSON ARRAY of
+            {org_code, department_name, dga_names} objects. department_name
+            null and dga_names empty when the org code is not in the
+            Department List.
+          - dga_cross_reference: JSON ARRAY of
+            {dga_name, org_codes, listed_in_section_2, action_needed}
+            objects. action_needed is one of "No action needed" or
+            "FLAG — Must be added to Section 2".
+          - notes_about_missing_sources: STRING describing any source
+            document that was not provided; null when all present.
+
+          ## Output
+
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+  - name: Consolidation (Markdown deliverable)
+    is_output: true
+    tasks:
+      - name: section2-personnel-eligibility-consolidation
+        kind: Prompt
+        input_source: step_input
+        prompt_inline: |
+          You are the consolidation step of the Section 2 Personnel
+          Eligibility Verification workflow. You receive TWO JSON
+          fragments from the previous step (personnel extraction +
+          eligibility / DGA verification).
+
+          Render a single RA-friendly Markdown Section 2 Review
+          Report. The deliverable is Markdown — NOT a JSON object, NOT
+          a JSON code fence. Mirrors the source
+          ui-insight/ProcessMapping section2-personnel-eligibility
+          consolidation.md exactly.
+
+          ## CRITICAL — ALWAYS RENDER THE DELIVERABLE
+
+          You MUST render the FULL Markdown deliverable structure (every
+          section listed below), EVEN WHEN some fragment fields arrive
+          as null, empty, missing, or sparse. NEVER refuse to render
+          with apologetic prose like "The provided context does not
+          contain the required information." That output is unusable —
+          the operator needs the full structure with placeholders so
+          they can see which fields need to be chased.
+
+          Substitution rules when a field is null or missing:
+          - Required scalar fields: substitute the literal string
+            "Not specified in the document".
+          - Optional table cells: substitute "—" (em dash).
+          - Empty arrays: render the section with its empty-state
+            language already specified below (e.g., "No items identified",
+            "Defers to federal defaults", "None identified beyond
+            standard federal requirements").
+
+          If EVERY field across ALL upstream fragments is null (which
+          means the document genuinely contained nothing extractable
+          OR the document was not attached to the run), STILL render
+          the full Markdown structure with "Not specified in the
+          document" placeholders throughout, AND append a single line
+          at the very end of the deliverable:
+
+          > ⚠️ The upstream extraction returned no data from the
+          > uploaded document. Verify the document was attached and
+          > re-run the workflow.
+
+          ## Required structure (in this exact order)
+
+          # Section 2 Review Report: <proposal_identifier or "Not specified">
+
+          ### SECTION 1: REVIEW OVERVIEW
+
+          - **Proposal:** <proposal_identifier or "Not specified">
+          - **Date of Review:** <today's date ISO YYYY-MM-DD>
+          - **Total Personnel in Section 2:** <total_personnel_count>
+          - **PI/Co-PIs Requiring Eligibility Check:** <pi_copis_requiring_eligibility.length>
+          - **Senior/Key Personnel (org code only):** <personnel_requiring_org_code_only.length>
+
+          ---
+
+          ### SECTION 2: PERSONNEL ELIGIBILITY MATRIX
+
+          | # | Name | Role | Job Title (Banner) | APM 45.22 Eligible | Org Code | DGA | Status |
+          |---|------|------|--------------------|--------------------|---------|----|--------|
+
+          One row per person in the combined Section 2.1 + Section
+          2.2A list. Sort by role: PI first, then Co-PI, then
+          Senior/Key Personnel. Pull Job Title and Org Code from
+          personnel_verification; APM 45.22 status from
+          eligibility_check (Senior/Key Personnel emit "N/A"); DGA
+          name from dga_mapping for the row's org_code.
+
+          Status:
+          - PASS = Eligible (or N/A for Senior/Key) + org code present + DGA mapped
+          - FAIL = APM 45.22 status "Not Eligible"
+          - REVIEW = APM 45.22 status "Review Required" OR ambiguous Banner match OR unmapped org code
+
+          **Status key:**
+
+          - PASS = Eligible (or N/A for Senior Personnel) + org code collected + DGA mapped
+          - FAIL = Not eligible per APM 45.22 (action required)
+          - REVIEW = Ambiguous eligibility (SPA manual review needed)
+
+          ---
+
+          ### SECTION 3: ORG CODE TO DGA MAPPING
+
+          | Org Code | Department | DGA Name | Personnel Count |
+          |----------|------------|----------|-----------------|
+
+          One row per entry in `org_code_compilation`. Look up
+          department + DGA in `dga_mapping`. When an org code is not
+          in the Department List, render Department as "— (not in
+          Department List)" and DGA Name as "—".
+
+          ---
+
+          ### SECTION 4: DGA COMPLETENESS ASSESSMENT
+
+          | DGA Name | Required (from org codes) | Listed in Section 2 | Action |
+          |----------|--------------------------|---------------------|--------|
+
+          One row per entry in `dga_cross_reference`. Action column:
+          "None" when listed_in_section_2 is true; "FLAG — Add to Section 2"
+          otherwise.
+
+          **Summary:**
+
+          - **Required DGAs:** <dga_cross_reference.length>
+          - **Listed in Section 2:** <count of listed_in_section_2 = true>
+          - **Missing DGAs: <count of action_needed = "FLAG — Must be added to Section 2">**
+
+          ---
+
+          ### SECTION 5: ACTION ITEMS
+
+          **Eligibility Issues (blocks proposal routing):**
+
+          | # | Person | Issue | Required Action |
+          |---|--------|-------|-----------------|
+
+          One row per eligibility_check entry where status is "Not
+          Eligible" or "Review Required". If none, state "No
+          eligibility issues identified."
+
+          **Missing DGAs (must be added to Section 2):**
+
+          | # | DGA Name | For Org Code(s) | Action |
+          |---|----------|-----------------|--------|
+
+          One row per dga_cross_reference entry with action_needed
+          "FLAG — Must be added to Section 2". If none, state "No
+          missing DGAs."
+
+          **Other Issues:**
+
+          Render as bulleted list, drawing from:
+          - personnel_verification entries with found_in_banner=false
+            (potential external collaborators)
+          - personnel_verification entries with notes that mention
+            ambiguous matches
+          - personnel_verification entries where current_employee is
+            false (inactive / terminated)
+
+          If none, state "No other issues identified."
+
+          ---
+
+          ### SECTION 6: REVIEW COMPLETION CHECKLIST
+
+          - [ ] All PI/Co-PIs verified for APM 45.22 eligibility
+          - [ ] All timesheet org codes collected
+          - [ ] All org codes mapped to DGAs
+          - [ ] All required DGAs cross-referenced against Section 2
+          - [ ] Missing DGAs flagged for addition
+          - [ ] Ineligible personnel flagged for review
+          - [ ] Section 2 Review marked complete
+
+          (Render as literal "- [ ]" GitHub task-list syntax.)
+
+          ## Rendering rules
+
+          - Bold every label with `**Label:**`.
+          - Use the literal status keys "PASS", "FAIL", "REVIEW",
+            "Eligible", "Not Eligible", "Review Required", "N/A".
+          - If any field arrives as a nested JSON object, REWRITE into
+            prose / table.
+          - No JSON code fences around the output.
+
+evals:
+  workflow_local: true

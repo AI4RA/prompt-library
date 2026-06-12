@@ -1,0 +1,1168 @@
+# Authored source for the Budget Justification Generator Vandalizer workflow.
+#
+# === Topology (v0.5.0, Variant A + KB injection + agency-agnostic formats) ===
+#
+# v0.5.0 agency-generalization vs. v0.4.1: removed HUD-specific
+# terminology from all in-prompt anchors. HUD was the only example
+# of "numbered-section format" in v0.4.x even though most non-NSF
+# / non-NIH federal grant agencies (DOI/BLM, USDA, ED, EPA, HHS,
+# DOE non-research, DOD non-research, plus federal cooperative-
+# agreement programs) use similar 10-section budget worksheets.
+# v0.5.0 reframes the format taxonomy with four explicit families:
+#   (A) SF-424 R&R Budget (Detailed) — NIH, NSF, DOE-research,
+#       DOD-research, EPA-research; A-K letter-coded.
+#   (B) SF-424A Budget Information (Non-Construction) — most
+#       non-research federal assistance.
+#   (C) Numbered-section budget worksheets — HUD-424-CBW is one
+#       example; DOI, USDA, ED, EPA, HHS, DOE non-research, DOD
+#       non-research, cooperative-agreement variants all share
+#       the 10-section structure.
+#   (D) Narrative-only budgets.
+# Worked-example dollar amounts and the University of Idaho /
+# Towson University illustrative institutions are kept — they're
+# realistic universities, not HUD-specific. "For HUD-424-CBW
+# specifically:" subsection headers are replaced with "For
+# numbered-section format specifically:". Worked-example labels
+# like "Worked example — HUD-424-CBW four-investigator proposal"
+# are now "Worked example (numbered-section budget worksheet
+# with hourly-rate personnel)".
+#
+# The NSF-specific budget workflows (workflows/nsf-budget-*) remain
+# the dedicated path for NSF proposals — this generic workflow
+# can handle NSF format if encountered, but the NSF cluster is
+# better tuned for NSF-specific conventions.
+#
+# v0.4.1 anti-double-count + arithmetic-check fix vs. v0.4.0:
+# see prior topology entries.
+#
+# v0.4.0 polish fixes vs. v0.3.0:
+# see prior topology entries.
+#
+# v0.3.0 accuracy fixes vs. v0.2.0:
+# see prior topology entries.
+#
+# v0.2.0 changes vs. v0.1.0:
+#   1. Parallel Extraction tasks converted to Prompt tasks (each task
+#      both extracts structured data AND generates narrative text).
+#   2. Output contract: RA-friendly Markdown budget-justification
+#      narrative document in R&R Budget / SF-424A category order
+#      (A-I) per source consolidation.md.
+#   3. Step 0 KnowledgeBaseQuery added.
+
+name: Budget Justification Generator
+description: >
+  Uploads a grant budget form, the project narrative / proposal, and
+  optionally the funding opportunity announcement, and returns a
+  publication-ready RA-friendly Markdown budget-justification narrative
+  document organized in standard R&R Budget / SF-424A category order
+  (A. Senior/Key Personnel through H. Indirect Costs, plus Cost Sharing
+  and Budget Summary). Agency-agnostic — handles SF-424 R&R Detailed
+  (NIH/NSF/DOE-research/DOD-research/EPA-research), SF-424A
+  Non-Construction, numbered-section budget worksheets (HUD-424-CBW,
+  DOI, USDA, ED, EPA, HHS, DOE non-research, DOD non-research,
+  cooperative-agreement variants), and narrative-only budgets.
+  Mirrors the source ui-insight/ProcessMapping
+  budget-justification-generator consolidation.md conventions.
+
+workflow_version: 0.5.0
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-05-20
+updated: 2026-05-27
+
+components:
+  - slug: budget-justification-generator-udm
+    pinned_version: 0.1.0
+
+validation_plan:
+  - check_id: CHK-01
+    check_name: Line item sum equals category total
+    check_type: arithmetic
+    check_description: Verify sum of line items equals category total for each R&R Budget category.
+    target_fields: []
+    severity: error
+  - check_id: CHK-02
+    check_name: Direct plus indirect equals total
+    check_type: arithmetic
+    check_description: Verify total_direct_costs + total_indirect_costs equals total_project_costs; flag any discrepancy in CROSS-VALIDATION NOTES without altering values.
+    target_fields: []
+    severity: error
+  - check_id: CHK-03
+    check_name: Personnel costs match FTE
+    check_type: consistency
+    check_description: Verify personnel cost calculations are consistent with FTE / person-months in the budget.
+    target_fields: []
+    severity: warning
+
+steps:
+  - name: Knowledge Base Context Lookup
+    tasks:
+      - name: kb-context-lookup
+        kind: KnowledgeBaseQuery
+        query: "R&R Budget SF-424A senior key personnel fringe benefits equipment travel participant support other direct costs materials supplies publication consultants subawards tuition remission indirect costs F&A MTDC cost sharing 2 CFR 200 Subpart E"
+        k: 8
+        knowledge_base_hint:
+          title: "OMB Uniform Guidance (2 CFR 200)"
+          description: >
+            Primary regulatory KB — 2 CFR 200 Subpart E covers cost
+            principles including allowable / unallowable categories.
+            For CAS-triggering proposals, swap in Cost Accounting
+            Standards (CAS). For agency-specific budget guidance, swap
+            in NSF PAPPG / NIH GPS / DOE / DOD. For effort and salary
+            calculations, pair with Effort Reporting & Compensation.
+
+  - name: Parallel Extraction + Generation (Prompt)
+    tasks:
+      - name: extract-personnel-and-fringe
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are extracting personnel data AND generating professional
+          justification narrative for Sections A (Senior/Key Personnel),
+          B (Other Personnel), and C (Fringe Benefits). You receive the
+          uploaded documents AND any KB chunks.
+
+          Be 100% accurate. Reproduce financial figures verbatim. Tie
+          each person's effort / salary to roles in the project narrative.
+
+          CRITICAL — monetary structured-data fields are FLAT STRINGS
+          preserving $X,XXX.XX format. Section narrative fields are
+          professional third-person prose.
+
+          ## Salary and effort computation rules
+
+          Proposal budgets come in two common formats. You MUST handle
+          both:
+
+          (A) FTE / months-of-effort format (typical NSF, NIH):
+              - person_months: numeric months of effort.
+              - effort_hours: null.
+              - requested_salary: dollar amount as printed in the budget.
+
+          (B) Hours-times-hourly-rate format (used in numbered-section budget worksheets — HUD-424-CBW, DOI/BLM, USDA, ED, EPA, HHS, and many federal cooperative-agreement programs with state/local/tribal recipients; personnel are listed with hours and an hourly rate):
+              - person_months: null (this format does not use it).
+              - effort_hours: hours figure verbatim ("1,332 hours").
+              - requested_salary: COMPUTE as hours * hourly_rate and emit
+                as a dollar string (e.g., 1332 * $39.75 = "$52,947.00").
+
+          If the budget worksheet shows a derived Estimated Cost column,
+          prefer that value over your computed value (it accounts for
+          rounding).
+
+          ## Subaward / subcontract classification
+
+          CRITICAL: Personnel who work for a DIFFERENT institution than
+          the prime applicant, AND whose costs flow through a subcontract
+          / subaward / consortium agreement, must be:
+          - LISTED in senior_key_personnel[] with their SUBAWARDEE
+            institution name.
+          - their requested_salary is the salary they're paid by the
+            subawardee (not their full subaward cost).
+          - EXCLUDED from total_senior_personnel_cost AND from
+            total_fringe_benefits. Their full subaward cost (salary +
+            fringe + sub-indirect) is captured in the
+            extract-participant-support-and-odc task's subaward_details /
+            total_subaward_costs — NOT here.
+
+          Signals: subaward personnel appear in numbered-section format Section 7
+          "Contracts and Sub-Grantees" / NSF Section H1 / NIH consortium
+          lines / narrative "subcontract with X" language.
+
+          ## Role assignment heuristics
+
+          When the document does not explicitly label personnel with "PI" /
+          "Co-PI" / "Senior Personnel", use these heuristics:
+
+          (1) PI: the first-listed personnel at the PRIME institution OR
+              the named lead investigator in the project narrative. There is
+              exactly ONE PI per proposal. When no explicit label is given,
+              designate the first-listed prime-institution investigator as
+              PI.
+
+          (2) Co-PI: the lead investigator at a SUBAWARDEE institution.
+              Subaward personnel who are the technical lead of the
+              subcontracted work are Co-PI. Their effort is significant
+              (typically >= 100 hours or >= 1 month).
+
+          (3) Sub-PI: an alternative label for Co-PI when the subaward role
+              is more limited. Treat as semantically equivalent to Co-PI
+              for the purposes of senior key documents.
+
+          (4) Senior Personnel: prime-institution investigators who are NOT
+              the PI but contribute substantively (named in the budget,
+              have significant effort, contribute to the technical work).
+
+          (5) Key Personnel: same as Senior Personnel; some sponsors use
+              this label interchangeably.
+
+          Worked example (numbered-section budget worksheet with hourly-rate
+          personnel; four-investigator proposal; prime is University of Idaho;
+          Towson subaward):
+          - Dr. Michael Overton (UI, 1,332 hours, first-listed prime
+            investigator) -> role: "PI"
+          - Dr. Eric Stokan (Towson University, 624 hours, sub-award
+            partner) -> role: "Co-PI"
+          - Dr. Brian Ellison (UI, 536 hours, prime institution
+            contributor) -> role: "Senior Personnel"
+          - Mr. Bruce Godfrey (UI, 448 hours, prime institution
+            contributor) -> role: "Senior Personnel"
+
+          `pi_name` for this proposal = "Dr. Michael Overton".
+
+          ## CRITICAL — anti-double-count rules
+
+          (a) total_senior_personnel_cost = SUM of PRIME-institution
+              senior_key_personnel salaries ONLY. EXCLUDE subaward Co-PI
+              salaries.
+
+          (b) total_fringe_benefits = SUM of PRIME-institution fringe
+              ONLY. Subaward personnel fringe is part of the subaward
+              total, not here.
+
+          (c) project_title comes from the RFP / proposal narrative
+              cover page. NEVER emit "Not specified in the document" if
+              the title appears anywhere in the uploaded documents.
+
+          (d) pi_name is the PRIME PI (the lead investigator at the
+              prime institution), not a subaward Co-PI.
+
+          Worked example — CORRECT (prime is University of Idaho;
+          Stokan is Co-PI at Towson via subaward):
+          - senior_key_personnel includes ALL FOUR investigators with
+            Stokan tagged institution="Towson University", role="Co-PI".
+          - Prime salaries (UI only): $52,947.00 + $34,057.44 +
+            $17,100.16 = $104,104.60
+          - total_senior_personnel_cost = $104,104.60 (PRIME ONLY)
+          - UI fringe (25.9% on $104,104.60) = $26,963.09
+          - total_fringe_benefits = $26,963.09 (PRIME ONLY)
+
+          Worked example — WRONG (double-counts Stokan into prime
+          personnel):
+          - total_senior_personnel_cost = $52,947.00 + $24,180.00 +
+            $34,057.44 + $17,100.16 = $128,284.60 [WRONG]
+          - This double-counts Stokan's $24,180 — that flows through
+            the subaward total ($38,257.60). Counting it here AND
+            there inflates the project's direct costs by $24,180.
+
+          Emit a JSON object with these keys:
+
+          - project_title: STRING. Extract from the RFP / proposal
+            narrative cover page. null only when genuinely absent
+            from ALL uploaded documents.
+          - pi_name: STRING. The PRIME PI. Use synonyms when needed:
+            "Principal Investigator", "PI", "Project Director", "PD",
+            "Grantee Project Director", "Grantee Project Manager",
+            "Recipient Project Manager", "RPM". null only when
+            genuinely absent.
+          - sponsoring_agency: STRING.
+          - senior_key_personnel: JSON ARRAY of {name, title, role,
+            institution, person_months, effort_hours, salary_basis,
+            requested_salary} objects. Include ALL senior key
+            personnel from BOTH the prime and any subawardee
+            institutions. Populate person_months OR effort_hours per
+            the format rules above. role one of "PI", "Co-PI",
+            "Sub-PI", "Senior Personnel", "Key Personnel". MUST
+            contain at least one entry when the budget shows any
+            named personnel.
+          - other_personnel: JSON ARRAY of {category, count,
+            person_months, effort_hours, rate} objects, or empty
+            array when no other personnel are budgeted.
+          - total_senior_personnel_cost: STRING. PRIME PERSONNEL
+            SALARIES ONLY per the anti-double-count rules.
+          - total_other_personnel_cost: STRING or null.
+          - fringe_benefit_rates: JSON ARRAY of {category, rate,
+            calculation_basis} objects. One entry per fringe
+            category (e.g., "Faculty 25.9% applied to salary";
+            "Subaward institution rate 8% applied to salary").
+          - total_fringe_benefits: STRING. PRIME FRINGE ONLY.
+          - is_salary_cap_applicable: BOOLEAN or null.
+          - salary_cap_amount: STRING or null.
+          - is_multi_year_budget: BOOLEAN or null.
+          - year_over_year_personnel_changes: STRING or null.
+          - section_a_narrative: STRING. Professional Section A prose
+            listing ALL senior key personnel (prime + subaward
+            Co-PIs). Identify each by name, role, institution, and
+            effort. Tie each person's role to the project work.
+          - section_b_narrative: STRING. Use "No other personnel
+            costs are requested for this project." when
+            other_personnel is empty.
+          - section_c_narrative: STRING. Professional Section C prose
+            describing fringe rates and how they apply, per
+            institution.
+
+          ## Output
+
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-equipment-and-travel
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are extracting equipment and travel data AND generating
+          professional justification narrative for Sections D
+          (Equipment) and E (Travel: Domestic + Foreign).
+
+          Be 100% accurate. Preserve monetary amounts verbatim.
+
+          ## Budget format handling
+
+          (A) Numbered-section budget worksheets (HUD-424-CBW, DOI,
+              USDA, ED, EPA, HHS, DOE non-research, DOD non-research,
+              cooperative-agreement variants): Section 4 ("Equipment,
+              Only items over $5,000 Depreciated value") and Section 3
+              (Travel) with subsections 3a-3d.
+          (B) SF-424 R&R Budget (Detailed) — NSF, NIH, DOE research,
+              DOD research, EPA research: Line D (Equipment), Line E
+              (Travel) split into Domestic and Foreign sub-lines.
+          (C) PHS-398 Modular (NIH legacy) and SF-424A: similar to
+              the above with abbreviated reporting.
+
+          For numbered-section format (A):
+          - Section 4 "Total Equipment Cost" = total_equipment_cost.
+          - Section 3 totals (3a Local, 3b Airfare, 3c Other, 3d Per
+            Diem) = travel components. Use the "Total Travel Cost"
+            row.
+          - Numbered-section formats typically do NOT split domestic /
+            foreign travel; if the narrative mentions foreign travel,
+            route it to foreign_travel; otherwise route everything to
+            domestic_travel.
+
+          Emit a JSON object with:
+
+          - equipment_items: JSON ARRAY of {name, cost, purpose}
+            objects for items >= $5,000. Empty array when no
+            equipment.
+          - total_equipment_cost: STRING. "$0" when no equipment in
+            the budget.
+          - equipment_threshold_applied: STRING or null.
+          - domestic_travel: JSON ARRAY of {destination, purpose,
+            travelers, duration_days, cost_breakdown} objects. Empty
+            array when no domestic travel.
+          - foreign_travel: JSON ARRAY of same shape. Empty array
+            when no foreign travel.
+          - total_domestic_travel_cost: STRING. "$0" when no
+            domestic travel.
+          - total_foreign_travel_cost: STRING. "$0" when no
+            foreign travel.
+          - is_foreign_travel_restricted: BOOLEAN or null.
+          - travel_cost_basis: STRING (GSA rates, quotes, etc.).
+          - section_d_narrative: STRING. Use "No equipment costs are
+            requested for this project." when equipment_items is
+            empty.
+          - section_e_domestic_narrative: STRING. Use "No domestic
+            travel costs are requested for this project." when
+            domestic_travel is empty.
+          - section_e_foreign_narrative: STRING. Use "No foreign
+            travel costs are requested for this project." when
+            foreign_travel is empty.
+
+          ## Output
+
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-participant-support-and-odc
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are extracting participant support and Other Direct
+          Costs data AND generating professional justification
+          narrative for Sections F (Participant/Trainee Support) and
+          G (Other Direct Costs subcategories G.1-G.9).
+
+          Be 100% accurate. Preserve monetary amounts verbatim.
+
+          ## Budget format handling
+
+          (A) Numbered-section budget worksheets (HUD-424-CBW, DOI,
+              USDA, ED, EPA, HHS, DOE non-research, DOD non-research,
+              cooperative-agreement variants):
+              - Section 5 (Supplies and Materials, subsections 5a
+                Consumable + 5b Non-Consumable) -> materials_and_supplies.
+              - Section 6 (Consultants) -> consultant_services.
+              - Section 7 (Contracts and Sub-Grantees) -> subaward_details.
+              - Section 9 (Other Direct Costs) -> other_direct_costs_other.
+          (B) SF-424 R&R Budget (Detailed) format (NSF, NIH, DOE
+              research, DOD research, EPA research):
+              - Line F (Participant Support) -> participant_support_costs.
+              - Line G subcategories G.1 through G.9 (G.5 Subawards
+                maps to subaward_details).
+          (C) PHS-398 Modular and SF-424A: similar with abbreviated
+              detail.
+
+          For numbered-section format (A) specifically:
+          - Section 5 "Subtotal - Consumable Supplies" + "Subtotal -
+            Non-Consumable Materials" go into materials_and_supplies[]
+            with category labels from the budget. The "Total Supplies
+            and Materials Cost" row -> sum these into G.1.
+          - Section 7 "Contracts and Sub-Grantees" each unique
+            institution = one subaward_details entry. Aggregate all
+            lines for one institution (salary + fringe + indirect)
+            into that institution's total_cost.
+
+          ## CRITICAL — subaward total formula + $25K threshold
+
+            subaward total_cost = subawardee salary + subawardee fringe
+                                + subawardee indirect (NOT including
+                                  prime indirect on the subaward)
+
+          CRITICAL: A narrative phrase like "first $25,000 of our
+          subcontract with X" describes the PRIME institution's MTDC
+          base for ITS OWN indirect calculation — that $25,000 is NOT
+          a separate subaward cost line, and the prime's indirect on
+          that $25K is NOT part of the subaward total. Both belong to
+          the PRIME's Section H Indirect Costs (handled by the
+          extract-indirect-and-summary task), NOT here.
+
+          Set under_25k_mtdc and over_25k_mtdc to split the subaward
+          amount: under_25k_mtdc is min(total_cost, $25,000);
+          over_25k_mtdc is max(0, total_cost - $25,000). These help
+          the indirect-cost task compute the prime's MTDC base.
+
+          ## CRITICAL — numbered-section format Section 5 worked example
+
+          Numbered-section Section 5 line items go into `materials_and_supplies[]`. Each
+          non-zero Section 5 line is one entry. ALWAYS populate this
+          array when ANY Section 5 / 5a / 5b row has a non-zero
+          Estimated Cost — DO NOT emit an empty array if Section 5
+          totals are non-zero.
+
+          Worked example (numbered-section budget worksheet with $207.20 in Section 5 supplies):
+          - Section 5a Consumable Supplies rows:
+              "Dallas Central Appraisal District data" $137.80
+              "Dallas Central Appraisal District GIS data" $69.40
+          - "Subtotal - Consumable Supplies" $207.20
+          - materials_and_supplies = [
+              {category: "Dallas Central Appraisal District data", cost: "$137.80"},
+              {category: "Dallas Central Appraisal District GIS data", cost: "$69.40"}
+            ]
+          - The G.1 subcategory total = $207.20 (used in
+            total_other_direct_costs and downstream Section H MTDC base).
+
+          Worked example — WRONG (emitting empty array when supplies
+          exist):
+          - materials_and_supplies = []
+          - This is WRONG when numbered-section format Section 5 / SF-424 R&R line G.1 has
+            ANY non-zero line items. The resulting G.1 narrative would
+            say "No costs are requested" even though the budget shows
+            $207.20, contradicting Section H's MTDC base computation.
+
+          ## CRITICAL — numbered-section format Section 7 worked example
+
+          Section 7 ("Contracts and Sub-Grantees") line items go into
+          `subaward_details[]`. Aggregate ALL lines for one institution
+          (salary + fringe + sub-indirect) into that institution's
+          total_cost. ALWAYS populate this array when ANY Numbered-section format Section 7 row
+          has a non-zero Estimated Cost — DO NOT emit an empty array if
+          Section 7 totals are non-zero.
+
+          Worked example (numbered-section budget worksheet with one Towson University subaward):
+          - Section 7 rows:
+              "Towson University-Dr. Eric Stokan-Salary Hours" 624 hours
+                @ $38.75 = $24,180.00
+              "Towson University-Dr. Eric Stokan-Fringe" 8% on $24,180
+                = $1,934.40
+              "Towson University-Indirect Rate" 46.5% on $26,114.40
+                = $12,143.20
+          - "Total Subcontracts Cost" $38,257.60
+          - subaward_details = [{
+              institution: "Towson University",
+              pi: "Dr. Eric Stokan",
+              scope: "<from narrative>",
+              total_cost: "$38,257.60",
+              under_25k_mtdc: "$25,000.00",
+              over_25k_mtdc: "$13,257.60"
+            }]
+          - total_subaward_costs = "$38,257.60"
+
+          Worked example — WRONG (emitting empty array when subawards
+          exist):
+          - subaward_details = []
+          - This is WRONG when numbered-section format Section 7 / SF-424 R&R line G.5 has
+            ANY non-zero subaward lines. The resulting G.5 narrative
+            would say "No costs are requested" even though Task 4's
+            Section H narrative correctly references the subaward —
+            causing a contradiction in the final deliverable.
+
+          Worked example — CORRECT (Towson sub):
+          - Stokan salary at Towson = $24,180.00
+          - Stokan fringe at Towson (8%) = $1,934.40
+          - Towson's own indirect (46.5% on $26,114.40) = $12,143.20
+          - subaward_details[0] = {
+              institution: "Towson University",
+              pi: "Dr. Eric Stokan",
+              scope: "<from narrative>",
+              total_cost: "$38,257.60",
+              under_25k_mtdc: "$25,000.00",
+              over_25k_mtdc: "$13,257.60"
+            }
+          - total_subaward_costs = "$38,257.60"
+
+          Worked example — WRONG ($75,132.60):
+          - Including the $25,000 threshold as a separate cost AND
+            including the prime's 47.5% indirect on that $25K
+            ($11,875) as a subaward cost gives $38,257.60 + $25,000 +
+            $11,875 = $75,132.60 [WRONG]. Both extras belong to the
+            PRIME's Section H, not to the subaward.
+
+          ## Other Direct Costs total formula
+
+            total_other_direct_costs = sum of:
+              materials_and_supplies totals
+              + publication_costs (or 0 if null)
+              + consultant_services totals
+              + adp_computing_services (or 0 if null)
+              + total_subaward_costs
+              + equipment_rental (or 0 if null)
+              + alterations_renovations (or 0 if null)
+              + tuition_remission (or 0 if null)
+              + other_direct_costs_other totals
+
+          Always emit a dollar string. "$0" when all subcategories
+          are zero. Never null.
+
+          Emit a JSON object with:
+
+          - participant_support_costs: JSON ARRAY of {category, cost}
+            objects. Empty array when no participant support.
+          - total_participant_support: STRING. "$0" when empty.
+          - materials_and_supplies: JSON ARRAY of {category, cost}
+            objects. Each Section 5 line item is one entry.
+          - publication_costs: STRING or null.
+          - consultant_services: JSON ARRAY of {name_or_tbd, rate,
+            days, total, scope} objects. Empty array when none.
+          - adp_computing_services: STRING or null.
+          - subaward_details: JSON ARRAY of {institution, pi, scope,
+            total_cost, under_25k_mtdc, over_25k_mtdc} objects. Apply
+            the formula above. Empty array when no subawards.
+          - total_subaward_costs: STRING. Apply the formula above.
+            "$0" when no subawards. Never null.
+          - equipment_rental: STRING or null.
+          - alterations_renovations: STRING or null.
+          - tuition_remission: STRING or null.
+          - other_direct_costs_other: JSON ARRAY of {category, cost}
+            objects. Empty array when none.
+          - total_other_direct_costs: STRING. Apply the formula above.
+            Never null.
+          - section_f_narrative: STRING — NEVER null. Use "No
+            participant/trainee support costs are requested for this
+            project." when participant_support_costs is empty. When
+            participant support costs exist, write professional
+            Section F prose listing the categories and totals.
+          - section_g_narrative: STRING — NEVER null. MUST contain
+            G.1 through G.9 subsections with `### G.N <subcategory name>`
+            headers, in order. Default template when ALL G subcategories
+            are empty:
+
+                ### G.1 Materials and Supplies
+                No costs are requested for this category.
+
+                ### G.2 Publication Costs
+                No costs are requested for this category.
+
+                ### G.3 Consultant Services
+                No costs are requested for this category.
+
+                ### G.4 ADP/Computing Services
+                No costs are requested for this category.
+
+                ### G.5 Subawards
+                No costs are requested for this category.
+
+                ### G.6 Equipment Rental
+                No costs are requested for this category.
+
+                ### G.7 Alterations/Renovations
+                No costs are requested for this category.
+
+                ### G.8 Tuition Remission
+                No costs are requested for this category.
+
+                ### G.9 Other Direct Costs
+                No costs are requested for this category.
+
+            For non-empty subcategories, replace "No costs are requested"
+            with professional prose describing the costs:
+            - G.1: list each materials_and_supplies entry with its cost.
+            - G.5: name each subawardee institution, the Sub-PI, the
+              scope, and the total_cost.
+            - etc.
+
+          ## Output
+
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-indirect-and-summary
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are extracting indirect cost, cost share, and budget
+          summary data AND generating professional justification
+          narrative for Section H (Indirect Costs), Cost Sharing,
+          and Budget Summary. Check the NOFO for F&A caps, cost
+          share requirements, and formatting rules.
+
+          Be 100% accurate. Preserve monetary amounts verbatim.
+
+          ## CRITICAL — Section H is PRIME indirect ONLY
+
+            total_indirect_costs = (prime indirect rate) * (prime MTDC base)
+
+          Section H of the budget justification shows ONLY the PRIME
+          institution's indirect costs. Each subawardee's own indirect
+          (e.g., Towson's 46.5% on Stokan's salary+fringe) is part of
+          that subaward's total_cost (handled by the
+          extract-participant-support-and-odc task), NOT part of the
+          project's Section H.
+
+          If you add subawardee sub-indirect to total_indirect_costs,
+          you have double-counted. The subaward's full cost
+          ($38,257.60) already includes the subawardee's $12,143.20
+          indirect — counting that $12,143.20 again in Section H
+          inflates the project total.
+
+          ## prime MTDC base FORMULA
+
+            prime_MTDC_base = total_senior_personnel_cost (PRIME ONLY)
+                            + total_other_personnel_cost (PRIME ONLY)
+                            + total_fringe_benefits (PRIME ONLY)
+                            + materials_and_supplies totals
+                            + publication_costs
+                            + consultant_services totals (subject to
+                              the institution's MTDC inclusion policy)
+                            + adp_computing_services
+                            + first $25,000 of EACH subaward
+                              (under_25k_mtdc from each
+                              subaward_details entry)
+
+          ## CRITICAL — anti-double-count rules for MTDC base
+
+          (a) total_senior_personnel_cost in the MTDC base is PRIME
+              INSTITUTION SALARIES ONLY. EXCLUDE every Sub-PI / Co-PI
+              salary at a subawardee institution — their salary is
+              captured inside the subaward's total_cost (which is
+              reported in G.5), and the first $25K of that subaward is
+              already added separately to the MTDC base. Counting the
+              subawardee salary AGAIN inside personnel double-counts.
+
+          (b) total_fringe_benefits in the MTDC base is PRIME FRINGE
+              ONLY. Subaward fringe is part of the subaward total
+              (already counted via first-$25K), not part of prime
+              fringe.
+
+          (c) Self-check after computing: if your prime_MTDC_base
+              INCLUDES a subawardee salary line OR a subawardee fringe
+              line, you have double-counted. Subtract them out and
+              recompute.
+
+          Worked example — CORRECT (prime is University of Idaho;
+          Stokan is Co-PI at Towson via subaward):
+          - Prime personnel (UI only): $52,947.00 + $34,057.44 +
+            $17,100.16 = $104,104.60
+          - Prime fringe (25.9% on UI salaries): $26,963.09
+          - Materials & supplies (UI): $207.20
+          - First $25,000 of Towson $38,257.60 subaward: $25,000.00
+          - prime_MTDC_base = $104,104.60 + $26,963.09 + $207.20
+                            + $25,000.00 = $156,274.89
+          - total_indirect_costs = 0.475 * $156,274.89 = $74,230.57
+
+          Worked example — WRONG (Stokan double-counted into prime
+          personnel and fringe):
+          - All-personnel salaries (UI + Stokan):
+              $52,947.00 + $24,180.00 + $34,057.44 + $17,100.16
+              = $128,284.60
+          - All-personnel fringe:
+              $26,963.09 (UI at 25.9%) + $1,934.40 (Stokan at 8%)
+              = $28,897.49
+          - Materials & supplies: $207.20
+          - First $25,000 of Towson subaward: $25,000.00
+          - prime_MTDC_base = $128,284.60 + $28,897.49 + $207.20
+                            + $25,000.00 = $182,389.29 [WRONG]
+          - total_indirect_costs = 0.475 * $182,389.29 = $86,634.91
+            [WRONG]
+          - This is WRONG because Stokan's salary ($24,180.00) and
+            fringe ($1,934.40) are ALREADY part of the Towson
+            subaward total ($38,257.60) reported in G.5. The first
+            $25,000 of that subaward total ALREADY enters the MTDC
+            base. Adding Stokan's individual salary and fringe AGAIN
+            to personnel and fringe lines triple-counts (subaward
+            total contains them, the $25K threshold abstracts them,
+            AND the personnel line lists them).
+
+          Prime MTDC base TYPICALLY EXCLUDES:
+          - Equipment
+          - Capital expenditures
+          - Patient care costs
+          - Subaward amounts BEYOND the first $25,000 per subaward
+            (over_25k_mtdc from each subaward_details entry)
+          - Tuition remission
+          - Rental of off-site facilities
+
+          ## Section H worked example — CORRECT
+
+          For the prime UI with one Towson subaward:
+          - prime_MTDC_base = $104,104.60 (UI personnel)
+                            + $26,963.09 (UI fringe)
+                            + $207.20 (UI supplies)
+                            + $25,000.00 (first $25K of $38,257.60
+                              Towson subaward)
+                            = $156,274.89
+          - total_indirect_costs = 0.475 * $156,274.89 = $74,230.57
+            (PRIME ONLY — does NOT include Towson's $12,143.20
+            sub-indirect, which is already inside the $38,257.60
+            subaward total in G.5.)
+
+          ## Section H worked example — WRONG ($86,274.65)
+
+          - Computing UI's indirect on a base that misses the $207.20
+            supplies: $156,067.69 * 47.5% = $74,132.15
+          - Then adding Towson's own indirect: $74,132.15 + $12,143.20
+            = $86,275.35 ≈ $86,274.65 [WRONG]
+          - This double-counts: Towson's $12,143.20 is already part
+            of the $38,257.60 subaward total reported in G.5.
+            Including it again in Section H inflates the project's
+            indirect costs.
+
+          ## total_direct_costs FORMULA
+
+            total_direct_costs = total_senior_personnel_cost
+                               + total_other_personnel_cost
+                               + total_fringe_benefits
+                               + total_equipment_cost
+                               + total_domestic_travel_cost
+                               + total_foreign_travel_cost
+                               + total_participant_support
+                               + total_other_direct_costs
+                                 (which already includes
+                                  total_subaward_costs via G.5)
+
+          PRIORITY ORDER:
+          1. If the budget has an explicit "Subtotal of Direct Costs"
+             / "Total Direct Costs" / "K. Total Direct Costs" line in
+             the extracted text, USE THAT LINE VERBATIM.
+          2. Otherwise COMPUTE using the formula above. Never emit
+             null.
+
+          Worked example:
+          - $104,104.60 (UI personnel) + $26,963.09 (UI fringe) + $0
+            (equipment) + $0 (travel) + $0 (participant)
+            + $38,464.80 ($207.20 supplies + $38,257.60 subaward in G)
+            = $169,532.49
+
+          ## total_project_costs FORMULA
+
+            total_project_costs = total_direct_costs + total_indirect_costs
+
+          PRIORITY ORDER:
+          1. If the budget has an explicit "Total Estimated Costs" /
+             "Total Project Cost" / "Total Direct and Indirect Costs"
+             line, USE THAT LINE VERBATIM (including cents).
+          2. Otherwise compute. Never emit null.
+
+          Worked example:
+          - $169,532.49 + $74,230.57 = $243,763.06
+
+          Emit a JSON object with:
+
+          - fa_rate_percentage: STRING. The PRIME's F&A rate
+            (e.g., "47.5%"). Subawardee rates are noted in
+            fa_rate_type, not here.
+          - fa_base_type: STRING (MTDC, TDC, Salaries & Wages, etc.).
+          - fa_rate_type: STRING (on-campus, off-campus, federally
+            negotiated, etc.). When prime and subaward institutions
+            have different rates, mention both
+            (e.g., "47.5% MTDC federally negotiated (prime,
+            University of Idaho); 46.5% (Towson University
+            subaward — accounted for inside G.5 subaward total)").
+          - mtdc_base_exclusions: JSON ARRAY of STRINGS.
+          - is_fa_rate_capped: BOOLEAN or null.
+          - fa_rate_cap_details: STRING or null.
+          - total_direct_costs: STRING. Apply the formula above.
+            Never null.
+          - total_indirect_costs: STRING. Apply the formula above.
+            PRIME ONLY. Never null.
+          - total_project_costs: STRING. Apply the formula above.
+            Never null.
+          - cost_share_required: BOOLEAN or null.
+          - cost_share_amount: STRING or null.
+          - cost_share_type: STRING or null.
+          - cost_share_sources: JSON ARRAY of STRINGS or empty.
+          - budget_period_summary: JSON ARRAY of {period,
+            direct_costs, indirect_costs, total} objects for
+            multi-year budgets, or empty for single-year.
+          - year_over_year_variations: STRING or null.
+          - nofo_budget_rules: JSON ARRAY of STRINGS or empty.
+          - nofo_page_limit_for_justification: STRING or null.
+          - section_h_narrative: STRING. H. Indirect Costs prose
+            showing the prime's MTDC calculation. Reference the
+            formula above explicitly. Do NOT add subawardee
+            sub-indirect to the project's indirect — note that it's
+            already accounted for inside the subaward total in G.5.
+          - cost_share_narrative: STRING. Use "No cost sharing is
+            required for this project and none is proposed." when
+            not required.
+          - budget_summary_narrative: STRING. Overview paragraph
+            with totals and year-over-year explanation.
+
+          ## Output
+
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+  - name: Consolidation (Markdown deliverable)
+    is_output: true
+    tasks:
+      - name: budget-justification-consolidation
+        kind: Prompt
+        input_source: step_input
+        prompt_inline: |
+          You are the consolidation step of the Budget Justification
+          Generator workflow. You receive FOUR JSON object fragments
+          from the previous step:
+
+          1. Personnel & Fringe (project_title, pi_name,
+             sponsoring_agency, senior_key_personnel, other_personnel,
+             total_senior_personnel_cost, total_other_personnel_cost,
+             fringe_benefit_rates, total_fringe_benefits,
+             is_salary_cap_applicable, salary_cap_amount,
+             is_multi_year_budget, year_over_year_personnel_changes,
+             section_a_narrative, section_b_narrative,
+             section_c_narrative)
+          2. Equipment & Travel (equipment_items, total_equipment_cost,
+             equipment_threshold_applied, domestic_travel,
+             foreign_travel, total_domestic_travel_cost,
+             total_foreign_travel_cost, is_foreign_travel_restricted,
+             travel_cost_basis, section_d_narrative,
+             section_e_domestic_narrative, section_e_foreign_narrative)
+          3. Participant Support & ODC (participant_support_costs,
+             total_participant_support, materials_and_supplies,
+             publication_costs, consultant_services,
+             adp_computing_services, subaward_details,
+             total_subaward_costs, equipment_rental,
+             alterations_renovations, tuition_remission,
+             other_direct_costs_other, total_other_direct_costs,
+             section_f_narrative, section_g_narrative)
+          4. Indirect Costs & Summary (fa_rate_percentage, fa_base_type,
+             fa_rate_type, mtdc_base_exclusions, is_fa_rate_capped,
+             fa_rate_cap_details, total_direct_costs,
+             total_indirect_costs, total_project_costs,
+             cost_share_required, cost_share_amount, cost_share_type,
+             cost_share_sources, budget_period_summary,
+             year_over_year_variations, nofo_budget_rules,
+             nofo_page_limit_for_justification, section_h_narrative,
+             cost_share_narrative, budget_summary_narrative)
+
+          Assemble the publication-ready Markdown budget-justification
+          narrative in standard R&R Budget / SF-424A category order
+          (A through I + Cost Sharing + Budget Summary), with a
+          Cross-Validation Notes section at the end marked as RA-only.
+
+          ## CRITICAL — Cross-validation
+
+          Let:
+            P = total_senior_personnel_cost + total_other_personnel_cost
+              + total_fringe_benefits        (Personnel & Fringe subtotal)
+            N = total_equipment_cost + total_domestic_travel_cost
+              + total_foreign_travel_cost + total_participant_support
+              + total_other_direct_costs     (Non-personnel direct subtotal)
+
+          Render PASS/FAIL with the ACTUAL arithmetic shown:
+
+          1. Personnel & Fringe subtotal: PASS/FAIL
+             ("$X + $Y + $Z = $P")
+          2. Non-personnel direct subtotal: PASS/FAIL
+             ("$A + $B + $C + $D + $E = $N")
+          3. Total Direct Costs: PASS/FAIL
+             ("expected P + N = $(P+N), stated total_direct_costs = $X")
+             PASS when (P + N) == total_direct_costs to the cent.
+          4. Total Project Costs: PASS/FAIL
+             ("expected total_direct_costs + total_indirect_costs =
+              $(D+I), stated total_project_costs = $X")
+             PASS when (total_direct_costs + total_indirect_costs) ==
+             total_project_costs.
+
+          The Total Direct check MUST add the Non-personnel direct
+          subtotal to the Personnel & Fringe subtotal — do NOT compare
+          Personnel & Fringe alone against total_direct_costs.
+
+          DO NOT alter any dollar amounts to make math work. Flag
+          discrepancies in CROSS-VALIDATION NOTES with PASS/FAIL
+          format and the actual numbers.
+
+          CRITICAL — null handling for arithmetic checks:
+          - When `total_other_personnel_cost` is null, treat as $0 for
+            arithmetic purposes (a budget with no Section B / other
+            personnel genuinely has $0 in that category, not unknown).
+          - Same for any other category total that is null but
+            semantically means $0 (e.g., total_participant_support null
+            when participant_support_costs is empty).
+          - Never render "Not specified in the document" inside an
+            arithmetic check expression — substitute $0 and proceed
+            with the check.
+
+          Worked example — CORRECT (null other_personnel treated as $0):
+          - "Personnel & Fringe subtotal: PASS ($104,104.60 + $0 +
+            $26,963.09 = $131,067.69)"
+
+          Worked example — WRONG (null surfaced as "Not specified"):
+          - "Personnel & Fringe subtotal: FAIL ($104,104.60 + Not
+            specified in the document + $26,963.09 = Not computable)"
+          - The check is unhelpful — the RA gets "Not computable" with
+            no actionable signal. Substitute $0 and emit PASS/FAIL based
+            on the real arithmetic.
+
+          ## CRITICAL — ALWAYS RENDER THE DELIVERABLE
+
+          You MUST render the FULL Markdown deliverable structure (every
+          section listed below), EVEN WHEN some fragment fields arrive
+          as null, empty, missing, or sparse. NEVER refuse to render
+          with apologetic prose like "The provided context does not
+          contain the required information." That output is unusable —
+          the operator needs the full structure with placeholders so
+          they can see which fields need to be chased.
+
+          Substitution rules when a field is null or missing:
+          - Required scalar fields: substitute the literal string
+            "Not specified in the document".
+          - Optional table cells: substitute "—" (em dash).
+          - Empty arrays: render the section with its empty-state
+            language already specified below.
+
+          If EVERY field across ALL upstream fragments is null (which
+          means the document genuinely contained nothing extractable
+          OR the document was not attached to the run), STILL render
+          the full Markdown structure with "Not specified in the
+          document" placeholders throughout, AND append a single line
+          at the very end of the deliverable:
+
+          > ⚠️ The upstream extraction returned no data from the
+          > uploaded document. Verify the document was attached and
+          > re-run the workflow.
+
+          ## Required structure (in this exact order)
+
+          ```
+          BUDGET JUSTIFICATION
+          ====================
+          ```
+
+          (Use literal `=` underline in the title block — this matches
+          source consolidation.md template.)
+
+          <project_title or "Not specified in the document">
+          <pi_name or "Not specified in the document">
+
+          **[FORMATTING ADVISORY — include this block ONLY when
+          `nofo_budget_rules` or `nofo_page_limit_for_justification`
+          is populated. Otherwise OMIT entirely.]**
+
+          - Page limit: <nofo_page_limit_for_justification>
+          - Other formatting requirements: <bullets from nofo_budget_rules>
+
+          ---
+
+          ## A. SENIOR/KEY PERSONNEL
+
+          <section_a_narrative>
+
+          ---
+
+          ## B. OTHER PERSONNEL
+
+          <section_b_narrative>
+
+          ---
+
+          ## C. FRINGE BENEFITS
+
+          <section_c_narrative>
+
+          **Personnel Summary Table:**
+
+          | Name | Role | Person-Months | Effort (hours) | Requested Salary | Fringe | Total |
+          |---|---|---|---|---|---|---|
+
+          One row per senior_key_personnel entry. For each row:
+          - Person-Months column: person_months value or "—" when null.
+          - Effort (hours) column: effort_hours value or "—" when null.
+          - Fringe column: derive per person from the
+            fringe_benefit_rates[] array. Match the person's
+            institution to the rate's institution context (e.g., UI
+            faculty get 25.9%; Towson subawardee gets 8%). Compute
+            fringe = requested_salary * applicable_rate and render as
+            $X,XXX.XX. Render "—" ONLY when no fringe rate can be
+            matched to the person's institution.
+
+            Example: Stokan at Towson (8%) on $24,180.00 salary
+            yields fringe = $1,934.40 (NOT "—"). Overton at UI
+            (25.9%) on $52,947.00 yields fringe = $13,713.27.
+          - Total column: requested_salary + fringe (computed numeric
+            sum). Render "—" for the total ONLY when fringe is "—".
+
+          Add an aggregated row per other_personnel category. Add a
+          total row at the bottom showing total_senior_personnel_cost +
+          total_other_personnel_cost + total_fringe_benefits.
+
+          ---
+
+          ## D. EQUIPMENT
+
+          <section_d_narrative>
+
+          ---
+
+          ## E. TRAVEL
+
+          ### Domestic Travel
+
+          <section_e_domestic_narrative>
+
+          ### Foreign Travel
+
+          <section_e_foreign_narrative>
+
+          **Travel Summary Table:**
+
+          | Destination | Purpose | Travelers | Duration | Cost |
+          |---|---|---|---|---|
+
+          One row per domestic_travel + foreign_travel entry. Add a
+          total row at the bottom. If both arrays are empty, render a
+          single row "| — | — | — | — | $0 |" plus a "Total: $0" row.
+
+          ---
+
+          ## F. PARTICIPANT/TRAINEE SUPPORT COSTS
+
+          <section_f_narrative>
+
+          ---
+
+          ## G. OTHER DIRECT COSTS
+
+          <section_g_narrative — already contains ### G.1 through
+          ### G.9 subsections from the upstream task>
+
+          **Other Direct Costs Summary Table:**
+
+          | Subcategory | Amount |
+          |---|---|
+
+          One row per G subcategory (G.1 Materials, G.2 Publications,
+          G.3 Consultants, G.4 ADP, G.5 Subawards, G.6 Equipment Rental,
+          G.7 Alterations, G.8 Tuition Remission, G.9 Other) showing
+          the totaled amount for that subcategory. Add a total row at
+          the bottom matching total_other_direct_costs.
+
+          ---
+
+          ## H. INDIRECT COSTS (FACILITIES & ADMINISTRATIVE)
+
+          <section_h_narrative>
+
+          ---
+
+          ## COST SHARING
+
+          <cost_share_narrative>
+
+          ---
+
+          ## BUDGET SUMMARY
+
+          <budget_summary_narrative>
+
+          **Budget Summary Table:**
+
+          When budget_period_summary is non-empty (multi-year):
+
+          | Period | Direct Costs | Indirect Costs | Total |
+          |---|---|---|---|
+
+          One row per period entry + total row.
+
+          When single-year, render a one-row total:
+
+          | Year 1 | <total_direct_costs> | <total_indirect_costs> | <total_project_costs> |
+
+          ---
+
+          ## CROSS-VALIDATION NOTES
+
+          **For the RA's internal review only — NOT for submission to
+          the sponsor.**
+
+          ### Arithmetic Checks
+
+          - **Personnel & Fringe subtotal:** PASS/FAIL ($X + $Y + $Z = $W)
+          - **Non-personnel direct subtotal:** PASS/FAIL (sum = $X)
+          - **Total Direct Costs:** PASS/FAIL ($X expected, $Y stated)
+          - **Total Project Costs:** PASS/FAIL ($X expected, $Y stated)
+
+          ### Items Requiring PI Clarification
+
+          Bulleted list of any placeholder text ("clarification needed
+          from PI", "Not specified in the document") found in the
+          narratives. If none, state "No items requiring PI
+          clarification were identified."
+
+          ### Missing or Incomplete Sections
+
+          Bulleted list of any budget categories with $0 or empty
+          narrative when the budget genuinely shows zero for that
+          category. (A genuine $0 in equipment is not a missing
+          section; it's a correct rendering.) If all categories that
+          should have content do, state "All budget categories with
+          budgeted line items have been addressed."
+
+          ## Placement contract (enforce as you render)
+
+          1. **Personnel salaries (prime) appear ONLY in Section A
+             and Section C (fringe).** Subaward Co-PI salaries appear
+             in Section A (for listing) but their dollar contribution
+             to total project cost flows through G.5 Subawards, not
+             Section A totals.
+          2. **Subaward costs appear ONLY in G.5 Subawards.** The
+             full subaward amount (including the subawardee's own
+             indirect) is in G.5 — NOT in Section H.
+          3. **Section H Indirect Costs is the PRIME's indirect ONLY.**
+             Do not add subawardee sub-indirect to Section H — that's
+             already counted inside G.5.
+          4. **Equipment >= $5K appears ONLY in Section D.**
+          5. **Travel appears ONLY in Section E (Domestic / Foreign).**
+          6. **Use ONLY the four JSON fragments above. Do NOT
+             reference the original uploaded documents directly.** If
+             a field is absent from the fragments, render the
+             appropriate placeholder per the rules above — do not
+             infer, fabricate, or pull from prior knowledge of the
+             document text.
+
+          ## Rendering rules
+
+          - Use `##` for main section headings (A through H, Cost
+            Sharing, Budget Summary, Cross-Validation Notes).
+          - Use `###` for subsections (E. Domestic / Foreign Travel,
+            G.1-G.9 subcategories).
+          - Format dollar amounts as `$X,XXX.XX` consistently.
+          - Bold all field labels and totals.
+          - Horizontal rules between major sections.
+          - Title block uses `=` underline (plain-text style at the
+            top — not a Markdown header — matches source convention).
+          - Cross-Validation Notes section is the LAST section and
+            must be clearly marked as RA-only / not-for-submission so
+            an RA can delete everything from that heading down and
+            have a clean submission-ready document.
+          - If any field arrives as a nested JSON object, REWRITE
+            into prose / table.
+          - Do NOT modify dollar amounts to make math work. Flag.
+          - No JSON code fences around the output.
+
+evals:
+  workflow_local: true

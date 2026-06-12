@@ -1,0 +1,51 @@
+# Case identity
+case: nsf-r-and-r-stub
+source: "Placeholder case shell — to be replaced with a synthetic NSF R&R Budget + project narrative exercise (multi-year, with cost-sharing, multiple senior personnel + postdocs + grad students + one subaward) that exercises the seven-block JSON shape, the four arithmetic checks, and the FORMATTING ADVISORY block when the NOFO specifies page limits."
+source_url: "https://www.nsf.gov/publications/pub_summ.jsp?ods_key=pappg"
+retrieved: 2026-05-20
+
+# Which structural features of the input documents this case exercises.
+structural_features:
+  - nsf-r-and-r-budget-form
+  - multi-year-budget-with-period-summary
+  - senior-personnel-plus-postdocs-plus-grads
+  - one-subaward-over-25k-mtdc-threshold
+  - cost-sharing-with-sources
+  - nofo-page-limit-for-justification
+
+# Workflow-level behaviors this case targets. These are pipeline-level
+# checks that no single component's evals can cover (seven-block
+# consolidation, narrative-and-data extraction, arithmetic-check
+# generation, final document assembly in R&R / SF-424A order).
+workflow_features:
+  - seven_block_consolidation
+  - narrative_and_data_extraction_in_one_task
+  - quoted_dollar_to_json_number_conversion
+  - four_arithmetic_checks_generation
+  - final_document_markdown_assembly_r_and_r_order
+  - formatting_advisory_block_from_nofo_rules
+  - cross_validation_notes_below_main_narrative
+  - empty_section_narrative_defaults
+  - multi_year_budget_period_summary_population
+
+# Validation metadata — REQUIRED.
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-05-20
+validated_against_version: "0.1.0"
+component_versions_at_validation:
+  budget-justification-generator-udm: "0.1.0"
+
+# Optional free-form notes on what was confirmed, what was surprising,
+# what should be re-checked on the next revalidation pass.
+notes: |
+  Scaffolded case shell only. The expected.json, expected.md,
+  input-source.md, and three input-document fixtures (synthetic NSF
+  R&R Budget, synthetic project narrative, NSF PAPPG excerpt) will be
+  added once a Pre-Award Analyst has reviewed and validated the
+  consolidated workflow output end-to-end (both the structured JSON and
+  the rendered Markdown document). This stub exists so the workflow can
+  declare workflow_local: true per docs/contracts.md while the real case
+  is being assembled in evaluation-data-sets. Additional case shells
+  should follow for the arithmetic-discrepancy edge case, the
+  single-year-baseline case, and the NOFO-page-limit case once the
+  first shell is validated.

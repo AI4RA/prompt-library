@@ -1,0 +1,352 @@
+# Authored source for the Compliance Personnel Verification (SFI & RST) Vandalizer workflow.
+#
+# The companion compliance-personnel-verification.vandalizer.json is
+# generated from this file by scripts/build_vandalizer_workflows.py and
+# committed alongside. Never hand-edit the generated JSON — update this
+# manifest and rebuild.
+#
+# === Topology (v0.2.0, Variant A + KB injection) ===
+#
+# v0.2.0 changes vs. v0.1.0:
+#   1. Parallel Extraction tasks converted to Prompt tasks (full-document
+#      NLU reading).
+#   2. Output contract changed to RA-friendly Markdown Compliance Status
+#      Report (mirroring source consolidation.md — six SECTIONs).
+#   3. Step 0 KnowledgeBaseQuery added — Financial Conflict of Interest
+#      (FCOI) is the primary KB hint since SFI disclosure is the heavier
+#      compliance lift; pair with RCR if needed by swapping the KB.
+#
+# Multi-source input model preserved: operator uploads three workflow
+# documents together (VERAS, SFI records, RST spreadsheet). Missing
+# inputs produce non-compliant defaults plus a notes gap-flag — the
+# contract never silently assumes compliance.
+#
+# Step 1  Knowledge Base Context Lookup
+# Step 2  Parallel Extraction (2 Prompt tasks)
+# Step 3  Consolidation (Markdown deliverable)
+
+name: Compliance Personnel Verification (SFI & RST)
+description: >
+  Uploads three workflow documents together — the VERAS proposal
+  package, the institutional SFI disclosure records, and the most
+  recent daily RST completion spreadsheet — and returns an RA-friendly
+  Markdown Compliance Status Report covering the per-person SFI / RST
+  status matrix, summary counts, action items for non-compliant
+  personnel, discrepancies & warnings, and a completion checklist.
+  Mirrors the source ui-insight/ProcessMapping
+  compliance-personnel-verification consolidation.md conventions.
+
+workflow_version: 0.2.0
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-05-20
+updated: 2026-05-22
+
+components:
+  - slug: compliance-personnel-verification-udm
+    pinned_version: 0.1.0
+
+validation_plan:
+  - check_id: CHK-01
+    check_name: Personnel list consistency
+    check_type: completeness
+    check_description: Verify Section 6.6 and Section 2 personnel are cross-referenced and consolidated in the Markdown report.
+    target_fields: []
+    severity: error
+  - check_id: CHK-02
+    check_name: SFI verification completeness
+    check_type: completeness
+    check_description: Verify every person on the consolidated list has an SFI status row in the matrix.
+    target_fields: []
+    severity: error
+  - check_id: CHK-03
+    check_name: RST verification completeness
+    check_type: completeness
+    check_description: Verify every person on the consolidated list has an RST status row in the matrix.
+    target_fields: []
+    severity: error
+  - check_id: CHK-04
+    check_name: SFI expiration date check
+    check_type: format
+    check_description: Verify SFI disclosure dates are evaluated against a 365-day validity window.
+    target_fields: []
+    severity: error
+
+steps:
+  - name: Knowledge Base Context Lookup
+    tasks:
+      - name: kb-context-lookup
+        kind: KnowledgeBaseQuery
+        query: "significant financial interest SFI disclosure research security training RST conflict of interest 365 day validity window federal research proposal compliance VERAS Section 6.6 Section 2 personnel disclosure RCR"
+        k: 8
+        knowledge_base_hint:
+          title: "Financial Conflict of Interest (FCOI)"
+          description: >
+            Primary KB for SFI disclosure compliance — the heavier of
+            the two compliance checks. For RST-focused runs, swap in
+            Responsible Conduct of Research (RCR). When the operator
+            does not attach a KB, this step returns empty output
+            gracefully and the downstream extractions fall back to
+            reading just the uploaded workflow documents.
+
+  - name: Parallel Extraction (Prompt)
+    tasks:
+      - name: extract-personnel-identification
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are extracting the personnel identification block from
+          a VERAS proposal package. You receive the workflow documents
+          AND any KB chunks the previous step retrieved.
+
+          Sources you need to find IN the uploaded workflow documents:
+          - VERAS Section 6.6 (SFI Disclosures) — lists every person
+            on the project who requires an SFI disclosure
+          - VERAS Section 2 (PI and Senior Key Personnel) — lists PI,
+            Co-PIs, and senior / key personnel with roles and
+            departments
+          - Proposal Information (cover page) — proposal_type and
+            sponsor_type
+
+          Be 100% accurate. Quote names verbatim. Do not invent
+          personnel. Use null when a field is absent.
+
+          Emit a JSON object with these keys:
+
+          - section_66_personnel: JSON ARRAY of STRINGS (names in
+            Section 6.6 requiring SFI disclosures). Empty array when
+            Section 6.6 is not present.
+          - section_2_personnel: JSON ARRAY of {name, role, department}
+            objects from VERAS Section 2. role is one of "PI", "Co-PI",
+            "Senior/Key Personnel". department is null when not stated.
+            MUST contain at least one entry.
+          - consolidated_personnel: deduplicated union as JSON ARRAY
+            of {name, role, department, source_sections} objects.
+            source_sections is an array of one or both of "6.6", "2".
+          - proposal_identifier: STRING. Proposal identifier (number or
+            title abbreviation). null when absent.
+          - sponsor_name: STRING. Sponsor / agency name. null when
+            absent.
+          - proposal_type: STRING — one of "Research", "Non-Research",
+            "Not specified".
+          - sponsor_type: STRING — one of "Federal", "State",
+            "Non-Federal", "Not specified".
+          - sfi_rst_required: BOOLEAN. true ONLY when proposal_type ==
+            "Research" AND sponsor_type == "Federal".
+          - personnel_discrepancies: JSON ARRAY of STRINGS describing
+            differences between Section 6.6 and Section 2 lists.
+            Empty array when the lists match.
+
+          ## Output
+
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-compliance-status
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are verifying SFI disclosure and RST completion status
+          for every person named on the federal research proposal.
+          You receive the workflow documents AND any KB chunks.
+
+          Sources to read FROM the uploaded workflow documents:
+          - Institutional SFI disclosure records (export, scanned, or
+            extracted)
+          - Most recent daily RST completion spreadsheet from UI Bridge
+
+          Be 100% accurate. Quote dates verbatim and convert to ISO
+          YYYY-MM-DD. Do NOT assume compliance — a person missing from
+          the SFI records is "Not Found" (NOT "Valid"); a person
+          missing from the RST spreadsheet is "Incomplete" (NOT
+          "Complete"). Ambiguous name matches emit status "Review
+          Required" — never guess.
+
+          When a source document is not provided, emit non-compliant
+          defaults and capture the gap in notes_about_missing_sources.
+
+          Emit a JSON object with these keys:
+
+          - sfi_verification: JSON ARRAY of per-person
+            {name, disclosure_found, disclosure_date,
+             days_since_disclosure, valid_within_365_days, status}
+            objects. status is one of "Valid", "Expiring Soon",
+            "Expired", "Not Found", "Review Required".
+            disclosure_date is ISO YYYY-MM-DD or null.
+            days_since_disclosure is an integer or null.
+          - rst_spreadsheet_date: STRING ISO YYYY-MM-DD of the RST
+            spreadsheet used. null when not provided.
+          - rst_spreadsheet_source: STRING (e.g., "UI Bridge daily
+            export"). "Not provided" when missing.
+          - rst_records: JSON ARRAY of per-person
+            {name, found_in_spreadsheet, completion_date, status}
+            objects. status is one of "Complete", "Incomplete",
+            "Review Required".
+          - notes_about_missing_sources: STRING describing any source
+            document that was not provided; null when all sources are
+            present.
+
+          ## Output
+
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+  - name: Consolidation (Markdown deliverable)
+    is_output: true
+    tasks:
+      - name: compliance-personnel-verification-consolidation
+        kind: Prompt
+        input_source: step_input
+        prompt_inline: |
+          You are the consolidation step of the Compliance Personnel
+          Verification workflow. You receive TWO JSON object fragments
+          from the previous step (personnel identification + compliance
+          status).
+
+          Render a single RA-friendly Markdown Compliance Status
+          Report. The deliverable is Markdown — NOT a JSON object, NOT
+          a JSON code fence. Mirrors the source
+          ui-insight/ProcessMapping compliance-personnel-verification
+          consolidation.md exactly.
+
+          ## CRITICAL — ALWAYS RENDER THE DELIVERABLE
+
+          You MUST render the FULL Markdown deliverable structure (every
+          section listed below), EVEN WHEN some fragment fields arrive
+          as null, empty, missing, or sparse. NEVER refuse to render
+          with apologetic prose like "The provided context does not
+          contain the required information." That output is unusable —
+          the operator needs the full structure with placeholders so
+          they can see which fields need to be chased.
+
+          Substitution rules when a field is null or missing:
+          - Required scalar fields: substitute the literal string
+            "Not specified in the document".
+          - Optional table cells: substitute "—" (em dash).
+          - Empty arrays: render the section with its empty-state
+            language already specified below (e.g., "No items identified",
+            "Defers to federal defaults", "None identified beyond
+            standard federal requirements").
+
+          If EVERY field across ALL upstream fragments is null (which
+          means the document genuinely contained nothing extractable
+          OR the document was not attached to the run), STILL render
+          the full Markdown structure with "Not specified in the
+          document" placeholders throughout, AND append a single line
+          at the very end of the deliverable:
+
+          > ⚠️ The upstream extraction returned no data from the
+          > uploaded document. Verify the document was attached and
+          > re-run the workflow.
+
+          ## Required structure (in this exact order)
+
+          # Compliance Status Report: <proposal_identifier or "Not specified">
+
+          ### SECTION 1: PROPOSAL COMPLIANCE OVERVIEW
+
+          - **Proposal:** <proposal_identifier or "Not specified">
+          - **Sponsor:** <sponsor_name or "Not specified">
+          - **Proposal Type:** <proposal_type>
+          - **SFI/RST Checks Required:** <Yes / No>
+            (Yes when sfi_rst_required is true)
+          - **Date of Verification:** <today's date in ISO YYYY-MM-DD>
+          - **RST Spreadsheet Date:** <rst_spreadsheet_date or "Not provided">
+
+          ---
+
+          ### SECTION 2: COMPLIANCE STATUS MATRIX
+
+          | # | Full Name | Role | SFI Status | SFI Date | RST Status | RST Date | Overall |
+          |---|-----------|------|------------|----------|------------|----------|---------|
+
+          One row per person in `consolidated_personnel`. Look up each
+          person's SFI status in `sfi_verification` and RST status in
+          `rst_records`. Overall = PASS when SFI="Valid" AND RST="Complete";
+          FAIL otherwise. Sort by compliance urgency: FAIL first, then
+          rows with "Expiring Soon" or "Review Required", then PASS.
+
+          **Legend:**
+
+          - PASS = Valid SFI + Complete RST
+          - FAIL = Any compliance gap
+
+          ---
+
+          ### SECTION 3: COMPLIANCE SUMMARY
+
+          - **Total personnel verified:** <count of consolidated_personnel>
+          - **Fully compliant:** <count of PASS> (<percentage>%)
+          - **Non-compliant:** <count of FAIL> (<percentage>%)
+          - **Proposal can proceed:** <Yes / No> (blocked by <count> non-compliant personnel)
+
+          When `sfi_rst_required` is false: state "**Proposal can proceed:** Yes (SFI/RST checks not required for this proposal type / sponsor combination)."
+
+          ---
+
+          ### SECTION 4: ACTION ITEMS
+
+          For each non-compliant person, render a row:
+
+          | # | Person | Issue | Required Action | Priority | Contact |
+          |---|--------|-------|-----------------|----------|---------|
+
+          Issue / Priority mapping:
+          - SFI status "Not Found" → Issue: "No SFI disclosure on file"; Action: "Submit new SFI disclosure"; Priority: Critical
+          - SFI status "Expired" → Issue: "SFI disclosure expired"; Action: "Renew SFI disclosure immediately"; Priority: High
+          - SFI status "Expiring Soon" → Issue: "SFI disclosure expires within 30 days"; Action: "Renew SFI disclosure proactively"; Priority: Medium
+          - SFI status "Review Required" → Issue: "SFI disclosure ambiguous match"; Action: "Manual SFI lookup required"; Priority: Critical
+          - RST status "Incomplete" → Issue: "RST not completed"; Action: "Complete Research Security Training via UI Bridge"; Priority: Critical
+          - RST status "Review Required" → Issue: "RST record ambiguous match"; Action: "Manual RST lookup required"; Priority: Critical
+
+          Contact column: leave blank or "[email if known]" — the
+          extraction does not populate emails.
+
+          If no non-compliant personnel, render a single row:
+          | — | All personnel compliant | — | No action required | — | — |
+
+          ---
+
+          ### SECTION 5: DISCREPANCIES & WARNINGS
+
+          Render `personnel_discrepancies` as a bulleted list.
+          Then render `notes_about_missing_sources` (if not null) as
+          an additional bullet.
+          Then render any "Expiring Soon" SFI rows as additional
+          bullets ("Upcoming expirations: ...").
+
+          If everything is empty, state "No discrepancies or warnings."
+
+          ---
+
+          ### SECTION 6: COMPLIANCE CHECK COMPLETION
+
+          - [ ] All personnel from Section 6.6 verified
+          - [ ] All personnel from Section 2 verified
+          - [ ] Cross-reference between sections complete
+          - [ ] SFI disclosures checked for all personnel
+          - [ ] RST completion checked for all personnel
+          - [ ] Non-compliant personnel identified and action items assigned
+          - [ ] Compliance checks marked complete in VERAS (pending SPA action)
+
+          (Render the checkboxes as literal "- [ ]" GitHub task list
+          syntax. Leave them unchecked — the SPA will check them as
+          they verify each step manually.)
+
+          ## Rendering rules
+
+          - Bold every label using `**Label:**` where appropriate.
+          - Preserve ISO YYYY-MM-DD date format.
+          - Use the literal status keys "Valid", "Expired", "Not Found",
+            "Expiring Soon", "Review Required", "Complete", "Incomplete",
+            "PASS", "FAIL" — these are the canonical legend values.
+          - Never silently assume compliance. Missing source documents
+            propagate as non-compliant defaults plus a SECTION 5
+            warning.
+          - No JSON code fences around the output.
+
+evals:
+  workflow_local: true

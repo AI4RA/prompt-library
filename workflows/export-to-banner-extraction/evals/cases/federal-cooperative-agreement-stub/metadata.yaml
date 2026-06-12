@@ -1,0 +1,49 @@
+# Case identity
+case: federal-cooperative-agreement-stub
+source: "Placeholder case shell — to be replaced with an authorized, de-identified federal cooperative agreement that exercises multi-year incremental funding, an explicit F&A rate cap with base annotation, a structured reporting requirements table, and a populated prior-approval list."
+source_url: "https://www.grants.gov/"
+retrieved: 2026-05-20
+
+# Which structural features of the input award document this case exercises.
+structural_features:
+  - federal-cooperative-agreement
+  - multi-year-incremental-funding
+  - explicit-fa-rate-cap-with-mtdc-base
+  - structured-reporting-requirements-table
+  - prior-approval-list-with-2-cfr-200-308-references
+
+# Workflow-level behaviors this case targets. These are pipeline-level
+# checks that no single component's evals can cover (six-block
+# consolidation, quoted-dollar-to-JSON-number conversion, enum
+# normalization across four enums, CFR-01 / CFR-02 flag emissions).
+workflow_features:
+  - six_block_consolidation
+  - quoted_dollar_to_json_number_conversion
+  - award_type_enum_cooperative_agreement
+  - sponsor_entity_type_enum_federal
+  - fa_rate_base_enum_mtdc
+  - billing_type_enum_cost_reimbursement
+  - budget_periods_array_multi_year_population
+  - cfr01_award_dates_consistency_check
+  - cfr02_performance_period_consistency_check
+
+# Validation metadata — REQUIRED.
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-05-20
+validated_against_version: "0.1.0"
+component_versions_at_validation:
+  export-to-banner-extraction-udm: "0.1.0"
+
+# Optional free-form notes on what was confirmed, what was surprising,
+# what should be re-checked on the next revalidation pass.
+notes: |
+  Scaffolded case shell only. The expected.json and input-source.md
+  artifacts will be added once an authorized, de-identified federal
+  cooperative agreement is selected and a Post-Award Specialist has
+  produced and validated the consolidated Banner-setup JSON. This stub
+  exists so the workflow can declare workflow_local: true per
+  docs/contracts.md while the real case is being assembled in
+  evaluation-data-sets. Additional case shells should follow for the
+  fixed-price contract, subcontract / pass-through, and date-inconsistency
+  edge cases once the first shell is validated and the contract has been
+  exercised end-to-end.

@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/section2-personnel-eligibility-udm/schema.json",
+  "title": "Section 2 Personnel Eligibility Verification — UDM Output",
+  "description": "JSON contract for the VERAS Section 2 review at the University of Idaho: extract every PI / Co-PI / Senior Key Person, verify employment via Banner NBAJOBS, cross-reference PI / Co-PI job titles against APM Section 45.22 eligibility criteria, compile timesheet org codes, map org codes to Departmental Grant Administrators (DGAs), and cross-reference required DGAs against Section 2 participants. Mirrors the source ui-insight/ProcessMapping section2-personnel-eligibility workflow.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "personnel_extraction",
+    "personnel_verification",
+    "eligibility_check",
+    "org_code_compilation",
+    "dga_mapping",
+    "dga_cross_reference",
+    "verification_summary"
+  ],
+  "properties": {
+    "personnel_extraction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section_21_personnel",
+        "section_22_personnel",
+        "total_personnel_count",
+        "pi_copis_requiring_eligibility",
+        "personnel_requiring_org_code_only"
+      ],
+      "properties": {
+        "section_21_personnel": {
+          "type": "array",
+          "minItems": 1,
+          "description": "PI and Co-PI personnel from VERAS Section 2.1. Required by source workflow. Must contain at least one entry (every proposal has a PI). Resolves to UDM Personnel.First_Name / Personnel.Last_Name.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "role"],
+            "properties": {
+              "name": {"type": "string", "minLength": 1},
+              "role": {
+                "type": "string",
+                "enum": ["PI", "Co-PI"]
+              },
+              "institution": {"type": ["string", "null"]}
+            }
+          }
+        },
+        "section_22_personnel": {
+          "type": "array",
+          "description": "Senior / Key Personnel from VERAS Section 2.2A. Empty array when Section 2.2A is not populated.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "role"],
+            "properties": {
+              "name": {"type": "string", "minLength": 1},
+              "role": {
+                "type": "string",
+                "enum": ["Senior/Key Personnel"]
+              },
+              "institution": {"type": ["string", "null"]}
+            }
+          }
+        },
+        "total_personnel_count": {"type": "integer", "minimum": 1},
+        "pi_copis_requiring_eligibility": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Names from section_21_personnel that require APM 45.22 eligibility verification."
+        },
+        "personnel_requiring_org_code_only": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Names from section_22_personnel that need org-code collection but NOT eligibility checks."
+        }
+      }
+    },
+    "personnel_verification": {
+      "type": "array",
+      "description": "Per-person Banner NBAJOBS verification records, one entry per person on the combined personnel list.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "found_in_banner"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "found_in_banner": {"type": "boolean"},
+          "current_employee": {
+            "type": ["boolean", "null"],
+            "description": "True when the Banner record shows active employment; null when found_in_banner is false."
+          },
+          "job_title": {
+            "type": ["string", "null"],
+            "description": "Banner job title verbatim; null when found_in_banner is false."
+          },
+          "timesheet_org_code": {
+            "type": ["string", "null"],
+            "description": "Banner timesheet organization code verbatim; null when found_in_banner is false."
+          },
+          "notes": {
+            "type": ["string", "null"],
+            "description": "Disambiguation notes, terminated-employee flags, external-collaborator flags."
+          }
+        }
+      }
+    },
+    "eligibility_check": {
+      "type": "array",
+      "description": "Per-person APM 45.22 eligibility records for PI / Co-PI only. Senior / Key Personnel are NOT emitted here.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "role", "eligibility_status", "evidence"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "role": {
+            "type": "string",
+            "enum": ["PI", "Co-PI"]
+          },
+          "job_title": {
+            "type": ["string", "null"],
+            "description": "Banner job title verbatim; null when no Banner record exists."
+          },
+          "eligibility_status": {
+            "type": "string",
+            "enum": ["Eligible", "Not Eligible", "Review Required"],
+            "description": "Eligible = job title explicitly listed in APM 45.22; Not Eligible = job title not in APM 45.22; Review Required = ambiguous or conditional eligibility."
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Short citation or rationale supporting the determination."
+          }
+        }
+      }
+    },
+    "org_code_compilation": {
+      "type": "array",
+      "description": "Unique timesheet org codes across all personnel. One entry per unique code.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["org_code", "personnel_names", "count"],
+        "properties": {
+          "org_code": {"type": "string", "minLength": 1},
+          "personnel_names": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string", "minLength": 1}
+          },
+          "count": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "dga_mapping": {
+      "type": "array",
+      "description": "Org-code-to-DGA mapping, one entry per unique org code. Multiple DGAs per org code are supported.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["org_code", "department_name", "dga_names"],
+        "properties": {
+          "org_code": {"type": "string", "minLength": 1},
+          "department_name": {
+            "type": ["string", "null"],
+            "description": "Department name from the Department List; null when the org code has no Department List entry."
+          },
+          "dga_names": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1},
+            "description": "DGA names from the Department List. Empty array only when the org code is not in the Department List."
+          }
+        }
+      }
+    },
+    "dga_cross_reference": {
+      "type": "array",
+      "description": "Per-DGA cross-reference against VERAS Section 2 participants. One entry per unique DGA pulled from dga_mapping.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["dga_name", "org_codes", "listed_in_section_2", "action_needed"],
+        "properties": {
+          "dga_name": {"type": "string", "minLength": 1},
+          "org_codes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string", "minLength": 1}
+          },
+          "listed_in_section_2": {"type": "boolean"},
+          "action_needed": {
+            "type": "string",
+            "enum": [
+              "No action needed",
+              "FLAG — Must be added to Section 2"
+            ],
+            "description": "No action needed = DGA already in Section 2; FLAG = DGA required by org-code mapping but missing from Section 2."
+          }
+        }
+      }
+    },
+    "verification_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_personnel_verified",
+        "pi_copis_eligible_count",
+        "pi_copis_not_eligible",
+        "pi_copis_review_required",
+        "unique_org_codes_count",
+        "dgas_required_count",
+        "dgas_in_section_2_count",
+        "missing_dgas",
+        "unmapped_org_codes"
+      ],
+      "properties": {
+        "total_personnel_verified": {"type": "integer", "minimum": 0},
+        "pi_copis_eligible_count": {"type": "integer", "minimum": 0},
+        "pi_copis_not_eligible": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "pi_copis_review_required": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "unique_org_codes_count": {"type": "integer", "minimum": 0},
+        "dgas_required_count": {"type": "integer", "minimum": 0},
+        "dgas_in_section_2_count": {"type": "integer", "minimum": 0},
+        "missing_dgas": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "DGA names with action_needed FLAG."
+        },
+        "unmapped_org_codes": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Org codes that did not appear in the Department List."
+        },
+        "notes": {
+          "type": ["string", "null"],
+          "description": "Source-document warnings (missing Banner extract, missing Department List, ambiguous matches)."
+        }
+      }
+    }
+  }
+}

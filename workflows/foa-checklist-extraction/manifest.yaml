@@ -1,39 +1,59 @@
 # Authored source for the FOA Checklist Extraction Vandalizer workflow.
 #
-# The companion foa-checklist-extraction.vandalizer.json is generated from
-# this file by scripts/build_vandalizer_workflows.py and committed alongside.
-# Never hand-edit the generated JSON — update this manifest and rebuild.
+# === Topology (v0.3.0, Variant A + KB injection + RFA-aligned consolidation) ===
 #
-# Runtime topology (v0.1.0):
-#   Step 1  Parallel Extraction
-#     6 Extraction tasks mirroring the source ProcessMapping workflow
-#     one-for-one (FOA Identification & Timeline; Evaluation Criteria;
-#     Review Process; Agency Priorities & Goals; Forms & Submission Systems;
-#     Formatting Requirements). Each task carries an embedded SearchSet
-#     whose item titles mirror the foa-checklist-extraction-udm@0.1.0
-#     schema field names.
-#   Step 2  Consolidation
-#     1 Prompt task assembles the six JSON fragments into a single object
-#     that validates against components/foa-checklist-extraction-udm/schema.json.
+# v0.3.0 consolidation rewrite vs. v0.2.0 (issue: full-workflow runs
+# on this workflow failed at Step 3/3 Consolidation with a Vandalizer
+# "Connection error" while the parallel extractions and the
+# consolidation Test Step succeeded. The same Vandalizer instance ran
+# the sibling RFA Checklist workflow end-to-end on the same input PDF
+# without issue. The variable was the FOA consolidation prompt's
+# structural divergence from the working RFA pattern — terse field
+# references, no explicit fragment enumeration, no placement contract,
+# no anti-leakage anchor. Symptoms in the Test Step output (dropped
+# populated fields, verbatim PDF text appearing in sections that had
+# no corresponding JSON field) supported the LLM losing track of
+# what it was supposed to consume):
+#   1. Consolidation prompt rewritten to mirror the working RFA
+#      Checklist consolidation structure exactly:
+#      - Enumerates all six JSON fragments and their fields up front.
+#      - Replaces terse "Bulleted list from X" instructions with
+#        explicit field-by-field templates per section.
+#      - Adds a placement contract block that routes each fact to
+#        one section only (funding to Funding, eligibility to
+#        Eligibility, etc.) and explicitly forbids reading from
+#        workflow_documents directly.
+#      - Drops the static Table of Contents (markdown viewers render
+#        TOC automatically and the static block consumed output
+#        tokens for no end-user benefit).
+#   2. Workflow_version 0.2.0 -> 0.3.0; extraction prompts unchanged.
+#
+# v0.2.0 changes vs. v0.1.0:
+#   1. Parallel Extraction tasks converted to Prompt tasks.
+#   2. Output contract: RA-friendly Markdown FOA reference document with
+#      ToC, eight sections (FOA Summary, Key Dates, Funding, Eligibility,
+#      Application Components, Evaluation, Priorities, Special Reqs) per
+#      source consolidation.md.
+#   3. Step 0 KnowledgeBaseQuery added.
 
-name: FOA Checklist Maker Extraction
+name: FOA Checklist Extraction
 description: >
-  Uploads a Federal Funding Opportunity Announcement (FOA) and returns a
-  single structured JSON object covering the eight reference sections a
-  federal-grants office uses for FOA review: FOA summary and key dates,
-  funding and eligibility, evaluation criteria with weights, multi-stage
-  review process, agency priorities and program goals, submission platform
-  and forms, application components, and formatting requirements. Output
-  conforms to the foa-checklist-extraction-udm component schema. The
-  runtime mirrors the ui-insight/ProcessMapping foa-checklist-extraction
-  workflow (six parallel Extraction tasks plus a Consolidation Prompt).
+  Uploads a federal funding opportunity announcement (FOA / NOFO) and
+  returns an RA-friendly Markdown FOA reference document covering FOA
+  Summary, Key Dates and Deadlines, Funding Information, Eligibility
+  Requirements, Application Components and Submission Requirements,
+  Evaluation Process and Criteria, Program Priorities and Alignment,
+  and Special Requirements. Mirrors the source
+  ui-insight/ProcessMapping foa-checklist-extraction conventions with
+  H1/H2/H3 hierarchical headings and a placement contract that routes
+  each fact to exactly one section.
 
-workflow_version: 0.1.0
+workflow_version: 0.3.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-04-30
-updated: 2026-04-30
+updated: 2026-05-27
 
 components:
   - slug: foa-checklist-extraction-udm
@@ -41,238 +61,429 @@ components:
 
 validation_plan:
   - check_id: CHK-01
-    check_name: FOA number format
+    check_name: Date / deadline preservation
     check_type: format
-    check_description: Verify foa_number matches a known agency format pattern (e.g., NIH PA/PAR/RFA, DOE DE-FOA, NSF program-solicitation).
-    target_fields:
-      - foa_number
-    severity: warning
-  - check_id: CHK-02
-    check_name: Date consistency
-    check_type: consistency
-    check_description: Verify critical_dates entries are chronologically ordered and that LOI/pre-application precedes full-application precedes panel review.
-    target_fields:
-      - critical_dates
+    check_description: Verify dates preserve the FOA's stated granularity and timezone.
+    target_fields: []
     severity: error
+  - check_id: CHK-02
+    check_name: Cross-field consistency
+    check_type: consistency
+    check_description: Verify expected_awards × max(award_range) ≤ total_funding when all three are stated.
+    target_fields: []
+    severity: warning
   - check_id: CHK-03
-    check_name: Funding vs per-award amounts
+    check_name: Evaluation-criteria weights sum
     check_type: arithmetic
-    check_description: Verify expected_awards * max(award_range) <= total_funding.
-    target_fields:
-      - total_funding
-      - expected_awards
-      - award_range
+    check_description: Verify the sum of evaluation-criteria weights equals 100% when weights are stated as percentages.
+    target_fields: []
     severity: warning
 
 steps:
-  - name: Parallel Extraction
+  - name: Knowledge Base Context Lookup
     tasks:
-      - name: extract-foa-identification-and-timeline
-        kind: Extraction
-        input_source: workflow_documents
+      - name: kb-context-lookup
+        kind: KnowledgeBaseQuery
+        query: "federal funding opportunity announcement FOA NOFO eligibility budget cost sharing F&A indirect cost rates allowable unallowable personnel effort submission deadlines compliance evaluation criteria peer review CFDA program authorization"
+        k: 8
+        knowledge_base_hint:
+          title: "OMB Uniform Guidance (2 CFR 200)"
+          description: >
+            Primary regulatory KB. Swap in NSF PAPPG Reference (NSF
+            FOAs), NIH Grants Policy Statement (NIH NOFOs), DOE
+            Financial Assistance Rules (DOE), or DOD Research Funding
+            & DFARS (DOD) as appropriate for the announcement's
+            sponsor.
+
+  - name: Parallel Extraction (Prompt)
+    tasks:
+      - name: extract-foa-summary
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
-          Extract FOA identifying information, funding details, critical
-          dates timeline, period of performance, and eligibility overview.
+          You are extracting FOA summary fields. You receive the
+          uploaded document AND any KB chunks.
 
-          Be 100% accurate. Match the schema's type for each field
-          exactly:
-            - total_funding is a JSON number (no quotes, no currency
-              symbol, no thousand-separators).
-            - expected_awards is a JSON integer.
-            - cost_sharing_required is a JSON boolean (or null).
-            - award_range, performance_period, and the date strings
-              inside critical_dates are STRINGS, quoted verbatim
-              preserving "$300,000 to $750,000 per award" / date format /
-              etc.
+          Emit a JSON object with: foa_number_or_id, cfda_number,
+          cfda_title, federal_agency, agency_office_bureau,
+          foa_title_or_program_name, program_authorization,
+          program_description (1-3 sentence summary). All STRINGS;
+          null when absent.
 
-          For federal_agency return one of: NSF, NIH, DOD, DOE, NASA,
-          USDA, EPA, DOT, DOC, ED, Other.
-        searchset:
-          title: FOA Identification & Timeline
-          domain: research-administration
-          items:
-            - title: foa_number
-              searchphrase: Funding Opportunity Number / ID (e.g., PA-24-246, DE-FOA-0003117).
-            - title: cfda_number
-              searchphrase: CFDA Number and title.
-              is_optional: true
-            - title: federal_agency
-              searchphrase: Federal Agency Name (NSF, NIH, DOD, DOE, NASA, USDA, EPA, DOT, DOC, ED, Other).
-              enum_values:
-                - NSF
-                - NIH
-                - DOD
-                - DOE
-                - NASA
-                - USDA
-                - EPA
-                - DOT
-                - DOC
-                - ED
-                - Other
-            - title: foa_title
-              searchphrase: FOA Title / Program Name.
-            - title: total_funding
-              searchphrase: Total available funding as a JSON number (no quotes, no currency symbol, no thousand-separators). "$10,000,000" becomes 10000000.
-              is_optional: true
-            - title: expected_awards
-              searchphrase: Expected number of awards as a JSON integer.
-              is_optional: true
-            - title: award_range
-              searchphrase: Minimum and maximum award amounts (e.g., "$300,000 to $750,000 per award").
-              is_optional: true
-            - title: cost_sharing_required
-              searchphrase: Boolean. Whether cost sharing/matching is required.
-              is_optional: true
-            - title: critical_dates
-              searchphrase: JSON array of {milestone, date_time, notes} for all gating milestones (LOI, pre-application, full application, panel review, anticipated start).
-            - title: performance_period
-              searchphrase: Expected project duration range.
-              is_optional: true
-            - title: eligible_applicants
-              searchphrase: Flat list of eligible applicant types as stated.
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
 
-      - name: extract-evaluation-criteria
-        kind: Extraction
-        input_source: workflow_documents
+      - name: extract-key-dates
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
-          Extract all evaluation criteria with weights, scoring system
-          overview, methodology, and minimum thresholds. Quote weights
-          verbatim — points or percentages as the FOA states them.
-        searchset:
-          title: Evaluation Criteria
-          domain: research-administration
-          items:
-            - title: total_points
-              searchphrase: Total possible points or scoring scale (e.g., "100 points").
-              is_optional: true
-            - title: evaluation_criteria
-              searchphrase: JSON array of {criterion_name, weight, description, rating_definitions} for each evaluation criterion.
-            - title: scoring_methodology
-              searchphrase: How scores are calculated, tie resolution, weighting.
-              is_optional: true
-            - title: minimum_threshold
-              searchphrase: Minimum score thresholds for funding consideration.
-              is_optional: true
+          You are extracting key dates and deadlines from a FOA.
+          Preserve the sponsor's date format verbatim including time
+          and timezone.
 
-      - name: extract-review-process
-        kind: Extraction
-        input_source: workflow_documents
+          Emit a JSON object with one key: critical_dates (JSON ARRAY
+          of {event_or_milestone, date_time, notes_or_requirements}
+          objects sorted chronologically).
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-funding-information
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
-          Extract review stages, review personnel types, initial screening
-          criteria, and review timeline. review_stages is sequential —
-          each stage's outcome is what proceeds to the next.
-        searchset:
-          title: Review Process
-          domain: research-administration
-          items:
-            - title: review_stages
-              searchphrase: JSON array of {stage_name, purpose, outcome} in sequential order.
-            - title: review_personnel
-              searchphrase: Types and composition of review panels.
-              is_optional: true
-            - title: screening_criteria
-              searchphrase: Flat list of initial-screening / disqualification factors.
-              is_optional: true
-            - title: review_timeline
-              searchphrase: Estimated length of review process and notification timeline.
-              is_optional: true
+          You are extracting funding information from a FOA. Preserve
+          monetary amounts verbatim ($X,XXX,XXX format).
 
-      - name: extract-agency-priorities-and-goals
-        kind: Extraction
-        input_source: workflow_documents
+          Emit a JSON object with: total_funding (STRING), expected_awards
+          (STRING — e.g., "10-15"), award_size_range (STRING — e.g.,
+          "$100,000 to $500,000"), project_duration (STRING),
+          cost_sharing_required (BOOLEAN or null), cost_sharing_details
+          (STRING or null), award_instrument_type (STRING — Grant /
+          Cooperative Agreement / Contract).
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-eligibility
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
-          Extract agency mission alignment, program goals and objectives,
-          priority areas (in stated order of importance), and expected
-          outcomes.
-        searchset:
-          title: Agency Priorities & Goals
-          domain: research-administration
-          items:
-            - title: agency_mission
-              searchphrase: Agency mission relevant to this FOA.
-              is_optional: true
-            - title: program_goals
-              searchphrase: JSON array of {goal, objective, success_indicator} for each program goal.
-            - title: priority_areas
-              searchphrase: Flat list of priority areas in stated order of importance.
-              is_optional: true
-            - title: expected_outcomes
-              searchphrase: Flat list of required deliverables / intended impacts.
-              is_optional: true
+          You are extracting eligibility requirements from a FOA.
 
-      - name: extract-forms-and-submission-systems
-        kind: Extraction
-        input_source: workflow_documents
+          Emit a JSON object with: eligible_applicants (JSON ARRAY of
+          STRINGS), ineligible_applicants (JSON ARRAY of STRINGS or
+          empty), per_institution_limit (STRING or null),
+          per_pi_limit (STRING or null), special_eligibility_conditions
+          (JSON ARRAY of STRINGS).
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-application-and-evaluation
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
-          Extract submission platform details, required registrations
-          (SAM, UEI, eRA Commons, Grants.gov, agency portals), required
-          forms, and the application-components checklist with page
-          limits.
-        searchset:
-          title: Forms & Submission Systems
-          domain: research-administration
-          items:
-            - title: submission_platform
-              searchphrase: Primary submission system (Grants.gov, eRA Commons, etc.).
-            - title: required_registrations
-              searchphrase: JSON array of {system_name, timeline, prerequisites} for SAM, UEI, eRA Commons, Grants.gov, agency portals.
-              is_optional: true
-            - title: required_forms
-              searchphrase: JSON array of {form_number, name, purpose, special_instructions} for required forms.
-            - title: application_components
-              searchphrase: JSON array of {component_name, required_or_optional, page_limit, format_requirements} for each component.
+          You are extracting application components, submission
+          requirements, and evaluation criteria from a FOA.
 
-      - name: extract-formatting-requirements
-        kind: Extraction
-        input_source: workflow_documents
+          Emit a JSON object with:
+          - registration_requirements: JSON ARRAY of STRINGS
+            (SAM.gov, Grants.gov, eRA Commons, etc.).
+          - required_forms: JSON ARRAY of STRINGS.
+          - formatting_requirements: STRING (page limits, font,
+            margins).
+          - required_components: JSON ARRAY of
+            {component_name, description, page_limit_or_format}
+            objects.
+          - submission_method: STRING (portal / email / hardcopy).
+          - screening_criteria: JSON ARRAY of STRINGS.
+          - merit_review_criteria: JSON ARRAY of
+            {criterion, weight, description} objects.
+          - review_timeline: STRING.
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+      - name: extract-priorities-and-special
+        input_sources:
+          - step_input
+          - workflow_documents
         prompt_inline: |
-          Extract document structure, page limits with what-counts rules,
-          formatting standards, and file requirements.
-        searchset:
-          title: Formatting Requirements
-          domain: research-administration
-          items:
-            - title: document_structure
-              searchphrase: Flat list of required proposal sections in exact order.
-              is_optional: true
-            - title: page_limits
-              searchphrase: JSON array of {section, limit, what_counts, consequences} for each page-limit rule.
-              is_optional: true
-            - title: formatting_standards
-              searchphrase: Margin, font, spacing, and other formatting requirements.
-              is_optional: true
-            - title: file_requirements
-              searchphrase: Acceptable file formats, sizes, naming conventions.
-              is_optional: true
+          You are extracting program priorities and special requirements
+          from a FOA.
 
-  - name: Consolidation
+          Emit a JSON object with: primary_goals (JSON ARRAY of
+          STRINGS), priority_areas (JSON ARRAY of STRINGS),
+          expected_outcomes (JSON ARRAY of STRINGS),
+          alignment_recommendations (STRING),
+          special_requirements (JSON ARRAY of STRINGS — unique aspects
+          not fitting other sections).
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown
+          fences.
+
+  - name: Consolidation (Markdown deliverable)
     is_output: true
     tasks:
       - name: foa-checklist-consolidation
         kind: Prompt
         input_source: step_input
         prompt_inline: |
-          You are assembling the FOA Checklist extraction output. The
-          input is the JSON fragment produced by the upstream six
-          parallel Extraction tasks. Your job is to emit a single JSON
-          object that validates against the
-          foa-checklist-extraction-udm@0.1.0 schema (31 fields).
+          You are the consolidation step of the FOA Checklist
+          Extraction workflow. You receive SIX JSON object fragments
+          from the previous step:
 
-          Rules:
-          1. Pass-through every field from the six fragments verbatim.
-             The schema has no nested re-shaping for this workflow — the
-             fragments map directly to top-level fields.
-          2. Verify cross-field consistency: critical_dates entries
-             chronological (LOI/pre-app < full-app < panel review);
-             expected_awards * max(award_range) <= total_funding.
-             Preserve document values when they conflict; surface the
-             conflict via validation_plan.
-          3. federal_agency must use the enum value exactly. Normalize
-             document phrasings to the closest enum.
-          4. Use null for missing scalar fields and empty arrays for
-             missing list fields; never invent values.
-          5. Do not output any text outside the single JSON object.
+          1. FOA summary (foa_number_or_id, cfda_number, cfda_title,
+             federal_agency, agency_office_bureau,
+             foa_title_or_program_name, program_authorization,
+             program_description)
+          2. Key dates (critical_dates: array of {event_or_milestone,
+             date_time, notes_or_requirements})
+          3. Funding information (total_funding, expected_awards,
+             award_size_range, project_duration, cost_sharing_required,
+             cost_sharing_details, award_instrument_type)
+          4. Eligibility (eligible_applicants, ineligible_applicants,
+             per_institution_limit, per_pi_limit,
+             special_eligibility_conditions)
+          5. Application and evaluation (registration_requirements,
+             required_forms, formatting_requirements,
+             required_components, submission_method, screening_criteria,
+             merit_review_criteria, review_timeline)
+          6. Priorities and special requirements (primary_goals,
+             priority_areas, expected_outcomes,
+             alignment_recommendations, special_requirements)
+
+          Your job is to render a single RA-friendly Markdown FOA
+          reference document for the sponsored-programs analyst (the
+          end-user). The deliverable is Markdown — NOT a JSON object
+          and NOT a JSON code fence. The audience is a research
+          administrator who will copy this into Word, paste into an
+          email to the proposal team, or save to a shared folder.
+
+          ## CRITICAL — ALWAYS RENDER THE DELIVERABLE
+
+          You MUST render the FULL Markdown deliverable structure (every
+          section listed below), EVEN WHEN some fragment fields arrive
+          as null, empty, missing, or sparse. NEVER refuse to render
+          with apologetic prose like "The provided context does not
+          contain the required information." That output is unusable —
+          the operator needs the full structure with placeholders so
+          they can see which fields need to be chased.
+
+          Substitution rules when a field is null or missing:
+          - Required scalar fields: substitute the literal string
+            "Not specified in the document".
+          - Optional table cells: substitute "—" (em dash).
+          - Empty arrays: render the section with its empty-state
+            language already specified below.
+
+          If EVERY field across ALL upstream fragments is null (which
+          means the document genuinely contained nothing extractable
+          OR the document was not attached to the run), STILL render
+          the full Markdown structure with "Not specified in the
+          document" placeholders throughout, AND append a single line
+          at the very end of the deliverable:
+
+          > ⚠️ The upstream extraction returned no data from the
+          > uploaded document. Verify the document was attached and
+          > re-run the workflow.
+
+          ## Required structure (in this exact order)
+
+          # FOA Reference: <foa_title_or_program_name>
+
+          **FOA Number/ID:** <foa_number_or_id or "Not specified">
+          **CFDA Number / Title:** <cfda_number or "Not specified"> — <cfda_title or "—">
+          **Federal Agency:** <federal_agency or "Not specified"> (<agency_office_bureau or "—">)
+          **Program Authorization:** <program_authorization or "Not specified">
+
+          <program_description as a paragraph; if null, write "Not specified in the document.">
+
+          ---
+
+          ## KEY DATES AND DEADLINES
+
+          A Markdown table with chronologically sorted rows:
+
+          | Event / Milestone | Date and Time | Notes / Requirements |
+          |---|---|---|
+          | (event_or_milestone) | (date_time) | (notes_or_requirements or "—") |
+
+          One row per critical_dates entry. Use **bold** for entries
+          labeled as critical, application, or final deadlines. If
+          critical_dates is empty, render a single row:
+          | — | — | No dates identified in the document |.
+
+          ---
+
+          ## FUNDING INFORMATION
+
+          Render as a definition-style list:
+
+          - **Total Available Funding:** <total_funding or "Not specified">
+          - **Number of Anticipated Awards:** <expected_awards or "Not specified">
+          - **Award Size:** <award_size_range or "Not specified">
+          - **Project Duration:** <project_duration or "Not specified">
+          - **Cost Sharing Required:** <"Yes" when cost_sharing_required is true, "No" when false, "Not specified" when null>
+          - **Cost Sharing Details:** <cost_sharing_details or "—">
+          - **Award Instrument Type:** <award_instrument_type or "Not specified">
+
+          ---
+
+          ## ELIGIBILITY REQUIREMENTS
+
+          ### Who can apply
+
+          Render eligible_applicants as a bulleted list. Each entry is
+          a flat string — render it as a single bullet without
+          sub-bullets. If empty or null, state "Not specified in the
+          document".
+
+          ### Who cannot apply
+
+          Render ineligible_applicants as a bulleted list of flat
+          strings. If empty or null, state "Not specified in the
+          document".
+
+          ### Limitations
+
+          - **Per Institution:** <per_institution_limit or "Not specified">
+          - **Per PI:** <per_pi_limit or "Not specified">
+
+          ### Special Eligibility Conditions
+
+          Render special_eligibility_conditions as a bulleted list of
+          flat strings. If empty or null, state "None beyond standard
+          federal requirements".
+
+          ---
+
+          ## APPLICATION COMPONENTS AND SUBMISSION REQUIREMENTS
+
+          ### Registration Requirements
+
+          Bulleted list of registration_requirements entries. Each
+          entry is a single flat-string bullet. If empty or null,
+          state "Not specified in the document".
+
+          ### Required Forms
+
+          Bulleted list of required_forms entries. Each entry is a
+          single flat-string bullet. If empty or null, state "Not
+          specified in the document".
+
+          ### Formatting Requirements
+
+          <formatting_requirements as a paragraph, or "Not specified in the document">
+
+          ### Required Components Checklist
+
+          A Markdown table. Always present.
+
+          | Component | Description | Page Limit / Format |
+          |---|---|---|
+          | (component_name) | (description) | (page_limit_or_format or "—") |
+
+          One row per required_components entry. If empty or null,
+          render a single row:
+          | Not specified in this document | — | — |.
+
+          ### Submission Method
+
+          <submission_method as a paragraph, or "Not specified in the document">
+
+          ---
+
+          ## EVALUATION PROCESS AND CRITERIA
+
+          ### Screening Criteria
+
+          Render screening_criteria as a bulleted list of flat strings.
+          If empty or null, state "Not specified in the document".
+
+          ### Merit Review Criteria
+
+          A Markdown table. Always present.
+
+          | Criterion | Weight | Description |
+          |---|---|---|
+          | (criterion) | (weight or "—") | (description or "—") |
+
+          One row per merit_review_criteria entry. If empty or null,
+          render a single row:
+          | Not specified in this document | — | — |.
+
+          ### Review Timeline
+
+          <review_timeline as a paragraph, or "Not specified in the document">
+
+          ---
+
+          ## PROGRAM PRIORITIES AND ALIGNMENT
+
+          ### Primary Goals
+
+          Render primary_goals as a bulleted list of flat strings. If
+          empty or null, state "Not specified in the document".
+
+          ### Priority Areas
+
+          Render priority_areas as a bulleted list of flat strings. If
+          empty or null, state "Not specified in the document".
+
+          ### Expected Outcomes
+
+          Render expected_outcomes as a bulleted list of flat strings.
+          If empty or null, state "Not specified in the document".
+
+          ### Alignment Recommendations
+
+          <alignment_recommendations as a paragraph, or "Not specified in the document">
+
+          ---
+
+          ## SPECIAL REQUIREMENTS
+
+          Render special_requirements as a bulleted list of flat
+          strings. If empty or null, state "None identified beyond
+          standard federal requirements."
+
+          ---
+
+          ## Placement contract (enforce as you render)
+
+          1. **Funding amounts, award counts, project duration, and
+             cost-sharing details appear ONLY in FUNDING INFORMATION.**
+             Even if other fragments mention them, do not restate
+             elsewhere.
+          2. **Eligibility lists appear ONLY in ELIGIBILITY
+             REQUIREMENTS.** Even if priorities or special-requirements
+             fragments mention who can/cannot apply, do not duplicate.
+          3. **Per-component formatting rules (page limits, fonts,
+             margins) appear ONLY in APPLICATION COMPONENTS / Required
+             Components Checklist** (in the table's Page Limit / Format
+             column). Not in SPECIAL REQUIREMENTS.
+          4. **Submission mechanics (portal, file format, naming)
+             appear ONLY in APPLICATION COMPONENTS / Submission Method.**
+             Not in SPECIAL REQUIREMENTS.
+          5. **Strategic priorities and alignment statements appear
+             ONLY in PROGRAM PRIORITIES AND ALIGNMENT.** Not in PROGRAM
+             AUTHORIZATION or SPECIAL REQUIREMENTS.
+          6. **Use ONLY the six JSON fragments above. Do NOT reference
+             the original uploaded document directly.** If a field is
+             absent from the fragments, render the appropriate
+             placeholder — do not infer, fabricate, or pull from prior
+             knowledge of the document text.
+
+          ## Formatting rules
+
+          - Preserve the sponsor's monetary formatting verbatim
+            ($1,234,567 or $0.5M).
+          - Preserve dates exactly as stated, including time and
+            timezone components.
+          - Use **bold** for labels and critical action items.
+          - Use — (em dash) for empty optional fields in tables;
+            "Not specified in the document" for empty required fields.
+          - If any field from a JSON fragment arrives as a nested
+            object instead of a string, REWRITE it into natural-language
+            prose before emitting — do NOT pass through {"key": "value"}
+            syntax into the final Markdown.
+          - No JSON. No code fences around the output. No preamble.
+            No closing commentary about the rendering. The output is
+            the deliverable — render it as if you were writing the
+            document directly.
 
 evals:
   workflow_local: true

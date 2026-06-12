@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/award-modification-intake-udm/schema.json",
+  "title": "Award Modification Intake & Classification — UDM Output",
+  "description": "JSON contract for an incoming federal award amendment / modification document, classified by type (additional funds, no-cost extension, PI change, rebudget, scope change, administrative change, combined) and broken into three structured blocks a Post-Award Specialist uses to enter the modification into Banner: identification, financial impact, and compliance. Mirrors the source ui-insight/ProcessMapping award-modification-intake workflow.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["identification", "financial", "compliance"],
+  "properties": {
+    "identification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "award_number",
+        "amendment_number",
+        "modification_type",
+        "execution_status"
+      ],
+      "properties": {
+        "award_number": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Federal Award Identification Number (FAIN) or sponsor award number. Required by source workflow. Resolves to UDM Award.Award_Number or Award.Federal_Award_ID."
+        },
+        "amendment_number": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Amendment or modification number as stated (e.g., 'Amendment 17', 'Mod 003'). Required by source workflow."
+        },
+        "modification_type": {
+          "type": "string",
+          "enum": [
+            "Additional Funds",
+            "No-Cost Extension",
+            "PI Change",
+            "Rebudget",
+            "Scope Change",
+            "Administrative Change",
+            "Combined (multiple types)"
+          ],
+          "description": "Classification of the modification type. Required by source workflow. Use 'Combined (multiple types)' only when the modification genuinely spans multiple categories."
+        },
+        "execution_status": {
+          "type": "string",
+          "enum": [
+            "Unilateral (fully executed)",
+            "Bilateral (requires signature)",
+            "Not specified in the document"
+          ],
+          "description": "Whether the modification is already fully executed by the sponsor or requires university signature. Required by source workflow."
+        },
+        "effective_date": {
+          "type": ["string", "null"],
+          "description": "Effective date of the modification, ISO YYYY-MM-DD when unambiguous; otherwise the document's stated form. Null when not specified."
+        },
+        "sponsor_name": {
+          "type": ["string", "null"],
+          "description": "Name of the sponsoring agency. Null when not specified. Resolves to UDM Organization.Organization_Name."
+        },
+        "pi_name": {
+          "type": ["string", "null"],
+          "description": "Current Principal Investigator on the award. Null when not specified. Resolves to UDM Personnel.First_Name / Personnel.Last_Name."
+        },
+        "old_pi": {
+          "type": ["string", "null"],
+          "description": "Previous PI name. Populate only when modification_type is 'PI Change' or 'Combined (multiple types)'. Null otherwise."
+        },
+        "new_pi": {
+          "type": ["string", "null"],
+          "description": "New PI name. Populate only when modification_type is 'PI Change' or 'Combined (multiple types)'. Null otherwise."
+        },
+        "new_end_date": {
+          "type": ["string", "null"],
+          "description": "New project end date, ISO YYYY-MM-DD when unambiguous. Populate only when modification_type is 'No-Cost Extension' or 'Combined (multiple types)'. Null otherwise."
+        },
+        "pms_code": {
+          "type": ["string", "null"],
+          "description": "Payment Management System code if stated in the document. Null when not specified."
+        },
+        "point_of_contact_changes": {
+          "type": ["string", "null"],
+          "description": "Any changes to sponsor point-of-contact information. Null when no changes are indicated."
+        }
+      }
+    },
+    "financial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["budget_breakdown"],
+      "properties": {
+        "modification_amount": {
+          "type": ["number", "null"],
+          "description": "Dollar amount of the modification (additional funds or rebudget amount). JSON number, not a quoted string. Null for non-financial modifications. Resolves to UDM Modification.Funding_Amount_Change."
+        },
+        "current_award_amount": {
+          "type": ["number", "null"],
+          "description": "Current total award amount before this modification. JSON number. Null when not specified. Resolves to UDM Award.Current_Total_Funded."
+        },
+        "total_obligated_amount": {
+          "type": ["number", "null"],
+          "description": "Total obligated amount after this modification. JSON number. Null when not specified."
+        },
+        "fa_rate": {
+          "type": ["string", "null"],
+          "description": "F&A (indirect cost) rate including the base annotation when stated (e.g., '30% MTDC', '56.5%'). String because the rate often carries a base type; preserve the document's form. Resolves to UDM IndirectRate.Rate_Percentage."
+        },
+        "fa_amount": {
+          "type": ["number", "null"],
+          "description": "F&A (overhead) dollar amount attributable to this modification. JSON number. Null when not specified."
+        },
+        "budget_breakdown": {
+          "type": "array",
+          "description": "Budget breakdown by sponsor-stated category. Empty array when the document does not provide a category-by-category breakdown. Resolves to UDM AwardBudget.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["category", "approved_amount"],
+            "properties": {
+              "category": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Sponsor category label exactly as stated (e.g., 'Salaries', 'Fringe', 'Equipment', 'F&A')."
+              },
+              "approved_amount": {
+                "type": "number",
+                "description": "Approved category amount. JSON number, not a quoted string."
+              }
+            }
+          }
+        },
+        "rebudget_source_account": {
+          "type": ["string", "null"],
+          "description": "Source budget account for a rebudget (e.g., 'OE/Account 30'). Null when modification_type is not a rebudget."
+        },
+        "rebudget_destination_account": {
+          "type": ["string", "null"],
+          "description": "Destination budget account for a rebudget (e.g., 'Temporary Help/Account 12'). Null when modification_type is not a rebudget."
+        },
+        "cost_share_changes": {
+          "type": ["string", "null"],
+          "description": "Sponsor-imposed changes to cost-share commitments as stated. Null when no cost-share changes apply. Resolves to UDM CostShare.Committed_Amount."
+        }
+      }
+    },
+    "compliance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prior_approval_required",
+        "sponsor_conditions",
+        "regulatory_references",
+        "end_date_change",
+        "requires_financial_unit"
+      ],
+      "properties": {
+        "prior_approval_required": {
+          "type": "boolean",
+          "description": "Whether this modification required (or grants) sponsor prior approval. Required by source workflow. Resolves to UDM Modification.Requires_Prior_Approval."
+        },
+        "approval_date": {
+          "type": ["string", "null"],
+          "description": "Date the sponsor approved the modification (ISO YYYY-MM-DD when unambiguous). Null when not specified."
+        },
+        "sponsor_conditions": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Conditions, restrictions, or requirements imposed by the sponsor as part of this modification. Empty array when none. Resolves to UDM Terms.Special_Conditions."
+        },
+        "regulatory_references": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "References to regulatory requirements (e.g., '2 CFR 200.308', 'Research Terms and Conditions', 'NSF PAPPG VI.D'). Empty array when none."
+        },
+        "end_date_change": {
+          "type": "boolean",
+          "description": "Whether the modification changes the project end date. Required by source workflow."
+        },
+        "requires_financial_unit": {
+          "type": "boolean",
+          "description": "Whether this modification requires Financial Unit processing. Required by source workflow (true for additional funds and NCE; false for most rebudgets and administrative changes)."
+        },
+        "ibc_protocols_required": {
+          "type": ["boolean", "null"],
+          "description": "Whether Institutional Biosafety Committee protocols must be complete before processing this modification. Null when biosafety is not addressed."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,49 @@
+# Case identity
+case: federal-multi-domain-stub
+source: "Placeholder case shell — to be replaced with a multi-document federal award fixture (NOA + RFA + proposal) that exercises distinct risk profiles across multiple of the 14 domains (e.g., high research-security and high IP concurrent; low programmatic but high audit; mixed cost-share and subrecipient)."
+source_url: "https://www.grants.gov/"
+retrieved: 2026-05-20
+
+# Which structural features of the input documents this case exercises.
+structural_features:
+  - multi-document-noa-rfa-proposal-input
+  - mixed-14-domain-risk-profile
+  - score-as-json-integer-not-string
+  - evidence-cited-justifications
+  - high-risk-domain-aggregation
+
+# Workflow-level behaviors this case targets. These are pipeline-level
+# checks that no single component's evals can cover (three-block
+# consolidation, JSON-integer score enforcement, aggregate_metrics
+# arithmetic derivation, high_risk_domains array population).
+workflow_features:
+  - three_block_consolidation
+  - score_as_json_integer
+  - total_risk_score_arithmetic_sum
+  - average_risk_score_total_divided_by_14
+  - overall_risk_level_enum_branch_low_moderate_high_very_high
+  - high_risk_domains_array_derivation
+  - key_risk_findings_evidence_citation
+  - recommended_mitigations_tied_to_high_risk_domains
+  - insufficient_evidence_conservative_scoring
+
+# Validation metadata — REQUIRED.
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-05-20
+validated_against_version: "0.1.0"
+component_versions_at_validation:
+  risk-domain-assessment-udm: "0.1.0"
+
+# Optional free-form notes on what was confirmed, what was surprising,
+# what should be re-checked on the next revalidation pass.
+notes: |
+  Scaffolded case shell only. The expected.json, input-source.md, and the
+  multi-document input set (synthetic NOA + RFA + proposal) will be added
+  once a Research Security Officer and a Sponsored Programs Administrator
+  have jointly reviewed and validated the consolidated 14-domain risk
+  profile. This stub exists so the workflow can declare workflow_local:
+  true per docs/contracts.md while the real case is being assembled in
+  evaluation-data-sets. Additional case shells should follow for the
+  Low-risk-baseline, High-research-security, and insufficient-evidence
+  scenarios once the first shell is validated and the contract has been
+  exercised end-to-end.

@@ -1,0 +1,327 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/export-to-banner-extraction-udm/schema.json",
+  "title": "Export to Banner Award Extraction — UDM Output",
+  "description": "JSON contract for operational setup data extracted from a fully-executed federal award document to populate VERAS's Export to Banner form. Six structured blocks (award_identification, dates_and_performance, sponsor_entity, budget_financial, billing_payment, reporting_special) covering Banner ERP-specific fields. Mirrors the source ui-insight/ProcessMapping export-to-banner-extraction workflow's six parallel extraction tasks plus a Consolidation Prompt.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "award_identification",
+    "dates_and_performance",
+    "sponsor_entity",
+    "budget_financial",
+    "billing_payment",
+    "reporting_special"
+  ],
+  "properties": {
+    "award_identification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "award_number",
+        "project_title",
+        "pi_name",
+        "award_type",
+        "is_pass_through",
+        "federal_agency_name"
+      ],
+      "properties": {
+        "award_number": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Federal Award Identification Number (FAIN) or sponsor award number. Required by source workflow. Resolves to UDM Award.Award_Number."
+        },
+        "project_title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Full project title as stated in the award document. Required by source workflow. Resolves to UDM Award.Award_Title."
+        },
+        "pi_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Principal Investigator name as listed on the award. Required by source workflow. Resolves to UDM Personnel.First_Name / Personnel.Last_Name."
+        },
+        "award_type": {
+          "type": "string",
+          "enum": ["Grant", "Cooperative Agreement", "Contract", "Subcontract"],
+          "description": "Award type classification. Required by source workflow."
+        },
+        "is_pass_through": {
+          "type": "boolean",
+          "description": "Whether this is a pass-through (subaward) or direct federal award. Required by source workflow. Resolves to UDM Award.Flow_Through_Indicator."
+        },
+        "prime_sponsor_name": {
+          "type": ["string", "null"],
+          "description": "Name of the prime sponsor when is_pass_through is true. Null for direct federal awards. Resolves to UDM Organization.Organization_Name."
+        },
+        "cfda_number": {
+          "type": ["string", "null"],
+          "description": "Catalog of Federal Domestic Assistance / Assistance Listing number (XX.XXX format). Comma-separated when multiple. Resolves to UDM Award.CFDA_Number."
+        },
+        "naics_code": {
+          "type": ["string", "null"],
+          "description": "North American Industry Classification System code from the award header."
+        },
+        "federal_agency_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the federal awarding agency. Required by source workflow. Resolves to UDM Organization.Organization_Name."
+        }
+      }
+    },
+    "dates_and_performance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "award_start_date",
+        "award_end_date",
+        "performance_period_start",
+        "performance_period_end"
+      ],
+      "properties": {
+        "award_start_date": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Start date of the current award / budget period (ISO YYYY-MM-DD when unambiguous). Required by source workflow. Resolves to UDM Award.Original_Start_Date."
+        },
+        "award_end_date": {
+          "type": "string",
+          "minLength": 1,
+          "description": "End date of the current award / budget period (ISO YYYY-MM-DD when unambiguous). Required by source workflow. Resolves to UDM Award.Original_End_Date."
+        },
+        "performance_period_start": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Start date of the overall project performance period (ISO YYYY-MM-DD when unambiguous). Required by source workflow. Resolves to UDM AwardBudgetPeriod.Start_Date."
+        },
+        "performance_period_end": {
+          "type": "string",
+          "minLength": 1,
+          "description": "End date of the overall project performance period (ISO YYYY-MM-DD when unambiguous, may extend beyond current funding period for multi-year incremental awards). Required by source workflow. Resolves to UDM AwardBudgetPeriod.End_Date."
+        },
+        "budget_periods": {
+          "type": "array",
+          "description": "Multi-year budget period rows when the award is incrementally funded. Empty array for single-period awards. Resolves to UDM AwardBudgetPeriod.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["period_number", "start_date", "end_date"],
+            "properties": {
+              "period_number": {"type": "integer", "minimum": 1},
+              "start_date": {"type": "string", "minLength": 1},
+              "end_date": {"type": "string", "minLength": 1},
+              "amount": {"type": ["number", "null"]}
+            }
+          }
+        },
+        "is_multi_year": {
+          "type": ["boolean", "null"],
+          "description": "Whether the award spans multiple budget periods with incremental funding. Null when not determinable from the document."
+        }
+      }
+    },
+    "sponsor_entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sponsor_name", "sponsor_entity_type", "awardee_organization"],
+      "properties": {
+        "sponsor_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Full legal name of the sponsoring organization. Required by source workflow. Resolves to UDM Organization.Organization_Name."
+        },
+        "sponsor_entity_type": {
+          "type": "string",
+          "enum": [
+            "Federal",
+            "State Government",
+            "Non-Profit",
+            "Private Industry",
+            "Foundation",
+            "University",
+            "Other"
+          ],
+          "description": "Entity classification. Required by source workflow. Resolves to UDM Organization.Organization_Type."
+        },
+        "federal_agency_hierarchy": {
+          "type": ["string", "null"],
+          "description": "Full agency hierarchy (e.g., 'USDA > NIFA > Agriculture and Food Research Initiative')."
+        },
+        "sponsor_address": {
+          "type": ["string", "null"],
+          "description": "Sponsor mailing / billing address as stated. Resolves to UDM ContactDetails.ContactDetails_Value."
+        },
+        "sponsor_uei": {
+          "type": ["string", "null"],
+          "description": "Sponsor Unique Entity Identifier (12-character alphanumeric, when stated). Resolves to UDM Organization.UEI."
+        },
+        "awardee_organization": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the recipient institution as stated in the award. Required by source workflow."
+        },
+        "awardee_uei": {
+          "type": ["string", "null"],
+          "description": "Awardee Unique Entity Identifier (12-character alphanumeric, when stated)."
+        }
+      }
+    },
+    "budget_financial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total_award_amount", "budget_categories"],
+      "properties": {
+        "total_award_amount": {
+          "type": "number",
+          "description": "Total amount of the current award action. JSON number, not a quoted string. Required by source workflow. Resolves to UDM Award.Current_Total_Funded."
+        },
+        "total_anticipated_amount": {
+          "type": ["number", "null"],
+          "description": "Total anticipated funding across all periods (may differ from current award amount for incremental awards). JSON number. Resolves to UDM Award.Total_Anticipated_Funding."
+        },
+        "budget_categories": {
+          "type": "array",
+          "description": "Budget breakdown by sponsor category. Required by source workflow. Resolves to UDM AwardBudget.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["category", "approved_amount"],
+            "properties": {
+              "category": {"type": "string", "minLength": 1},
+              "approved_amount": {"type": "number"}
+            }
+          }
+        },
+        "total_direct_costs": {
+          "type": ["number", "null"],
+          "description": "Total direct costs. JSON number."
+        },
+        "total_indirect_costs": {
+          "type": ["number", "null"],
+          "description": "Total indirect (F&A) costs. JSON number. Resolves to UDM AwardBudget.Approved_Indirect_Cost."
+        },
+        "fa_rate": {
+          "type": ["string", "null"],
+          "description": "Facilities & Administrative (indirect cost) rate as a percentage string (e.g., '56.5%', '30% MTDC'). String because the rate often carries a base annotation. Resolves to UDM IndirectRate.Rate_Percentage."
+        },
+        "fa_rate_base": {
+          "type": ["string", "null"],
+          "enum": ["MTDC", "TDC", "Salary & Wages", "Other", null],
+          "description": "Base for F&A rate calculation. Null when not specified. Resolves to UDM IndirectRate.Base_Type."
+        },
+        "is_fa_waived": {
+          "type": ["boolean", "null"],
+          "description": "Whether indirect costs are waived or limited by the sponsor."
+        },
+        "cost_share_amount": {
+          "type": ["number", "null"],
+          "description": "Required cost-sharing or matching amount. JSON number. Resolves to UDM CostShare.Committed_Amount."
+        },
+        "cost_share_type": {
+          "type": ["string", "null"],
+          "description": "Type of cost sharing (mandatory, voluntary committed, in-kind). String."
+        },
+        "program_income": {
+          "type": ["string", "null"],
+          "description": "Program income provisions and handling requirements."
+        }
+      }
+    },
+    "billing_payment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["billing_type"],
+      "properties": {
+        "billing_type": {
+          "type": "string",
+          "enum": ["Cost Reimbursement", "Fixed Price", "Letter of Credit", "Milestone"],
+          "description": "Type of billing arrangement. Required by source workflow. Resolves to UDM Terms.Payment_Method."
+        },
+        "billing_frequency": {
+          "type": ["string", "null"],
+          "description": "How often invoices should be submitted (monthly, quarterly, upon milestone completion). Resolves to UDM Terms.Invoicing_Frequency."
+        },
+        "billing_address": {
+          "type": ["string", "null"],
+          "description": "Physical or electronic address for invoice submission."
+        },
+        "invoice_email": {
+          "type": ["string", "null"],
+          "description": "Email address for electronic invoice submission when specified.",
+          "format": "email"
+        },
+        "pms_loc_code": {
+          "type": ["string", "null"],
+          "description": "Payment Management System or Letter of Credit code for federal drawdowns."
+        },
+        "payment_terms": {
+          "type": ["string", "null"],
+          "description": "Payment terms (e.g., 'Net 30', 'advance payment', 'reimbursement')."
+        },
+        "invoice_requirements": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Items required on invoices (budget categories, effort certification, progress summary, etc.). Empty array when none specified."
+        },
+        "final_invoice_deadline": {
+          "type": ["string", "null"],
+          "description": "Deadline for submitting the final invoice after project end (e.g., '60 days', '90 days')."
+        },
+        "billing_contact": {
+          "type": ["string", "null"],
+          "description": "Name and contact information for the sponsor's billing / payment office."
+        }
+      }
+    },
+    "reporting_special": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reporting_requirements"],
+      "properties": {
+        "reporting_requirements": {
+          "type": "array",
+          "description": "Required reports. Required by source workflow. Resolves to UDM Terms.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["report_type", "frequency", "due_date_or_timing", "submission_method"],
+            "properties": {
+              "report_type": {"type": "string", "minLength": 1},
+              "frequency": {"type": "string", "minLength": 1},
+              "due_date_or_timing": {"type": "string", "minLength": 1},
+              "submission_method": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        "record_retention_period": {
+          "type": ["string", "null"],
+          "description": "Required record retention period (e.g., '3 years after final FFR')."
+        },
+        "carry_forward_policy": {
+          "type": ["string", "null"],
+          "description": "Whether unspent funds can be carried forward to subsequent budget periods and under what conditions."
+        },
+        "prior_approval_requirements": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Actions requiring prior written agency approval (budget changes, PI changes, NCE, foreign travel, equipment). Empty array when none specified."
+        },
+        "special_terms": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Special terms and conditions beyond standard federal requirements. Empty array when none specified. Also used by the consolidator to surface CFR-02 date-consistency flags when performance_period_start > award_start_date."
+        },
+        "closeout_requirements": {
+          "type": ["string", "null"],
+          "description": "Specific closeout requirements and timeline."
+        },
+        "governing_regulations": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Governing regulations and terms referenced (2 CFR 200, RTCs, agency-specific). Empty array when none specified."
+        }
+      }
+    }
+  }
+}
