@@ -46,24 +46,18 @@ components:
     pinned_version: 0.1.0
 
 validation_plan:
-  - check_id: CHK-01
-    check_name: Approval-procedures table completeness
-    check_type: completeness
-    check_description: Verify every prior-approval category captured has a row in the APPROVAL PROCEDURES six-column table.
-    target_fields: []
-    severity: error
-  - check_id: CHK-02
-    check_name: Approval-authority preservation
-    check_type: format
-    check_description: Verify Approval Authority text preserves the document's exact wording (e.g., "Grants Officer", "Cognizant Federal Agency").
-    target_fields: []
-    severity: warning
-  - check_id: CHK-03
-    check_name: Threshold quotation
-    check_type: format
-    check_description: Verify thresholds quote the document verbatim (e.g., "25% of total award", "$10,000").
-    target_fields: []
-    severity: error
+  - id: CHK-01
+    name: Approval-procedures table completeness
+    category: completeness
+    description: Verify every prior-approval category captured has a row in the APPROVAL PROCEDURES six-column table.
+  - id: CHK-02
+    name: Approval-authority preservation
+    category: formatting
+    description: Verify Approval Authority text preserves the document's exact wording (e.g., "Grants Officer", "Cognizant Federal Agency").
+  - id: CHK-03
+    name: Threshold quotation
+    category: formatting
+    description: Verify thresholds quote the document verbatim (e.g., "25% of total award", "$10,000").
 
 steps:
   - name: Knowledge Base Context Lookup

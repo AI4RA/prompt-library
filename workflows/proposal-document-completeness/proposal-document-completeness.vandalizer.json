@@ -79,28 +79,22 @@
       "resource_config": {},
       "validation_plan": [
         {
-          "check_id": "CHK-01",
-          "check_name": "Required documents inventory completeness",
-          "check_type": "completeness",
-          "check_description": "Verify every sponsor-required document has a Present/MISSING status row in SECTION 2.",
-          "target_fields": [],
-          "severity": "error"
+          "id": "CHK-01",
+          "name": "Required documents inventory completeness",
+          "category": "completeness",
+          "description": "Verify every sponsor-required document has a Present/MISSING status row in SECTION 2."
         },
         {
-          "check_id": "CHK-02",
-          "check_name": "Per-person document matrix completeness",
-          "check_type": "completeness",
-          "check_description": "Verify every senior / key person identified has a row in SECTION 3 with all four document statuses.",
-          "target_fields": [],
-          "severity": "error"
+          "id": "CHK-02",
+          "name": "Per-person document matrix completeness",
+          "category": "completeness",
+          "description": "Verify every senior / key person identified has a row in SECTION 3 with all four document statuses."
         },
         {
-          "check_id": "CHK-03",
-          "check_name": "Conditional-requirement triggering",
-          "check_type": "consistency",
-          "check_description": "Verify conditional requirements (mentoring plan, letters of collaboration, etc.) are correctly marked Triggered/Not Triggered based on personnel and award type.",
-          "target_fields": [],
-          "severity": "warning"
+          "id": "CHK-03",
+          "name": "Conditional-requirement triggering",
+          "category": "accuracy",
+          "description": "Verify conditional requirements (mentoring plan, letters of collaboration, etc.) are correctly marked Triggered/Not Triggered based on personnel and award type."
         }
       ],
       "validation_inputs": [],

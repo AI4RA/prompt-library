@@ -33,30 +33,22 @@ components:
     pinned_version: 0.1.0
 
 validation_plan:
-  - check_id: CHK-01
-    check_name: Date range consistency
-    check_type: consistency
-    check_description: Verify award_start_date < award_end_date and performance_period_start <= award_start_date.
-    target_fields: []
-    severity: error
-  - check_id: CHK-02
-    check_name: Monetary amount formatting
-    check_type: format
-    check_description: Verify monetary amounts preserve the source document's currency formatting verbatim.
-    target_fields: []
-    severity: error
-  - check_id: CHK-03
-    check_name: UEI format
-    check_type: format
-    check_description: Verify UEIs follow the 12-character alphanumeric format when present.
-    target_fields: []
-    severity: warning
-  - check_id: CHK-04
-    check_name: CFDA number format
-    check_type: format
-    check_description: Verify CFDA number follows XX.XXX format when present.
-    target_fields: []
-    severity: warning
+  - id: CHK-01
+    name: Date range consistency
+    category: accuracy
+    description: Verify award_start_date < award_end_date and performance_period_start <= award_start_date.
+  - id: CHK-02
+    name: Monetary amount formatting
+    category: formatting
+    description: Verify monetary amounts preserve the source document's currency formatting verbatim.
+  - id: CHK-03
+    name: UEI format
+    category: formatting
+    description: Verify UEIs follow the 12-character alphanumeric format when present.
+  - id: CHK-04
+    name: CFDA number format
+    category: formatting
+    description: Verify CFDA number follows XX.XXX format when present.
 
 steps:
   - name: Knowledge Base Context Lookup

@@ -68,28 +68,22 @@
       "resource_config": {},
       "validation_plan": [
         {
-          "check_id": "CHK-01",
-          "check_name": "Certification cadence preserved",
-          "check_type": "format",
-          "check_description": "Verify reporting_frequency preserves the document's exact wording (e.g., \"Semi-annually\", \"Annually within 60 days of period end\").",
-          "target_fields": [],
-          "severity": "error"
+          "id": "CHK-01",
+          "name": "Certification cadence preserved",
+          "category": "formatting",
+          "description": "Verify reporting_frequency preserves the document's exact wording (e.g., \"Semi-annually\", \"Annually within 60 days of period end\")."
         },
         {
-          "check_id": "CHK-02",
-          "check_name": "Personnel commitments completeness",
-          "check_type": "completeness",
-          "check_description": "Verify every key person identified in the award has a row in the Personnel Commitments table with their committed effort.",
-          "target_fields": [],
-          "severity": "warning"
+          "id": "CHK-02",
+          "name": "Personnel commitments completeness",
+          "category": "completeness",
+          "description": "Verify every key person identified in the award has a row in the Personnel Commitments table with their committed effort."
         },
         {
-          "check_id": "CHK-03",
-          "check_name": "PI-mirror rule",
-          "check_type": "consistency",
-          "check_description": "Verify the PI's row in the personnel commitments table matches the standalone PI committed-effort field when both are stated.",
-          "target_fields": [],
-          "severity": "warning"
+          "id": "CHK-03",
+          "name": "PI-mirror rule",
+          "category": "accuracy",
+          "description": "Verify the PI's row in the personnel commitments table matches the standalone PI committed-effort field when both are stated."
         }
       ],
       "validation_inputs": [],

@@ -76,24 +76,18 @@ components:
     pinned_version: 0.1.0
 
 validation_plan:
-  - check_id: CHK-01
-    check_name: Line item sum equals category total
-    check_type: arithmetic
-    check_description: Verify sum of line items equals category total for each R&R Budget category.
-    target_fields: []
-    severity: error
-  - check_id: CHK-02
-    check_name: Direct plus indirect equals total
-    check_type: arithmetic
-    check_description: Verify total_direct_costs + total_indirect_costs equals total_project_costs; flag any discrepancy in CROSS-VALIDATION NOTES without altering values.
-    target_fields: []
-    severity: error
-  - check_id: CHK-03
-    check_name: Personnel costs match FTE
-    check_type: consistency
-    check_description: Verify personnel cost calculations are consistent with FTE / person-months in the budget.
-    target_fields: []
-    severity: warning
+  - id: CHK-01
+    name: Line item sum equals category total
+    category: accuracy
+    description: Verify sum of line items equals category total for each R&R Budget category.
+  - id: CHK-02
+    name: Direct plus indirect equals total
+    category: accuracy
+    description: Verify total_direct_costs + total_indirect_costs equals total_project_costs; flag any discrepancy in CROSS-VALIDATION NOTES without altering values.
+  - id: CHK-03
+    name: Personnel costs match FTE
+    category: accuracy
+    description: Verify personnel cost calculations are consistent with FTE / person-months in the budget.
 
 steps:
   - name: Knowledge Base Context Lookup

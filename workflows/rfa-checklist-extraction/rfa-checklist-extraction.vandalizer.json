@@ -134,36 +134,28 @@
       "resource_config": {},
       "validation_plan": [
         {
-          "check_id": "CHK-01",
-          "check_name": "Eight sections present",
-          "check_type": "completeness",
-          "check_description": "Verify the Markdown deliverable contains all eight sections in order (Dates & Deadlines, Eligibility, Award Information, Application Components, Budget Requirements & Policies, Submission Details, Special Requirements, Important Notes).",
-          "target_fields": [],
-          "severity": "error"
+          "id": "CHK-01",
+          "name": "Eight sections present",
+          "category": "completeness",
+          "description": "Verify the Markdown deliverable contains all eight sections in order (Dates & Deadlines, Eligibility, Award Information, Application Components, Budget Requirements & Policies, Submission Details, Special Requirements, Important Notes)."
         },
         {
-          "check_id": "CHK-02",
-          "check_name": "Placement contract enforcement",
-          "check_type": "consistency",
-          "check_description": "Verify award amount and duration appear only in the Award Information section, and detailed financial rules only in the Budget Requirements & Policies section.",
-          "target_fields": [],
-          "severity": "warning"
+          "id": "CHK-02",
+          "name": "Placement contract enforcement",
+          "category": "accuracy",
+          "description": "Verify award amount and duration appear only in the Award Information section, and detailed financial rules only in the Budget Requirements & Policies section."
         },
         {
-          "check_id": "CHK-03",
-          "check_name": "Monetary amount preservation",
-          "check_type": "format",
-          "check_description": "Verify monetary amounts preserve the sponsor's original currency formatting (dollar signs, commas, basis annotation).",
-          "target_fields": [],
-          "severity": "error"
+          "id": "CHK-03",
+          "name": "Monetary amount preservation",
+          "category": "formatting",
+          "description": "Verify monetary amounts preserve the sponsor's original currency formatting (dollar signs, commas, basis annotation)."
         },
         {
-          "check_id": "CHK-04",
-          "check_name": "Eligibility completeness",
-          "check_type": "completeness",
-          "check_description": "Verify both Eligible Institutions and Eligible Individuals subsections are present and non-empty.",
-          "target_fields": [],
-          "severity": "warning"
+          "id": "CHK-04",
+          "name": "Eligibility completeness",
+          "category": "completeness",
+          "description": "Verify both Eligible Institutions and Eligible Individuals subsections are present and non-empty."
         }
       ],
       "validation_inputs": [],
