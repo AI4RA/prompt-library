@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NOA Summary (UDM)",
+  "description": "Structured extraction of a federal Notice of Award for a post-award grant award summary.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "award_number": { "type": ["string", "null"], "description": "Federal Award Identification Number (FAIN) / award number." },
+    "agency": { "type": ["string", "null"], "description": "Awarding agency / institute." },
+    "program_title": { "type": ["string", "null"] },
+    "award_type": { "type": ["string", "null"], "description": "New / Renewal / Continuation / Revision." },
+    "is_rd": { "type": ["boolean", "null"], "description": "Whether the award is research & development." },
+    "pi_name": { "type": ["string", "null"], "description": "Principal Investigator (any PI synonym)." },
+    "federal_contacts": {
+      "type": "array",
+      "description": "Named federal/administrative contacts (program officer, grants management officer, authorized official).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "role": { "type": "string" },
+          "name": { "type": ["string", "null"] },
+          "email": { "type": ["string", "null"] },
+          "phone": { "type": ["string", "null"] }
+        },
+        "required": ["role"]
+      }
+    },
+    "total_federal_award_amount": { "type": ["string", "null"] },
+    "current_budget_period_amount": { "type": ["string", "null"] },
+    "direct_costs": { "type": ["string", "null"] },
+    "indirect_costs": { "type": ["string", "null"] },
+    "indirect_rate_and_base": { "type": ["string", "null"] },
+    "cost_sharing": { "type": ["string", "null"] },
+    "current_budget_period": { "type": ["string", "null"], "description": "Start/end dates of the current budget period." },
+    "total_project_period": { "type": ["string", "null"], "description": "Start/end dates of the total project period." },
+    "future_year_funding": { "type": ["string", "null"] },
+    "financial_restrictions": { "type": "array", "items": { "type": "string" } },
+    "reporting_requirements": { "type": "array", "items": { "type": "string" } },
+    "critical_deadlines": { "type": "array", "items": { "type": "string" } },
+    "prior_approval_requirements": { "type": "array", "items": { "type": "string" } },
+    "compliance_requirements": { "type": "array", "items": { "type": "string" } },
+    "special_terms_and_conditions": { "type": "array", "items": { "type": "string" } },
+    "subawards_included": { "type": ["boolean", "null"] },
+    "partner_institutions": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["award_number", "agency", "pi_name", "total_federal_award_amount", "total_project_period"]
+}

@@ -1,0 +1,35 @@
+# Case identity
+case: nih-r25-noa-stub
+source: "Placeholder case shell — to be replaced with an authorized, de-identified federal Notice of Award (e.g. an NIH R25 NoA) that exercises award identification, a multi-year budget with direct/indirect breakdown, prior-approval terms, and named federal contacts."
+source_url: "https://www.grants.gov/"
+retrieved: 2026-07-15
+
+# Structural features of the input award notice this case exercises.
+structural_features:
+  - multi-year-budget-with-future-years
+  - direct-indirect-cost-breakdown
+  - named-federal-contacts
+  - prior-approval-terms
+
+# Workflow-level behaviors this case targets (pipeline-level checks no single
+# component eval covers).
+workflow_features:
+  - two-fragment-synthesis-into-five-parts
+  - always-render-placeholder-discipline
+  - contact-anti-hallucination-guard
+  - validation_plan_chk01_structure_chk02_core_fields_chk03_fidelity_chk04_placeholder
+
+# Validation metadata — REQUIRED.
+validated_by: pending-sponsored-programs-review
+validated_at: 2026-07-15
+validated_against_version: "0.2.0"
+component_versions_at_validation:
+  noa-summary-udm: "0.1.0"
+
+notes: |
+  Scaffolded case shell only. The workflow was validated end-to-end in
+  Vandalizer against a real NIH R25 Notice of Award (structure, core fields, and
+  every monetary/date value passed; the contact guard was added after one run
+  fabricated a press contact). The expected.* and input-source artifacts will be
+  added once an authorized, de-identified award notice is committed to
+  evaluation-data-sets.

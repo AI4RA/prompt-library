@@ -106,6 +106,7 @@ nav:
       - export-to-banner-extraction-udm: components/export-to-banner-extraction-udm.md
       - ffr-management-extraction-udm: components/ffr-management-extraction-udm.md
       - foa-checklist-extraction-udm: components/foa-checklist-extraction-udm.md
+      - noa-summary-udm: components/noa-summary-udm.md
       - nsf-award-notice-extraction-udm:
           - Overview: components/nsf-award-notice-extraction-udm.md
           - Reports:

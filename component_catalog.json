@@ -1612,6 +1612,78 @@
       }
     },
     {
+      "component_id": "prompt.noa-summary-udm",
+      "slug": "noa-summary-udm",
+      "name": "noa-summary-udm",
+      "summary": "JSON extraction contract for a federal **Notice of Award (NoA)**. Extracts award identification, key personnel and federal contacts, financial terms, periods of performance, reporting deadlines, and compliance/administrative obligations into a single structured JSON object (see [`schema.json`](schema.json)).",
+      "version": "0.1.0",
+      "category": "extraction",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "noa",
+        "notice-of-award",
+        "grant-award-summary",
+        "post-award",
+        "compliance",
+        "financial",
+        "udm",
+        "structured-extraction",
+        "json"
+      ],
+      "audience": [
+        "sponsored-programs-staff",
+        "post-award-teams",
+        "ingest-pipelines"
+      ],
+      "paths": {
+        "component_dir": "components/noa-summary-udm",
+        "readme": "components/noa-summary-udm/README.md",
+        "prompt": "components/noa-summary-udm/prompt.md",
+        "schema": "components/noa-summary-udm/schema.json",
+        "evals_dir": "components/noa-summary-udm/evals",
+        "eval_case_metadata_glob": "components/noa-summary-udm/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/noa-summary-udm/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/noa-summary-udm/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "shared_udm_semantics_repo_local_schema",
+          "notes": "Repo-local Notice-of-Award summary contract. Award identification, key personnel and federal contacts, financial terms, periods of performance, reporting deadlines, and compliance/administrative obligations. Scalars resolve cleanly to UDM Award and Personnel; the summary shape itself is repo-local.",
+          "schema_path": "components/noa-summary-udm/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Validate JSON outputs against schema.json. The companion top-level workflows/noa-summary Vandalizer workflow implements a five-part Markdown Grant Award Summary deliverable from the same source document via prompt_inline tasks; this component's prompt.md is the JSON contract.",
+        "udm_alignment": {
+          "status": "shared_udm_semantics_repo_local_schema",
+          "notes": "award_number and pi_name resolve to UDM Award.Federal_Award_ID and Personnel.Full_Name; financial scalars feed UDM AwardBudget; the five-part summary shape is repo-local."
+        }
+      }
+    },
+    {
       "component_id": "prompt.nsf-award-notice-extraction-udm",
       "slug": "nsf-award-notice-extraction-udm",
       "name": "nsf-award-notice-extraction-udm",
@@ -3428,6 +3500,33 @@
       "evaluation": {
         "posture": "workflow_local",
         "source": "workflows/foa-checklist-extraction/evals"
+      }
+    },
+    {
+      "slug": "noa-summary",
+      "name": "NOA Summary",
+      "description": "Uploads a federal Notice of Award (NoA) and returns an RA-friendly Markdown Grant Award Summary for a university Office of Sponsored Programs: a five-part synthesis (Key Personnel & Contacts; Grant Summary At-a-Glance; Financial & Period of Performance; Reporting & Critical Deadlines; Key Compliance & Administrative Requirements) with finances and deadlines in tables and critical restrictions / required approvals bolded.",
+      "workflow_version": "0.2.0",
+      "status": "experimental",
+      "vandalizer_schema_version": 2,
+      "paths": {
+        "workflow_dir": "workflows/noa-summary",
+        "manifest": "workflows/noa-summary/manifest.yaml",
+        "export": "workflows/noa-summary/noa-summary.vandalizer.json",
+        "readme": "workflows/noa-summary/README.md",
+        "changelog": "workflows/noa-summary/CHANGELOG.md"
+      },
+      "components_manifested": [
+        "noa-summary-udm"
+      ],
+      "steps": {
+        "step_count": 3,
+        "task_count": 4,
+        "output_step_name": "Consolidation (Markdown deliverable)"
+      },
+      "evaluation": {
+        "posture": "workflow_local",
+        "source": "workflows/noa-summary/evals"
       }
     },
     {
