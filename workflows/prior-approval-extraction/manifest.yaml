@@ -53,11 +53,26 @@ validation_plan:
   - id: CHK-02
     name: Approval-authority preservation
     category: formatting
-    description: Verify Approval Authority text preserves the document's exact wording (e.g., "Grants Officer", "Cognizant Federal Agency").
+    description: >
+      Verify the named approval-authority TERMS (e.g. "Grants Officer", "Cognizant
+      Federal Agency", "Program Officer") are preserved accurately: the specific
+      authority named in the source is not reworded into a different role or
+      invented. The workflow SYNTHESIZES a reference document, so these terms may
+      appear inside explanatory prose; do NOT require the surrounding sentence to
+      be verbatim from the source. FAIL only if an approval authority is changed,
+      dropped, or fabricated.
   - id: CHK-03
     name: Threshold quotation
     category: formatting
-    description: Verify thresholds quote the document verbatim (e.g., "25% of total award", "$10,000").
+    description: >
+      Verify each prior-approval threshold stated in the output (percentages,
+      dollar amounts, time periods — e.g. "25% effort reduction", "3-month
+      absence", rebudgeting %) is ACCURATE: the numeric value matches the award
+      document or its governing regulation (e.g. 2 CFR 200.308) with no transposed
+      digits. The threshold may be quoted or lightly paraphrased and may derive
+      from the governing regulation rather than appearing verbatim in the award
+      notice. FAIL only if a threshold value is fabricated, numerically wrong, or
+      altered.
 
 steps:
   - name: Knowledge Base Context Lookup

@@ -41,7 +41,13 @@ validation_plan:
   - id: CHK-01
     name: Certification cadence preserved
     category: formatting
-    description: Verify reporting_frequency preserves the document's exact wording (e.g., "Semi-annually", "Annually within 60 days of period end").
+    description: >
+      Verify the certification cadence / reporting_frequency VALUE (e.g.
+      "Semi-annually", "Annually", "within 60 days of period end") is preserved
+      accurately, including any day-count. The workflow SYNTHESIZES a reference
+      document, so the cadence may appear inside explanatory prose; do NOT require
+      the surrounding sentence to be verbatim from the source. FAIL only if the
+      cadence term or day-count is altered, dropped, or fabricated.
   - id: CHK-02
     name: Personnel commitments completeness
     category: completeness
