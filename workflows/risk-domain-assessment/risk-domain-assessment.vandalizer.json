@@ -123,28 +123,22 @@
       "resource_config": {},
       "validation_plan": [
         {
-          "check_id": "CHK-01",
-          "check_name": "Score range validation",
-          "check_type": "range",
-          "check_description": "Verify all 14 domain scores are integers in [1, 5].",
-          "target_fields": [],
-          "severity": "error"
+          "id": "CHK-01",
+          "name": "Score range validation",
+          "category": "accuracy",
+          "description": "Verify all 14 domain scores are integers in [1, 5]."
         },
         {
-          "check_id": "CHK-02",
-          "check_name": "Justification completeness",
-          "check_type": "completeness",
-          "check_description": "Verify all 14 domain scores have non-empty evidence-cited justifications.",
-          "target_fields": [],
-          "severity": "error"
+          "id": "CHK-02",
+          "name": "Justification completeness",
+          "category": "completeness",
+          "description": "Verify all 14 domain scores have non-empty evidence-cited justifications."
         },
         {
-          "check_id": "CHK-03",
-          "check_name": "Aggregate score consistency",
-          "check_type": "arithmetic",
-          "check_description": "Verify total_risk_score equals the arithmetic sum of the 14 domain scores; average_risk_score equals total_risk_score / 14 rounded to one decimal place.",
-          "target_fields": [],
-          "severity": "warning"
+          "id": "CHK-03",
+          "name": "Aggregate score consistency",
+          "category": "accuracy",
+          "description": "Verify total_risk_score equals the arithmetic sum of the 14 domain scores; average_risk_score equals total_risk_score / 14 rounded to one decimal place."
         }
       ],
       "validation_inputs": [],

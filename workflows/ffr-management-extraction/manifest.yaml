@@ -79,18 +79,21 @@ components:
     pinned_version: 0.1.0
 
 validation_plan:
-  - check_id: CHK-01
-    check_name: Date format checks
-    check_type: format
-    check_description: Verify all dates and day-counts (annual FFR due, final FFR due, interim cadence) preserve the document's exact wording in the rendered Markdown.
-    target_fields: []
-    severity: error
-  - check_id: CHK-02
-    check_name: Deadline consistency
-    check_type: consistency
-    check_description: Verify final_ffr_due is consistent with annual_ffr_due (e.g., if annual is 90 days, final is at least 90 days; if document specifies different cadences, both are captured).
-    target_fields: []
-    severity: warning
+  - id: CHK-01
+    name: Date format checks
+    category: formatting
+    description: >
+      Verify every FFR date and day-count VALUE (annual FFR due, final FFR due,
+      interim cadence) rendered in the Markdown matches the source document's
+      schedule, with date FORMAT preserved (e.g. 12/29 or MM/DD/YYYY, not reworded
+      to "December 29"). The workflow SYNTHESIZES a reference document, so dates
+      may appear inside explanatory prose; do NOT require the surrounding sentence
+      to be verbatim from the source. FAIL only if a date value is altered,
+      transposed, mis-formatted, or dropped.
+  - id: CHK-02
+    name: Deadline consistency
+    category: accuracy
+    description: Verify final_ffr_due is consistent with annual_ffr_due (e.g., if annual is 90 days, final is at least 90 days; if document specifies different cadences, both are captured).
 
 steps:
   - name: Knowledge Base Context Lookup

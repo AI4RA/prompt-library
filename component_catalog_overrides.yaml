@@ -486,6 +486,30 @@ components:
           is a one-line summary; this component drills into the full FFR
           submission schedule, system, and preparation timeline.
 
+  noa-summary-udm:
+    output_contract:
+      format: json_object
+      scope: shared_udm_semantics_repo_local_schema
+      notes: >
+        Repo-local Notice-of-Award summary contract. Award identification, key
+        personnel and federal contacts, financial terms, periods of performance,
+        reporting deadlines, and compliance/administrative obligations. Scalars
+        resolve cleanly to UDM Award and Personnel; the summary shape itself is
+        repo-local.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Validate JSON outputs against schema.json. The companion top-level
+        workflows/noa-summary Vandalizer workflow implements a five-part Markdown
+        Grant Award Summary deliverable from the same source document via
+        prompt_inline tasks; this component's prompt.md is the JSON contract.
+      udm_alignment:
+        status: shared_udm_semantics_repo_local_schema
+        notes: >
+          award_number and pi_name resolve to UDM Award.Federal_Award_ID and
+          Personnel.Full_Name; financial scalars feed UDM AwardBudget; the
+          five-part summary shape is repo-local.
+
   prior-approval-extraction-udm:
     output_contract:
       format: json_object

@@ -1,0 +1,264 @@
+# Authored source for the NOA Summary Vandalizer workflow.
+#
+# The companion noa-summary.vandalizer.json is generated from this file by
+# scripts/build_vandalizer_workflows.py and committed alongside.
+# Never hand-edit the generated JSON — update this manifest and rebuild.
+#
+# === Topology (v0.2.0, Variant A + KB injection) ===
+#
+# New AI4RA-standard rebuild of the public "NOA Summary" workflow (which had no
+# AI4RA version). Transforms a federal Notice of Award into an RA-friendly
+# five-part Grant Award Summary for an Office of Sponsored Programs.
+#
+# Step 1  Knowledge Base Context Lookup
+#   1 KnowledgeBaseQuery task, kb_uuid blanked (operator selects a KB in
+#   Vandalizer; primary is OMB Uniform Guidance). Returns empty gracefully
+#   when no KB is attached.
+# Step 2  Extraction (two parallel Prompt tasks)
+#   - extract-award-basics-financial: award identification, key personnel,
+#     financial summary, periods, restrictions, basic compliance alerts,
+#     subawards.
+#   - extract-compliance-administrative: detailed compliance, administrative
+#     obligations, special terms, program income & carryover, deadlines, risk
+#     factors, contacts.
+#   Both read input_sources: [step_input, workflow_documents] and emit a
+#   labeled "field: value" text block (absent -> "Not specified in the document").
+# Step 3  Consolidation (Markdown deliverable)
+#   1 Prompt task synthesizing the two fragments into the five-part Grant Award
+#   Summary. Always renders; consumes only the fragments (anti-leak).
+#
+# v0.2.0 vs v0.1.0: added the contact anti-hallucination guard (never invent a
+# contact name / title / email / phone; absent -> "Not specified in the
+# document") to both extraction prompts and consolidation Part 1, after a
+# validation run occasionally fabricated a press contact.
+
+name: NOA Summary
+description: >
+  Uploads a federal Notice of Award (NoA) and returns an RA-friendly Markdown
+  Grant Award Summary for a university Office of Sponsored Programs: a five-part
+  synthesis (Key Personnel & Contacts; Grant Summary At-a-Glance; Financial &
+  Period of Performance; Reporting & Critical Deadlines; Key Compliance &
+  Administrative Requirements) with finances and deadlines in tables and
+  critical restrictions / required approvals bolded.
+
+workflow_version: 0.2.0
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-07-15
+updated: 2026-07-15
+
+components:
+  - slug: noa-summary-udm
+    pinned_version: 0.1.0
+
+validation_plan:
+  - id: CHK-01
+    name: Five-part structure present and ordered
+    category: completeness
+    description: >
+      The deliverable opens with an H1 title and contains all five H2 parts IN
+      THIS ORDER: Part 1: Key Personnel & Contacts, Part 2: Grant Summary
+      At-a-Glance, Part 3: Financial & Period of Performance, Part 4: Reporting &
+      Critical Deadlines, Part 5: Key Compliance & Administrative Requirements.
+      FAIL if any part is missing, renamed, or out of order.
+  - id: CHK-02
+    name: Core award fields populated
+    category: completeness
+    description: >
+      The summary states the award number/FAIN, agency/institute, principal
+      investigator, total federal award amount, and period of performance. Each
+      is either populated from the NoA or carries the placeholder "Not specified
+      in the document". FAIL only if one of these fields is blank/dropped, not on
+      which placeholder is used.
+  - id: CHK-03
+    name: Monetary and date fidelity to source
+    category: accuracy
+    description: >
+      Dollar amounts (total award, current budget period, direct costs, indirect
+      costs) and dates (budget period, project period) match the NoA EXACTLY —
+      dollar signs, commas, decimals, and date format preserved, no transposed
+      digits. The workflow SYNTHESIZES a reference, so values may sit inside
+      prose or tables; do NOT require the surrounding sentence to be verbatim.
+      FAIL only if a value is altered, transposed, mis-formatted, or fabricated
+      (not present in the source).
+  - id: CHK-04
+    name: Placeholder discipline for absent data
+    category: content
+    description: >
+      Absent data is marked "Not specified in the document" (or "—" in table
+      cells) rather than invented. FAIL only if the deliverable states a specific
+      value, requirement, or contact that is not supported by the extraction
+      fragments (hallucination).
+
+steps:
+  - name: Knowledge Base Context Lookup
+    tasks:
+      - name: kb-context-lookup
+        kind: KnowledgeBaseQuery
+        query: "federal Notice of Award administrative requirements prior approval reporting requirements financial reporting indirect cost rate F&A base program income carryover salary cap human subjects IRB FCOI financial conflict of interest data management sharing civil rights nondiscrimination public access subawards consortium audit record retention SAM registration 2 CFR 200 Uniform Guidance terms and conditions special conditions"
+        k: 8
+        knowledge_base_hint:
+          title: "OMB Uniform Guidance (2 CFR 200)"
+          description: >
+            Primary regulatory KB for interpreting a federal Notice of Award's
+            administrative, financial, and compliance terms. For NIH awards,
+            swap in NIH Grants Policy Statement; for NSF, NSF PAPPG. When no KB
+            is attached this step returns empty output gracefully and the
+            extraction falls back to reading just the uploaded award notice.
+
+  - name: Extraction (Prompt)
+    tasks:
+      - name: extract-award-basics-financial
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are analyzing a federal grant Notice of Award (NoA) for university sponsored-programs review. You receive the uploaded NoA AND any knowledge-base chunks the previous step retrieved in your CONTEXT. Use the KB chunks ONLY to interpret regulatory references; extract every fact from the NoA itself.
+
+          Extract ALL basic award information and financial terms. Be 100% accurate and review the ENTIRE document. Quote dollar amounts and dates VERBATIM ("$52,947.00", not "$53K"; "09/30/2027", not "Sept 2027"). Never invent values.
+
+          The project lead may be named under any of: "Principal Investigator", "PI", "Contact PI", "Project Director", "PD", "Grantee Project Director", "Grantee Project Manager", "Recipient Project Manager", "RPM". Treat any of these as the PI.
+
+          NEVER invent a person's name, title, email address, or phone number. If a personnel role (PI, Authorized Official, Federal Program Officer, Grants Management Officer) is not explicitly named in the document, write exactly "Not specified in the document" — do not guess or fill in a plausible-looking name or number.
+
+          AWARD IDENTIFICATION:
+          - Award Number:
+          - FAIN (Federal Award Identification Number):
+          - Agency/Institute:
+          - Program Title:
+          - Award Type (New/Renewal/Continuation/Revision):
+          - Is this R&D (Yes/No):
+
+          KEY PERSONNEL:
+          - Principal Investigator(s):
+          - Contact PI:
+          - Authorized Official:
+          - Federal Program Officer:
+          - Federal Grants Management Officer:
+
+          FINANCIAL SUMMARY:
+          - Total Federal Award Amount:
+          - Current Budget Period Amount:
+          - Direct Costs:
+          - Indirect Costs:
+          - Indirect Cost Rate and Base:
+          - Cost Sharing Required (Amount/Type):
+
+          AWARD PERIODS:
+          - Current Budget Period (Start/End Dates):
+          - Total Project Period (Start/End Dates):
+          - Future Year Funding (if listed):
+
+          FINANCIAL RESTRICTIONS:
+          - Salary Cap (Yes/No with amount):
+          - Equipment Purchase Restrictions:
+          - Travel Restrictions:
+          - Other Cost Limitations:
+
+          BASIC COMPLIANCE ALERTS:
+          - Human Subjects/IRB Required:
+          - Animal Use Required:
+          - Clinical Trial (Yes/No):
+          - FCOI Reporting Required:
+          - Data Management Plan Required:
+
+          CONSORTIUM/SUBAWARDS:
+          - Subawards Included (Yes/No):
+          - Partner Institutions:
+
+          For any field not found in the document, write exactly "Not specified in the document". Output the labeled list above with values filled in — no preamble, no JSON, no code fences.
+
+      - name: extract-compliance-administrative
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are analyzing a federal grant Notice of Award (NoA) for university sponsored-programs review. You receive the uploaded NoA AND any knowledge-base chunks the previous step retrieved in your CONTEXT. Use the KB chunks ONLY to interpret regulatory references; extract every fact from the NoA itself.
+
+          Extract ALL compliance requirements, administrative obligations, and special conditions. Be 100% accurate and review the ENTIRE document. Preserve imperative language ("must", "shall", "required", "prior approval") verbatim. Quote deadlines and dollar thresholds exactly. Never invent requirements.
+
+          DETAILED COMPLIANCE REQUIREMENTS:
+          - Human Subjects Protection Details:
+          - IRB/sIRB Requirements:
+          - FCOI Reporting Specifics:
+          - Data Management & Sharing Requirements:
+          - Civil Rights/Non-Discrimination Requirements:
+          - Publication/Acknowledgment Requirements:
+          - Public Access Policy Requirements:
+
+          ADMINISTRATIVE OBLIGATIONS:
+          - Reporting Requirements (type/frequency):
+          - Prior Approval Requirements:
+          - Record Keeping Requirements:
+          - Audit Requirements:
+          - System Registration Requirements (SAM, etc.):
+
+          SPECIAL TERMS & CONDITIONS:
+          - List any award-specific conditions, restrictions, or requirements that deviate from standard terms. Flag any unusual term for legal review by prefixing it with "[REVIEW]".
+
+          PROGRAM INCOME & CARRYOVER:
+          - Program Income Treatment:
+          - Carryover Provisions:
+          - Budget Flexibility:
+
+          CRITICAL DEADLINES:
+          - Report Due Dates:
+          - Budget Period End:
+          - Other Important Deadlines:
+
+          RISK FACTORS & ACTION ITEMS:
+          - High-Risk Compliance Areas:
+          - Unusual/Non-Standard Terms:
+          - Immediate Action Items with Deadlines:
+          - Training/Setup Requirements:
+
+          CONTACT INFORMATION:
+          (NEVER invent a contact name, title, email address, or phone number. If the document does not name a contact for a row, write exactly "Not specified in the document" — do not fabricate a plausible-looking contact or press/public-affairs name.)
+          - Who to contact for business matters:
+          - Who to contact for technical matters:
+          - Emergency/hotline information:
+
+          Search for keywords: "must", "shall", "required", "prior approval", "compliance", "report", "deadline", "restriction". For any field not found in the document, write exactly "Not specified in the document". Output the labeled list above with values filled in — no preamble, no JSON, no code fences.
+
+  - name: Consolidation (Markdown deliverable)
+    is_output: true
+    tasks:
+      - name: noa-summary-consolidation
+        kind: Prompt
+        input_source: step_input
+        prompt_inline: |
+          Role: You are an AI assistant expert in federal grant administration. You receive TWO extraction fragments from the previous step — (1) basic award information & financial terms, and (2) compliance requirements & administrative obligations — both pulled from a single Notice of Award (NoA). Synthesize them into one comprehensive, actionable Grant Award Summary for a university's Office of Sponsored Programs.
+
+          ## CRITICAL — ALWAYS RENDER THE DELIVERABLE
+          You MUST render the FULL five-part structure below, EVEN WHEN fields arrive as "Not specified in the document", empty, or sparse. NEVER refuse with apologetic prose like "The provided context does not contain the required information." The operator needs the full structure with placeholders so they can see what to chase. When a field is absent, carry the literal "Not specified in the document" (or "—" in a table cell). If EVERY field across both fragments is absent, still render the full structure with placeholders and append at the very end:
+          > ⚠️ The upstream extraction returned no data. Verify the NoA was attached and re-run.
+
+          ## Rules
+          - Synthesize and de-duplicate: combine both fragments; if a fact (e.g., Award Number) appears in both, present it once, in its most logical section.
+          - Consume ONLY the two fragments above. Do NOT re-read the original document or add facts not present in the fragments.
+          - Prioritize actionable information: use tables for finances and deadlines; use **bold** for critical restrictions, required approvals, and non-standard terms. Preserve imperative language ("must be approved", "must be submitted in writing").
+          - Preserve monetary and date values EXACTLY as the fragments state them (no rounding, no reformatting).
+          - Output clean Markdown — no JSON, no code fences around the whole reply.
+
+          ## Required structure (exact headings, this order)
+
+          # Grant Award Summary: <Award Number or "Not specified in the document">
+
+          ## Part 1: Key Personnel & Contacts
+          A list (or small table) of all project personnel and federal contacts (PI, Contact PI, Authorized Official, Program Officer, Grants Management Officer, business/technical contacts). Include ONLY people explicitly named in the fragments. NEVER invent a name, title, email, or phone number; if a role's contact is absent from the fragments, write "Not specified in the document".
+
+          ## Part 2: Grant Summary At-a-Glance
+          A high-level table of the most essential award details (Agency, Program Title, Award Type, R&D, FAIN, Total Award Amount, Period of Performance). Bold any non-standard term.
+
+          ## Part 3: Financial & Period of Performance
+          A detailed breakdown of all financial figures and key dates: total award, current budget-period amount, direct/indirect costs, indirect rate & base, cost sharing, budget period and project period dates, future-year funding, and any financial restrictions (salary cap, equipment/travel limits). Use a table for the figures.
+
+          ## Part 4: Reporting & Critical Deadlines
+          A clear schedule (table) of all required reports and their due dates, plus budget-period end and any other critical deadlines and immediate action items.
+
+          ## Part 5: Key Compliance & Administrative Requirements
+          A topic-organized summary of standard and special obligations: human subjects/IRB, FCOI, data management & sharing, civil rights, public access, prior-approval requirements, record retention, audit, SAM registration, program income & carryover, and any **[REVIEW]**-flagged special conditions. Bold anything requiring prior approval or legal review.
+
+evals:
+  workflow_local: true

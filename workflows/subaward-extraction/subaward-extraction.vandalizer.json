@@ -123,28 +123,22 @@
       "resource_config": {},
       "validation_plan": [
         {
-          "check_id": "CHK-01",
-          "check_name": "Monetary accuracy",
-          "check_type": "format",
-          "check_description": "Verify Total Subaward Amount, Total Direct Costs, Total Indirect Costs preserve the source document's exact figures (no missing/extra commas, no transposed digits, no wrong decimals).",
-          "target_fields": [],
-          "severity": "error"
+          "id": "CHK-01",
+          "name": "Monetary accuracy",
+          "category": "formatting",
+          "description": "Verify Total Subaward Amount, Total Direct Costs, Total Indirect Costs preserve the source document's exact figures (no missing/extra commas, no transposed digits, no wrong decimals)."
         },
         {
-          "check_id": "CHK-02",
-          "check_name": "Contact formatting",
-          "check_type": "format",
-          "check_description": "Verify phone numbers are formatted consistently with dashes; emails are preserved verbatim.",
-          "target_fields": [],
-          "severity": "warning"
+          "id": "CHK-02",
+          "name": "Contact formatting",
+          "category": "formatting",
+          "description": "Verify phone numbers are formatted consistently with dashes; emails are preserved verbatim."
         },
         {
-          "check_id": "CHK-03",
-          "check_name": "CFR-01 reconciliation",
-          "check_type": "arithmetic",
-          "check_description": "Verify Total Direct Costs + Total Indirect Costs equals Total Subaward Amount; flag any deviation.",
-          "target_fields": [],
-          "severity": "error"
+          "id": "CHK-03",
+          "name": "CFR-01 reconciliation",
+          "category": "accuracy",
+          "description": "Verify Total Direct Costs + Total Indirect Costs equals Total Subaward Amount; flag any deviation."
         }
       ],
       "validation_inputs": [],

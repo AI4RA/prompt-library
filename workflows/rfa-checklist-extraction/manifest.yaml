@@ -79,30 +79,32 @@ components:
     pinned_version: 0.1.0
 
 validation_plan:
-  - check_id: CHK-01
-    check_name: Eight sections present
-    check_type: completeness
-    check_description: Verify the Markdown deliverable contains all eight sections in order (Dates & Deadlines, Eligibility, Award Information, Application Components, Budget Requirements & Policies, Submission Details, Special Requirements, Important Notes).
-    target_fields: []
-    severity: error
-  - check_id: CHK-02
-    check_name: Placement contract enforcement
-    check_type: consistency
-    check_description: Verify award amount and duration appear only in the Award Information section, and detailed financial rules only in the Budget Requirements & Policies section.
-    target_fields: []
-    severity: warning
-  - check_id: CHK-03
-    check_name: Monetary amount preservation
-    check_type: format
-    check_description: Verify monetary amounts preserve the sponsor's original currency formatting (dollar signs, commas, basis annotation).
-    target_fields: []
-    severity: error
-  - check_id: CHK-04
-    check_name: Eligibility completeness
-    check_type: completeness
-    check_description: Verify both Eligible Institutions and Eligible Individuals subsections are present and non-empty.
-    target_fields: []
-    severity: warning
+  - id: CHK-01
+    name: Eight sections present
+    category: completeness
+    description: Verify the Markdown deliverable contains all eight sections in order (Dates & Deadlines, Eligibility, Award Information, Application Components, Budget Requirements & Policies, Submission Details, Special Requirements, Important Notes).
+  - id: CHK-02
+    name: Placement contract enforcement
+    category: accuracy
+    description: >
+      Verify each key fact has a clear PRIMARY home and that sections do not
+      CONTRADICT each other: (a) award amount and duration are present in AWARD
+      INFORMATION; (b) the detailed financial rules (cost-share / matching, F&A /
+      indirect, funding limits, allowable costs) are present in BUDGET REQUIREMENTS
+      & POLICIES. A figure or rule MAY also be referenced in a second section where
+      it is contextually relevant (e.g. the award range echoed inside a Budget
+      sentence) — this redundancy is ACCEPTABLE and must NOT fail. FAIL only if a
+      primary placement is MISSING (amount/duration absent from Award Information,
+      or the financial rules absent from Budget), or if two sections state
+      CONTRADICTORY values for the same fact.
+  - id: CHK-03
+    name: Monetary amount preservation
+    category: formatting
+    description: Verify monetary amounts preserve the sponsor's original currency formatting (dollar signs, commas, basis annotation).
+  - id: CHK-04
+    name: Eligibility completeness
+    category: completeness
+    description: Verify both Eligible Institutions and Eligible Individuals subsections are present and non-empty.
 
 steps:
   - name: Knowledge Base Context Lookup
@@ -657,18 +659,32 @@ steps:
           Render special_requirements as a bulleted list. If empty,
           state "None identified beyond standard federal requirements."
 
+          EXCLUDE financial rules from this section: cost-sharing /
+          matching-fund requirements (match source, percentage, cash
+          vs. in-kind), F&A / indirect-cost rates or caps, and
+          allowable / unallowable-cost rules belong ONLY in BUDGET
+          REQUIREMENTS & POLICIES. If the special_requirements fragment
+          contains such an item, drop it here and make sure Budget
+          carries it.
+
           ---
 
           ## IMPORTANT NOTES
 
           Synthesize 0–5 critical warnings or pitfalls a reviewer would
           otherwise miss. Pull from across the seven fragments — not
-          from the document directly. Render as a bulleted list with
-          each item starting with a bold lead like **Coordinate with
-          OSP at least 6 weeks before submission** — explanation
-          follows. Keep this short. If no critical warnings rise to
-          this bar, state "No critical reviewer warnings beyond what
-          appears in the sections above."
+          from the document directly. **Do NOT restate financial rules
+          here** (cost-share / matching, F&A / indirect, funding limits,
+          allowable costs) — those live ONLY in Budget Requirements &
+          Policies. Focus on process / timeline / eligibility pitfalls
+          (e.g. registration or portal lead time, letter-of-intent
+          gating, limited submissions per institution, non-standard
+          required attachments). Render as a bulleted list with each
+          item starting with a bold lead like **Coordinate with OSP at
+          least 6 weeks before submission** — explanation follows. Keep
+          this short. If no critical warnings rise to this bar, state
+          "No critical reviewer warnings beyond what appears in the
+          sections above."
 
           ---
 
@@ -678,9 +694,16 @@ steps:
              INFORMATION.** Even if the budget fragment mentions them,
              do not restate.
           2. **Detailed financial rules appear ONLY in BUDGET
-             REQUIREMENTS & POLICIES.** Even if the award-info fragment
-             mentions matching or indirect-cost notes, move those rules
-             to budget.
+             REQUIREMENTS & POLICIES — NOWHERE ELSE (not Award
+             Information, not Special Requirements, not Important
+             Notes).** This includes cost-sharing / matching
+             requirements (source of match, %, cash vs. in-kind), F&A /
+             indirect-cost rates and caps (e.g. "indirect limited to
+             10% of the total award"), funding limits, and allowable /
+             unallowable-cost rules. Do NOT restate, summarize, or
+             re-flag these anywhere outside Budget — not even as a
+             "critical warning." If any other fragment surfaces a
+             financial rule, render it under Budget only.
           3. **Per-component formatting rules (page limits, fonts,
              naming) appear ONLY on the individual component's Special
              Requirements column** in the APPLICATION COMPONENTS

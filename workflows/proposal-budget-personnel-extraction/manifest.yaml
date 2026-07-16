@@ -86,24 +86,18 @@ components:
     pinned_version: 0.1.0
 
 validation_plan:
-  - check_id: CHK-01
-    check_name: Personnel count consistency
-    check_type: consistency
-    check_description: Verify the personnel count from Task 1 (Personnel Identification) aligns with the salary line items from Task 2 (Budget Structure).
-    target_fields: []
-    severity: error
-  - check_id: CHK-02
-    check_name: Compliance trigger derivation
-    check_type: consistency
-    check_description: Verify mentoring_plan_required is true ONLY when postdocs or grad students are in the budget; verify has_subawards reflects actual subaward line items; verify has_equipment_over_5k reflects equipment line items over $5,000.
-    target_fields: []
-    severity: error
-  - check_id: CHK-03
-    check_name: Budget totals reconciliation
-    check_type: arithmetic
-    check_description: Verify Total Direct Costs equals sum of all direct categories, and Total Project Cost equals Direct + Indirect.
-    target_fields: []
-    severity: warning
+  - id: CHK-01
+    name: Personnel count consistency
+    category: accuracy
+    description: Verify the personnel count from Task 1 (Personnel Identification) aligns with the salary line items from Task 2 (Budget Structure).
+  - id: CHK-02
+    name: Compliance trigger derivation
+    category: accuracy
+    description: Verify mentoring_plan_required is true ONLY when postdocs or grad students are in the budget; verify has_subawards reflects actual subaward line items; verify has_equipment_over_5k reflects equipment line items over $5,000.
+  - id: CHK-03
+    name: Budget totals reconciliation
+    category: accuracy
+    description: Verify Total Direct Costs equals sum of all direct categories, and Total Project Cost equals Direct + Indirect.
 
 steps:
   - name: Knowledge Base Context Lookup

@@ -48,30 +48,22 @@ components:
     pinned_version: 0.1.0
 
 validation_plan:
-  - check_id: CHK-01
-    check_name: Personnel list consistency
-    check_type: completeness
-    check_description: Verify Section 6.6 and Section 2 personnel are cross-referenced and consolidated in the Markdown report.
-    target_fields: []
-    severity: error
-  - check_id: CHK-02
-    check_name: SFI verification completeness
-    check_type: completeness
-    check_description: Verify every person on the consolidated list has an SFI status row in the matrix.
-    target_fields: []
-    severity: error
-  - check_id: CHK-03
-    check_name: RST verification completeness
-    check_type: completeness
-    check_description: Verify every person on the consolidated list has an RST status row in the matrix.
-    target_fields: []
-    severity: error
-  - check_id: CHK-04
-    check_name: SFI expiration date check
-    check_type: format
-    check_description: Verify SFI disclosure dates are evaluated against a 365-day validity window.
-    target_fields: []
-    severity: error
+  - id: CHK-01
+    name: Personnel list consistency
+    category: completeness
+    description: Verify Section 6.6 and Section 2 personnel are cross-referenced and consolidated in the Markdown report.
+  - id: CHK-02
+    name: SFI verification completeness
+    category: completeness
+    description: Verify every person on the consolidated list has an SFI status row in the matrix.
+  - id: CHK-03
+    name: RST verification completeness
+    category: completeness
+    description: Verify every person on the consolidated list has an RST status row in the matrix.
+  - id: CHK-04
+    name: SFI expiration date check
+    category: formatting
+    description: Verify SFI disclosure dates are evaluated against a 365-day validity window.
 
 steps:
   - name: Knowledge Base Context Lookup

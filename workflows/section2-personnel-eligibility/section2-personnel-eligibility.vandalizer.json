@@ -79,36 +79,28 @@
       "resource_config": {},
       "validation_plan": [
         {
-          "check_id": "CHK-01",
-          "check_name": "Personnel extraction completeness",
-          "check_type": "completeness",
-          "check_description": "Verify all personnel from VERAS Sections 2.1 and 2.2A are reflected in the matrix.",
-          "target_fields": [],
-          "severity": "error"
+          "id": "CHK-01",
+          "name": "Personnel extraction completeness",
+          "category": "completeness",
+          "description": "Verify all personnel from VERAS Sections 2.1 and 2.2A are reflected in the matrix."
         },
         {
-          "check_id": "CHK-02",
-          "check_name": "Eligibility check completeness",
-          "check_type": "completeness",
-          "check_description": "Verify every PI and Co-PI has an APM 45.22 eligibility determination.",
-          "target_fields": [],
-          "severity": "error"
+          "id": "CHK-02",
+          "name": "Eligibility check completeness",
+          "category": "completeness",
+          "description": "Verify every PI and Co-PI has an APM 45.22 eligibility determination."
         },
         {
-          "check_id": "CHK-03",
-          "check_name": "Org code extraction completeness",
-          "check_type": "completeness",
-          "check_description": "Verify every person has a timesheet org code recorded or is flagged when no Banner record exists.",
-          "target_fields": [],
-          "severity": "error"
+          "id": "CHK-03",
+          "name": "Org code extraction completeness",
+          "category": "completeness",
+          "description": "Verify every person has a timesheet org code recorded or is flagged when no Banner record exists."
         },
         {
-          "check_id": "CHK-04",
-          "check_name": "DGA mapping completeness",
-          "check_type": "completeness",
-          "check_description": "Verify every unique org code maps to a DGA or is flagged in the unmapped-org-codes summary.",
-          "target_fields": [],
-          "severity": "error"
+          "id": "CHK-04",
+          "name": "DGA mapping completeness",
+          "category": "completeness",
+          "description": "Verify every unique org code maps to a DGA or is flagged in the unmapped-org-codes summary."
         }
       ],
       "validation_inputs": [],
