@@ -2280,6 +2280,91 @@
       }
     },
     {
+      "component_id": "prompt.ocr-quality-signals",
+      "slug": "ocr-quality-signals",
+      "name": "ocr-quality-signals",
+      "summary": "Audits OCR markdown or plain text and returns a stable JSON record of observable anomaly rates: encoding damage, suspicious glyphs, implausible tokens, broken words, numeric corruption, line fragmentation, repeated page furniture, table irregularity, sparse pages, and heading-order problems. The output is designed for correlation studies and workflow gating experiments, not as ground-truth OCR accuracy.",
+      "version": "0.1.0",
+      "category": "review",
+      "domain": "general",
+      "status": "experimental",
+      "tags": [
+        "ocr",
+        "document-quality",
+        "anomaly-detection",
+        "quantitative-signals",
+        "workflow-gating"
+      ],
+      "audience": [
+        "document-intelligence-teams",
+        "workflow-designers",
+        "evaluation-engineers"
+      ],
+      "paths": {
+        "component_dir": "components/ocr-quality-signals",
+        "readme": "components/ocr-quality-signals/README.md",
+        "prompt": "components/ocr-quality-signals/prompt.md",
+        "schema": "components/ocr-quality-signals/schema.json",
+        "evals_dir": "components/ocr-quality-signals/evals",
+        "eval_case_metadata_glob": "components/ocr-quality-signals/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/ocr-quality-signals/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/ocr-quality-signals/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_ocr_diagnostic_contract",
+          "notes": "Repo-local diagnostic record containing 12 OCR-text anomaly signals, raw counts and denominators, provisional thresholds, verbatim examples, and a simple flag-density index. Measurements are LLM estimates; the index is not OCR accuracy, failure probability, or a validated gate.",
+          "schema_path": "components/ocr-quality-signals/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "nsf-award-notice-extraction-udm",
+          "relationship": "candidate_downstream_outcome_source",
+          "notes": "Field-level and numeric-field accuracy from award-notice extraction can serve as dependent variables when calibrating OCR signals."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [
+          {
+            "dataset_id": "synthetic.workshop_ocr",
+            "relationship": "ground_truth_calibration_ladder",
+            "notes": "Run the three synthetic document types across clean and four degradation tiers, then correlate raw signal rates with downstream field and numeric-field accuracy scored against ground_truth.json."
+          },
+          {
+            "dataset_id": "real.nsf_rfa_checklist_eval",
+            "relationship": "paired_external_robustness_check",
+            "notes": "Compare signal movement and extraction deltas between clean web text and dots.OCR. Only anchored fields support accuracy claims; other comparisons remain robustness or agreement evidence."
+          }
+        ],
+        "harness_notes": "Validate output against schema.json and persist raw signal records beside downstream extraction outcomes. Until deterministic measurement exists, collect at least five replicates and aggregate signal rates by median.",
+        "udm_alignment": {
+          "status": "no_udm_relationship",
+          "notes": "This is a document-quality diagnostic contract and does not extend or claim alignment to the shared AI4RA UDM."
+        }
+      }
+    },
+    {
       "component_id": "prompt.prior-approval-extraction-udm",
       "slug": "prior-approval-extraction-udm",
       "name": "prior-approval-extraction-udm",
@@ -3611,6 +3696,33 @@
       "evaluation": {
         "posture": "inherited",
         "source": "components/nsf-expense-allowability-check/evals"
+      }
+    },
+    {
+      "slug": "ocr-quality-signals",
+      "name": "OCR Quality Signals",
+      "description": "Uploads a PDF to Vandalizer and returns a machine-readable JSON record of OCR-text anomaly counts, rates, evidence examples, and a provisional review recommendation that can be correlated with downstream extraction failures. The output is diagnostic evidence, not OCR accuracy or a validated production gate.",
+      "workflow_version": "0.1.0",
+      "status": "experimental",
+      "vandalizer_schema_version": 2,
+      "paths": {
+        "workflow_dir": "workflows/ocr-quality-signals",
+        "manifest": "workflows/ocr-quality-signals/manifest.yaml",
+        "export": "workflows/ocr-quality-signals/ocr-quality-signals.vandalizer.json",
+        "readme": "workflows/ocr-quality-signals/README.md",
+        "changelog": "workflows/ocr-quality-signals/CHANGELOG.md"
+      },
+      "components_manifested": [
+        "ocr-quality-signals"
+      ],
+      "steps": {
+        "step_count": 1,
+        "task_count": 1,
+        "output_step_name": "Measure OCR Text Signals"
+      },
+      "evaluation": {
+        "posture": "inherited",
+        "source": "components/ocr-quality-signals/evals"
       }
     },
     {

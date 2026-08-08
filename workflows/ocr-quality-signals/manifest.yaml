@@ -1,0 +1,52 @@
+# Authored source for the OCR Quality Signals Vandalizer workflow.
+# The sibling JSON export is generated; never edit it by hand.
+
+name: OCR Quality Signals
+description: >
+  Uploads a PDF to Vandalizer and returns a machine-readable JSON record of
+  OCR-text anomaly counts, rates, evidence examples, and a provisional
+  review recommendation that can be correlated with downstream extraction
+  failures. The output is diagnostic evidence, not OCR accuracy or a
+  validated production gate.
+
+workflow_version: 0.1.0
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-08-08
+updated: 2026-08-08
+
+components:
+  - slug: ocr-quality-signals
+    pinned_version: 0.1.0
+
+validation_plan:
+  - id: CHK-01
+    name: OCR signal JSON schema conformance
+    category: format
+    description: Verify the output is one JSON object conforming to components/ocr-quality-signals/schema.json and contains all 12 signals.
+  - id: CHK-02
+    name: Rate and summary arithmetic coherence
+    category: consistency
+    description: Verify each applicable rate equals observed_count divided by denominator_count and risk_index equals rounded flagged-signal density.
+  - id: CHK-03
+    name: Evidence remains verbatim
+    category: accuracy
+    description: Verify every signal example is copied from the OCR text without correction or reconstruction.
+  - id: CHK-04
+    name: Provisional interpretation language
+    category: consistency
+    description: Verify the output caveats do not describe risk_index as OCR accuracy, probability, confidence, or a validated pass/fail gate.
+
+steps:
+  - name: Measure OCR Text Signals
+    is_output: true
+    tasks:
+      - name: measure-ocr-quality-signals
+        input_source: workflow_documents
+        prompt_ref:
+          component: ocr-quality-signals
+          from_section: "## Prompt"
+
+evals:
+  inherits_from: components/ocr-quality-signals/evals
