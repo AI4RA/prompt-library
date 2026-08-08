@@ -1,0 +1,72 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "exported_at": "2026-08-08T00:00:00+00:00",
+  "exported_by": "ui-insight",
+  "items": [
+    {
+      "name": "OCR Quality Signals",
+      "description": "Uploads a PDF to Vandalizer and returns a machine-readable JSON record of OCR-text anomaly counts, rates, evidence examples, and a provisional review recommendation that can be correlated with downstream extraction failures. The output is diagnostic evidence, not OCR accuracy or a validated production gate.",
+      "steps": [
+        {
+          "name": "Measure OCR Text Signals",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "measure-ocr-quality-signals",
+                "prompt": "You are auditing OCR-DERIVED TEXT, not the original PDF image. Produce\nquantitative, reproducible-as-possible signals that can later be tested for\ncorrelation with downstream workflow errors. Do not repair the text, infer\nmissing source content, or call this an OCR accuracy score.\n\nAll measurements are LLM estimates. Analyze all input available in context. If\nthe context may be truncated, say so in `coverage_assessment`. Use the counting\nrules below consistently:\n\n- `character_count_estimate`: non-whitespace Unicode code points.\n- `word_count_estimate`: whitespace-delimited tokens after ignoring standalone\n  Markdown markers.\n- `nonempty_line_count_estimate`: trimmed lines containing visible content.\n- `numeric_token_count_estimate`: word tokens containing at least one digit.\n- `explicit_page_count`: pages only when the text has explicit page boundaries\n  or unambiguous page-number sequences; otherwise null.\n\nEmit exactly these 12 signals, in this order. For every signal, report the\nobserved count, denominator count, rate (`observed_count / denominator_count`),\nthe fixed provisional threshold below, whether the threshold is met or\nexceeded, measurement confidence, up to three short VERBATIM examples, and a\nshort note when interpretation needs care.\n\n1. `replacement_or_mojibake_character_rate` — U+FFFD replacement characters or\n   recognizable encoding damage such as `â€™`, `â€“`, or `Ã©`; denominator:\n   characters; threshold 0.0005.\n2. `suspicious_glyph_character_rate` — isolated glyphs apparently substituted\n   for letters or punctuation; exclude legitimate math, currency, scientific,\n   and non-English characters; denominator: characters; threshold 0.002.\n3. `single_character_alpha_token_rate` — isolated one-letter alphabetic tokens;\n   exclude legitimate `a`/`I`, initials, outline labels, variables, and table\n   column labels; denominator: words; threshold 0.02.\n4. `implausible_mixed_alphanumeric_token_rate` — word-like tokens with unlikely\n   letter/digit mixing; exclude identifiers, award numbers, dates, URLs, emails,\n   chemical notation, and valid codes; denominator: words; threshold 0.01.\n5. `broken_word_line_end_rate` — words split unnaturally across line boundaries;\n   exclude ordinary end-of-line hyphenation when the parts form a clear word;\n   denominator: words; threshold 0.005.\n6. `garbled_word_token_rate` — uninterpretable word-like tokens that are not\n   names, acronyms, codes, formulas, or non-English terms; denominator: words;\n   threshold 0.01.\n7. `malformed_numeric_token_rate` — digit-bearing tokens with suspicious OCR\n   substitutions, spacing, decimal/grouping punctuation, or lost signs; exclude\n   valid dates, IDs, telephone numbers, citations, and ranges; denominator:\n   numeric tokens; threshold 0.03.\n8. `very_short_nonempty_line_rate` — nonempty lines with three or fewer visible\n   characters after Markdown markers; denominator: nonempty lines; threshold\n   0.20.\n9. `duplicate_nonempty_line_rate` — repeated normalized header, footer, or body\n   lines after the first occurrence; denominator: nonempty lines; threshold\n   0.08.\n10. `table_row_irregularity_rate` — candidate table rows whose apparent column\n    count or alignment is inconsistent with neighboring rows; denominator:\n    candidate table rows; threshold 0.15.\n11. `low_text_page_rate` — explicit pages with fewer than 50 word tokens;\n    denominator: explicit pages; threshold 0.10.\n12. `heading_sequence_anomaly_rate` — Markdown headings or recognizable numbered\n    section headings that skip levels, appear out of order, or merge with body\n    text; denominator: observed headings; threshold 0.10.\n\nSet `applicable` false, `denominator_count` to 0, `rate` to null, and `flagged`\nfalse when a denominator cannot be observed reliably. Exclude non-applicable\nsignals from the summary calculation. Otherwise round each rate to six decimal\nplaces and make `flagged` exactly equal to `rate >= provisional_threshold`.\n\nCompute:\n\n- `applicable_signal_count`: count of signals where `applicable` is true.\n- `flagged_signal_count`: count of applicable signals where `flagged` is true.\n- `risk_index`: `round(100 * flagged_signal_count / applicable_signal_count)`;\n  use 0 only when no signal is applicable.\n- `risk_band`: `low` for 0–19, `watch` for 20–39, `elevated` for 40–59,\n  and `high` for 60–100.\n- `review_recommendation`: `proceed_with_spot_check` for low,\n  `spot_check_critical_fields` for watch, `rerun_ocr_or_human_review` for\n  elevated, and `block_automation_pending_review` for high.\n- `dominant_signals`: up to five flagged signal IDs, highest rate-to-threshold\n  multiple first.\n\nThe `risk_index` is provisional flag density, not a probability, confidence,\nOCR accuracy, or validated pass/fail threshold. Always include caveats covering\nLLM counting error, lack of access to the source image, and possible false\npositives from legitimate tables, identifiers, math, multilingual text, or\nrepeated page furniture.\n\nEmit exactly one JSON object conforming to `schema.json`. No preamble, Markdown\nfences, or closing commentary.\n\n---\n\n## Quality Standards\n\n- Preserve evidence examples verbatim; never silently correct suspected OCR.\n- Keep raw counts and denominators so later analysis can ignore the provisional index.\n- Make every rate and summary value arithmetically coherent with its reported inputs.\n- Mark unobservable page, table, or heading signals non-applicable instead of guessing.\n- Never describe the heuristic as accuracy, confidence, or a validated production gate.",
+                "input_source": "workflow_documents"
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "id": "CHK-01",
+          "name": "OCR signal JSON schema conformance",
+          "category": "format",
+          "description": "Verify the output is one JSON object conforming to components/ocr-quality-signals/schema.json and contains all 12 signals."
+        },
+        {
+          "id": "CHK-02",
+          "name": "Rate and summary arithmetic coherence",
+          "category": "consistency",
+          "description": "Verify each applicable rate equals observed_count divided by denominator_count and risk_index equals rounded flagged-signal density."
+        },
+        {
+          "id": "CHK-03",
+          "name": "Evidence remains verbatim",
+          "category": "accuracy",
+          "description": "Verify every signal example is copied from the OCR text without correction or reconstruction."
+        },
+        {
+          "id": "CHK-04",
+          "name": "Provisional interpretation language",
+          "category": "consistency",
+          "description": "Verify the output caveats do not describe risk_index as OCR accuracy, probability, confidence, or a validated pass/fail gate."
+        }
+      ],
+      "validation_inputs": [],
+      "x_ai4ra": {
+        "workflow_source": "workflows/ocr-quality-signals/manifest.yaml",
+        "workflow_version": "0.1.0",
+        "status": "experimental",
+        "components": [
+          {
+            "slug": "ocr-quality-signals",
+            "version": "0.1.0",
+            "prompt_sha256": "932af1cf0c9d50d999cc0b9c8eb7d210235756b220f8062005d70d903ba369b3"
+          }
+        ]
+      }
+    }
+  ]
+}

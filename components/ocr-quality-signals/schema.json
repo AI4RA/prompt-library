@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AI4RA/prompt-library/components/ocr-quality-signals/schema.json",
+  "title": "OCR Quality Signals Output",
+  "description": "Repo-local diagnostic contract for observable OCR-text anomaly signals. The measurements are LLM estimates and the risk index is provisional flag density, not OCR accuracy or a validated production gate.",
+  "version": "0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "analysis_scope", "signals", "summary"],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "analysis_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "document_label",
+        "measurement_method",
+        "coverage_assessment",
+        "character_count_estimate",
+        "word_count_estimate",
+        "nonempty_line_count_estimate",
+        "numeric_token_count_estimate",
+        "explicit_page_count"
+      ],
+      "properties": {
+        "document_label": {"type": "string", "minLength": 1},
+        "measurement_method": {"const": "llm_estimate"},
+        "coverage_assessment": {
+          "type": "string",
+          "enum": ["full_context", "possibly_truncated", "unknown"]
+        },
+        "character_count_estimate": {"type": "integer", "minimum": 0},
+        "word_count_estimate": {"type": "integer", "minimum": 0},
+        "nonempty_line_count_estimate": {"type": "integer", "minimum": 0},
+        "numeric_token_count_estimate": {"type": "integer", "minimum": 0},
+        "explicit_page_count": {
+          "type": ["integer", "null"],
+          "minimum": 1
+        }
+      }
+    },
+    "signals": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {"$ref": "#/$defs/signal"},
+      "allOf": [
+        {"$ref": "#/$defs/expectedReplacementOrMojibakeSignal"},
+        {"$ref": "#/$defs/expectedSuspiciousGlyphSignal"},
+        {"$ref": "#/$defs/expectedSingleCharacterSignal"},
+        {"$ref": "#/$defs/expectedMixedAlphanumericSignal"},
+        {"$ref": "#/$defs/expectedBrokenWordSignal"},
+        {"$ref": "#/$defs/expectedGarbledWordSignal"},
+        {"$ref": "#/$defs/expectedMalformedNumericSignal"},
+        {"$ref": "#/$defs/expectedShortLineSignal"},
+        {"$ref": "#/$defs/expectedDuplicateLineSignal"},
+        {"$ref": "#/$defs/expectedTableIrregularitySignal"},
+        {"$ref": "#/$defs/expectedLowTextPageSignal"},
+        {"$ref": "#/$defs/expectedHeadingAnomalySignal"}
+      ]
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "applicable_signal_count",
+        "flagged_signal_count",
+        "risk_index",
+        "risk_band",
+        "review_recommendation",
+        "dominant_signals",
+        "caveats"
+      ],
+      "properties": {
+        "applicable_signal_count": {"type": "integer", "minimum": 0, "maximum": 12},
+        "flagged_signal_count": {"type": "integer", "minimum": 0, "maximum": 12},
+        "risk_index": {"type": "integer", "minimum": 0, "maximum": 100},
+        "risk_band": {
+          "type": "string",
+          "enum": ["low", "watch", "elevated", "high"]
+        },
+        "review_recommendation": {
+          "type": "string",
+          "enum": [
+            "proceed_with_spot_check",
+            "spot_check_critical_fields",
+            "rerun_ocr_or_human_review",
+            "block_automation_pending_review"
+          ]
+        },
+        "dominant_signals": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {"$ref": "#/$defs/signalId"}
+        },
+        "caveats": {
+          "type": "array",
+          "minItems": 3,
+          "items": {"type": "string", "minLength": 1}
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"risk_index": {"maximum": 19}}, "required": ["risk_index"]},
+          "then": {"properties": {"risk_band": {"const": "low"}, "review_recommendation": {"const": "proceed_with_spot_check"}}}
+        },
+        {
+          "if": {"properties": {"risk_index": {"minimum": 20, "maximum": 39}}, "required": ["risk_index"]},
+          "then": {"properties": {"risk_band": {"const": "watch"}, "review_recommendation": {"const": "spot_check_critical_fields"}}}
+        },
+        {
+          "if": {"properties": {"risk_index": {"minimum": 40, "maximum": 59}}, "required": ["risk_index"]},
+          "then": {"properties": {"risk_band": {"const": "elevated"}, "review_recommendation": {"const": "rerun_ocr_or_human_review"}}}
+        },
+        {
+          "if": {"properties": {"risk_index": {"minimum": 60}}, "required": ["risk_index"]},
+          "then": {"properties": {"risk_band": {"const": "high"}, "review_recommendation": {"const": "block_automation_pending_review"}}}
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "signalId": {
+      "type": "string",
+      "enum": [
+        "replacement_or_mojibake_character_rate",
+        "suspicious_glyph_character_rate",
+        "single_character_alpha_token_rate",
+        "implausible_mixed_alphanumeric_token_rate",
+        "broken_word_line_end_rate",
+        "garbled_word_token_rate",
+        "malformed_numeric_token_rate",
+        "very_short_nonempty_line_rate",
+        "duplicate_nonempty_line_rate",
+        "table_row_irregularity_rate",
+        "low_text_page_rate",
+        "heading_sequence_anomaly_rate"
+      ]
+    },
+    "signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signal_id",
+        "applicable",
+        "observed_count",
+        "denominator_count",
+        "rate",
+        "provisional_threshold",
+        "flagged",
+        "measurement_confidence",
+        "examples",
+        "note"
+      ],
+      "properties": {
+        "signal_id": {"$ref": "#/$defs/signalId"},
+        "applicable": {"type": "boolean"},
+        "observed_count": {"type": "integer", "minimum": 0},
+        "denominator_count": {"type": "integer", "minimum": 0},
+        "rate": {"type": ["number", "null"], "minimum": 0},
+        "provisional_threshold": {"type": "number", "minimum": 0},
+        "flagged": {"type": "boolean"},
+        "measurement_confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        },
+        "examples": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {"type": "string", "minLength": 1, "maxLength": 240}
+        },
+        "note": {"type": ["string", "null"]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"applicable": {"const": false}}, "required": ["applicable"]},
+          "then": {"properties": {"denominator_count": {"const": 0}, "rate": {"type": "null"}, "flagged": {"const": false}}}
+        },
+        {
+          "if": {"properties": {"applicable": {"const": true}}, "required": ["applicable"]},
+          "then": {"properties": {"denominator_count": {"minimum": 1}, "rate": {"type": "number"}}}
+        }
+      ]
+    },
+    "expectedReplacementOrMojibakeSignal": {
+      "contains": {"properties": {"signal_id": {"const": "replacement_or_mojibake_character_rate"}, "provisional_threshold": {"const": 0.0005}}, "required": ["signal_id", "provisional_threshold"]},
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "expectedSuspiciousGlyphSignal": {
+      "contains": {"properties": {"signal_id": {"const": "suspicious_glyph_character_rate"}, "provisional_threshold": {"const": 0.002}}, "required": ["signal_id", "provisional_threshold"]},
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "expectedSingleCharacterSignal": {
+      "contains": {"properties": {"signal_id": {"const": "single_character_alpha_token_rate"}, "provisional_threshold": {"const": 0.02}}, "required": ["signal_id", "provisional_threshold"]},
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "expectedMixedAlphanumericSignal": {
+      "contains": {"properties": {"signal_id": {"const": "implausible_mixed_alphanumeric_token_rate"}, "provisional_threshold": {"const": 0.01}}, "required": ["signal_id", "provisional_threshold"]},
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "expectedBrokenWordSignal": {
+      "contains": {"properties": {"signal_id": {"const": "broken_word_line_end_rate"}, "provisional_threshold": {"const": 0.005}}, "required": ["signal_id", "provisional_threshold"]},
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "expectedGarbledWordSignal": {
+      "contains": {"properties": {"signal_id": {"const": "garbled_word_token_rate"}, "provisional_threshold": {"const": 0.01}}, "required": ["signal_id", "provisional_threshold"]},
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "expectedMalformedNumericSignal": {
+      "contains": {"properties": {"signal_id": {"const": "malformed_numeric_token_rate"}, "provisional_threshold": {"const": 0.03}}, "required": ["signal_id", "provisional_threshold"]},
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "expectedShortLineSignal": {
+      "contains": {"properties": {"signal_id": {"const": "very_short_nonempty_line_rate"}, "provisional_threshold": {"const": 0.2}}, "required": ["signal_id", "provisional_threshold"]},
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "expectedDuplicateLineSignal": {
+      "contains": {"properties": {"signal_id": {"const": "duplicate_nonempty_line_rate"}, "provisional_threshold": {"const": 0.08}}, "required": ["signal_id", "provisional_threshold"]},
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "expectedTableIrregularitySignal": {
+      "contains": {"properties": {"signal_id": {"const": "table_row_irregularity_rate"}, "provisional_threshold": {"const": 0.15}}, "required": ["signal_id", "provisional_threshold"]},
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "expectedLowTextPageSignal": {
+      "contains": {"properties": {"signal_id": {"const": "low_text_page_rate"}, "provisional_threshold": {"const": 0.1}}, "required": ["signal_id", "provisional_threshold"]},
+      "minContains": 1,
+      "maxContains": 1
+    },
+    "expectedHeadingAnomalySignal": {
+      "contains": {"properties": {"signal_id": {"const": "heading_sequence_anomaly_rate"}, "provisional_threshold": {"const": 0.1}}, "required": ["signal_id", "provisional_threshold"]},
+      "minContains": 1,
+      "maxContains": 1
+    }
+  }
+}

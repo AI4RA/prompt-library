@@ -67,6 +67,45 @@ shared_contracts:
     role: generated_vandalizer_workflow_exports
 
 components:
+  ocr-quality-signals:
+    output_contract:
+      format: json_object
+      scope: repo_local_ocr_diagnostic_contract
+      notes: >
+        Repo-local diagnostic record containing 12 OCR-text anomaly signals,
+        raw counts and denominators, provisional thresholds, verbatim examples,
+        and a simple flag-density index. Measurements are LLM estimates; the
+        index is not OCR accuracy, failure probability, or a validated gate.
+    triad_integration:
+      evaluation_datasets:
+        - dataset_id: synthetic.workshop_ocr
+          relationship: ground_truth_calibration_ladder
+          notes: >
+            Run the three synthetic document types across clean and four
+            degradation tiers, then correlate raw signal rates with downstream
+            field and numeric-field accuracy scored against ground_truth.json.
+        - dataset_id: real.nsf_rfa_checklist_eval
+          relationship: paired_external_robustness_check
+          notes: >
+            Compare signal movement and extraction deltas between clean web
+            text and dots.OCR. Only anchored fields support accuracy claims;
+            other comparisons remain robustness or agreement evidence.
+      harness_notes: >
+        Validate output against schema.json and persist raw signal records beside
+        downstream extraction outcomes. Until deterministic measurement exists,
+        collect at least five replicates and aggregate signal rates by median.
+      udm_alignment:
+        status: no_udm_relationship
+        notes: >
+          This is a document-quality diagnostic contract and does not extend or
+          claim alignment to the shared AI4RA UDM.
+    related_components:
+      - slug: nsf-award-notice-extraction-udm
+        relationship: candidate_downstream_outcome_source
+        notes: >
+          Field-level and numeric-field accuracy from award-notice extraction can
+          serve as dependent variables when calibrating OCR signals.
+
   document-type-classifier-udm:
     output_contract:
       format: json_object

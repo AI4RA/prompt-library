@@ -122,6 +122,7 @@ nav:
       - nsf-budget-spreadsheet-ingest-udm: components/nsf-budget-spreadsheet-ingest-udm.md
       - nsf-budget-spreadsheet-justification-udm: components/nsf-budget-spreadsheet-justification-udm.md
       - nsf-expense-allowability-check: components/nsf-expense-allowability-check.md
+      - ocr-quality-signals: components/ocr-quality-signals.md
       - prior-approval-extraction-udm: components/prior-approval-extraction-udm.md
       - proposal-budget-personnel-extraction-udm: components/proposal-budget-personnel-extraction-udm.md
       - proposal-document-completeness-udm: components/proposal-document-completeness-udm.md
