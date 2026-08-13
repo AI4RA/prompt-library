@@ -6,6 +6,15 @@ All notable changes to this workflow. Versions follow semver adapted to workflow
 - **MINOR** — prompt body tracking a referenced component MINOR, or additive step/task options that preserve the existing operator flow.
 - **PATCH** — step or task display-name edits, description polish, non-semantic manifest cleanup.
 
+## [2.0.0] — 2026-08-13
+
+- **MAJOR — task split for the 8192-token model context** (parallel task count 9 → 10, fragment count 9 → 10). Importing v1.2.0 failed with *"Model token limit (8192) exceeded before any response was generated"*: `extract-application-components` had accreted to ~20.8K chars (~5.2K tokens) of prompt across three fix iterations, which plus the attached document slice and reserved output budget exceeded the assigned model's total 8192-token window — the call was rejected before generating anything. (The consolidation is unaffected: it demonstrably consumed ~7.5K input tokens and produced ~2.6K output tokens in earlier runs, so it runs on a larger-context assignment.)
+  - **New parallel task `extract-mandated-structure`** owns announcement-mandated internal component structure — emits `{mandated_structure: [{component, mandated_sections}]}` (empty array when none) with the v0.8.0 enumeration rules, the pointer ban, and a compact worked example. Prompt ~4.5K chars (~1.1K tokens).
+  - **`extract-application-components` rewritten without the mandated-sections content** — backbone merge + stubs + compactness only, prompt 20.8K → ~9.5K chars (~2.4K tokens), comfortably inside 8192 with a document slice and output budget.
+  - **Consolidation**: now receives TEN fragments; the Announcement-Mandated Structure block and the "See required structure below." table pointer read fragment 10 (matched on component name); fragment 7 components no longer carry `mandated_sections`.
+- Deliverable unchanged — same eleven sections, same Required-structure block. `validation_plan` unchanged (CHK-01 – CHK-07 still hold at the deliverable level).
+- Component pin unchanged at `rfa-checklist-extraction-udm@0.1.0`.
+
 ## [1.2.0] — 2026-08-13
 
 - **Compactness-block placement fix + backbone stubs.** The v1.1.0 NSF 25-541 re-test fixed fragment truncation (components fragment parsed, all mandated sections and milestones survived) but surfaced two regressions caused by the compactness block itself:
