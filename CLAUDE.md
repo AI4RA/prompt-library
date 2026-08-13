@@ -125,13 +125,18 @@ rather than "PI".
 
 ### `workflows/rfa-checklist-extraction`
 
-**Status**: ✅ Confirmed working on BLM Idaho Wildlife FOA
-L24AS00123. No version bumps required from v0.2.0 baseline — the
-workflow's prompts already handled the seven-parallel-task
-extraction topology correctly. Used as the reference architecture
-for the FOA Checklist v0.3.0 consolidation rewrite (FOA was failing
-where RFA was passing on the same input PDF + same Vandalizer +
-same KB).
+**Status**: ✅ v2.0.x CONFIRMED end-to-end on THREE documents:
+BLM Idaho Wildlife FOA L24AS00123 (v0.2.0 baseline), NSF 22-603
+Mid-Career Advancement (v2.0.0, simple mandated structure — 3
+flat sections), and NSF 25-541 PCL Test Bed (v2.0.0, complex
+mandated structure — 8 sections, 5 nested sub-parts, 6-milestone
+timeline; the document that drove the v0.8.0→v2.0.1 arc). The
+PCL confirmation run (2026-08-13, after the operator raised model
+token limits): all 10 fragments valid minified JSON, zero salvage
+needed, backbone stubs rendered, full award amount preserved,
+placement contract enforced, deliverable complete with clean
+ending. Historically also used as the reference architecture for
+the FOA Checklist v0.3.0 consolidation rewrite.
 
 **Test input**:
 `C:\Users\lehsan\Documents\Sample_FOAs\BLM\1_Foa_Content_of_L24AS00123.pdf`
@@ -357,6 +362,28 @@ rule recovered every section, so the deliverable was unaffected
 — but the fragment should parse. PATCH: all ten extraction
 prompts now carry an explicit escape-or-rephrase rule for double
 quotes inside JSON string values. No other changes.
+
+#### v2.0.0 PCL confirmation run (2026-08-13)
+
+**Test input**: NSF 25-541 PCL Test Bed — the complex-structure
+document that drove the entire v0.8.0→v2.0.1 arc — re-run on the
+v2.0.0 import under the raised token limits.
+
+**Result: clean pass, workflow confirmed.** All 10 fragments
+valid minified JSON (0 invalid, no quote-escaping issues even
+without the v2.0.1 rule); mandated_structure carried all 8
+sections + Node capabilities' 5 sub-parts + the 6-milestone
+Implementation Timeline; Required Components table = 2
+announcement-modified rows first + 9 backbone stubs; Optional
+Components = Letters of Collaboration (with the
+Letters-of-Support prohibition) + 3 stubs; award amount preserved
+in full ("Up to $5M/year for 4 years... $20M"); placement
+contract enforced (cost-sharing item dropped from Special
+Requirements, carried in Budget); deliverable ends cleanly at
+3 Important Notes. Run-to-run variance note: this run's
+risk-flags returned "unclear" for AOR/signature (a prior run said
+"yes"); the grounding rule correctly kept it un-flagged rather
+than guessing — acceptable behavior, not a defect.
 
 ### `workflows/foa-checklist-extraction`
 
