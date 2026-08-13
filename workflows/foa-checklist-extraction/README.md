@@ -2,11 +2,13 @@
 
 Uploads a Federal Funding Opportunity Announcement (FOA) and returns a single structured JSON object covering the eight reference sections a federal-grants office uses for FOA review: FOA summary and key dates, funding and eligibility, evaluation criteria with weights, multi-stage review process, agency priorities and program goals, submission platform and forms, application components, and formatting requirements.
 
-**Workflow version:** 0.1.0
+**Workflow version:** 1.0.0
 **Vandalizer schema version:** 2
 **Status:** experimental
 **Components manifested:** `foa-checklist-extraction-udm@0.1.0`
 **Eval posture:** workflow-local — see [`evals/`](evals/)
+
+> **v1.0.0 (KB step removed):** the optional Knowledge Base lookup step was removed (MAJOR, 3 steps → 2) — it was inert on import (Vandalizer blanks `kb_uuid`). Extraction tasks now read the uploaded documents directly. Mirrors `rfa-checklist-extraction` v1.0.0. See the [CHANGELOG](CHANGELOG.md).
 
 ## What this workflow does
 

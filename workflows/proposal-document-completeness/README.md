@@ -2,11 +2,13 @@
 
 Uploads a proposal package (VERAS upload bundle, NSF or NIH proposal, plus the relevant solicitation) and returns a single structured JSON gap-analysis covering senior key personnel, budget personnel, subaward presence, the four per-person required documents, conditional requirements, and a prioritized list of missing items the analyst should ask the PI about.
 
-**Workflow version:** 0.1.0
+**Workflow version:** 1.0.0
 **Vandalizer schema version:** 2
 **Status:** experimental
 **Components manifested:** `proposal-document-completeness-udm@0.1.0`
 **Eval posture:** workflow-local — see [`evals/`](evals/)
+
+> **v1.0.0 (KB step removed):** the optional Knowledge Base lookup step was removed (MAJOR, 3 steps → 2) — it was inert on import (Vandalizer blanks `kb_uuid`). Extraction tasks now read the uploaded documents directly. Mirrors `rfa-checklist-extraction` v1.0.0. See the [CHANGELOG](CHANGELOG.md).
 
 ## What this workflow does
 

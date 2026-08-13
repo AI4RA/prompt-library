@@ -1,4 +1,13 @@
 # Authored source for the Proposal Budget Personnel & Compliance Triggers
+#
+# === v1.0.0 (2026-08-13): KB STEP REMOVED (MAJOR, 3 steps -> 2) ===
+# The Step 0 KnowledgeBaseQuery lookup referenced in the historical
+# topology notes below was removed -- it was inert on a fresh import
+# (Vandalizer blanks kb_uuid by design, so a KB always had to be
+# attached manually). The parallel extraction tasks now read
+# input_sources: [workflow_documents] only; consolidation is unchanged.
+# Mirrors rfa-checklist-extraction v1.0.0. KBs will be reintroduced
+# once the right approach is settled.
 # Vandalizer workflow.
 #
 # === Topology (v0.5.0, Variant A + KB injection + agency-agnostic formats) ===
@@ -74,12 +83,12 @@ description: >
   consolidation.md conventions, including ✅/❌ for compliance flags
   and ☐ for document checklists.
 
-workflow_version: 0.5.0
+workflow_version: 1.0.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-04-30
-updated: 2026-05-27
+updated: 2026-08-13
 
 components:
   - slug: proposal-budget-personnel-extraction-udm
@@ -100,28 +109,10 @@ validation_plan:
     description: Verify Total Direct Costs equals sum of all direct categories, and Total Project Cost equals Direct + Indirect.
 
 steps:
-  - name: Knowledge Base Context Lookup
-    tasks:
-      - name: kb-context-lookup
-        kind: KnowledgeBaseQuery
-        query: "proposal budget senior key personnel biosketch current and pending support collaborators affiliations synergistic activities mentoring plan postdocs graduate students subaward commitment form equipment justification cost sharing F&A indirect rate"
-        k: 8
-        knowledge_base_hint:
-          title: "OMB Uniform Guidance (2 CFR 200)"
-          description: >
-            Primary regulatory KB. For CAS-triggering proposals
-            (typically large research universities with >$50M in
-            federal awards), swap in Cost Accounting Standards (CAS).
-            For agency-specific document requirements, swap in NSF
-            PAPPG Reference, NIH Grants Policy Statement, DOE
-            Financial Assistance Rules, or DOD Research Funding &
-            DFARS.
-
   - name: Parallel Extraction (Prompt)
     tasks:
       - name: extract-personnel-identification
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting personnel from a proposal package (budget,
@@ -215,7 +206,6 @@ steps:
 
       - name: extract-budget-structure-and-triggers
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting budget structure and compliance triggers

@@ -2,33 +2,13 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-05-22T00:00:00+00:00",
+  "exported_at": "2026-08-13T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Effort Reporting Extraction v0.2.0",
+      "name": "Effort Reporting Extraction v1.0.0",
       "description": "Uploads a federal award notice or agreement and returns an RA-friendly Markdown \"Effort Compliance Brief\" covering the governing regulation, certification cadence (per 2 CFR 200.430(i)), per-person key-personnel commitments table, cost-shared effort, record retention, and referenced governing documents. Mirrors the source ui-insight/ProcessMapping effort-reporting-extraction formatting.md conventions, including left-aligned column markers (`:---`) in the personnel commitments Markdown table.",
       "steps": [
-        {
-          "name": "Knowledge Base Context Lookup",
-          "data": {},
-          "is_output": false,
-          "tasks": [
-            {
-              "name": "KnowledgeBaseQuery",
-              "data": {
-                "name": "kb-context-lookup",
-                "kb_uuid": "",
-                "query": "effort reporting certification 2 CFR 200.430 personnel commitments key personnel committed effort cost share institutional base salary semi-annual certification record retention 200.334",
-                "k": 8,
-                "_embedded_knowledge_base": {
-                  "title": "Effort Reporting & Compensation",
-                  "description": "Purpose-built KB for federal effort reporting and personnel compensation rules. Do not swap — this KB is uniquely suited to the workflow's domain. When the operator does not attach a KB, the extraction falls back to reading just the uploaded award notice; 2 CFR 200.430(i) defaults apply."
-                }
-              }
-            }
-          ]
-        },
         {
           "name": "Extraction (Prompt)",
           "data": {},
@@ -40,7 +20,6 @@
                 "name": "extract-effort-reporting",
                 "prompt": "You are extracting effort-reporting and personnel-compliance\nrequirements from a federal award notice or agreement. You\nreceive the uploaded document AND any KB chunks the previous\nstep retrieved in your context.\n\nBe 100% accurate. Quote percentages, person-months, and\ndeadlines verbatim. Use null when a field is absent. Do not\ninvent numeric values.\n\nSearch every section with attention to titles like \"Effort\nReporting\", \"Personnel\", \"Salaries and Wages\", \"Cost Share\",\n\"Terms and Conditions\", \"Reporting Requirements\", \"Time and\nEffort\", \"Compensation\". Keywords: effort, certification,\nperson-months, calendar months, summer months, academic\nyear, institutional base salary, IBS, salary cap, cost share,\ncommitted effort, key personnel, 2 CFR 200.430.\n\nCRITICAL — descriptive fields must be FLAT STRINGS, not\nnested objects.\n\nExtract these fields:\n\n- award_number: STRING. Federal Award Identification Number\n  (FAIN). null when absent.\n- pi_name: STRING. Principal Investigator full name. null\n  when absent.\n- project_title: STRING. Project title from the award. null\n  when absent.\n- project_period: STRING. Project period of performance\n  (e.g., \"07/01/2024–06/30/2027\"). null when absent.\n- governing_regulation: STRING. Primary governing regulation\n  cited for effort (e.g., \"2 CFR 200.430(i)\"). Use that\n  default when the document does not state.\n- reporting_frequency: STRING. Certification frequency\n  verbatim (\"Semi-annually\", \"Annually\"). null when absent.\n- certification_method: STRING. How effort is certified\n  (e.g., \"Plan-confirmation\", \"After-the-fact certification\").\n  null when absent.\n- certification_deadline: STRING. Deadline after the\n  reporting period for certification (e.g., \"60 days after\n  period end\"). null when absent.\n- pi_committed_effort: STRING. PI committed effort verbatim\n  (e.g., \"2.0 summer months\", \"10% calendar year\"). null\n  when absent.\n- pi_person_months: STRING. PI commitment expressed in\n  person-months (e.g., \"1.2 calendar months\"). null when\n  absent.\n- key_personnel_commitments: JSON ARRAY of\n  {name_or_role, committed_effort, cost_shared_effort, notes}\n  objects, one per key person identified in the award. Each\n  field is a STRING. Empty array when no key personnel are\n  specified beyond the PI. The PI's row MUST also appear\n  here (mirror with pi_committed_effort).\n- cost_shared_effort: STRING. Cost-shared effort details\n  beyond what appears per-person in\n  key_personnel_commitments (e.g., institutional cost-share\n  on summer effort). null when no cost share is required.\n- record_retention: STRING. Record retention requirement\n  (e.g., \"3 years from final expenditure report per\n  2 CFR 200.334\"). null when absent.\n- penalties_for_noncompliance: STRING. Penalties for missed\n  or late effort certification (e.g., \"Withholding of\n  payments, cost disallowance, or award suspension\"). null\n  when absent.\n- referenced_documents: JSON ARRAY of STRINGS. Documents\n  cited that govern effort compliance for this award (e.g.,\n  \"NSF Research Terms and Conditions\",\n  \"NIH Grants Policy Statement Chapter 7.9.1\"). Empty array\n  when none cited.\n\n## Output\n\nEmit exactly one JSON object with all the keys above. No\npreamble, no markdown fences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -89,7 +68,7 @@
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/effort-reporting-extraction/manifest.yaml",
-        "workflow_version": "0.2.0",
+        "workflow_version": "1.0.0",
         "status": "experimental",
         "components": [
           {

@@ -1,5 +1,14 @@
 # Authored source for the Effort Reporting Extraction Vandalizer workflow.
 #
+# === v1.0.0 (2026-08-13): KB STEP REMOVED (MAJOR, 3 steps -> 2) ===
+# The Step 0 KnowledgeBaseQuery lookup referenced in the historical
+# topology notes below was removed -- it was inert on a fresh import
+# (Vandalizer blanks kb_uuid by design, so a KB always had to be
+# attached manually). The parallel extraction tasks now read
+# input_sources: [workflow_documents] only; consolidation is unchanged.
+# Mirrors rfa-checklist-extraction v1.0.0. KBs will be reintroduced
+# once the right approach is settled.
+#
 # The companion effort-reporting-extraction.vandalizer.json is generated from
 # this file by scripts/build_vandalizer_workflows.py and committed alongside.
 # Never hand-edit the generated JSON — update this manifest and rebuild.
@@ -26,12 +35,12 @@ description: >
   conventions, including left-aligned column markers (`:---`) in the
   personnel commitments Markdown table.
 
-workflow_version: 0.2.0
+workflow_version: 1.0.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-04-30
-updated: 2026-05-22
+updated: 2026-08-13
 
 components:
   - slug: effort-reporting-extraction-udm
@@ -58,26 +67,10 @@ validation_plan:
     description: Verify the PI's row in the personnel commitments table matches the standalone PI committed-effort field when both are stated.
 
 steps:
-  - name: Knowledge Base Context Lookup
-    tasks:
-      - name: kb-context-lookup
-        kind: KnowledgeBaseQuery
-        query: "effort reporting certification 2 CFR 200.430 personnel commitments key personnel committed effort cost share institutional base salary semi-annual certification record retention 200.334"
-        k: 8
-        knowledge_base_hint:
-          title: "Effort Reporting & Compensation"
-          description: >
-            Purpose-built KB for federal effort reporting and personnel
-            compensation rules. Do not swap — this KB is uniquely suited
-            to the workflow's domain. When the operator does not attach
-            a KB, the extraction falls back to reading just the
-            uploaded award notice; 2 CFR 200.430(i) defaults apply.
-
   - name: Extraction (Prompt)
     tasks:
       - name: extract-effort-reporting
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting effort-reporting and personnel-compliance

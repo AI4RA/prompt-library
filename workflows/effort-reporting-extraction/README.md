@@ -2,11 +2,13 @@
 
 Uploads a federal award notice or agreement and returns a single structured JSON object covering effort-reporting and personnel-compliance requirements: cadence, certification method (per 2 CFR 200.430(i)), PI commitments, per-person key-personnel commitments, cost-shared effort, governing regulation, record-retention requirement, and referenced governing documents.
 
-**Workflow version:** 0.1.0
+**Workflow version:** 1.0.0
 **Vandalizer schema version:** 2
 **Status:** experimental
 **Components manifested:** `effort-reporting-extraction-udm@0.1.0`
 **Eval posture:** workflow-local — see [`evals/`](evals/)
+
+> **v1.0.0 (KB step removed):** the optional Knowledge Base lookup step was removed (MAJOR, 3 steps → 2) — it was inert on import (Vandalizer blanks `kb_uuid`). Extraction tasks now read the uploaded documents directly. Mirrors `rfa-checklist-extraction` v1.0.0. See the [CHANGELOG](CHANGELOG.md).
 
 ## What this workflow does
 

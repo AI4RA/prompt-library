@@ -1,5 +1,14 @@
 # Authored source for the FFR Management Extraction Vandalizer workflow.
 #
+# === v1.0.0 (2026-08-13): KB STEP REMOVED (MAJOR, 3 steps -> 2) ===
+# The Step 0 KnowledgeBaseQuery lookup referenced in the historical
+# topology notes below was removed -- it was inert on a fresh import
+# (Vandalizer blanks kb_uuid by design, so a KB always had to be
+# attached manually). The parallel extraction tasks now read
+# input_sources: [workflow_documents] only; consolidation is unchanged.
+# Mirrors rfa-checklist-extraction v1.0.0. KBs will be reintroduced
+# once the right approach is settled.
+#
 # The companion ffr-management-extraction.vandalizer.json is generated from
 # this file by scripts/build_vandalizer_workflows.py and committed alongside.
 # Never hand-edit the generated JSON — update this manifest and rebuild.
@@ -67,12 +76,12 @@ description: >
   readability, matching the source ui-insight/ProcessMapping
   ffr-management-extraction formatting.md conventions.
 
-workflow_version: 0.3.0
+workflow_version: 1.0.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-04-30
-updated: 2026-05-27
+updated: 2026-08-13
 
 components:
   - slug: ffr-management-extraction-udm
@@ -96,28 +105,10 @@ validation_plan:
     description: Verify final_ffr_due is consistent with annual_ffr_due (e.g., if annual is 90 days, final is at least 90 days; if document specifies different cadences, both are captured).
 
 steps:
-  - name: Knowledge Base Context Lookup
-    tasks:
-      - name: kb-context-lookup
-        kind: KnowledgeBaseQuery
-        query: "Federal Financial Report SF-425 FFR submission schedule Payment Management System PMS reporting cadence late submission penalties drawdown liquidation 2 CFR 200 Subpart F audit financial reporting requirements"
-        k: 8
-        knowledge_base_hint:
-          title: "OMB Uniform Guidance (2 CFR 200)"
-          description: >
-            Primary regulatory KB for FFR / SF-425 reporting
-            requirements. For NIH awards, swap in NIH Grants Policy
-            Statement (covers eRA Commons / PMS specifics). For DOE
-            awards, swap in DOE Financial Assistance Rules. When the
-            operator does not attach a KB, this step returns empty
-            output gracefully and the downstream extraction falls back
-            to reading just the uploaded award notice.
-
   - name: Extraction (Prompt)
     tasks:
       - name: extract-ffr-management
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting Federal Financial Report (FFR / SF-425)

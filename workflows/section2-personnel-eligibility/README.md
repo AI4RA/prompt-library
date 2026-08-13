@@ -2,11 +2,13 @@
 
 Uploads a VERAS proposal together with the Banner NBAJOBS extract for each person and the institutional Department List, and returns a verification matrix with per-person APM 45.22 eligibility determinations, per-org-code DGA mappings, and flags for ineligible personnel and missing DGAs.
 
-**Workflow version:** 0.1.0
+**Workflow version:** 1.0.0
 **Vandalizer schema version:** 2
 **Status:** experimental
 **Components manifested:** `section2-personnel-eligibility-udm@0.1.0`
 **Eval posture:** workflow-local — see [`evals/`](evals/)
+
+> **v1.0.0 (KB step removed):** the optional Knowledge Base lookup step was removed (MAJOR, 3 steps → 2) — it was inert on import (Vandalizer blanks `kb_uuid`). Extraction tasks now read the uploaded documents directly. Mirrors `rfa-checklist-extraction` v1.0.0. See the [CHANGELOG](CHANGELOG.md).
 
 ## What this workflow does
 
@@ -16,7 +18,7 @@ The operator uploads three documents together into Vandalizer:
 2. The Banner NBAJOBS extract for every person on the proposal (export, CSV, or PDF), and
 3. The institutional Department List (org-code → department → DGA mapping, typically XLSX or CSV).
 
-The APM 45.22 eligible-titles list is consumed from the knowledge base / search corpus and does not need to be uploaded as a workflow document — see the source workflow's note that an APM 45.22 custom knowledge base must be built and loaded before this workflow runs in production.
+The APM 45.22 eligible-titles list is applied during the eligibility determination. As of v1.0.0 the inert `KnowledgeBaseQuery` step was removed, so until KBs are reintroduced the APM 45.22 list should be supplied as an uploaded reference document alongside the other inputs.
 
 The workflow runs as two steps:
 
@@ -35,7 +37,7 @@ The runtime mirrors the source `ui-insight/ProcessMapping/workflows/section2-per
 
 - [`section2-personnel-eligibility-udm@0.1.0`](../../components/section2-personnel-eligibility-udm/) — the sole component. The two Extraction tasks carry focused `prompt_inline` bodies in [`manifest.yaml`](manifest.yaml); the canonical full-document prompt at [`components/section2-personnel-eligibility-udm/prompt.md`](../../components/section2-personnel-eligibility-udm/prompt.md) remains the single-call reference for harness invocations.
 
-## Input model — three workflow documents + knowledge base
+## Input model — three workflow documents
 
 This is the second of two pre-award compliance ports that require multiple input documents uploaded together (the other is `compliance-personnel-verification`). The Banner NBAJOBS extract and the Department List are not retrieved by API calls from inside Vandalizer; the operator must include them in the same workflow run as the VERAS proposal. When any of the three is missing:
 

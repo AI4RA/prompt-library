@@ -1,5 +1,14 @@
 # Authored source for the Risk Domain Assessment Vandalizer workflow.
 #
+# === v1.0.0 (2026-08-13): KB STEP REMOVED (MAJOR, 3 steps -> 2) ===
+# The Step 0 KnowledgeBaseQuery lookup referenced in the historical
+# topology notes below was removed -- it was inert on a fresh import
+# (Vandalizer blanks kb_uuid by design, so a KB always had to be
+# attached manually). The parallel extraction tasks now read
+# input_sources: [workflow_documents] only; consolidation is unchanged.
+# Mirrors rfa-checklist-extraction v1.0.0. KBs will be reintroduced
+# once the right approach is settled.
+#
 # === Topology (v0.3.0, Variant A + KB injection + inline rubrics + Domain 9 polarity fix) ===
 #
 # v0.3.0 accuracy fixes vs. v0.2.0 (surfaced by full 4-document HUD
@@ -82,12 +91,12 @@ description: >
   output template — dot-leader score lines, underlined section
   headers, fixed-width layout for legibility.
 
-workflow_version: 0.3.0
+workflow_version: 1.0.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-05-20
-updated: 2026-05-27
+updated: 2026-08-13
 
 components:
   - slug: risk-domain-assessment-udm
@@ -108,25 +117,10 @@ validation_plan:
     description: Verify total_risk_score equals the arithmetic sum of the 14 domain scores; average_risk_score equals total_risk_score / 14 rounded to one decimal place.
 
 steps:
-  - name: Knowledge Base Context Lookup
-    tasks:
-      - name: kb-context-lookup
-        kind: KnowledgeBaseQuery
-        query: "federal award risk programmatic complexity financial budgetary subrecipient research security foreign influence compliance regulatory reporting burden audit risk strategic alignment sustainability closeout sensitive data CJIS PII intellectual property data rights privacy unusual terms sponsor reliability reputational risk export control NSPM-33 CHIPS Act"
-        k: 8
-        knowledge_base_hint:
-          title: "OMB Uniform Guidance (2 CFR 200)"
-          description: >
-            Primary regulatory KB. For research-security-heavy
-            awards, swap in Export Control (EAR & ITAR) or Responsible
-            Conduct of Research (RCR). For agency-specific scoring,
-            swap in NSF PAPPG / NIH GPS / DOE / DOD / DFARS.
-
   - name: Parallel Risk Domain Extraction (Prompt)
     tasks:
       - name: extract-programmatic-strategic
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are scoring Domain 1 (Programmatic Complexity) and
@@ -214,7 +208,6 @@ steps:
 
       - name: extract-financial-audit
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are scoring Domain 2 (Financial & Budgetary Risk) and
@@ -287,7 +280,6 @@ steps:
 
       - name: extract-subrecipient-sponsor
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are scoring Domain 3 (Subrecipient / Partner Risk) and
@@ -352,7 +344,6 @@ steps:
 
       - name: extract-security-compliance
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are scoring Domain 4 (Research Security & Foreign
@@ -413,7 +404,6 @@ steps:
 
       - name: extract-reporting-administrative
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are scoring Domain 6 (Performance Measurement & Reporting
@@ -468,7 +458,6 @@ steps:
 
       - name: extract-data-sustainability-reputational
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are scoring Domain 10 (Sustainability & Closeout),

@@ -2,33 +2,13 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-05-22T00:00:00+00:00",
+  "exported_at": "2026-08-13T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Subaward Agreement Extraction v0.2.0",
+      "name": "Subaward Agreement Extraction v1.0.0",
       "description": "Uploads a federal subaward agreement and returns an RA-friendly Markdown Subaward Summary covering basic award information, project periods, PTE / Subrecipient contact tables (Role | Name | Email | Phone), financial summary with monetary-accuracy verification, financial policies, reporting requirements (Technical / Financial / Invention sub-bullets), prior approval requirements, and key compliance requirements. Mirrors the source ui-insight/ProcessMapping subaward-extraction consolidation.md conventions, including the \"VERIFY CAREFULLY\" annotation on Total Subaward Amount.",
       "steps": [
-        {
-          "name": "Knowledge Base Context Lookup",
-          "data": {},
-          "is_output": false,
-          "tasks": [
-            {
-              "name": "KnowledgeBaseQuery",
-              "data": {
-                "name": "kb-context-lookup",
-                "kb_uuid": "",
-                "query": "subaward agreement pass-through entity PTE subrecipient federal award subrecipient monitoring 2 CFR 200.331 200.332 FFATA invoicing indirect cost rate prior approval scope of work cost type fixed price cost reimbursable",
-                "k": 8,
-                "_embedded_knowledge_base": {
-                  "title": "OMB Uniform Guidance (2 CFR 200)",
-                  "description": "Primary regulatory KB — §§ 200.331-332 cover subaward rules. For contract subawards, swap in Federal Acquisition Regulation (FAR). When the operator does not attach a KB, the extraction falls back to reading just the uploaded subaward agreement."
-                }
-              }
-            }
-          ]
-        },
         {
           "name": "Parallel Extraction (Prompt)",
           "data": {},
@@ -40,7 +20,6 @@
                 "name": "extract-core-award",
                 "prompt": "You are extracting the basic award information from a federal\nsubaward agreement. You receive the uploaded document AND any\nKB chunks.\n\nEmit a JSON object with: pte_name, subrecipient_name,\npte_federal_award_number, subaward_number, project_title,\nfederal_awarding_agency, prime_award_period_start (ISO\nYYYY-MM-DD or null), prime_award_period_end (ISO YYYY-MM-DD\nor null), subaward_period_start (ISO YYYY-MM-DD),\nsubaward_period_end (ISO YYYY-MM-DD).\n\nBe 100% accurate. Quote identifiers verbatim. Use null when\nabsent.\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -51,7 +30,6 @@
                 "name": "extract-contacts",
                 "prompt": "You are extracting contact information from a federal subaward\nagreement.\n\nFor each contact, emit name (STRING), email (STRING), phone\n(STRING formatted as XXX-XXX-XXXX). Use null for any missing\nfield.\n\nEmit a JSON object with:\n- pte_contacts: JSON ARRAY of {role, name, email, phone}\n  objects — four rows (Principal Investigator, Administrative\n  Contact, Financial Contact, Authorized Official).\n- subrecipient_contacts: JSON ARRAY of same shape — same\n  four rows.\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -62,7 +40,6 @@
                 "name": "extract-financial",
                 "prompt": "You are extracting financial details from a federal subaward\nagreement.\n\nCRITICAL — monetary accuracy is vital. Cross-check amounts\nin multiple document locations. Common errors: missing\ncommas, transposed digits, wrong decimals.\n\nEmit a JSON object with: total_subaward_amount (STRING),\ntotal_direct_costs (STRING), total_indirect_costs (STRING),\ncost_type (one of \"Fixed Price\", \"Cost Reimbursement\",\n\"Milestone\", \"Other\"), indirect_cost_rate (STRING e.g.,\n\"47.5%\"), indirect_cost_base (STRING e.g., \"MTDC\"),\ncost_sharing_required (BOOLEAN), cost_sharing_details\n(STRING or null), carryforward_policy (STRING or null).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -73,7 +50,6 @@
                 "name": "extract-financial-policies",
                 "prompt": "You are extracting financial policies and invoicing rules\nfrom a federal subaward agreement.\n\nEmit a JSON object with: invoicing_frequency (one of\n\"Monthly\", \"Quarterly\", \"Upon Milestone\", \"Annually\",\n\"Other\"), final_invoice_deadline (STRING),\nrequired_invoice_elements (JSON ARRAY of STRINGS),\npayment_terms (STRING or null), banking_information_required\n(BOOLEAN).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -84,7 +60,6 @@
                 "name": "extract-reporting",
                 "prompt": "You are extracting reporting requirements from a federal\nsubaward agreement.\n\nEmit a JSON object with:\n- technical_reports: JSON ARRAY of {frequency, deadline,\n  recipient} objects (Monthly / Quarterly / Annual / Final\n  as applicable).\n- financial_reports: JSON ARRAY of same shape (Final\n  statement, interim statements).\n- invention_reporting: JSON ARRAY of {type, deadline}\n  objects (Disclosure, Final invention report).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -95,7 +70,6 @@
                 "name": "extract-compliance",
                 "prompt": "You are extracting compliance requirements and prior-approval\nrules from a federal subaward agreement.\n\nEmit a JSON object with: prior_approval_general_rule (STRING\n— who to contact for approvals), prior_approval_specific (JSON\nARRAY of {category, requirement} objects — no-cost extensions,\nPI / key personnel changes, equipment, etc.),\ngoverning_regulations (JSON ARRAY of STRINGS),\nfcoi_policy (STRING — whose FCOI policy applies),\ndata_rights (STRING), certifications_required (JSON ARRAY of\nSTRINGS), termination_notice_period (STRING),\nrecord_retention (STRING).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -144,7 +118,7 @@
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/subaward-extraction/manifest.yaml",
-        "workflow_version": "0.2.0",
+        "workflow_version": "1.0.0",
         "status": "experimental",
         "components": [
           {

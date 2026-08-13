@@ -3336,7 +3336,7 @@
       "slug": "award-compliance-extraction",
       "name": "Award Compliance & Financial Overview Extraction",
       "description": "Uploads a fully-executed federal award notice or agreement and returns an RA-friendly Markdown Award Compliance & Financial Overview covering award header information, financial summary, approved budget & restrictions, governing regulations (prioritized), and key administrative requirements (reporting, prior approval, compliance deadlines). Mirrors the source ui-insight/ProcessMapping award-compliance-extraction consolidation.md conventions.",
-      "workflow_version": "0.2.2",
+      "workflow_version": "1.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3350,8 +3350,8 @@
         "award-compliance-extraction-udm"
       ],
       "steps": {
-        "step_count": 3,
-        "task_count": 4,
+        "step_count": 2,
+        "task_count": 3,
         "output_step_name": "Consolidation (Markdown deliverable)"
       },
       "evaluation": {
@@ -3363,7 +3363,7 @@
       "slug": "award-modification-intake",
       "name": "Award Modification Intake & Classification",
       "description": "Uploads a federal award amendment / modification document and returns an RA-friendly Markdown Modification Intake Summary covering modification classification, type-specific key-information tables (additional funds / NCE / PI change / rebudget), compliance & conditions, a type-specific processing checklist, pre-filled VERAS form values, and discrepancies & warnings. Mirrors the source ui-insight/ProcessMapping award-modification-intake consolidation.md conventions — including conditional Section 2 tables driven by the classified modification type and the `[DISCREPANCY: ...]` flag syntax for contradictions between tasks.",
-      "workflow_version": "0.2.0",
+      "workflow_version": "1.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3377,8 +3377,8 @@
         "award-modification-intake-udm"
       ],
       "steps": {
-        "step_count": 3,
-        "task_count": 5,
+        "step_count": 2,
+        "task_count": 4,
         "output_step_name": "Consolidation (Markdown deliverable)"
       },
       "evaluation": {
@@ -3390,7 +3390,7 @@
       "slug": "budget-justification-generator",
       "name": "Budget Justification Generator",
       "description": "Uploads a grant budget form, the project narrative / proposal, and optionally the funding opportunity announcement, and returns a publication-ready RA-friendly Markdown budget-justification narrative document organized in standard R&R Budget / SF-424A category order (A. Senior/Key Personnel through H. Indirect Costs, plus Cost Sharing and Budget Summary). Agency-agnostic — handles SF-424 R&R Detailed (NIH/NSF/DOE-research/DOD-research/EPA-research), SF-424A Non-Construction, numbered-section budget worksheets (HUD-424-CBW, DOI, USDA, ED, EPA, HHS, DOE non-research, DOD non-research, cooperative-agreement variants), and narrative-only budgets. Mirrors the source ui-insight/ProcessMapping budget-justification-generator consolidation.md conventions.",
-      "workflow_version": "0.5.0",
+      "workflow_version": "1.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3404,8 +3404,8 @@
         "budget-justification-generator-udm"
       ],
       "steps": {
-        "step_count": 3,
-        "task_count": 6,
+        "step_count": 2,
+        "task_count": 5,
         "output_step_name": "Consolidation (Markdown deliverable)"
       },
       "evaluation": {
@@ -3417,7 +3417,7 @@
       "slug": "compliance-personnel-verification",
       "name": "Compliance Personnel Verification (SFI & RST)",
       "description": "Uploads three workflow documents together — the VERAS proposal package, the institutional SFI disclosure records, and the most recent daily RST completion spreadsheet — and returns an RA-friendly Markdown Compliance Status Report covering the per-person SFI / RST status matrix, summary counts, action items for non-compliant personnel, discrepancies & warnings, and a completion checklist. Mirrors the source ui-insight/ProcessMapping compliance-personnel-verification consolidation.md conventions.",
-      "workflow_version": "0.2.0",
+      "workflow_version": "1.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3431,8 +3431,8 @@
         "compliance-personnel-verification-udm"
       ],
       "steps": {
-        "step_count": 3,
-        "task_count": 4,
+        "step_count": 2,
+        "task_count": 3,
         "output_step_name": "Consolidation (Markdown deliverable)"
       },
       "evaluation": {
@@ -3483,7 +3483,7 @@
       "slug": "effort-reporting-extraction",
       "name": "Effort Reporting Extraction",
       "description": "Uploads a federal award notice or agreement and returns an RA-friendly Markdown \"Effort Compliance Brief\" covering the governing regulation, certification cadence (per 2 CFR 200.430(i)), per-person key-personnel commitments table, cost-shared effort, record retention, and referenced governing documents. Mirrors the source ui-insight/ProcessMapping effort-reporting-extraction formatting.md conventions, including left-aligned column markers (`:---`) in the personnel commitments Markdown table.",
-      "workflow_version": "0.2.0",
+      "workflow_version": "1.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3497,8 +3497,8 @@
         "effort-reporting-extraction-udm"
       ],
       "steps": {
-        "step_count": 3,
-        "task_count": 3,
+        "step_count": 2,
+        "task_count": 2,
         "output_step_name": "Consolidation (Markdown deliverable)"
       },
       "evaluation": {
@@ -3537,7 +3537,7 @@
       "slug": "ffr-management-extraction",
       "name": "FFR Management Extraction",
       "description": "Uploads a federal award notice or agreement and returns an RA-friendly Markdown FFR (SF-425) management reference covering the five buckets a sponsored-programs analyst uses when scheduling FFR submissions: submission schedule, submission system and procedures, required financial data categories, compliance consequences, and preparation timeline. The Markdown uses bold category labels for maximum readability, matching the source ui-insight/ProcessMapping ffr-management-extraction formatting.md conventions.",
-      "workflow_version": "0.3.0",
+      "workflow_version": "1.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3551,8 +3551,8 @@
         "ffr-management-extraction-udm"
       ],
       "steps": {
-        "step_count": 3,
-        "task_count": 3,
+        "step_count": 2,
+        "task_count": 2,
         "output_step_name": "Consolidation (Markdown deliverable)"
       },
       "evaluation": {
@@ -3564,7 +3564,7 @@
       "slug": "foa-checklist-extraction",
       "name": "FOA Checklist Extraction",
       "description": "Uploads a federal funding opportunity announcement (FOA / NOFO) and returns an RA-friendly Markdown FOA reference document covering FOA Summary, Key Dates and Deadlines, Funding Information, Eligibility Requirements, Application Components and Submission Requirements, Evaluation Process and Criteria, Program Priorities and Alignment, and Special Requirements. Mirrors the source ui-insight/ProcessMapping foa-checklist-extraction conventions with H1/H2/H3 hierarchical headings and a placement contract that routes each fact to exactly one section.",
-      "workflow_version": "0.3.0",
+      "workflow_version": "1.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3578,8 +3578,8 @@
         "foa-checklist-extraction-udm"
       ],
       "steps": {
-        "step_count": 3,
-        "task_count": 8,
+        "step_count": 2,
+        "task_count": 7,
         "output_step_name": "Consolidation (Markdown deliverable)"
       },
       "evaluation": {
@@ -3591,7 +3591,7 @@
       "slug": "noa-summary",
       "name": "NOA Summary",
       "description": "Uploads a federal Notice of Award (NoA) and returns an RA-friendly Markdown Grant Award Summary for a university Office of Sponsored Programs: a five-part synthesis (Key Personnel & Contacts; Grant Summary At-a-Glance; Financial & Period of Performance; Reporting & Critical Deadlines; Key Compliance & Administrative Requirements) with finances and deadlines in tables and critical restrictions / required approvals bolded.",
-      "workflow_version": "0.2.0",
+      "workflow_version": "1.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3605,8 +3605,8 @@
         "noa-summary-udm"
       ],
       "steps": {
-        "step_count": 3,
-        "task_count": 4,
+        "step_count": 2,
+        "task_count": 3,
         "output_step_name": "Consolidation (Markdown deliverable)"
       },
       "evaluation": {
@@ -3729,7 +3729,7 @@
       "slug": "prior-approval-extraction",
       "name": "Prior Approval Extraction",
       "description": "Uploads a federal award notice or agreement and returns an RA-friendly Markdown reference covering prior-approval requirements: budget approvals (rebudgeting thresholds, equipment, F&A changes), scope & timeline approvals (NCE, PI / key personnel changes, scope changes), the approval procedures matrix (Approval Type | Threshold | Required Documentation | Approval Authority | Processing Timeline | Consequences of Non-compliance), and any RTC expanded-authority waivers. Mirrors the source ui-insight/ProcessMapping prior-approval-extraction formatting.md conventions, including the mandatory six-column APPROVAL PROCEDURES table.",
-      "workflow_version": "0.2.0",
+      "workflow_version": "1.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3743,8 +3743,8 @@
         "prior-approval-extraction-udm"
       ],
       "steps": {
-        "step_count": 3,
-        "task_count": 3,
+        "step_count": 2,
+        "task_count": 2,
         "output_step_name": "Consolidation (Markdown deliverable)"
       },
       "evaluation": {
@@ -3756,7 +3756,7 @@
       "slug": "proposal-budget-personnel-extraction",
       "name": "Proposal Budget Personnel & Compliance Requirements Extraction",
       "description": "Uploads a proposal package (budget form, project narrative, sponsor RFA) and returns an RA-friendly Markdown Budget Personnel & Compliance Requirements Analysis covering the personnel summary table, trainee summary with mentoring-plan flag, compliance requirement flags driven by budget content, senior-key-personnel document requirements matrix, subaward document requirements, budget overview table, and cost details. Mirrors the source ui-insight/ProcessMapping proposal-budget-personnel-extraction consolidation.md conventions, including ✅/❌ for compliance flags and ☐ for document checklists.",
-      "workflow_version": "0.5.0",
+      "workflow_version": "1.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3770,8 +3770,8 @@
         "proposal-budget-personnel-extraction-udm"
       ],
       "steps": {
-        "step_count": 3,
-        "task_count": 4,
+        "step_count": 2,
+        "task_count": 3,
         "output_step_name": "Consolidation (Markdown deliverable)"
       },
       "evaluation": {
@@ -3783,7 +3783,7 @@
       "slug": "proposal-document-completeness",
       "name": "Proposal Document Completeness",
       "description": "Uploads a federal proposal package (VERAS or sponsor portal export) plus the RFA / FOA for the announcement and returns an RA-friendly Markdown Completeness Report covering required-documents checklist, per-person document matrix, subaward document status, conditional requirements, personnel discrepancies, prioritized missing-documents summary for PI communication, and warnings. Mirrors the source ui-insight/ProcessMapping proposal-document-completeness consolidation.md conventions.",
-      "workflow_version": "0.2.0",
+      "workflow_version": "1.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3797,8 +3797,8 @@
         "proposal-document-completeness-udm"
       ],
       "steps": {
-        "step_count": 3,
-        "task_count": 4,
+        "step_count": 2,
+        "task_count": 3,
         "output_step_name": "Consolidation (Markdown deliverable)"
       },
       "evaluation": {
@@ -3837,7 +3837,7 @@
       "slug": "risk-domain-assessment",
       "name": "Risk Domain Assessment",
       "description": "Uploads federal award documents (Notice of Award, FOA / NOFO / RFA, modification, proposal) and returns an RA-friendly Risk Domain Assessment Report scoring 14 institutional risk domains on a 1-5 rubric with evidence citations, aggregate metrics, high-risk-areas list, key findings, and recommended mitigations. The deliverable is rendered as plain-text inside a Markdown code block per the source ui-insight/ProcessMapping risk-domain-assessment consolidation.md output template — dot-leader score lines, underlined section headers, fixed-width layout for legibility.",
-      "workflow_version": "0.3.0",
+      "workflow_version": "1.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3851,8 +3851,8 @@
         "risk-domain-assessment-udm"
       ],
       "steps": {
-        "step_count": 3,
-        "task_count": 8,
+        "step_count": 2,
+        "task_count": 7,
         "output_step_name": "Risk Profile Consolidation (Plain-text in code block)"
       },
       "evaluation": {
@@ -3864,7 +3864,7 @@
       "slug": "section2-personnel-eligibility",
       "name": "Section 2 Personnel Eligibility Verification",
       "description": "Uploads three workflow documents together — the VERAS proposal package, the Banner NBAJOBS extract, and the institutional Department List — and returns an RA-friendly Markdown Section 2 Review Report covering the per-person eligibility matrix (with APM 45.22 status), org-code-to-DGA mapping, DGA completeness assessment, action items for ineligible personnel and missing DGAs, and a review-completion checklist. Mirrors the source ui-insight/ProcessMapping section2-personnel-eligibility consolidation.md conventions.",
-      "workflow_version": "0.2.0",
+      "workflow_version": "1.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3878,8 +3878,8 @@
         "section2-personnel-eligibility-udm"
       ],
       "steps": {
-        "step_count": 3,
-        "task_count": 4,
+        "step_count": 2,
+        "task_count": 3,
         "output_step_name": "Consolidation (Markdown deliverable)"
       },
       "evaluation": {
@@ -3891,7 +3891,7 @@
       "slug": "subaward-extraction",
       "name": "Subaward Agreement Extraction",
       "description": "Uploads a federal subaward agreement and returns an RA-friendly Markdown Subaward Summary covering basic award information, project periods, PTE / Subrecipient contact tables (Role | Name | Email | Phone), financial summary with monetary-accuracy verification, financial policies, reporting requirements (Technical / Financial / Invention sub-bullets), prior approval requirements, and key compliance requirements. Mirrors the source ui-insight/ProcessMapping subaward-extraction consolidation.md conventions, including the \"VERIFY CAREFULLY\" annotation on Total Subaward Amount.",
-      "workflow_version": "0.2.0",
+      "workflow_version": "1.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3905,8 +3905,8 @@
         "subaward-extraction-udm"
       ],
       "steps": {
-        "step_count": 3,
-        "task_count": 8,
+        "step_count": 2,
+        "task_count": 7,
         "output_step_name": "Consolidation (Markdown deliverable)"
       },
       "evaluation": {
