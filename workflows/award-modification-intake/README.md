@@ -2,11 +2,13 @@
 
 Uploads a federal award amendment / modification document and returns a single structured JSON object covering the three blocks a Post-Award Specialist uses to enter the modification into Banner: identification (with seven-value modification-type classification), financial impact, and compliance.
 
-**Workflow version:** 0.1.0
+**Workflow version:** 1.0.0
 **Vandalizer schema version:** 2
 **Status:** experimental
 **Components manifested:** `award-modification-intake-udm@0.1.0`
 **Eval posture:** workflow-local — see [`evals/`](evals/)
+
+> **v1.0.0 (KB step removed):** the optional Knowledge Base lookup step was removed (MAJOR, 3 steps → 2) — it was inert on import (Vandalizer blanks `kb_uuid`). Extraction tasks now read the uploaded documents directly. Mirrors `rfa-checklist-extraction` v1.0.0. See the [CHANGELOG](CHANGELOG.md).
 
 ## What this workflow does
 

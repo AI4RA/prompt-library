@@ -2,33 +2,13 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-05-27T00:00:00+00:00",
+  "exported_at": "2026-08-13T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "FOA Checklist Extraction v0.3.0",
+      "name": "FOA Checklist Extraction v1.0.0",
       "description": "Uploads a federal funding opportunity announcement (FOA / NOFO) and returns an RA-friendly Markdown FOA reference document covering FOA Summary, Key Dates and Deadlines, Funding Information, Eligibility Requirements, Application Components and Submission Requirements, Evaluation Process and Criteria, Program Priorities and Alignment, and Special Requirements. Mirrors the source ui-insight/ProcessMapping foa-checklist-extraction conventions with H1/H2/H3 hierarchical headings and a placement contract that routes each fact to exactly one section.",
       "steps": [
-        {
-          "name": "Knowledge Base Context Lookup",
-          "data": {},
-          "is_output": false,
-          "tasks": [
-            {
-              "name": "KnowledgeBaseQuery",
-              "data": {
-                "name": "kb-context-lookup",
-                "kb_uuid": "",
-                "query": "federal funding opportunity announcement FOA NOFO eligibility budget cost sharing F&A indirect cost rates allowable unallowable personnel effort submission deadlines compliance evaluation criteria peer review CFDA program authorization",
-                "k": 8,
-                "_embedded_knowledge_base": {
-                  "title": "OMB Uniform Guidance (2 CFR 200)",
-                  "description": "Primary regulatory KB. Swap in NSF PAPPG Reference (NSF FOAs), NIH Grants Policy Statement (NIH NOFOs), DOE Financial Assistance Rules (DOE), or DOD Research Funding & DFARS (DOD) as appropriate for the announcement's sponsor."
-                }
-              }
-            }
-          ]
-        },
         {
           "name": "Parallel Extraction (Prompt)",
           "data": {},
@@ -40,7 +20,6 @@
                 "name": "extract-foa-summary",
                 "prompt": "You are extracting FOA summary fields. You receive the\nuploaded document AND any KB chunks.\n\nEmit a JSON object with: foa_number_or_id, cfda_number,\ncfda_title, federal_agency, agency_office_bureau,\nfoa_title_or_program_name, program_authorization,\nprogram_description (1-3 sentence summary). All STRINGS;\nnull when absent.\n\n## Output\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -51,7 +30,6 @@
                 "name": "extract-key-dates",
                 "prompt": "You are extracting key dates and deadlines from a FOA.\nPreserve the sponsor's date format verbatim including time\nand timezone.\n\nEmit a JSON object with one key: critical_dates (JSON ARRAY\nof {event_or_milestone, date_time, notes_or_requirements}\nobjects sorted chronologically).\n\n## Output\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -62,7 +40,6 @@
                 "name": "extract-funding-information",
                 "prompt": "You are extracting funding information from a FOA. Preserve\nmonetary amounts verbatim ($X,XXX,XXX format).\n\nEmit a JSON object with: total_funding (STRING), expected_awards\n(STRING — e.g., \"10-15\"), award_size_range (STRING — e.g.,\n\"$100,000 to $500,000\"), project_duration (STRING),\ncost_sharing_required (BOOLEAN or null), cost_sharing_details\n(STRING or null), award_instrument_type (STRING — Grant /\nCooperative Agreement / Contract).\n\n## Output\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -73,7 +50,6 @@
                 "name": "extract-eligibility",
                 "prompt": "You are extracting eligibility requirements from a FOA.\n\nEmit a JSON object with: eligible_applicants (JSON ARRAY of\nSTRINGS), ineligible_applicants (JSON ARRAY of STRINGS or\nempty), per_institution_limit (STRING or null),\nper_pi_limit (STRING or null), special_eligibility_conditions\n(JSON ARRAY of STRINGS).\n\n## Output\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -84,7 +60,6 @@
                 "name": "extract-application-and-evaluation",
                 "prompt": "You are extracting application components, submission\nrequirements, and evaluation criteria from a FOA.\n\nEmit a JSON object with:\n- registration_requirements: JSON ARRAY of STRINGS\n  (SAM.gov, Grants.gov, eRA Commons, etc.).\n- required_forms: JSON ARRAY of STRINGS.\n- formatting_requirements: STRING (page limits, font,\n  margins).\n- required_components: JSON ARRAY of\n  {component_name, description, page_limit_or_format}\n  objects.\n- submission_method: STRING (portal / email / hardcopy).\n- screening_criteria: JSON ARRAY of STRINGS.\n- merit_review_criteria: JSON ARRAY of\n  {criterion, weight, description} objects.\n- review_timeline: STRING.\n\n## Output\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -95,7 +70,6 @@
                 "name": "extract-priorities-and-special",
                 "prompt": "You are extracting program priorities and special requirements\nfrom a FOA.\n\nEmit a JSON object with: primary_goals (JSON ARRAY of\nSTRINGS), priority_areas (JSON ARRAY of STRINGS),\nexpected_outcomes (JSON ARRAY of STRINGS),\nalignment_recommendations (STRING),\nspecial_requirements (JSON ARRAY of STRINGS — unique aspects\nnot fitting other sections).\n\n## Output\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -144,7 +118,7 @@
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/foa-checklist-extraction/manifest.yaml",
-        "workflow_version": "0.3.0",
+        "workflow_version": "1.0.0",
         "status": "experimental",
         "components": [
           {

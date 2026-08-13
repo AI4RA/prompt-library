@@ -1,5 +1,14 @@
 # Authored source for the Compliance Personnel Verification (SFI & RST) Vandalizer workflow.
 #
+# === v1.0.0 (2026-08-13): KB STEP REMOVED (MAJOR, 3 steps -> 2) ===
+# The Step 0 KnowledgeBaseQuery lookup referenced in the historical
+# topology notes below was removed -- it was inert on a fresh import
+# (Vandalizer blanks kb_uuid by design, so a KB always had to be
+# attached manually). The parallel extraction tasks now read
+# input_sources: [workflow_documents] only; consolidation is unchanged.
+# Mirrors rfa-checklist-extraction v1.0.0. KBs will be reintroduced
+# once the right approach is settled.
+#
 # The companion compliance-personnel-verification.vandalizer.json is
 # generated from this file by scripts/build_vandalizer_workflows.py and
 # committed alongside. Never hand-edit the generated JSON — update this
@@ -36,12 +45,12 @@ description: >
   Mirrors the source ui-insight/ProcessMapping
   compliance-personnel-verification consolidation.md conventions.
 
-workflow_version: 0.2.0
+workflow_version: 1.0.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-05-20
-updated: 2026-05-22
+updated: 2026-08-13
 
 components:
   - slug: compliance-personnel-verification-udm
@@ -66,27 +75,10 @@ validation_plan:
     description: Verify SFI disclosure dates are evaluated against a 365-day validity window.
 
 steps:
-  - name: Knowledge Base Context Lookup
-    tasks:
-      - name: kb-context-lookup
-        kind: KnowledgeBaseQuery
-        query: "significant financial interest SFI disclosure research security training RST conflict of interest 365 day validity window federal research proposal compliance VERAS Section 6.6 Section 2 personnel disclosure RCR"
-        k: 8
-        knowledge_base_hint:
-          title: "Financial Conflict of Interest (FCOI)"
-          description: >
-            Primary KB for SFI disclosure compliance — the heavier of
-            the two compliance checks. For RST-focused runs, swap in
-            Responsible Conduct of Research (RCR). When the operator
-            does not attach a KB, this step returns empty output
-            gracefully and the downstream extractions fall back to
-            reading just the uploaded workflow documents.
-
   - name: Parallel Extraction (Prompt)
     tasks:
       - name: extract-personnel-identification
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting the personnel identification block from
@@ -138,7 +130,6 @@ steps:
 
       - name: extract-compliance-status
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are verifying SFI disclosure and RST completion status

@@ -1,5 +1,14 @@
 # Authored source for the Budget Justification Generator Vandalizer workflow.
 #
+# === v1.0.0 (2026-08-13): KB STEP REMOVED (MAJOR, 3 steps -> 2) ===
+# The Step 0 KnowledgeBaseQuery lookup referenced in the historical
+# topology notes below was removed -- it was inert on a fresh import
+# (Vandalizer blanks kb_uuid by design, so a KB always had to be
+# attached manually). The parallel extraction tasks now read
+# input_sources: [workflow_documents] only; consolidation is unchanged.
+# Mirrors rfa-checklist-extraction v1.0.0. KBs will be reintroduced
+# once the right approach is settled.
+#
 # === Topology (v0.5.0, Variant A + KB injection + agency-agnostic formats) ===
 #
 # v0.5.0 agency-generalization vs. v0.4.1: removed HUD-specific
@@ -64,12 +73,12 @@ description: >
   Mirrors the source ui-insight/ProcessMapping
   budget-justification-generator consolidation.md conventions.
 
-workflow_version: 0.5.0
+workflow_version: 1.0.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-05-20
-updated: 2026-05-27
+updated: 2026-08-13
 
 components:
   - slug: budget-justification-generator-udm
@@ -90,27 +99,10 @@ validation_plan:
     description: Verify personnel cost calculations are consistent with FTE / person-months in the budget.
 
 steps:
-  - name: Knowledge Base Context Lookup
-    tasks:
-      - name: kb-context-lookup
-        kind: KnowledgeBaseQuery
-        query: "R&R Budget SF-424A senior key personnel fringe benefits equipment travel participant support other direct costs materials supplies publication consultants subawards tuition remission indirect costs F&A MTDC cost sharing 2 CFR 200 Subpart E"
-        k: 8
-        knowledge_base_hint:
-          title: "OMB Uniform Guidance (2 CFR 200)"
-          description: >
-            Primary regulatory KB — 2 CFR 200 Subpart E covers cost
-            principles including allowable / unallowable categories.
-            For CAS-triggering proposals, swap in Cost Accounting
-            Standards (CAS). For agency-specific budget guidance, swap
-            in NSF PAPPG / NIH GPS / DOE / DOD. For effort and salary
-            calculations, pair with Effort Reporting & Compensation.
-
   - name: Parallel Extraction + Generation (Prompt)
     tasks:
       - name: extract-personnel-and-fringe
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting personnel data AND generating professional
@@ -293,7 +285,6 @@ steps:
 
       - name: extract-equipment-and-travel
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting equipment and travel data AND generating
@@ -361,7 +352,6 @@ steps:
 
       - name: extract-participant-support-and-odc
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting participant support and Other Direct
@@ -594,7 +584,6 @@ steps:
 
       - name: extract-indirect-and-summary
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting indirect cost, cost share, and budget

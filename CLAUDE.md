@@ -987,11 +987,31 @@ document — refine the rationale blocks once the guides arrive. Also
 pending: her promised field-by-field comparison of the v0.2.0 output
 against a real E2B review.
 
+### Batch: KB-step removal across remaining Variant-A workflows (v1.0.0, 2026-08-13)
+
+PR #2 (branch `remove-kb-step-remaining-workflows`) removes the inert
+`KnowledgeBaseQuery` Step 0 from the **14** remaining KB-carrying
+workflows, each bumped to **v1.0.0** (MAJOR, 3 steps → 2), mirroring
+`rfa-checklist-extraction` v1.0.0 (#50) and `export-to-banner-extraction`
+v1.0.0 (#52). The 14: `award-compliance-extraction`,
+`award-modification-intake`, `budget-justification-generator`,
+`compliance-personnel-verification`, `effort-reporting-extraction`,
+`ffr-management-extraction`, `foa-checklist-extraction`, `noa-summary`,
+`prior-approval-extraction`, `proposal-budget-personnel-extraction`,
+`proposal-document-completeness`, `risk-domain-assessment`,
+`section2-personnel-eligibility`, `subaward-extraction`. Surgical change
+(mirrors #50): extraction tasks now read `input_sources:
+[workflow_documents]` only; consolidation unchanged; **no** prompt-body
+or validation-plan edits. Two READMEs had KB-specific topology prose
+cleaned (noa-summary flow line; section2 APM-45.22 KB input-model note).
+KBs will be reintroduced once the right approach is settled.
+
 ### Workflows not yet tested
 
-The following workflows have v0.2.0 manifestations from the Variant
-A rollout but have not been tested against a representative input
-document yet:
+The following workflows have not been tested against a representative
+input document yet. The KB-carrying ones among them were bumped to
+**v1.0.0** by the KB-removal batch above; the `nsf-*` entries never
+carried a KB step and keep their prior versions:
 
 - `award-modification-intake`
 - `budget-justification-generator`

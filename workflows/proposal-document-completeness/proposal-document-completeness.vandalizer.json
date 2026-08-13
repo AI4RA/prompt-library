@@ -2,33 +2,13 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-05-22T00:00:00+00:00",
+  "exported_at": "2026-08-13T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Proposal Document Completeness v0.2.0",
+      "name": "Proposal Document Completeness v1.0.0",
       "description": "Uploads a federal proposal package (VERAS or sponsor portal export) plus the RFA / FOA for the announcement and returns an RA-friendly Markdown Completeness Report covering required-documents checklist, per-person document matrix, subaward document status, conditional requirements, personnel discrepancies, prioritized missing-documents summary for PI communication, and warnings. Mirrors the source ui-insight/ProcessMapping proposal-document-completeness consolidation.md conventions.",
       "steps": [
-        {
-          "name": "Knowledge Base Context Lookup",
-          "data": {},
-          "is_output": false,
-          "tasks": [
-            {
-              "name": "KnowledgeBaseQuery",
-              "data": {
-                "name": "kb-context-lookup",
-                "kb_uuid": "",
-                "query": "proposal document checklist senior key personnel biosketch current and pending support collaboration and affiliation synergistic activities mentoring plan subaward documents NSF PAPPG NIH GPS facilities and equipment data management plan",
-                "k": 8,
-                "_embedded_knowledge_base": {
-                  "title": "University of Idaho Office of Sponsored Programs",
-                  "description": "Primary KB — covers UI institutional document checklist requirements (7-day basic vs 10-day full review, per-person document expectations). For agency-specific document lists, swap in NSF PAPPG Reference (NSF proposals) or NIH Grants Policy Statement (NIH proposals). When the operator does not attach a KB, this step returns empty output and the extraction falls back to reading just the uploaded documents."
-                }
-              }
-            }
-          ]
-        },
         {
           "name": "Parallel Extraction (Prompt)",
           "data": {},
@@ -40,7 +20,6 @@
                 "name": "extract-proposal-components-inventory",
                 "prompt": "You are extracting the inventory of uploaded proposal\ndocuments from a VERAS or sponsor-portal proposal package.\nYou receive the uploaded documents AND any KB chunks.\n\nBe 100% accurate. Quote document filenames, personnel names,\nand section labels verbatim. Use null when a field is absent.\n\nEmit a JSON object with these keys:\n\n- sponsor_name: STRING. Sponsoring agency name.\n- rfa_foa_number: STRING. RFA / FOA / NOFO identifier.\n- review_type: STRING — one of \"7-day basic\", \"10-day full\",\n  \"Not specified\".\n- senior_key_personnel: JSON ARRAY of\n  {name, role, institution} objects. role one of \"PI\",\n  \"Co-PI\", \"Senior/Key Personnel\".\n- subawardees: JSON ARRAY of {institution, co_pi_name}\n  objects representing subaward partners. Empty array when\n  no subawards.\n- documents_uploaded: JSON ARRAY of\n  {filename, document_type, associated_person} objects, one\n  per file in the proposal package. document_type uses the\n  sponsor's category names (e.g., \"Project Description\",\n  \"Biosketch\", \"Current and Pending Support\"). associated_person\n  is the person whose biosketch / C&P this is, or null for\n  proposal-level documents.\n- has_postdocs_or_grad_students: BOOLEAN. Inferred from\n  budget personnel.\n- has_subawards: BOOLEAN.\n- mentoring_plan_required: BOOLEAN. true when\n  has_postdocs_or_grad_students AND sponsor requires\n  mentoring plans.\n- personnel_discrepancies: JSON ARRAY of STRINGS describing\n  mismatches between budget personnel and proposal personnel.\n  Empty array when consistent.\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -51,7 +30,6 @@
                 "name": "extract-sponsor-requirements",
                 "prompt": "You are extracting the sponsor's document requirements\nchecklist from an RFA / FOA / NOFO. You receive the uploaded\ndocuments AND any KB chunks (NSF PAPPG, NIH GPS, or UI OSP\nchecklist when attached).\n\nBe 100% accurate. Quote requirement text verbatim. Use null\nwhen a field is absent.\n\nEmit a JSON object with these keys:\n\n- required_documents: JSON ARRAY of\n  {document_name, description, page_limit_or_format}\n  objects. One entry per document the sponsor explicitly\n  requires of every applicant.\n- per_person_documents: JSON ARRAY of STRINGS naming the\n  documents required for each senior / key person (typical\n  set: Biosketch, Current and Pending Support, Collaboration\n  and Affiliation, Synergistic Activities). Empty array when\n  sponsor does not require per-person documents.\n- subaward_documents: JSON ARRAY of STRINGS naming the\n  documents required from each subawardee (typical set:\n  Commitment Form, Budget, Budget Justification, Senior Key\n  Documents, Scope of Work, Facilities/Equipment). Empty\n  when not applicable.\n- conditional_requirements: JSON ARRAY of\n  {condition, document_name} objects (e.g., {condition:\n  \"Postdocs or grad students in budget\", document_name:\n  \"Mentoring Plan\"}).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -100,7 +78,7 @@
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/proposal-document-completeness/manifest.yaml",
-        "workflow_version": "0.2.0",
+        "workflow_version": "1.0.0",
         "status": "experimental",
         "components": [
           {

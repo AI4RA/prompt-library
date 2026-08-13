@@ -2,33 +2,13 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-07-15T00:00:00+00:00",
+  "exported_at": "2026-08-13T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "NOA Summary v0.2.0",
+      "name": "NOA Summary v1.0.0",
       "description": "Uploads a federal Notice of Award (NoA) and returns an RA-friendly Markdown Grant Award Summary for a university Office of Sponsored Programs: a five-part synthesis (Key Personnel & Contacts; Grant Summary At-a-Glance; Financial & Period of Performance; Reporting & Critical Deadlines; Key Compliance & Administrative Requirements) with finances and deadlines in tables and critical restrictions / required approvals bolded.",
       "steps": [
-        {
-          "name": "Knowledge Base Context Lookup",
-          "data": {},
-          "is_output": false,
-          "tasks": [
-            {
-              "name": "KnowledgeBaseQuery",
-              "data": {
-                "name": "kb-context-lookup",
-                "kb_uuid": "",
-                "query": "federal Notice of Award administrative requirements prior approval reporting requirements financial reporting indirect cost rate F&A base program income carryover salary cap human subjects IRB FCOI financial conflict of interest data management sharing civil rights nondiscrimination public access subawards consortium audit record retention SAM registration 2 CFR 200 Uniform Guidance terms and conditions special conditions",
-                "k": 8,
-                "_embedded_knowledge_base": {
-                  "title": "OMB Uniform Guidance (2 CFR 200)",
-                  "description": "Primary regulatory KB for interpreting a federal Notice of Award's administrative, financial, and compliance terms. For NIH awards, swap in NIH Grants Policy Statement; for NSF, NSF PAPPG. When no KB is attached this step returns empty output gracefully and the extraction falls back to reading just the uploaded award notice."
-                }
-              }
-            }
-          ]
-        },
         {
           "name": "Extraction (Prompt)",
           "data": {},
@@ -40,7 +20,6 @@
                 "name": "extract-award-basics-financial",
                 "prompt": "You are analyzing a federal grant Notice of Award (NoA) for university sponsored-programs review. You receive the uploaded NoA AND any knowledge-base chunks the previous step retrieved in your CONTEXT. Use the KB chunks ONLY to interpret regulatory references; extract every fact from the NoA itself.\n\nExtract ALL basic award information and financial terms. Be 100% accurate and review the ENTIRE document. Quote dollar amounts and dates VERBATIM (\"$52,947.00\", not \"$53K\"; \"09/30/2027\", not \"Sept 2027\"). Never invent values.\n\nThe project lead may be named under any of: \"Principal Investigator\", \"PI\", \"Contact PI\", \"Project Director\", \"PD\", \"Grantee Project Director\", \"Grantee Project Manager\", \"Recipient Project Manager\", \"RPM\". Treat any of these as the PI.\n\nNEVER invent a person's name, title, email address, or phone number. If a personnel role (PI, Authorized Official, Federal Program Officer, Grants Management Officer) is not explicitly named in the document, write exactly \"Not specified in the document\" — do not guess or fill in a plausible-looking name or number.\n\nAWARD IDENTIFICATION:\n- Award Number:\n- FAIN (Federal Award Identification Number):\n- Agency/Institute:\n- Program Title:\n- Award Type (New/Renewal/Continuation/Revision):\n- Is this R&D (Yes/No):\n\nKEY PERSONNEL:\n- Principal Investigator(s):\n- Contact PI:\n- Authorized Official:\n- Federal Program Officer:\n- Federal Grants Management Officer:\n\nFINANCIAL SUMMARY:\n- Total Federal Award Amount:\n- Current Budget Period Amount:\n- Direct Costs:\n- Indirect Costs:\n- Indirect Cost Rate and Base:\n- Cost Sharing Required (Amount/Type):\n\nAWARD PERIODS:\n- Current Budget Period (Start/End Dates):\n- Total Project Period (Start/End Dates):\n- Future Year Funding (if listed):\n\nFINANCIAL RESTRICTIONS:\n- Salary Cap (Yes/No with amount):\n- Equipment Purchase Restrictions:\n- Travel Restrictions:\n- Other Cost Limitations:\n\nBASIC COMPLIANCE ALERTS:\n- Human Subjects/IRB Required:\n- Animal Use Required:\n- Clinical Trial (Yes/No):\n- FCOI Reporting Required:\n- Data Management Plan Required:\n\nCONSORTIUM/SUBAWARDS:\n- Subawards Included (Yes/No):\n- Partner Institutions:\n\nFor any field not found in the document, write exactly \"Not specified in the document\". Output the labeled list above with values filled in — no preamble, no JSON, no code fences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -51,7 +30,6 @@
                 "name": "extract-compliance-administrative",
                 "prompt": "You are analyzing a federal grant Notice of Award (NoA) for university sponsored-programs review. You receive the uploaded NoA AND any knowledge-base chunks the previous step retrieved in your CONTEXT. Use the KB chunks ONLY to interpret regulatory references; extract every fact from the NoA itself.\n\nExtract ALL compliance requirements, administrative obligations, and special conditions. Be 100% accurate and review the ENTIRE document. Preserve imperative language (\"must\", \"shall\", \"required\", \"prior approval\") verbatim. Quote deadlines and dollar thresholds exactly. Never invent requirements.\n\nDETAILED COMPLIANCE REQUIREMENTS:\n- Human Subjects Protection Details:\n- IRB/sIRB Requirements:\n- FCOI Reporting Specifics:\n- Data Management & Sharing Requirements:\n- Civil Rights/Non-Discrimination Requirements:\n- Publication/Acknowledgment Requirements:\n- Public Access Policy Requirements:\n\nADMINISTRATIVE OBLIGATIONS:\n- Reporting Requirements (type/frequency):\n- Prior Approval Requirements:\n- Record Keeping Requirements:\n- Audit Requirements:\n- System Registration Requirements (SAM, etc.):\n\nSPECIAL TERMS & CONDITIONS:\n- List any award-specific conditions, restrictions, or requirements that deviate from standard terms. Flag any unusual term for legal review by prefixing it with \"[REVIEW]\".\n\nPROGRAM INCOME & CARRYOVER:\n- Program Income Treatment:\n- Carryover Provisions:\n- Budget Flexibility:\n\nCRITICAL DEADLINES:\n- Report Due Dates:\n- Budget Period End:\n- Other Important Deadlines:\n\nRISK FACTORS & ACTION ITEMS:\n- High-Risk Compliance Areas:\n- Unusual/Non-Standard Terms:\n- Immediate Action Items with Deadlines:\n- Training/Setup Requirements:\n\nCONTACT INFORMATION:\n(NEVER invent a contact name, title, email address, or phone number. If the document does not name a contact for a row, write exactly \"Not specified in the document\" — do not fabricate a plausible-looking contact or press/public-affairs name.)\n- Who to contact for business matters:\n- Who to contact for technical matters:\n- Emergency/hotline information:\n\nSearch for keywords: \"must\", \"shall\", \"required\", \"prior approval\", \"compliance\", \"report\", \"deadline\", \"restriction\". For any field not found in the document, write exactly \"Not specified in the document\". Output the labeled list above with values filled in — no preamble, no JSON, no code fences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -106,7 +84,7 @@
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/noa-summary/manifest.yaml",
-        "workflow_version": "0.2.0",
+        "workflow_version": "1.0.0",
         "status": "experimental",
         "components": [
           {
