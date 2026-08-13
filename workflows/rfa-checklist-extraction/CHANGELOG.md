@@ -6,6 +6,15 @@ All notable changes to this workflow. Versions follow semver adapted to workflow
 - **MINOR** — prompt body tracking a referenced component MINOR, or additive step/task options that preserve the existing operator flow.
 - **PATCH** — step or task display-name edits, description polish, non-semantic manifest cleanup.
 
+## [1.2.0] — 2026-08-13
+
+- **Compactness-block placement fix + backbone stubs.** The v1.1.0 NSF 25-541 re-test fixed fragment truncation (components fragment parsed, all mandated sections and milestones survived) but surfaced two regressions caused by the compactness block itself:
+  - **Prompt-tail displacement:** the block was appended *after* each task's `## Output` schema section, making minification the final instruction. The `extract-risk-flags` model latched onto it, claimed "no schema was provided", and returned conversational prose — collapsing RED FLAGS to a false "✅ no red flags identified" (hiding real limited-submission and AOR flags as *clear*). The block now sits **before** `## Output` so the schema is always the last instruction, and every extraction prompt ends with an anti-chat anchor: *begin your reply with `{` and emit nothing but the single minified JSON object — no questions, no offers to help*.
+  - **Backbone dropped / content over-compression:** the model treated the economy framing as license to omit all 10 backbone components (one-row Required Components table), and the award task shortened "Up to $5M/year for 4 years…" to "$20M per PCL Node". New rules: **minify the syntax only — never shorten, summarize, or drop content values**; pure "Sponsor standard" components are emitted as **stubs** (`{name, source}` only, ~60 chars each — no output-budget excuse to drop them) with an explicit NEVER-drop rule and the observed run-3 failure as the WRONG worked example. The consolidation renders stub rows with "—" description cells, never invents descriptions, and never drops a row.
+  - **Deliverable economy:** IMPORTANT NOTES tightened from 0–5 to 0–3 bullets (the run-3 consolidation clipped its final line at the output cap).
+- **MINOR**: no step-structure change; prompt restructuring + fragment-shape refinement (backbone stubs) that the consolidation is taught to render.
+- Component pin unchanged at `rfa-checklist-extraction-udm@0.1.0`.
+
 ## [1.1.0] — 2026-08-13
 
 - **Output-token economy.** Two NSF 25-541 runs truncated mid-string at hard output-token caps the operator cannot raise: run 1 cut the consolidation deliverable at ~9.3K chars; run 2 (different model assignment) cut the `extract-application-components` fragment at ~4.9K chars, destroying every field after the cut (backbone components, `submission_details`, `formatting_requirements`, the final Implementation Timeline milestones).
