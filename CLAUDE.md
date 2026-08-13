@@ -385,6 +385,32 @@ risk-flags returned "unclear" for AOR/signature (a prior run said
 "yes"); the grounding rule correctly kept it un-flagged rather
 than guessing — acceptable behavior, not a defect.
 
+#### v2.0.1 → v3.0.0 (2026-08-13)
+
+**Not a test-surfaced bug — operator feature request.** Two asks,
+both verified feasible against the ui-insight/vandalizer backend
+source (schemas/workflows.py, services/export_import_service.py,
+services/workflow_engine.py) before implementing:
+1. Parallel Extraction step now sets is_output: true → the raw
+   JSON fragments surface as a workflow deliverable alongside
+   the Markdown checklist. Vandalizer supports multiple output
+   steps (import preserves per-step is_output;
+   output_step_names is a list); the "at most one output step"
+   constraint was our build script's, now relaxed to "at least
+   one".
+2. New workflow-level manifest key default_task_model:
+   VandalStrong → build script emits "model": "VandalStrong"
+   into every task's data. Engine precedence is
+   task_data["model"] or run_model (task wins), so the pin
+   overrides the run dialog's picker. Name must EXACTLY match a
+   server available_models[].name entry; per-task model: can
+   override the default; Vandalizer's optimizer per-step
+   overrides can still swap models after the pin.
+MAJOR per this workflow's semver (is_output change). No prompt
+changes — re-test only needs to confirm both steps appear as
+deliverables and runs use VandalStrong regardless of the model
+picked in the run dialog.
+
 ### `workflows/foa-checklist-extraction`
 
 **Status**: ⚠️ v0.3.0 import-ready but not yet re-tested by user.
