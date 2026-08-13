@@ -340,9 +340,13 @@ def validate_manifest(manifest: dict, manifest_path: Path) -> None:
     if not isinstance(steps, list) or not steps:
         raise BuildError(manifest_path, "steps must be a non-empty list")
 
+    # Vandalizer supports MULTIPLE output steps: import_workflow preserves
+    # is_output per step and WorkflowStatusResponse.output_step_names is a
+    # list (verified against ui-insight/vandalizer backend). Require at
+    # least one so every workflow has a deliverable.
     output_steps = [s for s in steps if s.get("is_output")]
-    if len(output_steps) > 1:
-        raise BuildError(manifest_path, "at most one step may set is_output: true")
+    if not output_steps:
+        raise BuildError(manifest_path, "at least one step must set is_output: true")
 
     for step in steps:
         for task in step.get("tasks", []) or []:
@@ -412,6 +416,18 @@ def build_workflow(manifest_path: Path) -> tuple[dict, Path]:
                 "name": task["name"],
                 "prompt": body,
             }
+            # Per-task model pin. Vandalizer's workflow engine resolves
+            # `task_data["model"] = task_data.get("model") or run_model`
+            # (workflow_engine.py graph construction), so a model set here
+            # takes precedence over the model chosen in the run dialog.
+            # The name must EXACTLY match a SystemConfig
+            # available_models[].name entry on the Vandalizer server.
+            # Manifest sources: per-task `model:` wins over the
+            # workflow-level `default_task_model:`; when neither is set no
+            # model key is emitted and the run-level model applies.
+            pinned_model = task.get("model") or manifest.get("default_task_model")
+            if pinned_model:
+                task_data["model"] = str(pinned_model)
             # Vandalizer's _resolve_input_sources() (workflow_engine.py) reads
             # `input_sources` (plural list) FIRST, falling back to `input_source`
             # (singular) when the list is absent. The plural form lets a single

@@ -4,7 +4,25 @@
 # file by scripts/build_vandalizer_workflows.py and committed alongside.
 # Never hand-edit the generated JSON — update this manifest and rebuild.
 #
-# === Variant A topology (v2.0.0) ===
+# === Variant A topology (v3.0.0) ===
+#
+# v3.0.0 (2026-08-13) — DUAL DELIVERABLES + MODEL LOCK. Two operator
+# requests, both verified against ui-insight/vandalizer backend source:
+#   1. Parallel Extraction step now sets is_output: true, so the raw
+#      JSON fragments are surfaced as a workflow deliverable alongside
+#      the Markdown checklist. Vandalizer supports multiple output
+#      steps (import preserves per-step is_output;
+#      WorkflowStatusResponse.output_step_names is a list); the old
+#      "at most one output step" rule was repo-side only and the build
+#      script now requires at least one instead.
+#   2. New workflow-level `default_task_model: VandalStrong` pins every
+#      task's LLM call. The engine resolves task_data["model"] or
+#      run-model (task wins), so the pin overrides the run dialog's
+#      model picker. Name must exactly match the server's
+#      available_models[].name. Per-task `model:` in the manifest can
+#      override the workflow default when needed.
+#   MAJOR per this workflow's semver (is_output change). No prompt
+#   changes.
 #
 # v2.0.0 (2026-08-13) — TASK SPLIT for the 8192-token model context.
 # The v1.2.0 import failed with "Model token limit (8192) exceeded
@@ -255,7 +273,15 @@ description: >
   the expanded Red Flags / Contract-Review trigger set and Compliance
   Risks + Foreign Influence sections from the RA's SPA checklist.
 
-workflow_version: 2.0.1
+workflow_version: 3.0.0
+
+# Pin every task's LLM call to this model, overriding the model chosen in
+# Vandalizer's run dialog (engine precedence: task model > run model). Must
+# EXACTLY match an available_models[].name entry on the Vandalizer server;
+# if the server renames the model, update this and rebuild. Note
+# Vandalizer's optimizer per-step overrides, when enabled, can still swap
+# a model after this pin.
+default_task_model: VandalStrong
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
@@ -336,6 +362,9 @@ validation_plan:
 
 steps:
   - name: Parallel Extraction (Prompt)
+    # Surface the raw JSON fragments as a workflow deliverable alongside
+    # the Markdown checklist — Vandalizer supports multiple output steps.
+    is_output: true
     tasks:
       - name: extract-opportunity-metadata
         input_sources:
