@@ -1,0 +1,11 @@
+Hi Labib,
+
+Thank you for meeting with me this morning and providing the pdf of the workflow results.
+
+I have attached an Excel spreadsheet that provides this information:
+
+It identifies what the input documents should be for this workflow
+It lists, in order, the data points that would be most helpful in pulling out of an award document + sponsor terms and conditions.
+It identifies if the workflow results you attached here earlier had the data points
+It provides desired output information
+Also attached is the full pdf of an export to Banner form. This is where you will find all of the ‘lines’ starting on page 13, as I left off at line 114 in the spreadsheet.

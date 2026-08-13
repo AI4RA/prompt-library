@@ -1,0 +1,1731 @@
+WEBVTT
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/5-0
+00:00:09.224 --> 00:00:11.064
+<v Ehsan, Labib (lehsan@uidaho.edu)>I'm going to share my screen.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/8-0
+00:00:23.024 --> 00:00:24.584
+<v Ehsan, Labib (lehsan@uidaho.edu)>There we go. Are you able to see?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/9-0
+00:00:25.144 --> 00:00:25.864
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yes.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/10-0
+00:00:27.064 --> 00:00:27.464
+<v Ehsan, Labib (lehsan@uidaho.edu)>Right.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/12-0
+00:00:31.624 --> 00:00:35.224
+<v Ehsan, Labib (lehsan@uidaho.edu)>Let's do, let's say, this one, so one.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/13-0
+00:00:40.864 --> 00:00:44.840
+<v Ehsan, Labib (lehsan@uidaho.edu)>And then after you see this,
+if you could like, you know,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/13-1
+00:00:44.840 --> 00:00:50.049
+<v Ehsan, Labib (lehsan@uidaho.edu)>basically kind of identify what we need
+to add, what we need to get rid of,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/13-2
+00:00:50.049 --> 00:00:53.065
+<v Ehsan, Labib (lehsan@uidaho.edu)>and what you actually put into that
+screen,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/13-3
+00:00:53.065 --> 00:00:55.464
+<v Ehsan, Labib (lehsan@uidaho.edu)>and then we can take it from there.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/14-0
+00:00:59.384 --> 00:01:00.344
+<v Ehsan, Labib (lehsan@uidaho.edu)>So...</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/15-0
+00:01:02.104 --> 00:01:02.744
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Okay.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/18-0
+00:01:05.304 --> 00:01:10.338
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Can we back up just a bit?
+I want to understand your workflow here.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/17-0
+00:01:09.864 --> 00:01:10.264
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/18-1
+00:01:10.338 --> 00:01:15.224
+<v Mattoon, Michele (mmattoon@uidaho.edu)>And so I think I saw that you were
+connected to a knowledge base.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/19-0
+00:01:16.184 --> 00:01:19.421
+<v Ehsan, Labib (lehsan@uidaho.edu)>Actually,
+that knowledge base step is right now,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/19-1
+00:01:19.421 --> 00:01:24.639
+<v Ehsan, Labib (lehsan@uidaho.edu)>it's disabled until we figure out how to
+utilize knowledge bases better in the</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/19-2
+00:01:24.639 --> 00:01:27.743
+<v Ehsan, Labib (lehsan@uidaho.edu)>workflow.
+Because of current design of how the</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/19-3
+00:01:27.743 --> 00:01:31.838
+<v Ehsan, Labib (lehsan@uidaho.edu)>knowledge base works in Vanalyzer,
+it can't quite do the job.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/19-4
+00:01:31.838 --> 00:01:34.744
+<v Ehsan, Labib (lehsan@uidaho.edu)>So currently that step is kind of
+disabled.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/21-0
+00:01:35.944 --> 00:01:40.099
+<v Ehsan, Labib (lehsan@uidaho.edu)>But in the future,
+once we do get knowledge bases working,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/21-1
+00:01:40.099 --> 00:01:45.662
+<v Ehsan, Labib (lehsan@uidaho.edu)>you can kind of give input into what
+knowledge base we could use and like what</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/21-2
+00:01:45.662 --> 00:01:47.704
+<v Ehsan, Labib (lehsan@uidaho.edu)>would be useful in this case.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/20-0
+00:01:48.584 --> 00:01:48.904
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/22-0
+00:01:50.144 --> 00:01:52.344
+<v Mattoon, Michele (mmattoon@uidaho.edu)>So, I think...</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/23-0
+00:01:54.184 --> 00:01:56.664
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Knowledge bases could be.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/24-0
+00:01:57.944 --> 00:02:04.898
+<v Mattoon, Michele (mmattoon@uidaho.edu)>useful in this workflow.
+If it could work the way that I would</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/24-1
+00:02:04.898 --> 00:02:06.664
+<v Mattoon, Michele (mmattoon@uidaho.edu)>like it to work.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/25-0
+00:02:07.624 --> 00:02:07.864
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/26-0
+00:02:07.904 --> 00:02:12.824
+<v Mattoon, Michele (mmattoon@uidaho.edu)>What I mean by that is,
+there isn't necessarily...</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/29-0
+00:02:14.264 --> 00:02:22.089
+<v Mattoon, Michele (mmattoon@uidaho.edu)>one specific knowledge base to use for
+all export to banners because our</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/27-0
+00:02:20.264 --> 00:02:20.744
+<v Ehsan, Labib (lehsan@uidaho.edu)>Mhm.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/29-1
+00:02:22.089 --> 00:02:25.304
+<v Mattoon, Michele (mmattoon@uidaho.edu)>sponsors are all different and</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/28-0
+00:02:24.064 --> 00:02:24.344
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/32-0
+00:02:26.224 --> 00:02:32.595
+<v Mattoon, Michele (mmattoon@uidaho.edu)>What you would really want to point to is
+the sponsor's general terms and</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/32-1
+00:02:32.595 --> 00:02:37.933
+<v Mattoon, Michele (mmattoon@uidaho.edu)>conditions. So like this,
+I notice you're using an NSF award.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/32-2
+00:02:37.933 --> 00:02:43.442
+<v Mattoon, Michele (mmattoon@uidaho.edu)>And so we would, yeah,
+we would want it to point to the PPAPPG.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/30-0
+00:02:38.184 --> 00:02:39.864
+<v Ehsan, Labib (lehsan@uidaho.edu)>Should be the PAPPG.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/32-3
+00:02:43.442 --> 00:02:48.436
+<v Mattoon, Michele (mmattoon@uidaho.edu)>But if it was NIH,
+we'd want it to point to the NIH terms</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/32-4
+00:02:48.436 --> 00:02:51.104
+<v Mattoon, Michele (mmattoon@uidaho.edu)>and conditions. If it was USDA.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/33-0
+00:02:51.104 --> 00:02:53.464
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah, you know, so on and so forth.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/31-0
+00:02:52.184 --> 00:02:52.584
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/34-0
+00:02:55.304 --> 00:02:59.224
+<v Mattoon, Michele (mmattoon@uidaho.edu)>So is there a way to utilize a workflow?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/35-0
+00:03:01.224 --> 00:03:05.784
+<v Mattoon, Michele (mmattoon@uidaho.edu)>but then ask it to point to a different
+knowledge base each time.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/35-1
+00:03:05.784 --> 00:03:11.243
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Or do you just select the knowledge base
+and the award letter when you run the</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/35-2
+00:03:11.243 --> 00:03:11.864
+<v Mattoon, Michele (mmattoon@uidaho.edu)>workflow?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/36-0
+00:03:12.664 --> 00:03:16.098
+<v Ehsan, Labib (lehsan@uidaho.edu)>So there's two ways we could tackle this.
+First,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/36-1
+00:03:16.098 --> 00:03:21.424
+<v Ehsan, Labib (lehsan@uidaho.edu)>what you said is have it like in the
+disclaimer of the workflow that before</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/36-2
+00:03:21.424 --> 00:03:25.839
+<v Ehsan, Labib (lehsan@uidaho.edu)>you run the workflow,
+you go into that knowledge base step and</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/36-3
+00:03:25.839 --> 00:03:30.744
+<v Ehsan, Labib (lehsan@uidaho.edu)>select the knowledge base based on which
+agency the document is from.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/37-0
+00:03:31.304 --> 00:03:36.002
+<v Ehsan, Labib (lehsan@uidaho.edu)>Or if this is,
+we could also have like just different</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/37-1
+00:03:36.002 --> 00:03:39.829
+<v Ehsan, Labib (lehsan@uidaho.edu)>variations of the workflow, like,
+you know,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/37-2
+00:03:39.829 --> 00:03:44.875
+<v Ehsan, Labib (lehsan@uidaho.edu)>export the banner in parentheses, NIH,
+NSF, and all that,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/37-3
+00:03:44.875 --> 00:03:49.224
+<v Ehsan, Labib (lehsan@uidaho.edu)>if we want to save Dari's time of like,
+you know.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/38-0
+00:03:50.384 --> 00:03:52.813
+<v Ehsan, Labib (lehsan@uidaho.edu)>Okay,
+so that would be very simple if we just,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/38-1
+00:03:52.813 --> 00:03:55.449
+<v Ehsan, Labib (lehsan@uidaho.edu)>you know,
+it would be just like basically the same</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/38-2
+00:03:55.449 --> 00:03:58.705
+<v Ehsan, Labib (lehsan@uidaho.edu)>copy of the workflow,
+but like the knowledge base pre-selected</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/38-3
+00:03:58.705 --> 00:04:00.824
+<v Ehsan, Labib (lehsan@uidaho.edu)>based on the different agency variations.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/40-0
+00:04:01.704 --> 00:04:07.706
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah, I like that. Okay. Okay, so that's,
+I guess, my first comment.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/39-0
+00:04:04.104 --> 00:04:04.504
+<v Ehsan, Labib (lehsan@uidaho.edu)>Awesome.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/40-1
+00:04:07.706 --> 00:04:14.664
+<v Mattoon, Michele (mmattoon@uidaho.edu)>And then it looks like the rest of the
+workflow was built utilizing extraction.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/41-0
+00:04:15.624 --> 00:04:16.344
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Is that right?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/42-0
+00:04:17.224 --> 00:04:21.433
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah, well,
+like an extraction task or like I did use</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/42-1
+00:04:21.433 --> 00:04:25.017
+<v Ehsan, Labib (lehsan@uidaho.edu)>prompt tasks,
+but in this case it works as an</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/42-2
+00:04:25.017 --> 00:04:26.264
+<v Ehsan, Labib (lehsan@uidaho.edu)>extraction task.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/43-0
+00:04:27.424 --> 00:04:27.784
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Uh-huh.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/45-0
+00:04:29.064 --> 00:04:33.417
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Okay,
+and you probably are extracting</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/45-1
+00:04:33.417 --> 00:04:39.144
+<v Mattoon, Michele (mmattoon@uidaho.edu)>information that I described in the video,
+right?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/44-0
+00:04:39.544 --> 00:04:39.864
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/46-0
+00:04:40.344 --> 00:04:40.744
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Got it.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/47-0
+00:04:41.624 --> 00:04:42.344
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Okay.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/49-0
+00:04:43.224 --> 00:04:48.424
+<v Ehsan, Labib (lehsan@uidaho.edu)>And this was specifically, uh,
+it's worth the banner, the form review.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/48-0
+00:04:43.464 --> 00:04:44.104
+<v Mattoon, Michele (mmattoon@uidaho.edu)>What?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/50-0
+00:04:49.224 --> 00:04:51.944
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah, yeah, OK.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/51-0
+00:04:53.144 --> 00:04:53.224
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Um...</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/52-0
+00:04:54.704 --> 00:04:57.864
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I think what would work best?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/53-0
+00:04:58.744 --> 00:05:00.584
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yes, if.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/54-0
+00:05:03.224 --> 00:05:07.064
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I could take some time to match up.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/56-0
+00:05:08.664 --> 00:05:16.775
+<v Mattoon, Michele (mmattoon@uidaho.edu)>what it's giving you against the export
+to Banner form and see what I left out of</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/56-1
+00:05:16.775 --> 00:05:21.918
+<v Mattoon, Michele (mmattoon@uidaho.edu)>my video.
+Because I have no doubt that you probably</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/55-0
+00:05:18.504 --> 00:05:19.384
+<v Ehsan, Labib (lehsan@uidaho.edu)>Awesome, yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/56-2
+00:05:21.918 --> 00:05:24.984
+<v Mattoon, Michele (mmattoon@uidaho.edu)>did exactly as my video stated.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/57-0
+00:05:25.944 --> 00:05:28.184
+<v Ehsan, Labib (lehsan@uidaho.edu)>And yeah, it's yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/58-0
+00:05:27.344 --> 00:05:30.264
+<v Mattoon, Michele (mmattoon@uidaho.edu)>What did I miss when I did when I did the
+video?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/60-0
+00:05:30.984 --> 00:05:35.165
+<v Ehsan, Labib (lehsan@uidaho.edu)>It has been a while. And see,
+I was thinking about this yesterday, like,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/60-1
+00:05:35.165 --> 00:05:38.715
+<v Ehsan, Labib (lehsan@uidaho.edu)>gosh, before we meet,
+should I send you a copy of the output?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/60-2
+00:05:38.715 --> 00:05:43.354
+<v Ehsan, Labib (lehsan@uidaho.edu)>And then Barrie and I got like, you know,
+too deep into the rabbit hole with our</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/60-3
+00:05:43.354 --> 00:05:46.618
+<v Ehsan, Labib (lehsan@uidaho.edu)>evaluation stuff,
+and that just kind of slipped my mind.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/60-4
+00:05:46.618 --> 00:05:50.226
+<v Ehsan, Labib (lehsan@uidaho.edu)>But I will e-mail you like that copy of
+that output right now,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/60-5
+00:05:50.226 --> 00:05:52.344
+<v Ehsan, Labib (lehsan@uidaho.edu)>so that later you can take your time.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/59-0
+00:05:50.424 --> 00:05:50.904
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Okay.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/61-0
+00:05:52.744 --> 00:05:54.104
+<v Ehsan, Labib (lehsan@uidaho.edu)>And, like, you know, match it up.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/63-0
+00:05:53.144 --> 00:05:57.247
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I have,
+I need to do an export to banner review</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/63-1
+00:05:57.247 --> 00:06:01.093
+<v Mattoon, Michele (mmattoon@uidaho.edu)>today. So this will be,
+this will be a good,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/62-0
+00:05:58.104 --> 00:05:58.984
+<v Ehsan, Labib (lehsan@uidaho.edu)>Oh, awesome.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/63-2
+00:06:01.093 --> 00:06:03.144
+<v Mattoon, Michele (mmattoon@uidaho.edu)>it'll be easy for me to.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/64-0
+00:06:04.424 --> 00:06:08.984
+<v Mattoon, Michele (mmattoon@uidaho.edu)>to evaluate this and let you know what I
+missed.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/65-0
+00:06:13.064 --> 00:06:14.824
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I'm wondering, so...</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/66-0
+00:06:16.424 --> 00:06:20.184
+<v Mattoon, Michele (mmattoon@uidaho.edu)>You tell me. I created a while ago.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/67-0
+00:06:20.344 --> 00:06:20.664
+<v Ehsan, Labib (lehsan@uidaho.edu)>Who?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/68-0
+00:06:21.264 --> 00:06:25.304
+<v Mattoon, Michele (mmattoon@uidaho.edu)>A workflow for myself of two.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/69-0
+00:06:26.184 --> 00:06:27.384
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Problematic.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/70-0
+00:06:28.264 --> 00:06:31.064
+<v Mattoon, Michele (mmattoon@uidaho.edu)>areas that I have during the review.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/72-0
+00:06:33.304 --> 00:06:40.822
+<v Mattoon, Michele (mmattoon@uidaho.edu)>the two areas that are difficult for me
+to find the information in the award</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/71-0
+00:06:39.704 --> 00:06:40.184
+<v Ehsan, Labib (lehsan@uidaho.edu)>Mhm.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/72-1
+00:06:40.822 --> 00:06:45.704
+<v Mattoon, Michele (mmattoon@uidaho.edu)>document.
+And so I created a workflow that I call</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/73-0
+00:06:46.984 --> 00:06:49.464
+<v Mattoon, Michele (mmattoon@uidaho.edu)>E2B reviews.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/74-0
+00:06:51.624 --> 00:06:52.504
+<v Mattoon, Michele (mmattoon@uidaho.edu)>And.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/75-0
+00:06:55.064 --> 00:06:56.824
+<v Mattoon, Michele (mmattoon@uidaho.edu)>To help me pull out.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/76-0
+00:06:59.584 --> 00:07:03.944
+<v Mattoon, Michele (mmattoon@uidaho.edu)>It's mostly reporting requirements and
+billing requirements.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/77-0
+00:07:05.784 --> 00:07:11.585
+<v Mattoon, Michele (mmattoon@uidaho.edu)>So you tell me in your workflow,
+does it have billing requirements and</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/77-1
+00:07:11.585 --> 00:07:13.464
+<v Mattoon, Michele (mmattoon@uidaho.edu)>reporting requirements?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/80-0
+00:07:15.224 --> 00:07:19.515
+<v Ehsan, Labib (lehsan@uidaho.edu)>Should let me just double check.
+It's got special terms and F. Okay,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/80-1
+00:07:19.515 --> 00:07:23.557
+<v Ehsan, Labib (lehsan@uidaho.edu)>that's near the. Yes,
+reporting compliance, billing and payment.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/80-2
+00:07:23.557 --> 00:07:26.666
+<v Ehsan, Labib (lehsan@uidaho.edu)>I think you mentioned that in the, like,
+hold on,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/79-0
+00:07:26.264 --> 00:07:26.984
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Okay, good.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/80-3
+00:07:26.666 --> 00:07:29.464
+<v Ehsan, Labib (lehsan@uidaho.edu)>let me share it in to just kind of show
+you.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/82-0
+00:07:36.904 --> 00:07:39.696
+<v Ehsan, Labib (lehsan@uidaho.edu)>So yeah,
+it's got like a dedicated section for</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/82-1
+00:07:39.696 --> 00:07:44.388
+<v Ehsan, Labib (lehsan@uidaho.edu)>billing and payment and then reporting
+and compliance if it's mentioned in the</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/82-2
+00:07:44.388 --> 00:07:44.744
+<v Ehsan, Labib (lehsan@uidaho.edu)>award.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/81-0
+00:07:44.744 --> 00:07:45.064
+<v Mattoon, Michele (mmattoon@uidaho.edu)>OK.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/83-0
+00:07:46.264 --> 00:07:46.904
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Okay.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/84-0
+00:07:48.264 --> 00:07:48.984
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Great.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/85-0
+00:07:50.904 --> 00:07:51.464
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Um...</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/86-0
+00:07:55.144 --> 00:07:58.104
+<v Mattoon, Michele (mmattoon@uidaho.edu)>One thing when we do pull in.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/87-0
+00:07:58.984 --> 00:07:59.704
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Um...</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/88-0
+00:08:01.264 --> 00:08:02.504
+<v Mattoon, Michele (mmattoon@uidaho.edu)>A knowledge base.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/89-0
+00:08:03.064 --> 00:08:03.464
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/90-0
+00:08:03.944 --> 00:08:11.487
+<v Mattoon, Michele (mmattoon@uidaho.edu)>that will want to ensure that the
+workflow has instructions for is if there</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/90-1
+00:08:11.487 --> 00:08:11.784
+<v Mattoon, Michele (mmattoon@uidaho.edu)>are</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/91-0
+00:08:12.864 --> 00:08:16.184
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Differing information between...</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/92-0
+00:08:17.544 --> 00:08:18.744
+<v Mattoon, Michele (mmattoon@uidaho.edu)>The Award.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/94-0
+00:08:20.184 --> 00:08:25.184
+<v Mattoon, Michele (mmattoon@uidaho.edu)>versus the terms and conditions.
+We want the terms and conditions to take,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/93-0
+00:08:22.584 --> 00:08:23.064
+<v Ehsan, Labib (lehsan@uidaho.edu)>Mhm.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/94-1
+00:08:25.184 --> 00:08:28.584
+<v Mattoon, Michele (mmattoon@uidaho.edu)>or excuse me,
+we want the award to take precedent.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/95-0
+00:08:29.704 --> 00:08:30.184
+<v Ehsan, Labib (lehsan@uidaho.edu)>Okay.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/96-0
+00:08:29.744 --> 00:08:33.613
+<v Mattoon, Michele (mmattoon@uidaho.edu)>So that would want, you know,
+when we do build that,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/96-1
+00:08:33.613 --> 00:08:36.824
+<v Mattoon, Michele (mmattoon@uidaho.edu)>we would want that to be explicit in
+there.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/97-0
+00:08:37.624 --> 00:08:38.104
+<v Ehsan, Labib (lehsan@uidaho.edu)>Okay.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/98-0
+00:08:39.064 --> 00:08:39.384
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/99-0
+00:08:40.264 --> 00:08:43.624
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Um, what else can I think of right now?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/100-0
+00:08:44.824 --> 00:08:46.504
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah, I think I just want to.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/102-0
+00:08:47.824 --> 00:08:52.904
+<v Mattoon, Michele (mmattoon@uidaho.edu)>try it out and let you know maybe things
+that I missed.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/101-0
+00:08:51.544 --> 00:08:52.024
+<v Ehsan, Labib (lehsan@uidaho.edu)>Mhm.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/104-0
+00:08:58.184 --> 00:09:01.087
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah,
+I think the other thing that I might run</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/103-0
+00:08:58.624 --> 00:08:58.824
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/104-1
+00:09:01.087 --> 00:09:01.704
+<v Mattoon, Michele (mmattoon@uidaho.edu)>into is...</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/105-0
+00:09:04.024 --> 00:09:07.704
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Some of these values are simply pulling
+out.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/106-0
+00:09:09.784 --> 00:09:14.904
+<v Mattoon, Michele (mmattoon@uidaho.edu)>you know, some words out of the award,
+but some of it is...</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/107-0
+00:09:18.184 --> 00:09:19.864
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Making decisions.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/108-0
+00:09:20.184 --> 00:09:20.664
+<v Ehsan, Labib (lehsan@uidaho.edu)>Mhm.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/109-0
+00:09:20.744 --> 00:09:23.464
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I show you something and then maybe it'll.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/110-0
+00:09:25.304 --> 00:09:26.904
+<v Mattoon, Michele (mmattoon@uidaho.edu)>It will describe it better.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/111-0
+00:09:28.024 --> 00:09:28.144
+<v Mattoon, Michele (mmattoon@uidaho.edu)>The.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/112-0
+00:09:30.904 --> 00:09:35.144
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Take me a minute to get my screens where
+they need to be, and then I'll share.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/113-0
+00:09:35.824 --> 00:09:36.544
+<v Ehsan, Labib (lehsan@uidaho.edu)>No problem.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/120-0
+00:10:13.304 --> 00:10:13.544
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/121-0
+00:10:16.104 --> 00:10:17.144
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I just tie up.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/123-0
+00:10:18.264 --> 00:10:21.544
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I'm not, I get frustrated with Veris.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/124-0
+00:10:22.984 --> 00:10:24.584
+<v Ehsan, Labib (lehsan@uidaho.edu)>It's a good thing it's going away then.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/125-0
+00:10:27.624 --> 00:10:30.784
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Just like the amount of clicks to get to
+something is.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/126-0
+00:10:31.784 --> 00:10:32.664
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Alright, crazy.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/127-0
+00:10:33.784 --> 00:10:34.424
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Export.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/128-0
+00:10:35.624 --> 00:10:36.264
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Theater.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/129-0
+00:10:39.144 --> 00:10:40.744
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Okay, sure.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/130-0
+00:10:44.464 --> 00:10:48.024
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Let's see,
+I think there's one on the first page.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/132-0
+00:10:53.504 --> 00:11:00.744
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Here's a good example.
+Are you able to see my screen? Okay. 1.12.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/131-0
+00:10:56.664 --> 00:10:57.144
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/134-0
+00:11:01.784 --> 00:11:11.350
+<v Mattoon, Michele (mmattoon@uidaho.edu)>This drop-down menu here,
+the award document might actually mention</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/134-1
+00:11:11.350 --> 00:11:18.664
+<v Mattoon, Michele (mmattoon@uidaho.edu)>these words.
+And what I have found is some sponsors</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/133-0
+00:11:12.544 --> 00:11:13.064
+<v Ehsan, Labib (lehsan@uidaho.edu)>Mmh.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/136-0
+00:11:20.104 --> 00:11:23.695
+<v Mattoon, Michele (mmattoon@uidaho.edu)>incorrectly identify the document as,
+for example,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/136-1
+00:11:23.695 --> 00:11:28.131
+<v Mattoon, Michele (mmattoon@uidaho.edu)>they might call the document in the award
+document a contract,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/136-2
+00:11:28.131 --> 00:11:32.356
+<v Mattoon, Michele (mmattoon@uidaho.edu)>but then when we read through it,
+we realize, no, actually,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/135-0
+00:11:29.624 --> 00:11:29.944
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/136-3
+00:11:32.356 --> 00:11:36.228
+<v Mattoon, Michele (mmattoon@uidaho.edu)>it's a grant or actually it's a
+cooperative agreement.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/136-4
+00:11:36.228 --> 00:11:40.664
+<v Mattoon, Michele (mmattoon@uidaho.edu)>And so the way we've dealt with this and
+Barrie is to help our</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/137-0
+00:11:41.304 --> 00:11:44.984
+<v Mattoon, Michele (mmattoon@uidaho.edu)>analysts are these help tips over to the
+side.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/139-0
+00:11:47.064 --> 00:11:52.184
+<v Mattoon, Michele (mmattoon@uidaho.edu)>So this is what they need to think about
+before they click on one of those.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/138-0
+00:11:52.584 --> 00:11:52.984
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/140-0
+00:11:54.264 --> 00:11:58.984
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Regardless of what the Award document
+actually says.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/142-0
+00:12:00.264 --> 00:12:05.002
+<v Mattoon, Michele (mmattoon@uidaho.edu)>This is how they need to make that
+determination.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/141-0
+00:12:02.984 --> 00:12:03.464
+<v Ehsan, Labib (lehsan@uidaho.edu)>Okay.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/142-1
+00:12:05.002 --> 00:12:10.024
+<v Mattoon, Michele (mmattoon@uidaho.edu)>And so my guess is in the workflow,
+it may pull out.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/143-0
+00:12:11.224 --> 00:12:16.741
+<v Mattoon, Michele (mmattoon@uidaho.edu)>one of these terms,
+but don't you think it's probably basing</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/143-1
+00:12:16.741 --> 00:12:17.464
+<v Mattoon, Michele (mmattoon@uidaho.edu)>it on...</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/144-0
+00:12:19.544 --> 00:12:27.104
+<v Mattoon, Michele (mmattoon@uidaho.edu)>the words in the document as opposed to
+the attributes that the project actually</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/144-1
+00:12:27.104 --> 00:12:27.384
+<v Mattoon, Michele (mmattoon@uidaho.edu)>is.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/145-0
+00:12:28.104 --> 00:12:28.584
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/146-0
+00:12:29.944 --> 00:12:36.165
+<v Mattoon, Michele (mmattoon@uidaho.edu)>So I'm wondering how we can build this
+kind of decision making into a workflow,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/146-1
+00:12:36.165 --> 00:12:38.264
+<v Mattoon, Michele (mmattoon@uidaho.edu)>or maybe it's not possible.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/148-0
+00:12:39.304 --> 00:12:41.929
+<v Ehsan, Labib (lehsan@uidaho.edu)>Well,
+it is kind of possible because of</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/148-1
+00:12:41.929 --> 00:12:47.048
+<v Ehsan, Labib (lehsan@uidaho.edu)>depending on how we design the prompt,
+in the prompt we would tell it to make</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/148-2
+00:12:47.048 --> 00:12:51.773
+<v Ehsan, Labib (lehsan@uidaho.edu)>those decisions based on the wording
+rather than what's just, you know,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/148-3
+00:12:51.773 --> 00:12:55.317
+<v Ehsan, Labib (lehsan@uidaho.edu)>subtly or like just mentioned in the
+document itself.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/148-4
+00:12:55.317 --> 00:13:00.304
+<v Ehsan, Labib (lehsan@uidaho.edu)>So it is definitely possible if we make
+the prompt have that decision step.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/147-0
+00:12:56.184 --> 00:12:56.664
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/149-0
+00:13:00.904 --> 00:13:03.224
+<v Ehsan, Labib (lehsan@uidaho.edu)>and add, you know,
+that critical thinking part of it.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/152-0
+00:13:05.464 --> 00:13:09.677
+<v Mattoon, Michele (mmattoon@uidaho.edu)>This is another example,
+like this award category.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/152-1
+00:13:09.677 --> 00:13:14.882
+<v Mattoon, Michele (mmattoon@uidaho.edu)>You can see there's lots of different
+choices here. And again,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/152-2
+00:13:14.882 --> 00:13:20.664
+<v Mattoon, Michele (mmattoon@uidaho.edu)>we created a document to help the analyst
+decide what to select here.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/151-0
+00:13:20.864 --> 00:13:21.344
+<v Ehsan, Labib (lehsan@uidaho.edu)>Mhm.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/153-0
+00:13:23.624 --> 00:13:29.148
+<v Mattoon, Michele (mmattoon@uidaho.edu)>So we have a lot of this throughout the
+export to Banner form,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/153-1
+00:13:29.148 --> 00:13:34.409
+<v Mattoon, Michele (mmattoon@uidaho.edu)>a lot of these guides on how to make the
+correct selection.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/153-2
+00:13:34.409 --> 00:13:40.984
+<v Mattoon, Michele (mmattoon@uidaho.edu)>So I'll take a look at what that output
+was. And like I said, I have this.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/155-0
+00:13:42.144 --> 00:13:46.127
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I actually have one,
+this one that I need to review today,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/154-0
+00:13:44.584 --> 00:13:45.064
+<v Ehsan, Labib (lehsan@uidaho.edu)>Mhm.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/155-1
+00:13:46.127 --> 00:13:49.704
+<v Mattoon, Michele (mmattoon@uidaho.edu)>so I can compare it and then give you
+some feedback.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/156-0
+00:13:50.344 --> 00:13:51.304
+<v Ehsan, Labib (lehsan@uidaho.edu)>Okay, awesome.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/157-0
+00:13:52.024 --> 00:13:54.824
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Trying to think if there's anything else
+that I had thought of.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/158-0
+00:13:55.784 --> 00:13:59.077
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Ohh,
+let me show you once one place in the</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/158-1
+00:13:59.077 --> 00:14:01.144
+<v Mattoon, Michele (mmattoon@uidaho.edu)>export to banner form that.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/159-0
+00:14:02.584 --> 00:14:08.048
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I think we could also build into a
+workflow. We call this FOI text.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/159-1
+00:14:08.048 --> 00:14:14.395
+<v Mattoon, Michele (mmattoon@uidaho.edu)>This is just the banner form where this
+information lives. And as you can see,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/159-2
+00:14:14.395 --> 00:14:20.340
+<v Mattoon, Michele (mmattoon@uidaho.edu)>there's a lot of information here.
+And the way that this works is we have</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/159-3
+00:14:20.340 --> 00:14:21.384
+<v Mattoon, Michele (mmattoon@uidaho.edu)>some standard</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/161-0
+00:14:22.104 --> 00:14:28.744
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Terms that we see quite often in awards,
+and if the analyst...</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/160-0
+00:14:26.104 --> 00:14:26.504
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/162-0
+00:14:30.824 --> 00:14:36.113
+<v Mattoon, Michele (mmattoon@uidaho.edu)>in reviewing the award, discovers that,
+for example, we need this,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/162-1
+00:14:36.113 --> 00:14:39.744
+<v Mattoon, Michele (mmattoon@uidaho.edu)>then they'll just make a selection over
+here.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/162-2
+00:14:39.744 --> 00:14:42.664
+<v Mattoon, Michele (mmattoon@uidaho.edu)>And that will then when this exports.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/164-0
+00:14:43.824 --> 00:14:48.015
+<v Mattoon, Michele (mmattoon@uidaho.edu)>that term will show up in the FOIA text
+banner form.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/164-1
+00:14:48.015 --> 00:14:54.024
+<v Mattoon, Michele (mmattoon@uidaho.edu)>So not all of these will show up.
+Only the ones that are checked are on the</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/164-2
+00:14:54.024 --> 00:14:59.479
+<v Mattoon, Michele (mmattoon@uidaho.edu)>far left. So as you can see,
+Wes is the one that did this one and he</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/163-0
+00:14:55.224 --> 00:14:55.624
+<v Ehsan, Labib (lehsan@uidaho.edu)>Okay.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/164-3
+00:14:59.479 --> 00:15:00.744
+<v Mattoon, Michele (mmattoon@uidaho.edu)>added these two.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/165-0
+00:15:03.304 --> 00:15:07.304
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Terms,
+and but all the others won't show up.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/166-0
+00:15:07.784 --> 00:15:08.264
+<v Ehsan, Labib (lehsan@uidaho.edu)>Mhm.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/167-0
+00:15:08.184 --> 00:15:12.518
+<v Mattoon, Michele (mmattoon@uidaho.edu)>As you can imagine,
+this area takes quite a bit of time for</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/167-1
+00:15:12.518 --> 00:15:13.384
+<v Mattoon, Michele (mmattoon@uidaho.edu)>the analyst.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/168-0
+00:15:14.264 --> 00:15:18.904
+<v Mattoon, Michele (mmattoon@uidaho.edu)>To find all of the to see if any of these
+exist in a document.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/169-0
+00:15:21.384 --> 00:15:27.224
+<v Mattoon, Michele (mmattoon@uidaho.edu)>And I would love to see in the workflow.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/171-0
+00:15:28.344 --> 00:15:32.744
+<v Mattoon, Michele (mmattoon@uidaho.edu)>it actually doing the work for us as much
+as possible.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/170-0
+00:15:33.144 --> 00:15:33.544
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/172-0
+00:15:34.584 --> 00:15:38.904
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Do you think that's something that we
+could build in?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/173-0
+00:15:39.864 --> 00:15:43.565
+<v Ehsan, Labib (lehsan@uidaho.edu)>Oh, yes, especially like, you know,
+these terms, like,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/173-1
+00:15:43.565 --> 00:15:47.064
+<v Ehsan, Labib (lehsan@uidaho.edu)>we could definitely make a workflow that,
+you know,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/173-2
+00:15:47.064 --> 00:15:52.717
+<v Ehsan, Labib (lehsan@uidaho.edu)>kind of flags it or like the part of this
+workflow and add like a different contest</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/173-3
+00:15:52.717 --> 00:15:56.351
+<v Ehsan, Labib (lehsan@uidaho.edu)>that its explicit task is to do this,
+like, you know,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/173-4
+00:15:56.351 --> 00:15:59.984
+<v Ehsan, Labib (lehsan@uidaho.edu)>take all these terms and see if they're
+mentioned at.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/174-0
+00:16:00.064 --> 00:16:04.928
+<v Ehsan, Labib (lehsan@uidaho.edu)>Any point in the document, and if so,
+in the output we would add in another</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/174-1
+00:16:04.928 --> 00:16:09.728
+<v Ehsan, Labib (lehsan@uidaho.edu)>section, the foil line text, let's say,
+and then it would list like, "Hey,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/174-2
+00:16:09.728 --> 00:16:13.248
+<v Ehsan, Labib (lehsan@uidaho.edu)>this is here in the document where this
+was mentioned,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/174-3
+00:16:13.248 --> 00:16:18.176
+<v Ehsan, Labib (lehsan@uidaho.edu)>" and then that would make the RS job
+easier instead of going through all of</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/174-4
+00:16:18.176 --> 00:16:18.944
+<v Ehsan, Labib (lehsan@uidaho.edu)>these and...</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/175-0
+00:16:19.144 --> 00:16:23.139
+<v Ehsan, Labib (lehsan@uidaho.edu)>There's quite a lot.
+I see the toolbar on the right.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/176-0
+00:16:21.544 --> 00:16:26.024
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yes, look at that. I mean,
+it's kind of crazy.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/175-1
+00:16:23.139 --> 00:16:24.344
+<v Ehsan, Labib (lehsan@uidaho.edu)>I was like, wow.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/177-0
+00:16:27.824 --> 00:16:31.224
+<v Mattoon, Michele (mmattoon@uidaho.edu)>And when I first started being the
+reviewer...</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/178-0
+00:16:31.304 --> 00:16:31.784
+<v Ehsan, Labib (lehsan@uidaho.edu)>Mhm.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/179-0
+00:16:32.424 --> 00:16:37.879
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I was just like, oh my gosh. I mean,
+this is where I spent most of my time</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/179-1
+00:16:37.879 --> 00:16:39.624
+<v Mattoon, Michele (mmattoon@uidaho.edu)>trying to figure it out.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/180-0
+00:16:38.984 --> 00:16:42.841
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah. And are these terms or like,
+I guess, phrases,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/180-1
+00:16:42.841 --> 00:16:48.443
+<v Ehsan, Labib (lehsan@uidaho.edu)>do you guys always update them or are at
+least is there like a general like,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/180-2
+00:16:48.443 --> 00:16:51.936
+<v Ehsan, Labib (lehsan@uidaho.edu)>you know,
+bank of terms like this that are like</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/180-3
+00:16:51.936 --> 00:16:54.264
+<v Ehsan, Labib (lehsan@uidaho.edu)>commonly that you guys flag for?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/181-0
+00:16:56.504 --> 00:16:59.632
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah,
+these are the common ones that we're</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/181-1
+00:16:59.632 --> 00:17:00.504
+<v Mattoon, Michele (mmattoon@uidaho.edu)>looking for.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/184-0
+00:17:02.024 --> 00:17:07.992
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Then what you'll see, like for instance,
+this one on sequence 202,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/182-0
+00:17:07.704 --> 00:17:08.184
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/184-1
+00:17:07.992 --> 00:17:12.356
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I probably said something like point of
+contact.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/183-0
+00:17:12.024 --> 00:17:12.504
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/184-2
+00:17:12.356 --> 00:17:19.660
+<v Mattoon, Michele (mmattoon@uidaho.edu)>And then what Wes did is he flagged that
+and then added in from the award who the</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/184-3
+00:17:19.660 --> 00:17:24.024
+<v Mattoon, Michele (mmattoon@uidaho.edu)>actual point of contact is.
+But the boilerplate.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/185-0
+00:17:24.064 --> 00:17:27.144
+<v Mattoon, Michele (mmattoon@uidaho.edu)>would have just said, you know,
+point of contact.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/186-0
+00:17:30.424 --> 00:17:35.064
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I was trying to up here,
+a lot of times I'll see.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/188-0
+00:17:37.784 --> 00:17:42.391
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Like, you'll see this one.
+So we have some that are pretty,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/187-0
+00:17:40.504 --> 00:17:40.904
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/188-1
+00:17:42.391 --> 00:17:46.613
+<v Mattoon, Michele (mmattoon@uidaho.edu)>that we see quite often,
+but then there could be other</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/188-2
+00:17:46.613 --> 00:17:51.911
+<v Mattoon, Michele (mmattoon@uidaho.edu)>restrictions than the award.
+And if there were, you would mark this,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/188-3
+00:17:51.911 --> 00:17:56.824
+<v Mattoon, Michele (mmattoon@uidaho.edu)>but you'd probably, you know,
+do something like no publication.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/189-0
+00:17:58.184 --> 00:17:58.664
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/190-0
+00:17:58.504 --> 00:18:00.904
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Post allowed, right? And so...</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/192-0
+00:18:04.104 --> 00:18:08.682
+<v Mattoon, Michele (mmattoon@uidaho.edu)>It's mostly there,
+but then we'll tailor it to the very</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/192-1
+00:18:08.682 --> 00:18:11.624
+<v Mattoon, Michele (mmattoon@uidaho.edu)>specific award, if that makes sense.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/191-0
+00:18:10.504 --> 00:18:11.064
+<v Ehsan, Labib (lehsan@uidaho.edu)>OK, then.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/196-0
+00:18:12.184 --> 00:18:17.803
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah, and later on when you have a chance,
+could you send me like, like, you know,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/196-1
+00:18:17.803 --> 00:18:23.015
+<v Ehsan, Labib (lehsan@uidaho.edu)>like a PDF version of this page or just
+even like the list of terms so I can</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/193-0
+00:18:21.864 --> 00:18:22.184
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Hi.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/196-2
+00:18:23.015 --> 00:18:25.384
+<v Ehsan, Labib (lehsan@uidaho.edu)>start to bake it into the workflow?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/194-0
+00:18:23.624 --> 00:18:24.184
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/195-0
+00:18:25.784 --> 00:18:26.904
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah, okay.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/197-0
+00:18:28.384 --> 00:18:29.624
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Where's another one?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/200-0
+00:18:31.624 --> 00:18:36.551
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Oh, this one doesn't have it,
+but a lot of times maybe like final</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/200-1
+00:18:36.551 --> 00:18:40.955
+<v Mattoon, Michele (mmattoon@uidaho.edu)>billing, this is pretty standard, like 30,
+45, or 60 days.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/198-0
+00:18:40.424 --> 00:18:40.984
+<v Ehsan, Labib (lehsan@uidaho.edu)>Mhm.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/200-2
+00:18:40.955 --> 00:18:47.301
+<v Mattoon, Michele (mmattoon@uidaho.edu)>But there might actually be a date in the
+award, like final is due on December 10th,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/200-3
+00:18:47.301 --> 00:18:52.601
+<v Mattoon, Michele (mmattoon@uidaho.edu)>2029 or something like that. So again,
+we'd flag it and then we would,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/199-0
+00:18:48.824 --> 00:18:49.384
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yes.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/200-4
+00:18:52.601 --> 00:18:53.944
+<v Mattoon, Michele (mmattoon@uidaho.edu)>we might add some.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/201-0
+00:18:54.664 --> 00:18:56.104
+<v Mattoon, Michele (mmattoon@uidaho.edu)>The specifics.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/202-0
+00:18:57.304 --> 00:18:57.784
+<v Ehsan, Labib (lehsan@uidaho.edu)>Okay.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/203-0
+00:18:58.024 --> 00:18:58.664
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/204-0
+00:19:00.424 --> 00:19:04.516
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Like this is very specific to the award
+and I am not sure exactly what would have</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/204-1
+00:19:04.516 --> 00:19:05.064
+<v Mattoon, Michele (mmattoon@uidaho.edu)>been there.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/205-0
+00:19:06.584 --> 00:19:10.184
+<v Mattoon, Michele (mmattoon@uidaho.edu)>But okay, yeah,
+this is this is the challenge.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/209-0
+00:19:11.384 --> 00:19:15.023
+<v Mattoon, Michele (mmattoon@uidaho.edu)>for sure.
+And this is where I think we probably</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/206-0
+00:19:12.184 --> 00:19:12.264
+<v Ehsan, Labib (lehsan@uidaho.edu)>The.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/209-1
+00:19:15.023 --> 00:19:20.558
+<v Mattoon, Michele (mmattoon@uidaho.edu)>miss some because it is so labor
+intensive and we have a human doing it.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/207-0
+00:19:18.744 --> 00:19:19.304
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/209-2
+00:19:20.558 --> 00:19:24.424
+<v Mattoon, Michele (mmattoon@uidaho.edu)>So being able to have a machine and a
+human do it.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/208-0
+00:19:25.384 --> 00:19:25.704
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/211-0
+00:19:25.584 --> 00:19:28.344
+<v Mattoon, Michele (mmattoon@uidaho.edu)>People will get better at it, K.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/210-0
+00:19:27.584 --> 00:19:28.104
+<v Ehsan, Labib (lehsan@uidaho.edu)>Mhm.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/212-0
+00:19:29.544 --> 00:19:32.424
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I think those are the things I wanted to
+chat with you about.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/213-0
+00:19:34.904 --> 00:19:35.464
+<v Ehsan, Labib (lehsan@uidaho.edu)>Awesome.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/214-0
+00:19:35.304 --> 00:19:39.942
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah. Okay.
+How are the rest of your meetings going</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/214-1
+00:19:39.942 --> 00:19:40.744
+<v Mattoon, Michele (mmattoon@uidaho.edu)>with RAs?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/215-0
+00:19:41.464 --> 00:19:46.660
+<v Ehsan, Labib (lehsan@uidaho.edu)>Good. With RAs. So remember,
+Emily was the only person that was left</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/215-1
+00:19:46.660 --> 00:19:52.683
+<v Ehsan, Labib (lehsan@uidaho.edu)>to go over like the process mapping stuff.
+And we finally set up like a meeting</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/215-2
+00:19:52.683 --> 00:19:57.803
+<v Ehsan, Labib (lehsan@uidaho.edu)>because she was like busy and then it was
+supposed to be this week,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/215-3
+00:19:57.803 --> 00:20:00.664
+<v Ehsan, Labib (lehsan@uidaho.edu)>but then Sammy's out. So we're meeting</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/216-0
+00:20:01.544 --> 00:20:05.326
+<v Ehsan, Labib (lehsan@uidaho.edu)>the following Friday.
+So after that is wrapped,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/216-1
+00:20:05.326 --> 00:20:11.155
+<v Ehsan, Labib (lehsan@uidaho.edu)>we have all the process maps basically
+done. And then as far as meetings,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/216-2
+00:20:11.155 --> 00:20:16.906
+<v Ehsan, Labib (lehsan@uidaho.edu)>the one with Cindy went well.
+Barrie and I are working on it. And then..</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/216-3
+00:20:16.906 --> 00:20:16.984
+<v Ehsan, Labib (lehsan@uidaho.edu)>.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/217-0
+00:20:18.184 --> 00:20:21.202
+<v Ehsan, Labib (lehsan@uidaho.edu)>Today, at 11,
+we have what I'm excited for,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/217-1
+00:20:21.202 --> 00:20:25.864
+<v Ehsan, Labib (lehsan@uidaho.edu)>a meeting with Tammy to combine the RFA
+and FOA checklist into one.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/217-2
+00:20:25.864 --> 00:20:31.282
+<v Ehsan, Labib (lehsan@uidaho.edu)>And which is also awesome because the
+evaluation me and Barrie are working on,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/217-3
+00:20:31.282 --> 00:20:36.424
+<v Ehsan, Labib (lehsan@uidaho.edu)>like even for like vandalizer accuracy
+metrics, as well as like, you know.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/219-0
+00:20:38.024 --> 00:20:43.176
+<v Ehsan, Labib (lehsan@uidaho.edu)>making like a whole like benchmark or
+data set of how to evaluate workflows,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/219-1
+00:20:43.176 --> 00:20:47.927
+<v Ehsan, Labib (lehsan@uidaho.edu)>the timeline matched up pretty nicely
+because we're at a point in that</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/219-2
+00:20:47.927 --> 00:20:52.811
+<v Ehsan, Labib (lehsan@uidaho.edu)>evaluation, we're thinking, all right,
+what should we get rid of in this</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/219-3
+00:20:52.811 --> 00:20:56.023
+<v Ehsan, Labib (lehsan@uidaho.edu)>workflow?
+And so that's the one I'm excited for</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/219-4
+00:20:56.023 --> 00:20:56.424
+<v Ehsan, Labib (lehsan@uidaho.edu)>today.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/221-0
+00:20:57.464 --> 00:21:02.987
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Oh, good.
+And she will be very critical and provide</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/221-1
+00:21:02.987 --> 00:21:10.102
+<v Mattoon, Michele (mmattoon@uidaho.edu)>a lot of feedback, which is good,
+which is very good. And she has,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/220-0
+00:21:03.544 --> 00:21:05.464
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yes, exactly.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/221-2
+00:21:10.102 --> 00:21:15.624
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I know she has created other workflows.
+And so she.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/222-0
+00:21:16.184 --> 00:21:20.464
+<v Mattoon, Michele (mmattoon@uidaho.edu)>might have ideas on how to incorporate
+some other things.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/225-0
+00:21:21.224 --> 00:21:26.229
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Things into that into your workflow that
+you're creating for her,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/225-1
+00:21:26.229 --> 00:21:30.172
+<v Mattoon, Michele (mmattoon@uidaho.edu)>but she's she's one of our active
+vandalizer users,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/224-0
+00:21:29.224 --> 00:21:30.104
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah, yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/225-2
+00:21:30.172 --> 00:21:35.024
+<v Mattoon, Michele (mmattoon@uidaho.edu)>so I think she'll she'll provide a lot of
+really good feedback.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/227-0
+00:21:35.064 --> 00:21:38.125
+<v Ehsan, Labib (lehsan@uidaho.edu)>I know,
+that's what I noticed in like Barry and I</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/227-1
+00:21:38.125 --> 00:21:42.349
+<v Ehsan, Labib (lehsan@uidaho.edu)>were talking that you guys also had this
+conversation. It's hard to,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/227-2
+00:21:42.349 --> 00:21:46.206
+<v Ehsan, Labib (lehsan@uidaho.edu)>I feel like in meetings,
+not always people are like, you know,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/227-3
+00:21:46.206 --> 00:21:49.512
+<v Ehsan, Labib (lehsan@uidaho.edu)>fully, you know,
+feel comfortable to give feedback or</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/227-4
+00:21:49.512 --> 00:21:53.553
+<v Ehsan, Labib (lehsan@uidaho.edu)>critical, but with Tammy,
+I've noticed it's so helpful. Like she,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/226-0
+00:21:52.544 --> 00:21:52.664
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/227-5
+00:21:53.553 --> 00:21:55.144
+<v Ehsan, Labib (lehsan@uidaho.edu)>even the smallest details,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/228-0
+00:21:55.464 --> 00:21:56.504
+<v Mattoon, Michele (mmattoon@uidaho.edu)>He will tell you.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/229-0
+00:21:55.504 --> 00:21:59.864
+<v Ehsan, Labib (lehsan@uidaho.edu)>Which is exactly what we want, you know?
+Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/231-0
+00:21:58.664 --> 00:22:06.984
+<v Mattoon, Michele (mmattoon@uidaho.edu)>She will tell you she has no qualms of
+giving feedback. Yeah, yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/230-0
+00:22:03.904 --> 00:22:07.504
+<v Ehsan, Labib (lehsan@uidaho.edu)>No, and that is perfect for, like,
+you know, developing workflows and all.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/232-0
+00:22:08.944 --> 00:22:09.384
+<v Ehsan, Labib (lehsan@uidaho.edu)>All this year.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/234-0
+00:22:09.544 --> 00:22:14.082
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah,
+because we want to also get to a point</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/234-1
+00:22:14.082 --> 00:22:19.831
+<v Mattoon, Michele (mmattoon@uidaho.edu)>where they are using these workflows,
+you know, so yeah,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/233-0
+00:22:15.464 --> 00:22:17.224
+<v Ehsan, Labib (lehsan@uidaho.edu)>Exactly.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/234-2
+00:22:19.831 --> 00:22:23.864
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I'm excited for that one because I know.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/237-0
+00:22:25.144 --> 00:22:29.732
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I know she'll give the feedback.
+And so it may take a few times going back</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/237-1
+00:22:29.732 --> 00:22:32.912
+<v Mattoon, Michele (mmattoon@uidaho.edu)>and forth with her to get it to where she
+likes it.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/235-0
+00:22:30.584 --> 00:22:31.064
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/237-2
+00:22:32.912 --> 00:22:35.787
+<v Mattoon, Michele (mmattoon@uidaho.edu)>But if we can get her buy-in on that
+workflow,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/237-3
+00:22:35.787 --> 00:22:40.313
+<v Mattoon, Michele (mmattoon@uidaho.edu)>she'll convince the rest of the
+preawarduidahoedu team to start using it.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/237-4
+00:22:40.313 --> 00:22:44.533
+<v Mattoon, Michele (mmattoon@uidaho.edu)>And that's of course what we want.
+We want them to start using these</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/236-0
+00:22:41.064 --> 00:22:41.464
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/237-5
+00:22:44.533 --> 00:22:45.144
+<v Mattoon, Michele (mmattoon@uidaho.edu)>workflows.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/239-0
+00:22:47.184 --> 00:22:52.656
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yeah, okay, good. I'm glad.
+And Barry's so good at bridging that gap</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/239-1
+00:22:52.656 --> 00:22:58.842
+<v Mattoon, Michele (mmattoon@uidaho.edu)>between developer and RA. You know,
+I think adding him to those meetings will</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/238-0
+00:22:53.704 --> 00:22:54.104
+<v Ehsan, Labib (lehsan@uidaho.edu)>Uh-huh.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/239-2
+00:22:58.842 --> 00:23:00.904
+<v Mattoon, Michele (mmattoon@uidaho.edu)>be helpful for both sides.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/240-0
+00:23:04.504 --> 00:23:07.224
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Alright,
+is there anything else you need from me?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/241-0
+00:23:08.184 --> 00:23:10.424
+<v Ehsan, Labib (lehsan@uidaho.edu)>I know this is helpful.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/243-0
+00:23:09.224 --> 00:23:12.900
+<v Mattoon, Michele (mmattoon@uidaho.edu)>I've been given my assignment and I will
+give you,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/243-1
+00:23:12.900 --> 00:23:17.224
+<v Mattoon, Michele (mmattoon@uidaho.edu)>get you feedback once I have a chance to
+dig into it, okay?</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/242-0
+00:23:15.944 --> 00:23:16.184
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/244-0
+00:23:18.024 --> 00:23:21.464
+<v Ehsan, Labib (lehsan@uidaho.edu)>Awesome. Well,
+see you at 3:30 for our DGA meeting.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/247-0
+00:23:22.424 --> 00:23:25.624
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Yes, yeah,
+we'll check in with them and think I'm</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/245-0
+00:23:23.144 --> 00:23:23.384
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/247-1
+00:23:25.624 --> 00:23:30.872
+<v Mattoon, Michele (mmattoon@uidaho.edu)>going to need to prod them a little bit
+more because we have not received any new</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/246-0
+00:23:30.264 --> 00:23:31.344
+<v Ehsan, Labib (lehsan@uidaho.edu)>Okay, yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/247-2
+00:23:30.872 --> 00:23:32.024
+<v Mattoon, Michele (mmattoon@uidaho.edu)>project ideas. So.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/253-0
+00:23:33.304 --> 00:23:36.796
+<v Mattoon, Michele (mmattoon@uidaho.edu)>That's okay.
+We've got plenty of other things to work</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/248-0
+00:23:34.424 --> 00:23:34.824
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/253-1
+00:23:36.796 --> 00:23:39.835
+<v Mattoon, Michele (mmattoon@uidaho.edu)>on. But it's like,
+if you want us to help you,</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/253-2
+00:23:39.835 --> 00:23:44.879
+<v Mattoon, Michele (mmattoon@uidaho.edu)>you have to give us your ideas. So, yeah.
+Okay. All right. Talk to you later.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/249-0
+00:23:40.344 --> 00:23:40.824
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/250-0
+00:23:43.624 --> 00:23:44.344
+<v Ehsan, Labib (lehsan@uidaho.edu)>Hello, Michele.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/253-3
+00:23:44.879 --> 00:23:45.784
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Thanks, Labib.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/252-0
+00:23:46.824 --> 00:23:48.104
+<v Ehsan, Labib (lehsan@uidaho.edu)>Yeah, thank you. Bye.</v>
+
+8bf91a2f-7d62-405e-acf0-467d71b28d47/254-0
+00:23:47.504 --> 00:23:48.544
+<v Mattoon, Michele (mmattoon@uidaho.edu)>Okay, bye.</v>
