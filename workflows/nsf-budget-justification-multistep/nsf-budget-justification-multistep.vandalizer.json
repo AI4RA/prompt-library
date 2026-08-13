@@ -6,7 +6,7 @@
   "exported_by": "ai4ra-prompt-library",
   "items": [
     {
-      "name": "NSF Budget Justification (Multi-step)",
+      "name": "NSF Budget Justification (Multi-step) v2.0.0",
       "description": "Four-step NSF budget-justification pipeline. Step 1 normalizes an NSF-style proposal budget workbook into a structured budget object. Step 2 drafts the eight NSF budget-justification sections (A–H) from that structured budget. Step 3 reviews and polishes the drafted array for section-placement errors, missing disclosures, fabricated figures, and NSF-framing consistency. Step 4 renders the reviewed array into Word-pasteable Markdown and HTML strings. The final output validates against components/nsf-budget-justification-render-udm/schema.json.",
       "steps": [
         {

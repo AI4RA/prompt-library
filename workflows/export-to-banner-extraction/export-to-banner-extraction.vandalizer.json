@@ -6,7 +6,7 @@
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Export to Banner Award Extraction",
+      "name": "Export to Banner Award Extraction v0.2.0",
       "description": "Uploads a fully-executed federal award document and returns an RA-friendly Markdown Export to Banner Reference Summary covering the seven sections needed to populate VERAS's Export to Banner form: award identification, dates & performance period, sponsor information, budget summary, billing & payment, reporting & compliance, and special terms & FOI items. Mirrors the source ui-insight/ProcessMapping export-to-banner-extraction consolidation.md conventions, including the `[DISCREPANCY - ...]` flag syntax.",
       "steps": [
         {

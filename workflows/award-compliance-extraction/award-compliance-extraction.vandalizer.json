@@ -6,7 +6,7 @@
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Award Compliance & Financial Overview Extraction",
+      "name": "Award Compliance & Financial Overview Extraction v0.2.2",
       "description": "Uploads a fully-executed federal award notice or agreement and returns an RA-friendly Markdown Award Compliance & Financial Overview covering award header information, financial summary, approved budget & restrictions, governing regulations (prioritized), and key administrative requirements (reporting, prior approval, compliance deadlines). Mirrors the source ui-insight/ProcessMapping award-compliance-extraction consolidation.md conventions.",
       "steps": [
         {
