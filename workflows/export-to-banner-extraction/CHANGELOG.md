@@ -2,6 +2,48 @@
 
 All notable changes to this workflow. Versions follow semver: MAJOR for step-structure changes, MINOR for additive changes (e.g., new search_set_items, validation checks), PATCH for display-name or wording edits.
 
+## [1.0.0] — 2026-08-13
+
+**MAJOR — step-structure change (3 steps → 2, KB step removed) bundled with additive fields, decision logic, and a new FOATEXT task**, implementing three tiers of RA feedback from Michele Mattoon's review of the v0.2.0 output (meeting transcript + `E2B Workflow Data Points.xlsx` + `FOATEXT Lines - Export To Banner Form.pdf`). No extraction task was collapsed.
+
+**KB step removal (mirrors `rfa-checklist-extraction` v1.0.0 / PR #50):**
+
+- The optional `KnowledgeBaseQuery` Step 0 is **removed**. It was inert on a fresh import (Vandalizer blanks `kb_uuid` by design, so the operator always had to attach a KB manually) and confused operators comparing the imported workflow to their live copies. KBs will be reintroduced once the right approach is settled.
+- The seven parallel extraction tasks now read `input_sources: [workflow_documents]` only — the vestigial `step_input` (which fed the now-removed KB step's output) is dropped. Consolidation is unchanged (`input_source: step_input`, i.e. the extraction fragments).
+- Prompts no longer claim to receive "KB chunks." Sponsor terms & conditions and the University of Idaho determination guides are honored **when uploaded as workflow documents**; the award-over-T&C precedence rule is retained as a latent rule for that case.
+- Prompt prose spells out "UI" as "University of Idaho" (the one exception is the literal Banner FOATEXT line-154 label "Cost share: UI $", kept verbatim as it mirrors the form).
+
+**Tier 1 — additive fields (low risk):**
+
+- **Award Category** + `funding_source_classification` added to `extract-award-identification` (NEW — the v0.2.0 output had no category).
+- **Subrecipients** present Y/N + list added (RA data point 8, previously missing).
+- **Co-PI / Co-I / Co-PD names** and **Senior/Key Personnel names** added (RA data points 18–19, previously missing).
+- **Program Income** split into a present Y/N flag plus `program_income_amount`.
+- **SF-270 Required** Y/N added to `extract-billing-and-payment` (RA data point 24).
+- **Cost-share category detail** table added to `extract-budget-and-financial` (conditional, mirrors the budget table).
+- **"Capture ALL variants"** arrays added — `all_date_ranges`, `all_sponsors`, `all_award_amounts` — because an award commonly states more than one of each and the RA wants them all, not a collapsed single value.
+- **Provenance:** every extraction task now emits a `provenance` array, and the consolidation renders sources for the determination fields, funding amounts, and FOATEXT/Reporting tables (RA Output Note: "provide where in the input documents the information was extracted from").
+- Deliverable **reordered** to follow the RA's prioritized data-point list.
+
+**Tier 2 — decision logic (rubric-driven determinations):**
+
+- **Award Type**, **Award Category**, **Indirect Cost Basis**, and **Billing Type** are now DETERMINED from project attributes + UI determination rubrics, NOT copied from the literal word the sponsor used — the RA's central point (sponsors mislabel documents; a doc titled "Contract" is often a Cooperative Agreement). Each carries a `*_rationale` field.
+- **Award Type enum corrected** to the UI Banner set: `Grant`, `Cooperative Agreement`, `Contract`, `Letter Award`, `Gift Funding`, `Purchase Order` (dropped `Subcontract`; subawards are captured via the new subrecipients fields).
+- **Billing determination** encodes the Banner form's own logic (§4.3–4.5): minimum billing $0 (LOC / fixed) vs. $500 (non-LOC cost-reimbursable, unless lower or award ≤ $1,000); frequency tied to billing type but overridable by the award.
+- **Indirect basis** encodes the waived-OH → MTDC-A rule from Banner form §2.2/2.5.
+- **Award-over-T&C precedence** rule added explicitly to every task and the consolidation (RA + xlsx cell A1).
+- ⚠️ Michele's exact UI determination guides were not yet in hand; prompts encode the standard federal distinctions and instruct the model to apply the UI guide verbatim when attached as KB context. Rationale blocks should be refined when the guides arrive.
+
+**Tier 3 — FOATEXT engine (highest value):**
+
+- NEW parallel task **`extract-foatext-lines`** scans the award (+ T&Cs) against the full Export to Banner FOATEXT line catalog (lines 100–230, §5.2–5.8) and emits ONLY the present/applicable lines with line number, standard term, Banner-ready award-specific text (placeholders filled from the award), source location, and evidence snippet. Absent terms are omitted. Rendered as SECTION 7 of the deliverable. This automates the analyst's most labor-intensive manual step.
+
+**Validation plan:** replaced the four `CHK-0x` format/consistency checks with eight core-contract checks in the Vandalizer runtime schema (`etb-sections-complete`, `etb-award-type-determination`, `etb-award-precedence`, `etb-all-variants-captured`, `etb-foatext-line-mapping`, `etb-provenance-present`, `etb-monetary-fidelity`, `etb-flags-and-personnel-present`).
+
+**Docs:** README brought current (it had lagged at v0.1.0) and updated to the two-step, KB-free topology. Component `harness_notes` in `component_catalog_overrides.yaml` refreshed.
+
+**Status:** import-ready; in-Vandalizer re-test on a real award still pending.
+
 ## [0.2.0] — 2026-05-22
 
 - **MAJOR step-structure change + output-contract change** for end-user Vandalizer use.
