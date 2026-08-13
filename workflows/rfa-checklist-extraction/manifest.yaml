@@ -255,7 +255,7 @@ description: >
   the expanded Red Flags / Contract-Review trigger set and Compliance
   Risks + Foreign Influence sections from the RA's SPA checklist.
 
-workflow_version: 2.0.0
+workflow_version: 2.0.1
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
@@ -390,6 +390,10 @@ steps:
             content values. Every fact the schema asks for is still
             required, stated fully ("Up to $5M/year for 4 years, total not
             to exceed $20M" must NOT become "$20M total").
+          - Inside a JSON string value, escape any double quote as \"
+            or rephrase using single quotes ('added value', not
+            "added value") — one unescaped quote invalidates the
+            entire fragment.
           - Any JSON examples shown in this prompt are indented for
             readability only — YOUR output must be minified.
 
@@ -538,6 +542,10 @@ steps:
             content values. Every fact the schema asks for is still
             required, stated fully ("Up to $5M/year for 4 years, total not
             to exceed $20M" must NOT become "$20M total").
+          - Inside a JSON string value, escape any double quote as \"
+            or rephrase using single quotes ('added value', not
+            "added value") — one unescaped quote invalidates the
+            entire fragment.
           - Any JSON examples shown in this prompt are indented for
             readability only — YOUR output must be minified.
 
@@ -631,6 +639,10 @@ steps:
             content values. Every fact the schema asks for is still
             required, stated fully ("Up to $5M/year for 4 years, total not
             to exceed $20M" must NOT become "$20M total").
+          - Inside a JSON string value, escape any double quote as \"
+            or rephrase using single quotes ('added value', not
+            "added value") — one unescaped quote invalidates the
+            entire fragment.
           - Any JSON examples shown in this prompt are indented for
             readability only — YOUR output must be minified.
 
@@ -723,6 +735,10 @@ steps:
             content values. Every fact the schema asks for is still
             required, stated fully ("Up to $5M/year for 4 years, total not
             to exceed $20M" must NOT become "$20M total").
+          - Inside a JSON string value, escape any double quote as \"
+            or rephrase using single quotes ('added value', not
+            "added value") — one unescaped quote invalidates the
+            entire fragment.
           - Any JSON examples shown in this prompt are indented for
             readability only — YOUR output must be minified.
 
@@ -806,6 +822,10 @@ steps:
             content values. Every fact the schema asks for is still
             required, stated fully ("Up to $5M/year for 4 years, total not
             to exceed $20M" must NOT become "$20M total").
+          - Inside a JSON string value, escape any double quote as \"
+            or rephrase using single quotes ('added value', not
+            "added value") — one unescaped quote invalidates the
+            entire fragment.
           - Any JSON examples shown in this prompt are indented for
             readability only — YOUR output must be minified.
 
@@ -874,6 +894,10 @@ steps:
             content values. Every fact the schema asks for is still
             required, stated fully ("Up to $5M/year for 4 years, total not
             to exceed $20M" must NOT become "$20M total").
+          - Inside a JSON string value, escape any double quote as \"
+            or rephrase using single quotes ('added value', not
+            "added value") — one unescaped quote invalidates the
+            entire fragment.
           - Any JSON examples shown in this prompt are indented for
             readability only — YOUR output must be minified.
 
@@ -1061,6 +1085,9 @@ steps:
             newlines inside the JSON, no spaces after `:` or `,`.
           - Minify the SYNTAX only — do NOT shorten, summarize, or drop
             content values.
+          - Inside a JSON string value, escape any double quote as \"
+            or rephrase using single quotes — one unescaped quote
+            invalidates the entire fragment.
           - Emit the five keys in this order: submission_details,
             formatting_requirements, special_requirements,
             required_components, optional_components — cheap scalar fields
@@ -1177,7 +1204,10 @@ steps:
           Emit MINIFIED JSON — one single line, no indentation, no spaces
           after `:` or `,`. Minify the syntax only, never the content:
           every named section, sub-part, table column, and milestone must
-          appear.
+          appear. When quoting announcement text inside a JSON string
+          value, escape any double quote as \" or rephrase using single
+          quotes ('added value', not "added value") — one unescaped
+          quote invalidates the entire fragment.
 
           ## Output
 
@@ -1296,6 +1326,10 @@ steps:
             content values. Every fact the schema asks for is still
             required, stated fully ("Up to $5M/year for 4 years, total not
             to exceed $20M" must NOT become "$20M total").
+          - Inside a JSON string value, escape any double quote as \"
+            or rephrase using single quotes ('added value', not
+            "added value") — one unescaped quote invalidates the
+            entire fragment.
           - Any JSON examples shown in this prompt are indented for
             readability only — YOUR output must be minified.
 
@@ -1388,6 +1422,10 @@ steps:
             content values. Every fact the schema asks for is still
             required, stated fully ("Up to $5M/year for 4 years, total not
             to exceed $20M" must NOT become "$20M total").
+          - Inside a JSON string value, escape any double quote as \"
+            or rephrase using single quotes ('added value', not
+            "added value") — one unescaped quote invalidates the
+            entire fragment.
           - Any JSON examples shown in this prompt are indented for
             readability only — YOUR output must be minified.
 
