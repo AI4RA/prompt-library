@@ -4,7 +4,31 @@
 # file by scripts/build_vandalizer_workflows.py and committed alongside.
 # Never hand-edit the generated JSON — update this manifest and rebuild.
 #
-# === Variant A topology (v1.2.0) ===
+# === Variant A topology (v2.0.0) ===
+#
+# v2.0.0 (2026-08-13) — TASK SPLIT for the 8192-token model context.
+# The v1.2.0 import failed with "Model token limit (8192) exceeded
+# before any response was generated": extract-application-components
+# had accreted to ~20.8K chars (~5.2K tokens) of prompt across three
+# fix iterations, which plus the attached document slice and the
+# reserved output budget exceeded the assigned model's total 8192-token
+# window — the call was rejected before generating anything. (The
+# consolidation is NOT affected: it demonstrably consumed ~7.5K input
+# tokens and produced ~2.6K output tokens in runs 3–4, so it runs on a
+# larger-context assignment.) Changes:
+#   1. NEW parallel task extract-mandated-structure (10th task) owns
+#      announcement-mandated internal component structure — emits
+#      {mandated_structure:[{component, mandated_sections:[...]}]}
+#      with a compact worked example. Prompt ~4.5K chars (~1.1K tok).
+#   2. extract-application-components rewritten WITHOUT the
+#      mandated-sections rules/example — backbone merge + stubs +
+#      compactness only. Prompt 20.8K → ~9.5K chars (~2.4K tokens),
+#      comfortably inside 8192 with a document slice + output budget.
+#   3. Consolidation: TEN fragments; the Announcement-Mandated
+#      Structure block and the "See required structure below." table
+#      pointer now read fragment 10 (match on component name);
+#      fragment 7 components no longer carry mandated_sections.
+#   4. MAJOR: parallel task count 9 → 10, fragment count 9 → 10.
 #
 # v1.2.0 (2026-08-13) — COMPACTNESS-BLOCK PLACEMENT FIX + BACKBONE
 # STUBS. The v1.1.0 NSF 25-541 re-test fixed fragment truncation but
@@ -194,16 +218,17 @@
 # end-user (sponsored-programs analyst) deliverable.
 #
 # Step 1  Parallel Prompt
-#   9 Prompt tasks, each receiving input_sources: [workflow_documents]
+#   10 Prompt tasks, each receiving input_sources: [workflow_documents]
 #   (the uploaded RFA). One metadata task captures the UDM-aligned
 #   scalar opportunity fields; a risk-flags task hunts the escalation +
 #   CRU triggers for the Red Flags banner; a compliance-flags task
-#   feeds the Compliance Risks and Foreign Influence sections; the
-#   other six mirror the source workflow's six parallel extractions.
-#   Each task emits a JSON FRAGMENT for its block (Variant A
-#   mid-pipeline format).
+#   feeds the Compliance Risks and Foreign Influence sections; a
+#   mandated-structure task extracts announcement-mandated internal
+#   component structure; the other six mirror the source workflow's
+#   six parallel extractions. Each task emits a JSON FRAGMENT for its
+#   block (Variant A mid-pipeline format).
 # Step 2  Consolidation (Markdown deliverable)
-#   1 Prompt task assembles the nine JSON fragments and renders a
+#   1 Prompt task assembles the ten JSON fragments and renders a
 #   single Markdown checklist with eleven sections (Red Flags first),
 #   enforcing the strict-de-duplication placement contract from source.
 
@@ -217,7 +242,7 @@ description: >
   Deadlines, Eligibility, Award Information, Budget Requirements &
   Policies, Submission Details, Application Components, Compliance Risks,
   Foreign Influence & International Components, Special Requirements, and
-  Important Notes. The pipeline runs nine parallel Prompt tasks (each
+  Important Notes. The pipeline runs ten parallel Prompt tasks (each
   emitting a JSON fragment for its block) plus a Consolidation Prompt
   that renders the
   final Markdown checklist with strict de-duplication. Mirrors the
@@ -230,7 +255,7 @@ description: >
   the expanded Red Flags / Contract-Review trigger set and Compliance
   Risks + Foreign Influence sections from the RA's SPA checklist.
 
-workflow_version: 1.2.0
+workflow_version: 2.0.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
@@ -868,52 +893,48 @@ steps:
           You are extracting the APPLICATION COMPONENTS, SUBMISSION
           DETAILS, SPECIAL REQUIREMENTS, and FORMATTING REQUIREMENTS
           blocks of a federal funding announcement. You receive the full
-          uploaded document as your context. Read every section that
-          describes what to submit and how to submit it.
+          uploaded document. Read every section that describes what to
+          submit and how to submit it.
 
-          Page limits, font and margin rules, template names, and
-          naming conventions live on the INDIVIDUAL component (in
-          special_requirements for that component). Submission
-          mechanics — portal, file format, upload method — live in
-          submission_details, NOT on individual components.
-          Document-wide preparation rules (fonts, margins, spacing, page
-          size, file naming) live in the separate formatting_requirements
-          field described below.
+          A SEPARATE parallel task extracts the announcement-mandated
+          INTERNAL structure of components (e.g., required Project
+          Description sections). Do NOT enumerate internal section
+          structure here. A component's special_requirements carries ONLY
+          page limits, title rules, fonts, templates, and naming — never
+          "must include the sections in Section V.A"-style pointers.
+
+          Placement rules: per-component rules (page limits, fonts,
+          templates, naming) go in that component's special_requirements.
+          Portal / file-format / upload mechanics go in
+          submission_details. Document-wide preparation rules (fonts,
+          margins, spacing, page size, file naming) go in
+          formatting_requirements.
 
           ## Sponsor backbone — ALWAYS include the standard components
 
-          Federal sponsors frequently DO NOT list every required proposal
-          component in an individual announcement, because some are
-          standardized in the sponsor's proposal guide (e.g., the NSF
-          PAPPG). You MUST still include them. Do this:
+          Federal sponsors often do NOT list every required proposal
+          component in an individual announcement — some are standardized
+          in the sponsor's proposal guide (e.g., the NSF PAPPG). You MUST
+          still include them:
 
-          1. Identify the sponsor from the document. Hints: "National
-             Science Foundation" / NSF numbers like "NSF 25-543" → NSF;
-             "National Institutes of Health" / "PA-", "PAR-", "RFA-",
-             "NOT-" numbers → NIH; "USDA" / "NIFA" → USDA-NIFA;
+          1. Identify the sponsor. Hints: "National Science Foundation" /
+             "NSF 25-543" → NSF; "National Institutes of Health" / "PA-",
+             "PAR-", "RFA-", "NOT-" → NIH; "USDA" / "NIFA" → USDA-NIFA;
              "Department of Energy" / "DE-FOA-" → DOE; "NASA" / "NNH",
              "NRA" → NASA.
-          2. Take that sponsor's STANDARD REQUIRED COMPONENTS from the
-             backbone table below and MERGE them with what this specific
-             announcement states:
-             - Every backbone item that is unconditional goes in
-               required_components. Items the backbone marks "(if
-               applicable)" go in optional_components (still listed, so
-               the reviewer can judge applicability).
-             - If the announcement ALSO names a component, do not
-               duplicate — emit ONE entry, using the announcement's
-               description and any page-limit / formatting rule it gives.
-             - If the announcement IMPOSES A CHANGE on a standard
-               component (different page limit, extra content, a new
-               required attachment), keep that change on the component
-               and set its `source` to "Announcement + sponsor standard".
-          3. Set each component's `source` field:
-             - "Announcement" — the announcement explicitly requires it
-               and it is not a backbone item (RFA-unique).
-             - "Sponsor standard" — added from the backbone; the
-               announcement did not list it.
-             - "Announcement + sponsor standard" — present in both, or a
-               backbone item the announcement modifies.
+          2. MERGE that sponsor's standard components (backbone below)
+             with what the announcement states. Unconditional backbone
+             items → required_components; "(if applicable)" items →
+             optional_components. If the announcement also names a
+             component, emit ONE entry using the announcement's wording
+             and rules. If the announcement modifies a standard component
+             (page limit, extra content), keep the change on the
+             component.
+          3. Set each component's `source`: "Announcement" (announcement
+             requires it, not a backbone item), "Sponsor standard" (added
+             from the backbone), or "Announcement + sponsor standard"
+             (present in both, or backbone item the announcement
+             modifies).
           4. "Subaward Documents (if applicable)" is a conditional
              OPTIONAL component: list it with its standard sub-items
              (Budget (excel); RR Subaward Budget form if applicable;
@@ -921,13 +942,10 @@ steps:
              sponsor SciENcv Biosketch + Current & Pending; Specific
              Scope of Work; AOR-signed Letter of Commitment if on the FDP
              list, or a completed UI subrecipient Commitment form;
-             Facilities/Equipment if applicable) in its description, and
-             note it applies only when the proposal includes a subaward.
-          5. If the sponsor is NOT one of the five below (e.g., a state
-             agency, private foundation, or unrecognized sponsor), DO NOT
-             invent a backbone — extract ONLY the components the
-             announcement actually states, and set every `source` to
-             "Announcement".
+             Facilities/Equipment if applicable) in its description.
+          5. If the sponsor is NOT one of the five below, DO NOT invent a
+             backbone — extract only what the announcement states; every
+             `source` is "Announcement".
 
           ### Backbone — standard required components by sponsor
 
@@ -976,171 +994,14 @@ steps:
             applicable); Subaward Documents (if applicable). Senior Key
             Personnel documents apply to PI/Co-PI/Co-I with ≥10% effort/yr.
 
-          ## Announcement-mandated internal structure (mandated_sections)
-
-          Announcements frequently prescribe named sections that must
-          appear INSIDE a single component — most often the Project
-          Description / Project Narrative. Trigger language looks like:
-          "All proposals should clearly include sections for each of the
-          following aspects:", "The Project Description must contain the
-          following sections", or a solicitation-specific supplement to
-          the sponsor's proposal guide (e.g., NSF's "The following
-          information supplements the guidelines and requirements in the
-          NSF PAPPG"). These enumerations are the single highest-value
-          content in this extraction: a proposal missing a mandated
-          section can be returned without review, and the checklist
-          reader does NOT have the announcement open in front of them.
-
-          When the announcement enumerates named sections for a
-          component:
-
-          1. Populate that component's `mandated_sections` array with ONE
-             entry per mandated section, in the announcement's order,
-             using the announcement's own section names verbatim.
-          2. `requirements`: 1–3 sentences in the announcement's terms —
-             what the section must contain or answer.
-          3. When a mandated section itself has enumerated sub-parts
-             (numbered sub-sections, a required table with named columns,
-             a milestone list), capture EACH sub-part in that entry's
-             `subsections` array. Required table columns and named
-             milestones must be enumerated in the entry's or sub-entry's
-             `requirements` — spelled out, not summarized.
-          4. NEVER compress the enumeration into a pointer such as "must
-             include all specified subsections listed in Section V.A" or
-             "see Section IV for required sections". A pointer in place
-             of the enumerated list is an extraction failure — treat it
-             exactly as you would treat emitting an empty
-             required_components array.
-          5. Keep the component's `description` to a one-sentence
-             summary; the structure lives in `mandated_sections`, not
-             crammed into `description` or `special_requirements`.
-          6. Components whose internal structure the announcement does
-             not prescribe get `mandated_sections: null`. Do NOT invent
-             structure from the sponsor backbone or the sponsor's
-             proposal guide.
-
-          ### Worked example — WRONG vs CORRECT
-
-          An NSF solicitation states "All PCL Node proposals should
-          clearly include sections for each of the following aspects:"
-          followed by named sections, one of which (Node capabilities)
-          has five numbered sub-parts and another of which (Management
-          Plan) requires an Implementation Timeline with six named
-          milestones.
-
-          WRONG (the failure mode — pointer prose, structure lost):
-
-            "name": "Project Description",
-            "description": "Detailed narrative including science
-             drivers, node capabilities, cross-node collaborations,
-             training/education plans, broadening access, metrics,
-             management plan (with implementation timeline), and
-             post-award continued operation plan.",
-            "special_requirements": "Up to 20 pages. Must include all
-             specified subsections listed in Section V.A.",
-            "mandated_sections": null
-
-          CORRECT (every mandated section enumerated by name):
-
-            "name": "Project Description",
-            "description": "Narrative describing the proposed PCL Node
-             and its role in the Test Bed.",
-            "special_requirements": "Up to 20 pages. Proposal title must
-             begin with 'PCL-Test Bed:'.",
-            "mandated_sections": [
-              {"name": "Science drivers", "requirements": "Science
-               drivers that will drive development of the Node;
-               well-identified users/user communities; how the Node's
-               capabilities transform the science areas; impact on U.S.
-               competitiveness in science and/or national security.",
-               "subsections": null},
-              {"name": "Node capabilities", "requirements": "What makes
-               the Node capable, unique, and/or comprehensive in
-               supporting the identified science drivers, and how that
-               benefits users.", "subsections": [
-                {"name": "Instrument Inventory Table", "requirements":
-                 "Separate document, NOT counted in the 20-page Project
-                 Description limit. For each instrument: type and
-                 description (with total number of such instruments),
-                 relevance to the science driver(s) with example
-                 workflows/experiments/protocols, and available time
-                 (duty cycle / active instrument time, e.g. hours per
-                 day)."},
-                {"name": "Node Expertise", "requirements": "Team and
-                 corresponding expertise available at the Node to
-                 facilitate the science driver(s) and handle data and AI
-                 issues."},
-                {"name": "Node Partnerships", "requirements": "External
-                 partnerships the Node plans to establish; may be
-                 illustrated via Letters of Collaboration (Letters of
-                 Support are not permitted)."},
-                {"name": "Node Access control, user organization and
-                 recruitment plan, and research security",
-                 "requirements": "Recruiting, organizing, and vetting
-                 users; access controls for safe and secure facility
-                 use; research security issues and how they will be
-                 addressed; balancing access time across user groups."},
-                {"name": "Data and AI capabilities and expertise",
-                 "requirements": "How the proposers will support the
-                 Node's data management and AI needs; a strong proposal
-                 contains a co-PI with extensive data and AI
-                 expertise."}]},
-              {"name": "Cross-Node Collaborations", "requirements":
-               "Time, effort, and corresponding budget set aside for
-               collaboration across the Test Bed (data/metadata
-               standards, data sharing, AI model development and use,
-               sharing of training data and models).",
-               "subsections": null},
-              {"name": "Training and education", "requirements": "Plans
-               for providing users access to relevant expertise,
-               consultation, and training; education and training in the
-               science areas, test-bed technologies, and AI strategies
-               for automated science and cloud labs.",
-               "subsections": null},
-              {"name": "Broadening access", "requirements":
-               "Participation in the Recruitment and On-Boarding
-               Workshops plus other plans for reaching new users/user
-               communities and raising awareness of the Test Bed.",
-               "subsections": null},
-              {"name": "Metrics", "requirements": "Metrics for
-               evaluating success of the Test Bed and the Node's ability
-               to efficiently run its instruments; plan for collecting
-               user-satisfaction data and responding to user requests.",
-               "subsections": null},
-              {"name": "Management Plan", "requirements": "Specific
-               roles and responsibilities of the PI, co-PIs, Senior
-               Personnel, staff, and paid consultants; time and effort
-               for coordination meetings and cross-project
-               collaboration.", "subsections": [
-                {"name": "Implementation Timeline", "requirements":
-                 "Timeline and description of activities with at least
-                 these milestones: Project Kickoff (award start); Alpha
-                 release to users (no later than 1 year); Beta (no later
-                 than 1.5 years, end-to-end workflows complete); Robust
-                 User Service (no later than 2 years, ready for new
-                 'friendly' users); Test Bed 2.0 (on-boarding new users
-                 from the Year-2 Recruitment Workshops, incl. training
-                 and education materials); Project end (end of Year 4,
-                 deployment plan for post-award sustained
-                 operation)."}]},
-              {"name": "Plan for Post-Award Continued Operation",
-               "requirements": "Plan for operation of the facility after
-               the current award; financial viability after conclusion
-               of NSF and other federal funding is a key evaluation
-               criterion.", "subsections": null}]
-
           ## Formatting precedence (fills formatting_requirements)
 
-          If the announcement gives SPECIFIC formatting / document-
-          preparation instructions (fonts, margins, spacing, page size,
-          file naming), use THOSE verbatim. If the announcement is SILENT
-          on formatting, populate formatting_requirements from the
-          sponsor-standard formatting below and prefix it exactly with
-          "Sponsor default (<SPONSOR>):" so the reviewer knows it was not
-          stated in this announcement. If the announcement gives some
-          rules but not others, combine: stated rules first, then note
-          the sponsor default fills the rest. For a non-backbone sponsor
-          with no stated formatting, set formatting_requirements to null.
+          If the announcement gives SPECIFIC formatting instructions, use
+          those verbatim. If it is silent, populate from the sponsor
+          default below prefixed exactly with "Sponsor default
+          (<SPONSOR>):". If it gives some rules but not others, combine:
+          stated rules first, then note the sponsor default fills the
+          rest. Non-backbone sponsor with no stated formatting → null.
 
           ### Backbone — sponsor-standard formatting
 
@@ -1168,112 +1029,164 @@ steps:
 
           ## Fields to emit
 
-          - required_components: JSON array of {name, description,
-            special_requirements, mandated_sections, source} objects
-            (backbone-merged per the rules above). MUST be non-empty.
-            - name: Component name (backbone or announcement wording).
-              Required.
-            - description: What the component must contain. Use the
-              announcement's terms when it describes the component.
-              Required for components whose source contains
-              "Announcement"; OMITTED for pure "Sponsor standard"
-              backbone stubs (see the Output compactness rules — a
-              stub is {name, source} only).
-            - special_requirements: Page limits, font/margin rules,
-              template requirements, or naming conventions specific to
-              THIS component (not document-wide formatting). null when
-              none. NEVER a pointer like "must include all subsections
-              listed in Section V.A" — enumerated structure belongs in
-              mandated_sections.
-            - mandated_sections: null, or an array of {name,
-              requirements, subsections} objects capturing internal
-              sections THIS announcement mandates for the component, per
-              the "Announcement-mandated internal structure" rules
-              above. subsections: null, or an array of {name,
-              requirements} objects.
-            - source: "Announcement" | "Sponsor standard" | "Announcement
-              + sponsor standard", per the rules above. Required.
-          - optional_components: Same item shape as required_components
-            (including source); empty array when none. Backbone "(if
-            applicable)" items and Subaward Documents go here.
-          - submission_details: A single coherent paragraph covering
-            submission method / portal, technical and file-format
-            requirements, file-naming conventions, and collaboration
-            rules. NAME the specific submission system when the
-            announcement states it (e.g., Grants.gov, Research.gov, eRA
-            Commons, JustGrants, NSPIRES, ProposalCentral, or the named
-            agency portal); do not guess a portal the document does not
-            name. null only when the announcement contains no submission
-            guidance at all.
-          - special_requirements: JSON array of strings — unique RFA
-            aspects that do not fit into any other section (conference
-            travel obligations, data-sharing commitments beyond federal
-            defaults, workshop participation). Empty array when none.
-          - formatting_requirements: STRING (single natural-language
-            paragraph) filled per the formatting-precedence rule above.
-            Prefix with "Sponsor default (<SPONSOR>):" when populated from
-            the backbone rather than stated in the announcement. null when
-            neither the announcement nor a backbone provides formatting.
+          - required_components: array of {name, description,
+            special_requirements, source} (backbone-merged). MUST be
+            non-empty. description uses the announcement's terms;
+            special_requirements is null when none, and NEVER a pointer to
+            an announcement section.
+          - optional_components: same shape; empty array when none.
+            Backbone "(if applicable)" items and Subaward Documents live
+            here.
+          - submission_details: one coherent paragraph — submission
+            method/portal (NAME the system the announcement states, e.g.
+            Grants.gov, Research.gov, eRA Commons, JustGrants, NSPIRES,
+            ProposalCentral; never guess), file formats, naming,
+            collaboration rules. null only if no submission guidance at
+            all.
+          - special_requirements: array of strings — unique RFA aspects
+            that fit no other section (conference travel obligations,
+            data-sharing beyond federal defaults, workshop participation).
+            Empty array when none.
+          - formatting_requirements: string per the precedence rule above,
+            or null.
 
           ## Output compactness (CRITICAL)
 
           Your output feeds a downstream consolidation step and is never
-          read by a human. The runtime enforces a hard output-token cap on
-          this task — a verbose fragment gets cut off mid-string, which
-          destroys every field after the cut. Therefore:
+          read by a human. The runtime enforces a hard output-token cap —
+          a verbose fragment gets cut off mid-string, destroying every
+          field after the cut. Therefore:
 
           - Emit MINIFIED JSON: one single line, no indentation, no
             newlines inside the JSON, no spaces after `:` or `,`.
           - Minify the SYNTAX only — do NOT shorten, summarize, or drop
-            content values. Every fact the schema asks for is still
-            required, stated fully ("Up to $5M/year for 4 years, total not
-            to exceed $20M" must NOT become "$20M total").
-          - Any JSON examples shown in this prompt are indented for
-            readability only — YOUR output must be minified.
-
-          Additional output-budget rules for THIS task (it emits the
-          largest fragment in the workflow and is the first to hit the
-          cap):
-
+            content values.
           - Emit the five keys in this order: submission_details,
             formatting_requirements, special_requirements,
-            required_components, optional_components — the cheap scalar
-            fields first, so they survive if the cap is hit mid-output.
-          - Within required_components, list components whose `source`
-            contains "Announcement" FIRST (they carry the
-            announcement-unique content, including mandated_sections),
-            then the "Sponsor standard" backbone components.
+            required_components, optional_components — cheap scalar fields
+            first so they survive if the cap is hit.
+          - Within required_components, list "Announcement"-sourced
+            components FIRST, then the backbone.
           - BACKBONE STUBS: for a pure "Sponsor standard" component emit
             ONLY {"name":"...","source":"Sponsor standard"} — omit
-            description, special_requirements, and mandated_sections
-            entirely. The consolidation renders standard components from
-            the name alone. A stub costs ~60 characters, so there is NO
-            output-budget reason to drop the backbone.
-          - NEVER drop the backbone. Emitting only the announcement-named
-            components with the backbone missing is an extraction failure.
-            WRONG: "required_components":[{"name":"Project Description",
-            ...}] and nothing else (10 standard components missing).
-            CORRECT: "required_components":[{"name":"Project Description",
-            ...},{"name":"Project Summary","source":"Sponsor standard"},
-            {"name":"References Cited","source":"Sponsor standard"},...]
-            — every backbone item present as a stub.
-          - OMIT any component-object key whose value would be null — the
-            consolidation treats a missing key as null. Never omit name
-            or source.
-          - Keep each mandated_sections `requirements` string tight (aim
-            for 30 words or fewer) while still enumerating EVERY named
-            sub-part, table column, and milestone — compress the wording,
-            never drop a list item. Milestone lists may use compact forms
-            like "Alpha release ≤1 yr".
+            description and special_requirements. A stub costs ~60
+            characters, so there is NO output-budget reason to drop the
+            backbone. Emitting only the announcement-named components with
+            the backbone missing is an extraction failure — every backbone
+            item must be present as a stub.
+          - OMIT any component key whose value would be null. Never omit
+            name or source.
 
           ## Output
 
-          Emit exactly one JSON object with these five keys. No preamble,
-          no markdown fences.
+          Emit exactly one JSON object with these five keys. Begin your
+          reply with the character `{` and emit NOTHING except the single
+          minified JSON object — no preamble, no questions, no offers to
+          help, no commentary, no markdown fences.
 
-          Begin your reply with the character `{` and emit NOTHING except
-          the single minified JSON object — no preamble, no questions, no
-          offers to help, no commentary, no markdown fences.
+      - name: extract-mandated-structure
+        input_sources:
+          - workflow_documents
+        prompt_inline: |
+          You are extracting the ANNOUNCEMENT-MANDATED INTERNAL STRUCTURE
+          of proposal components from a federal funding announcement. You
+          receive the full uploaded document.
+
+          Announcements frequently prescribe named sections that must
+          appear INSIDE a single proposal component — most often the
+          Project Description / Project Narrative. Trigger language looks
+          like: "All proposals should clearly include sections for each of
+          the following aspects:", "The Project Description must contain
+          the following sections", or a solicitation-specific supplement
+          to the sponsor's proposal guide (e.g., NSF's "The following
+          information supplements the guidelines and requirements in the
+          NSF PAPPG"). These enumerations are decision-critical: a
+          proposal missing a mandated section can be returned without
+          review, and the checklist reader does NOT have the announcement
+          open.
+
+          ## Rules
+
+          1. For each component whose internal structure the announcement
+             prescribes, emit one entry: {"component": "<component
+             name>", "mandated_sections": [...]} — one mandated_sections
+             item per mandated section, in the announcement's order,
+             section names verbatim.
+          2. Each mandated_sections item is {name, requirements,
+             subsections}. requirements: what the section must contain,
+             in the announcement's terms, 30 words or fewer — compress
+             the wording, never drop a named item.
+          3. When a mandated section itself has enumerated sub-parts
+             (numbered sub-sections, a required table with named columns,
+             a milestone list), capture EACH sub-part in that entry's
+             `subsections` array ({name, requirements}); enumerate
+             required table columns and named milestones fully (compact
+             forms fine: "Alpha release ≤1 yr"). Omit `subsections` when
+             there are none.
+          4. NEVER compress an enumeration into a pointer such as "must
+             include all subsections listed in Section V.A". A pointer in
+             place of the enumerated list is an extraction failure.
+          5. Only structure THIS announcement prescribes. Do NOT invent
+             structure from the sponsor's standard proposal guide. If no
+             component has announcement-mandated structure, emit
+             {"mandated_structure":[]}.
+
+          ## Worked example
+
+          An NSF solicitation states "All PCL Node proposals should
+          clearly include sections for each of the following aspects:"
+          followed by named sections.
+
+          WRONG (pointer prose, structure lost): a components entry whose
+          special_requirements says "Must include all specified
+          subsections listed in Section V.A" and no structure emitted.
+
+          CORRECT (abbreviated here — emit EVERY section the announcement
+          names, in order):
+
+          {"mandated_structure":[{"component":"Project Description",
+          "mandated_sections":[
+          {"name":"Science drivers","requirements":"Science drivers
+          driving Node development; identified users/communities; how
+          capabilities transform the science; impact on U.S.
+          competitiveness/security."},
+          {"name":"Node capabilities","requirements":"What makes the Node
+          capable/unique in supporting the science drivers.",
+          "subsections":[
+          {"name":"Instrument Inventory Table","requirements":"Separate
+          document, NOT in the 20-page limit; per instrument: type/
+          description + count; relevance with example workflows;
+          available time (duty cycle, hours/day)."},
+          {"name":"Node Expertise","requirements":"Team and expertise for
+          science drivers and data/AI issues."}]},
+          {"name":"Management Plan","requirements":"Roles of PI/co-PIs/
+          staff; coordination meetings.","subsections":[
+          {"name":"Implementation Timeline","requirements":"Milestones:
+          Project Kickoff; Alpha ≤1 yr; Beta ≤1.5 yr; Robust User Service
+          ≤2 yr; Test Bed 2.0; Project end (Yr 4) deployment plan."}]}
+          ]}]}
+
+          (The example is line-wrapped for readability only — YOUR output
+          must be one single minified line, and must include every
+          mandated section, not just the three shown.)
+
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human; the runtime enforces a hard output-token cap.
+          Emit MINIFIED JSON — one single line, no indentation, no spaces
+          after `:` or `,`. Minify the syntax only, never the content:
+          every named section, sub-part, table column, and milestone must
+          appear.
+
+          ## Output
+
+          Emit exactly one JSON object with the single key
+          `mandated_structure` (array; empty array when the announcement
+          mandates no internal structure). Begin your reply with the
+          character `{` and emit NOTHING except the single minified JSON
+          object — no preamble, no questions, no offers to help, no
+          commentary, no markdown fences.
 
       - name: extract-budget-requirements
         input_sources:
@@ -1509,8 +1422,11 @@ steps:
         input_source: step_input
         prompt_inline: |
           You are the consolidation step of the RFA Checklist
-          Extraction workflow. You receive NINE JSON object fragments
-          from the previous step:
+          Extraction workflow. You receive TEN JSON object fragments
+          from the previous step. Fragments arrive as MINIFIED JSON;
+          keys may appear in any order, and an object may OMIT a key
+          whose value would be null (treat a missing key exactly as
+          null):
 
           1. Opportunity metadata (rfa_id, rfa_number, rfa_title,
              sponsor_name, program_code, announcement_url,
@@ -1528,21 +1444,20 @@ steps:
              optional_components, submission_details,
              special_requirements, formatting_requirements) — component
              objects carry a `source` field (Announcement / Sponsor
-             standard / Announcement + sponsor standard) marking backbone
-             provenance, and a `mandated_sections` field (null, or an
-             array of {name, requirements, subsections} objects
-             enumerating internal sections the announcement mandates for
-             that component; subsections is null or an array of {name,
-             requirements}). Fragments arrive as MINIFIED JSON; keys may
-             appear in any order, and a component object may OMIT a key
-             whose value would be null (treat a missing key exactly as
-             null)
+             standard / Announcement + sponsor standard) marking
+             backbone provenance. Pure "Sponsor standard" components
+             arrive as STUBS: {name, source} only
           8. Budget requirements (funding_limits, cost_sharing_status,
              cost_sharing_details, fa_policy, allowable_costs,
              unallowable_costs, personnel_effort, other_considerations)
           9. Compliance & international (compliance_risks: array of
              {area, status, detail}; international_components: array of
              {area, status, detail})
+          10. Mandated structure (mandated_structure: array of
+             {component, mandated_sections}; each mandated_sections
+             item is {name, requirements, subsections?} enumerating
+             internal sections the announcement mandates for that
+             component)
 
           Your job is to render a single, well-formatted Markdown
           checklist for the sponsored-programs analyst (the
@@ -1792,18 +1707,19 @@ steps:
           the fragment gets a table row, stub or not. (The same rule
           applies to stubs in the Optional Components table.)
 
-          For any component whose `mandated_sections` is non-null and
-          non-empty, append "**See required structure below.**" to that
-          component's Special Requirements cell.
+          For any component named in the MANDATED STRUCTURE fragment
+          (fragment 10), append "**See required structure below.**" to
+          that component's Special Requirements cell (match on
+          component name).
 
           ### Announcement-Mandated Structure
 
           Immediately after the Required Components table, render one
-          block for EVERY component (required or optional) whose
-          `mandated_sections` is non-null and non-empty. This is often
-          the most decision-critical content in the checklist — a
-          proposal missing a mandated section risks being returned
-          without review — so render it prominently and completely:
+          block for EVERY entry in fragment 10's `mandated_structure`
+          array. This is often the most decision-critical content in
+          the checklist — a proposal missing a mandated section risks
+          being returned without review — so render it prominently and
+          completely:
 
           #### 📋 Required structure: <Component Name>
 
@@ -1821,8 +1737,9 @@ steps:
           - Render EVERY entry and EVERY subsection — never summarize,
             truncate, or replace the list with a pointer to the
             announcement.
-          - If NO component carries a populated mandated_sections, omit
-            this entire block (heading included) — no empty-state line.
+          - If fragment 10's `mandated_structure` array is empty or
+            missing, omit this entire block (heading included) — no
+            empty-state line.
 
           ### Optional Components
 
@@ -1895,7 +1812,7 @@ steps:
           ## IMPORTANT NOTES
 
           Synthesize 0–3 critical warnings or pitfalls a reviewer would
-          otherwise miss. Pull from across the eight fragments — not
+          otherwise miss. Pull from across the ten fragments — not
           from the document directly. **Do NOT restate financial rules
           here** (cost-share / matching, F&A / indirect, funding limits,
           allowable costs) — those live ONLY in Budget Requirements &

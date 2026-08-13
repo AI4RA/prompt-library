@@ -295,6 +295,42 @@ itself caused two regressions:
   (announcement + backbone stubs), and the deliverable reaches
   its final line without truncation.
 
+#### v1.2.0 → v2.0.0 (2026-08-13)
+
+**Bug surfaced**: importing/running v1.2.0 failed with "Model
+token limit (8192) exceeded before any response was generated" —
+no output at all. Arithmetic identified the culprit:
+extract-application-components had accreted to ~20.8K chars
+(~5.2K tokens) of prompt across the v0.8→v1.2 fix iterations;
+prompt + attached document slice + reserved output budget
+exceeded the extraction model's total 8192-token window, so the
+call was rejected upfront. The consolidation is NOT affected —
+it consumed ~7.5K input tokens and produced ~2.6K output tokens
+in runs 3–4, so it runs on a larger-context assignment.
+
+**Changes** (MAJOR — parallel tasks 9 → 10):
+- New task extract-mandated-structure owns the
+  announcement-mandated internal structure extraction
+  ({mandated_structure:[{component, mandated_sections}]}, empty
+  array when none) with the v0.8.0 enumeration rules + pointer
+  ban + a compact worked example (~4.5K chars).
+- extract-application-components rewritten without the
+  mandated-sections content: backbone merge + stubs +
+  compactness only, 20.8K → 9.5K chars (~2.4K tokens).
+- Consolidation reads TEN fragments; the Required-structure
+  block + table pointer source from fragment 10 (matched on
+  component name).
+- Deliverable and validation_plan unchanged.
+- Lesson recorded: with an 8192-token extraction model, keep
+  every extraction prompt ≤ ~2.5K tokens (~10K chars) — the
+  document slice + output reservation consume the rest. Check
+  prompt sizes BEFORE import when iterating.
+- Re-test pending: same NSF 25-541 checklist as v1.2.0 (real
+  red flags, 11-row components table, full award amount, clean
+  ending) plus: mandated-structure fragment populates with all
+  ten sections and the components fragment carries the backbone
+  stubs.
+
 ### `workflows/foa-checklist-extraction`
 
 **Status**: ⚠️ v0.3.0 import-ready but not yet re-tested by user.
