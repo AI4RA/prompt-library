@@ -2,11 +2,13 @@
 
 Uploads a proposal budget document (NSF-style budget tables / NIH PHS 398 / agency budget form) and returns a single structured JSON object covering personnel identification (senior key, postdocs, grad students, undergraduates, other personnel) and budget structure compliance triggers (subaward recipients, equipment over $5,000, F&A rate and base, cost sharing, total costs).
 
-**Workflow version:** 0.1.0
+**Workflow version:** 1.0.0
 **Vandalizer schema version:** 2
 **Status:** experimental
 **Components manifested:** `proposal-budget-personnel-extraction-udm@0.1.0`
 **Eval posture:** workflow-local — see [`evals/`](evals/)
+
+> **v1.0.0 (KB step removed):** the optional Knowledge Base lookup step was removed (MAJOR, 3 steps → 2) — it was inert on import (Vandalizer blanks `kb_uuid`). Extraction tasks now read the uploaded documents directly. Mirrors `rfa-checklist-extraction` v1.0.0. See the [CHANGELOG](CHANGELOG.md).
 
 ## What this workflow does
 

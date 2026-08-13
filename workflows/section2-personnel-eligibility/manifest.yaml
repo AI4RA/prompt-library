@@ -1,5 +1,14 @@
 # Authored source for the Section 2 Personnel Eligibility Verification Vandalizer workflow.
 #
+# === v1.0.0 (2026-08-13): KB STEP REMOVED (MAJOR, 3 steps -> 2) ===
+# The Step 0 KnowledgeBaseQuery lookup referenced in the historical
+# topology notes below was removed -- it was inert on a fresh import
+# (Vandalizer blanks kb_uuid by design, so a KB always had to be
+# attached manually). The parallel extraction tasks now read
+# input_sources: [workflow_documents] only; consolidation is unchanged.
+# Mirrors rfa-checklist-extraction v1.0.0. KBs will be reintroduced
+# once the right approach is settled.
+#
 # The companion section2-personnel-eligibility.vandalizer.json is generated
 # from this file by scripts/build_vandalizer_workflows.py and committed
 # alongside. Never hand-edit the generated JSON — update this manifest and
@@ -29,12 +38,12 @@ description: >
   checklist. Mirrors the source ui-insight/ProcessMapping
   section2-personnel-eligibility consolidation.md conventions.
 
-workflow_version: 0.2.0
+workflow_version: 1.0.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-05-20
-updated: 2026-05-22
+updated: 2026-08-13
 
 components:
   - slug: section2-personnel-eligibility-udm
@@ -59,27 +68,10 @@ validation_plan:
     description: Verify every unique org code maps to a DGA or is flagged in the unmapped-org-codes summary.
 
 steps:
-  - name: Knowledge Base Context Lookup
-    tasks:
-      - name: kb-context-lookup
-        kind: KnowledgeBaseQuery
-        query: "APM 45.22 Principal Investigator eligibility Co-PI Senior Key Personnel VERAS Section 2.1 Section 2.2A Banner NBAJOBS Departmental Grant Administrator DGA timesheet org code job title professor research associate"
-        k: 8
-        knowledge_base_hint:
-          title: "University of Idaho Office of Sponsored Programs"
-          description: >
-            Primary KB — this KB contains the APM Section 45.22
-            eligible-titles list that drives PI / Co-PI eligibility
-            determinations. Do NOT swap. When the operator does not
-            attach a KB, every PI / Co-PI will come back as "Review
-            Required" because the workflow cannot evaluate eligibility
-            without the APM 45.22 reference.
-
   - name: Parallel Extraction (Prompt)
     tasks:
       - name: extract-section-2-personnel
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting Section 2 personnel from a VERAS proposal
@@ -114,7 +106,6 @@ steps:
 
       - name: extract-eligibility-and-dga-verification
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are performing eligibility and DGA verification. You
