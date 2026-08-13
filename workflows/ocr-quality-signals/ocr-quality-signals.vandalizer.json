@@ -6,7 +6,7 @@
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "OCR Quality Signals",
+      "name": "OCR Quality Signals v0.1.0",
       "description": "Uploads a PDF to Vandalizer and returns a machine-readable JSON record of OCR-text anomaly counts, rates, evidence examples, and a provisional review recommendation that can be correlated with downstream extraction failures. The output is diagnostic evidence, not OCR accuracy or a validated production gate.",
       "steps": [
         {

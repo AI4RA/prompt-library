@@ -6,7 +6,7 @@
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "FOA Checklist Extraction",
+      "name": "FOA Checklist Extraction v0.3.0",
       "description": "Uploads a federal funding opportunity announcement (FOA / NOFO) and returns an RA-friendly Markdown FOA reference document covering FOA Summary, Key Dates and Deadlines, Funding Information, Eligibility Requirements, Application Components and Submission Requirements, Evaluation Process and Criteria, Program Priorities and Alignment, and Special Requirements. Mirrors the source ui-insight/ProcessMapping foa-checklist-extraction conventions with H1/H2/H3 hierarchical headings and a placement contract that routes each fact to exactly one section.",
       "steps": [
         {
