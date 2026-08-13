@@ -6,6 +6,15 @@ All notable changes to this workflow. Versions follow semver adapted to workflow
 - **MINOR** — prompt body tracking a referenced component MINOR, or additive step/task options that preserve the existing operator flow.
 - **PATCH** — step or task display-name edits, description polish, non-semantic manifest cleanup.
 
+## [1.1.0] — 2026-08-13
+
+- **Output-token economy.** Two NSF 25-541 runs truncated mid-string at hard output-token caps the operator cannot raise: run 1 cut the consolidation deliverable at ~9.3K chars; run 2 (different model assignment) cut the `extract-application-components` fragment at ~4.9K chars, destroying every field after the cut (backbone components, `submission_details`, `formatting_requirements`, the final Implementation Timeline milestones).
+  - **All 9 extraction tasks** gain an "Output compactness (CRITICAL)" block: emit MINIFIED single-line JSON — fragments are mid-pipeline and never human-read; the run-2 pretty-printed fragment spent ~35% of its output budget on indentation. In-prompt JSON examples are declared "indented for readability only".
+  - **`extract-application-components`** (the largest fragment, first to hit any cap) additionally: emit cheap scalar keys first (`submission_details`, `formatting_requirements`, `special_requirements`), then `required_components` with "Announcement"-sourced components (which carry `mandated_sections`) before pure backbone rows — a future cap-hit clips low-value tail content instead of the announcement-unique payload. Omit null-valued component keys; backbone "Sponsor standard" descriptions ≤ 12 words; `mandated_sections` requirements ≤ ~30 words (compress wording, never drop an enumerated sub-part, table column, or milestone).
+  - **Consolidation**: fragment 7 spec now notes fragments arrive minified, keys may be reordered, and a missing component key means null; new salvage rule — a truncated or malformed fragment is parsed for every salvageable field and array entry, never discarded (codifies the graceful behavior observed in run 2).
+- **MINOR**: no step-structure change; prompt-behavior change alters the mid-pipeline fragment shape (minification, key order, null-key omission) that the consolidation is explicitly taught to tolerate.
+- Component pin unchanged at `rfa-checklist-extraction-udm@0.1.0`.
+
 ## [1.0.0] — 2026-08-13
 
 - **MAJOR — Knowledge Base lookup step removed** (step structure 3 → 2). The optional `KnowledgeBaseQuery` Step 0 (added in v0.4.0) is gone:

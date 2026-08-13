@@ -4,7 +4,33 @@
 # file by scripts/build_vandalizer_workflows.py and committed alongside.
 # Never hand-edit the generated JSON — update this manifest and rebuild.
 #
-# === Variant A topology (v1.0.0) ===
+# === Variant A topology (v1.1.0) ===
+#
+# v1.1.0 (2026-08-13) — OUTPUT-TOKEN ECONOMY. Surfaced by two NSF
+# 25-541 runs that truncated mid-string at hard output-token caps the
+# operator cannot raise: run 1 cut the consolidation deliverable at
+# ~9.3K chars; run 2 (different model assignment) cut the
+# extract-application-components fragment at ~4.9K chars, destroying
+# everything after the cut (backbone components, submission_details,
+# formatting_requirements, the last Implementation Timeline
+# milestones). Changes:
+#   1. All 9 extraction tasks: new "Output compactness (CRITICAL)"
+#      block — emit MINIFIED single-line JSON (fragments are
+#      mid-pipeline, never human-read; the pretty-printed run-2
+#      fragment spent ~35% of its budget on indentation).
+#   2. extract-application-components (largest fragment): emit cheap
+#      scalar keys first (submission_details, formatting_requirements,
+#      special_requirements) then required_components with
+#      "Announcement"-sourced components (carrying mandated_sections)
+#      before pure backbone rows — so a future cap-hit clips low-value
+#      tail content, not the announcement-unique payload. Omit
+#      null-valued component keys; backbone descriptions ≤12 words;
+#      mandated_sections requirements ≤~30 words (compress wording,
+#      never drop an enumerated sub-part / column / milestone).
+#   3. Consolidation: fragment 7 spec notes minified/reordered/
+#      key-omitted arrivals (missing key == null); new salvage rule —
+#      a truncated/malformed fragment is parsed for every salvageable
+#      field, never discarded.
 #
 # v1.0.0 (2026-08-13) REMOVES the optional Knowledge Base lookup step
 # (Step 0, added in v0.4.0). MAJOR: step-structure change (3 steps → 2).
@@ -179,7 +205,7 @@ description: >
   the expanded Red Flags / Contract-Review trigger set and Compliance
   Risks + Foreign Influence sections from the RA's SPA checklist.
 
-workflow_version: 1.0.0
+workflow_version: 1.1.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
@@ -319,6 +345,18 @@ steps:
             "funding_instrument_type": "Cooperative Agreement"
           }
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a pretty-printed fragment can get cut off mid-string,
+          which destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
       - name: extract-risk-flags
         input_sources:
           - workflow_documents
@@ -449,6 +487,18 @@ steps:
             ]
           }
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a pretty-printed fragment can get cut off mid-string,
+          which destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
       - name: extract-dates-and-deadlines
         input_sources:
           - workflow_documents
@@ -516,6 +566,18 @@ steps:
             ]
           }
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a pretty-printed fragment can get cut off mid-string,
+          which destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
       - name: extract-eligible-institutions
         input_sources:
           - workflow_documents
@@ -582,6 +644,18 @@ steps:
           entry with type "Not specified in this document". No
           preamble, no markdown fences.
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a pretty-printed fragment can get cut off mid-string,
+          which destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
       - name: extract-eligible-individuals
         input_sources:
           - workflow_documents
@@ -645,6 +719,18 @@ steps:
           with type "Not specified in this document". No preamble, no
           markdown fences.
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a pretty-printed fragment can get cut off mid-string,
+          which destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
       - name: extract-award-information
         input_sources:
           - workflow_documents
@@ -689,6 +775,18 @@ steps:
 
           Emit exactly one JSON object with these four keys. No
           preamble, no markdown fences.
+
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a pretty-printed fragment can get cut off mid-string,
+          which destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
 
       - name: extract-application-components
         input_sources:
@@ -1046,6 +1144,43 @@ steps:
           Emit exactly one JSON object with these five keys. No preamble,
           no markdown fences.
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a pretty-printed fragment can get cut off mid-string,
+          which destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
+          Additional output-budget rules for THIS task (it emits the
+          largest fragment in the workflow and is the first to hit the
+          cap):
+
+          - Emit the five keys in this order: submission_details,
+            formatting_requirements, special_requirements,
+            required_components, optional_components — the cheap scalar
+            fields first, so they survive if the cap is hit mid-output.
+          - Within required_components, list components whose `source`
+            contains "Announcement" FIRST (they carry the
+            announcement-unique content, including mandated_sections),
+            then the pure "Sponsor standard" backbone components.
+          - OMIT any component-object key whose value would be null
+            (special_requirements, mandated_sections) — the consolidation
+            treats a missing key as null. Never omit name, description,
+            or source.
+          - Keep pure backbone "Sponsor standard" component descriptions
+            to 12 words or fewer — reviewers know these standard items;
+            spend the output budget on announcement-specific content.
+          - Keep each mandated_sections `requirements` string tight (aim
+            for 30 words or fewer) while still enumerating EVERY named
+            sub-part, table column, and milestone — compress the wording,
+            never drop a list item. Milestone lists may use compact forms
+            like "Alpha release ≤1 yr".
+
       - name: extract-budget-requirements
         input_sources:
           - workflow_documents
@@ -1146,6 +1281,18 @@ steps:
           Emit exactly one JSON object with these eight keys. No
           preamble, no markdown fences.
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a pretty-printed fragment can get cut off mid-string,
+          which destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
       - name: extract-compliance-flags
         input_sources:
           - workflow_documents
@@ -1232,6 +1379,18 @@ steps:
             ]
           }
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a pretty-printed fragment can get cut off mid-string,
+          which destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
   - name: Consolidation (Markdown deliverable)
     is_output: true
     tasks:
@@ -1264,7 +1423,10 @@ steps:
              array of {name, requirements, subsections} objects
              enumerating internal sections the announcement mandates for
              that component; subsections is null or an array of {name,
-             requirements})
+             requirements}). Fragments arrive as MINIFIED JSON; keys may
+             appear in any order, and a component object may OMIT a key
+             whose value would be null (treat a missing key exactly as
+             null)
           8. Budget requirements (funding_limits, cost_sharing_status,
              cost_sharing_details, fa_policy, allowable_costs,
              unallowable_costs, personnel_effort, other_considerations)
@@ -1288,6 +1450,11 @@ steps:
           contain the required information." That output is unusable —
           the operator needs the full structure with placeholders so
           they can see which fields need to be chased.
+
+          If a fragment arrives as truncated or malformed JSON (cut
+          off mid-string by an upstream output cap), do NOT discard
+          it — salvage every field and array entry that parses, and
+          treat everything after the cut as missing.
 
           Substitution rules when a field is null or missing:
           - Required scalar fields: substitute the literal string

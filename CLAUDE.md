@@ -204,6 +204,50 @@ KnowledgeBaseQuery step manually post-import, per the README's
 Recommended knowledge bases section. The pending v0.8.0 NSF 25-541
 re-test should be run against this v1.0.0 JSON instead.
 
+#### v1.0.0 → v1.1.0 (2026-08-13)
+
+**Test input**: NSF 25-541 (PCL Test Bed) solicitation PDF, two
+in-Vandalizer runs of the v1.0.0-equivalent workflow.
+
+**Bug surfaced**: hard output-token caps in Vandalizer (operator
+cannot raise them) truncated LLM output mid-string in both runs,
+at different pipeline stages depending on model assignment:
+- Run 1: extraction complete (~11K-char components fragment), but
+  the consolidation deliverable cut at ~9.3K chars — mid-sentence
+  inside the Required-structure block; everything downstream
+  (mandated sections 3–8, Optional Components, Formatting,
+  Compliance, Foreign Influence, Special Requirements, Important
+  Notes) missing.
+- Run 2 (user changed model assignment): consolidation completed,
+  but the extract-application-components fragment itself cut at
+  ~4.9K chars mid-way through the Implementation Timeline string —
+  unparseable JSON; the deliverable lost the backbone components
+  (1-row Required Components table), submission_details,
+  formatting_requirements, and the last two milestones. The
+  consolidation LLM salvaged the parseable prefix gracefully.
+  Separate model-quality note: run 2's model found BABA + CHIPS
+  §10636 CRU triggers (better than run 1) but returned empty
+  allowable_costs (worse than run 1).
+
+**Changes** (output-token economy, since caps are not adjustable):
+- All 9 extraction tasks: "Output compactness (CRITICAL)" block —
+  minified single-line JSON (run-2's pretty-printed fragment spent
+  ~35% of its budget on indentation); in-prompt examples flagged
+  as indented-for-readability-only.
+- extract-application-components: scalar keys emitted first, then
+  Announcement-sourced components (with mandated_sections) before
+  backbone rows, so any future cap-hit clips low-value tail
+  content; null component keys omitted; backbone descriptions
+  ≤12 words; mandated_sections requirements ≤~30 words with the
+  hard rule "compress wording, never drop an enumerated item".
+- Consolidation: told fragments arrive minified / reordered /
+  null-keys-omitted, and to salvage truncated or malformed
+  fragments field-by-field rather than discarding.
+- Re-test pending: re-import v1.1.0, re-run NSF 25-541 under the
+  run-2 model assignment; verify the components fragment parses,
+  the Required Components table has all backbone rows, and all
+  six Implementation Timeline milestones survive.
+
 ### `workflows/foa-checklist-extraction`
 
 **Status**: ⚠️ v0.3.0 import-ready but not yet re-tested by user.
