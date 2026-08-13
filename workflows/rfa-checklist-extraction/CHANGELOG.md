@@ -6,6 +6,11 @@ All notable changes to this workflow. Versions follow semver adapted to workflow
 - **MINOR** — prompt body tracking a referenced component MINOR, or additive step/task options that preserve the existing operator flow.
 - **PATCH** — step or task display-name edits, description polish, non-semantic manifest cleanup.
 
+## [2.0.1] — 2026-08-13
+
+- **JSON quote-escaping rule.** First fully clean end-to-end v2.0.0 run (NSF 22-603 Mid-Career Advancement, new test document, after the operator raised model token limits): all ten tasks emitted minified JSON, backbone stubs and the mandated-structure fragment worked, the deliverable rendered completely with correct red flags and placement-contract enforcement. One residual defect: `extract-mandated-structure` quoted announcement text with unescaped double quotes (`mutual benefits/"added value" of collaboration`), invalidating its fragment's JSON — the consolidation's salvage rule recovered every section, so the deliverable was unaffected, but the fragment should parse. All ten extraction prompts now carry an explicit rule: escape `"` as `\"` inside JSON string values, or rephrase with single quotes.
+- **PATCH**: prompt clarification only; no structure, schema, or rendering change.
+
 ## [2.0.0] — 2026-08-13
 
 - **MAJOR — task split for the 8192-token model context** (parallel task count 9 → 10, fragment count 9 → 10). Importing v1.2.0 failed with *"Model token limit (8192) exceeded before any response was generated"*: `extract-application-components` had accreted to ~20.8K chars (~5.2K tokens) of prompt across three fix iterations, which plus the attached document slice and reserved output budget exceeded the assigned model's total 8192-token window — the call was rejected before generating anything. (The consolidation is unaffected: it demonstrably consumed ~7.5K input tokens and produced ~2.6K output tokens in earlier runs, so it runs on a larger-context assignment.)
