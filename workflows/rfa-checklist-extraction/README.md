@@ -1,33 +1,46 @@
 # RFA Checklist Extraction
 
-Uploads a federal funding announcement (RFA / FOA / NOFO / program solicitation) and returns a single **RA-friendly Markdown checklist** organized in the eight pre-award sections a sponsored-programs analyst uses when triaging an opportunity: Dates & Deadlines, Eligibility, Award Information, Application Components, Budget Requirements & Policies, Submission Details, Special Requirements, and Important Notes.
+Uploads a federal funding announcement (RFA / FOA / NOFO / program solicitation) and returns a single **RA-friendly Markdown checklist** organized in the pre-award sections a sponsored-programs analyst uses when triaging an opportunity, led by a **Red Flags** banner that surfaces escalation triggers first: Red Flags, Dates & Deadlines, Eligibility, Award Information, Budget Requirements & Policies, Submission Details, Application Components, Special Requirements, and Important Notes.
 
-**Workflow version:** 0.3.0
+**Workflow version:** 0.7.0
 **Vandalizer schema version:** 2
 **Status:** experimental
 **Components manifested:** `rfa-checklist-extraction-udm@0.1.0`
 **Eval posture:** workflow-local — see [`evals/`](evals/)
-**Output contract:** RA-friendly Markdown checklist (8 sections, placement-rule de-duplication)
+**Output contract:** RA-friendly Markdown checklist (11 sections, Red-Flags-led, sponsor-backbone-merged components, placement-rule de-duplication)
 
 ## What this workflow does
 
-The operator uploads a funding announcement (PDF) into Vandalizer. The workflow runs as two steps:
+The operator uploads a funding announcement (PDF) into Vandalizer. The workflow runs as three steps (an optional Knowledge Base lookup, parallel extraction, and consolidation):
 
-**Step 1 — Parallel Extraction (7 Prompt tasks):** each task receives the full uploaded document via `input_source: workflow_documents` and emits a **JSON fragment** for its block. (This is the Variant A handoff format. The side-by-side `rfa-checklist-extraction-md` workflow tests an alternative where each task emits a Markdown chunk instead.)
+**Step 1 — Parallel Extraction (9 Prompt tasks):** each task receives the full uploaded document via `input_sources: [step_input, workflow_documents]` and emits a **JSON fragment** for its block. (This is the Variant A handoff format. The side-by-side `rfa-checklist-extraction-md` workflow tests an alternative where each task emits a Markdown chunk instead.) Every task carries explicit anti-hallucination guards — ground each value in the document, use "unclear"/null rather than guessing, never infer a typical federal value.
 
 | Task | Block produced |
 |---|---|
-| `extract-opportunity-metadata` | Scalar fields: rfa_id, rfa_number, rfa_title, sponsor_name, program_code, announcement_url, opportunity_number, cfda_number |
-| `extract-dates-and-deadlines` | Chronological array of `{item, date_time, notes}` |
-| `extract-eligible-institutions` | Array of `{type, subcategory, examples, compliance_requirements}` |
-| `extract-eligible-individuals` | Array of `{type, criteria, compliance_requirements, conditions}` |
+| `extract-opportunity-metadata` | Scalar fields: rfa_id, rfa_number, rfa_title, sponsor_name, program_code, announcement_url, opportunity_number, cfda_number, **funding_instrument_type** |
+| `extract-risk-flags` | `{risk_flags: [{check, category, status, detail}]}` — **expanded** to 5 escalation flags + the Contract-Review-Unit trigger set (indemnification, IP/data ownership, publication restrictions, insurance, NDA, FAR/contract terms, governing law of another state, acceptance of T&C on submission, restricted country / foreign ownership, JPL/INL, CUI/classified); `category` = escalation \| cru |
+| `extract-dates-and-deadlines` | Chronological array of `{item, date_time, notes}` — resolves recurring/relative deadline rules to concrete dates, rule text kept in `notes` |
+| `extract-eligible-institutions` | Array of `{type, subcategory, examples, compliance_requirements}` — incl. institution-level limited-submission caps, required certifications, **subrecipient eligibility** |
+| `extract-eligible-individuals` | Array of `{type, criteria, compliance_requirements, conditions}` — incl. per-individual submission caps + **limited-submission mechanics/nomination**, citizenship, career stage, required credentials |
 | `extract-award-information` | `{award_duration, amount_per_award, number_of_awards, anticipated_award_date}` |
-| `extract-application-components` | `{required_components, optional_components, submission_details, special_requirements}` |
-| `extract-budget-requirements` | `{funding_limits, cost_sharing_status, cost_sharing_details, fa_policy, allowable_costs, unallowable_costs, personnel_effort, other_considerations}` |
+| `extract-application-components` | `{required_components, optional_components, submission_details, special_requirements, formatting_requirements}` — **sponsor-backbone-merged** (NSF/NIH/USDA-NIFA/DOE/NASA); each component carries a `source`; `submission_details` names the specific portal; `formatting_requirements` uses the announcement's rules if stated, else the sponsor default |
+| `extract-budget-requirements` | `{funding_limits, cost_sharing_status, cost_sharing_details, fa_policy, allowable_costs, unallowable_costs, personnel_effort, other_considerations}` — explicitly hunts salary/tuition/equipment/participant/travel/food/incentive/publication rules |
+| `extract-compliance-flags` | `{compliance_risks: [{area, status, detail}], international_components: [{area, status, detail}]}` — human subjects, animals, biosafety, export control, select agents, CUI, data security, national security; foreign collaborators/subawards/travel, talent-program certs, international data sharing, country restrictions |
 
-**Step 2 — Consolidation (1 Prompt task, Markdown deliverable):** `rfa-checklist-consolidation` parses the seven JSON fragments and renders a single Markdown document with the eight sections in canonical order, enforcing the placement contract (award amount only in AWARD INFORMATION; detailed financial rules only in BUDGET REQUIREMENTS & POLICIES; per-component formatting rules on the individual component, not in SPECIAL REQUIREMENTS; submission mechanics only in SUBMISSION DETAILS) and synthesizing an IMPORTANT NOTES section from cross-fragment signals.
+**Step 2 — Consolidation (1 Prompt task, Markdown deliverable):** `rfa-checklist-consolidation` parses the nine JSON fragments and renders a single Markdown document with the eleven sections in canonical order (Red Flags first), enforcing the placement contract (award amount only in AWARD INFORMATION; detailed financial rules only in BUDGET REQUIREMENTS & POLICIES; per-component formatting rules on the individual component, not in SPECIAL REQUIREMENTS; submission mechanics only in SUBMISSION DETAILS — with the Red Flags banner allowed to carry short *pointers* to those triggers) and synthesizing an IMPORTANT NOTES section from cross-fragment signals. When any CRU trigger fires, Red Flags adds the "route to the Contract Review Unit via VERAS" action.
 
-The runtime mirrors the source `ui-insight/ProcessMapping/workflows/rfa-checklist-extraction/` workflow's eight-section consolidated checklist conventions exactly.
+The runtime extends the source `ui-insight/ProcessMapping/workflows/rfa-checklist-extraction/` workflow's consolidated checklist conventions with the 2026-08 pre-award RA feedback (Red Flags banner + expanded Contract-Review trigger set, section reorder, recurring date resolution, richer eligibility, sponsor backbone, Compliance Risks + Foreign Influence sections).
+
+## Sponsor backbone (v0.6.0)
+
+Federal sponsors often omit standardized required components from an individual announcement (they live in the sponsor's proposal guide, e.g., the NSF PAPPG). The `extract-application-components` task carries a **baked-in reference** of each sponsor's standard required components and standard formatting for **NSF, NIH, USDA-NIFA, DOE, and NASA**, sourced from the RA-provided `Required document components and formatting NSF_NIH_USDA_NIFA_DOE_NASA.pdf`. At runtime it:
+
+- **detects the sponsor** from the document and **merges** the standard components into the output even when the announcement does not list them — no operator action, no second upload;
+- tags every component with a **`source`** (Announcement / Sponsor standard / Announcement + sponsor standard) so the reviewer can verify provenance and see where the RFA modifies a standard component;
+- fills **`formatting_requirements`** by precedence: the announcement's stated formatting if present, otherwise the sponsor default (prefixed `Sponsor default (<SPONSOR>):`);
+- applies **no backbone to non-federal sponsors** (state agencies, foundations) — those reflect only what the announcement states.
+
+Some backbone items are University-of-Idaho-specific (e.g., the AOR-signed Letter of Commitment / FDP-list / UI subrecipient Commitment form language), carried verbatim from the reference PDF.
 
 ## Architecture context
 
@@ -40,7 +53,7 @@ The two outputs serve different consumers without doubling maintenance.
 
 ## Components
 
-- [`rfa-checklist-extraction-udm@0.1.0`](../../components/rfa-checklist-extraction-udm/) — the sole component. The component itself emits JSON for evaluation; this workflow's seven Extraction tasks carry focused `prompt_inline` bodies in [`manifest.yaml`](manifest.yaml) that emit JSON fragments for clean step-input handoff, and the Consolidation step renders the final Markdown.
+- [`rfa-checklist-extraction-udm@0.1.0`](../../components/rfa-checklist-extraction-udm/) — the sole component. The component itself emits JSON for evaluation; this workflow's eight parallel Prompt tasks carry focused `prompt_inline` bodies in [`manifest.yaml`](manifest.yaml) that emit JSON fragments for clean step-input handoff, and the Consolidation step renders the final Markdown. **Note (v0.5.0):** the workflow prompts have moved ahead of the component (Red Flags task, recurring-date resolution, richer eligibility); the component `prompt.md` / `schema.json` are a pending sync — see CHANGELOG.
 
 ## A/B test sibling
 
@@ -52,16 +65,18 @@ Carried into the Vandalizer export at the workflow level (re-targeted for the Ma
 
 | Check | Type | Severity |
 |---|---|---|
-| `CHK-01` Eight sections present | completeness | error |
-| `CHK-02` Placement contract enforcement | consistency | warning |
+| `CHK-01` Eleven sections present | completeness | error |
+| `CHK-02` Placement contract enforcement (incl. Red-Flags pointer exception) | consistency | warning |
 | `CHK-03` Monetary amount preservation | format | error |
 | `CHK-04` Eligibility completeness | completeness | warning |
+| `CHK-05` Red Flags section grounded (escalation + CRU triggers; VERAS action) | accuracy | warning |
+| `CHK-06` Compliance & International sections grounded | accuracy | warning |
 
 ## Eval posture
 
 Workflow-local — see [`evals/`](evals/). The workflow's deliverable is Markdown, so workflow-local cases use `expected.md` rather than `expected.json`. The component-level evals at [`components/rfa-checklist-extraction-udm/evals/`](../../components/rfa-checklist-extraction-udm/evals/) remain the JSON-against-schema test for the harness.
 
-Workflow-local cases should target the eight-section presence, the placement contract enforcement during consolidation (any cost-sharing inadvertently mentioned by extract-award-information should be moved to BUDGET REQUIREMENTS & POLICIES; per-component formatting in SPECIAL REQUIREMENTS should be moved onto the matching component row), monetary preservation, and IMPORTANT NOTES synthesis.
+Workflow-local cases should target the nine-section presence (Red Flags first), the placement contract enforcement during consolidation (any cost-sharing inadvertently mentioned by extract-award-information should be moved to BUDGET REQUIREMENTS & POLICIES; per-component formatting in SPECIAL REQUIREMENTS should be moved onto the matching component row), monetary preservation, and IMPORTANT NOTES synthesis.
 
 ## Recommended knowledge bases
 

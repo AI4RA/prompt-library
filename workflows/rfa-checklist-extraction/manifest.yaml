@@ -4,9 +4,76 @@
 # file by scripts/build_vandalizer_workflows.py and committed alongside.
 # Never hand-edit the generated JSON — update this manifest and rebuild.
 #
-# === Variant A topology (v0.4.0) ===
+# === Variant A topology (v0.7.0) ===
 #
-# v0.4.0 adds an optional Knowledge Base lookup as Step 0. The parallel
+# v0.7.0 (2026-08-13) expands per the RA follow-up email's .docx
+# ("Examples of items to include in RFA"):
+#   1. RED FLAGS EXPANSION — extract-risk-flags now checks the full
+#      trigger set from the SPA checklist: 5 escalation flags PLUS the
+#      Contract Review Unit (CRU) triggers (indemnification; IP / data
+#      ownership; publication restrictions; insurance; NDA; FAR /
+#      contract-type terms; governing law of another state; acceptance of
+#      T&C on submission; restricted country / foreign ownership; foreign
+#      government or national-lab contracting (JPL/INL); CUI / classified;
+#      other unusual T&C). Each check is tagged category "escalation" or
+#      "cru"; when any CRU trigger fires, the banner adds the "route to
+#      Contract Review Unit via VERAS" action.
+#   2. NEW extract-compliance-flags task → two new sections: COMPLIANCE
+#      RISKS (human subjects, animals, biosafety, export control, select
+#      agents, CUI, data security, national security) and FOREIGN
+#      INFLUENCE & INTERNATIONAL COMPONENTS (foreign collaborators /
+#      subawards / travel, talent-program certs, international data
+#      sharing, country restrictions).
+#   3. Field enrichments: metadata gains funding_instrument_type; budget
+#      explicitly hunts salary/tuition/equipment/participant/travel/food/
+#      incentive/publication rules; eligibility adds subrecipient
+#      eligibility + limited-submission mechanics; submission names the
+#      specific portal.
+# All new prompts carry explicit anti-hallucination guards (ground every
+# assertion in the document; "unclear" not "no" when unaddressed; never
+# infer a typical federal value). The parallel step now runs 9 tasks;
+# the deliverable has 11 sections.
+#
+# v0.6.0 (2026-08-13) added the SPONSOR BACKBONE (RA follow-up email).
+# The extract-application-components task now carries a baked-in
+# reference of each federal sponsor's (NSF / NIH / USDA-NIFA / DOE /
+# NASA) standard required proposal components + standard formatting. It
+# detects the sponsor from the document and MERGES the standard
+# components into the output even when the announcement does not list
+# them, tagging each component's provenance in a new `source` field
+# (Announcement / Sponsor standard / Announcement + sponsor standard).
+# A new `formatting_requirements` field applies the precedence rule:
+# use the announcement's stated formatting, else fall back to the
+# sponsor default (prefixed "Sponsor default (<SPONSOR>):"). Non-federal
+# sponsors (e.g., a state agency) get no backbone — output reflects only
+# what the announcement states. Consolidation renders a Source column in
+# the components tables and a Formatting Requirements subsection. No
+# topology change: still 8 parallel tasks + consolidation.
+#
+# v0.5.0 (2026-08-13) applied the first round of pre-award RA feedback:
+#   1. NEW "RED FLAGS" section at the TOP of the deliverable, fed by a
+#      new dedicated `extract-risk-flags` parallel task. It explicitly
+#      hunts the escalation triggers that make a submission
+#      higher-effort or longer-lead-time (cost share, F&A limit/waiver,
+#      institutional/executive commitment letter, limited submission,
+#      contract-review terms like indemnification/IP, AOR signature /
+#      institution-must-submit) so an RA sees them first and can start
+#      the long-pole processes early.
+#   2. Section REORDER to match how RAs triage: Red Flags -> Dates ->
+#      Eligibility -> Award Information -> Budget (moved up, now adjacent
+#      to Award) -> Submission Details (moved before Application
+#      Components) -> Application Components -> Special Requirements ->
+#      Important Notes.
+#   3. Dates task now RESOLVES recurring / relative deadline rules
+#      ("second Tuesday in September", recurring annually) to concrete
+#      calendar dates, keeping the original rule text in `notes`.
+#   4. Eligibility tasks now explicitly capture limited-submission caps
+#      (per institution and per individual), citizenship, career-stage,
+#      and required certifications / credentials.
+# The parallel step therefore now carries EIGHT Prompt tasks and the
+# Consolidation step parses EIGHT JSON fragments.
+#
+# v0.4.0 added an optional Knowledge Base lookup as Step 0. The parallel
 # extraction Prompt tasks now read input_sources: [step_input,
 # workflow_documents] — combining the KB chunks (when the operator
 # attaches a KB in Vandalizer's UI post-import) with the uploaded RFA
@@ -29,9 +96,9 @@
 # with NLU and finds the right content regardless of wording.
 #
 # Output contract change vs. v0.2.0: the Consolidation step now emits
-# RA-friendly Markdown (the 8-section RFA checklist per the source
-# ui-insight/ProcessMapping rfa-checklist-extraction consolidation.md
-# conventions) rather than schema-conformant JSON. The
+# RA-friendly Markdown (a Red-Flags-led, multi-section RFA checklist
+# based on the source ui-insight/ProcessMapping rfa-checklist-extraction
+# consolidation.md conventions) rather than schema-conformant JSON. The
 # rfa-checklist-extraction-udm COMPONENT remains JSON-emitting and is
 # the evaluation-harness target; this WORKFLOW is the Vandalizer
 # end-user (sponsored-programs analyst) deliverable.
@@ -42,37 +109,47 @@
 #   points at OMB Uniform Guidance (2 CFR 200) as the primary
 #   recommendation). Returns empty output when no KB is attached.
 # Step 1  Parallel Prompt
-#   7 Prompt tasks, each receiving input_sources: [step_input,
+#   8 Prompt tasks, each receiving input_sources: [step_input,
 #   workflow_documents] — combining the Step 0 KB chunks (when
 #   available) with the uploaded RFA. One metadata task captures the
-#   eight UDM-aligned scalar opportunity fields; the other six mirror
-#   the source workflow's six parallel extractions. Each task emits a
-#   JSON FRAGMENT for its block (Variant A mid-pipeline format).
+#   eight UDM-aligned scalar opportunity fields; a risk-flags task hunts
+#   the escalation triggers for the Red Flags banner; the other six
+#   mirror the source workflow's six parallel extractions. Each task
+#   emits a JSON FRAGMENT for its block (Variant A mid-pipeline format).
 # Step 2  Consolidation (Markdown deliverable)
-#   1 Prompt task assembles the seven JSON fragments and renders a
-#   single Markdown checklist with eight sections, enforcing the
-#   strict-de-duplication placement contract from source.
+#   1 Prompt task assembles the eight JSON fragments and renders a
+#   single Markdown checklist with nine sections (Red Flags first),
+#   enforcing the strict-de-duplication placement contract from source.
 
 name: RFA Checklist Extraction
 description: >
   Uploads a federal funding announcement (RFA, FOA, NOFO, or program
   solicitation) and returns a single RA-friendly Markdown checklist
-  organized in the eight pre-award sections a sponsored-programs analyst
-  uses when triaging an opportunity: Dates & Deadlines, Eligibility,
-  Award Information, Application Components, Budget Requirements &
-  Policies, Submission Details, Special Requirements, and Important
-  Notes. The pipeline runs seven parallel Prompt tasks (each emitting a
-  JSON fragment for its block) plus a Consolidation Prompt that renders
-  the final Markdown checklist with strict de-duplication. Mirrors the
-  ui-insight/ProcessMapping rfa-checklist-extraction workflow's eight
-  consolidated sections and placement contract.
+  organized in the pre-award sections a sponsored-programs analyst uses
+  when triaging an opportunity, led by a Red Flags section that surfaces
+  escalation and contract-review triggers first: Red Flags, Dates &
+  Deadlines, Eligibility, Award Information, Budget Requirements &
+  Policies, Submission Details, Application Components, Compliance Risks,
+  Foreign Influence & International Components, Special Requirements, and
+  Important Notes. The pipeline runs nine parallel Prompt tasks (each
+  emitting a JSON fragment for its block) plus a Consolidation Prompt
+  that renders the
+  final Markdown checklist with strict de-duplication. Mirrors the
+  ui-insight/ProcessMapping rfa-checklist-extraction workflow's
+  consolidated sections and placement contract, extended with the
+  2026-08 pre-award RA feedback (Red Flags, section reorder, recurring
+  date resolution, richer eligibility) and a baked-in sponsor backbone
+  that auto-includes each federal sponsor's standard required components
+  and default formatting when the announcement omits them. v0.7.0 adds
+  the expanded Red Flags / Contract-Review trigger set and Compliance
+  Risks + Foreign Influence sections from the RA's SPA checklist.
 
-workflow_version: 0.4.0
+workflow_version: 0.7.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-04-24
-updated: 2026-05-22
+updated: 2026-08-13
 
 components:
   - slug: rfa-checklist-extraction-udm
@@ -80,9 +157,9 @@ components:
 
 validation_plan:
   - id: CHK-01
-    name: Eight sections present
+    name: Eleven sections present
     category: completeness
-    description: Verify the Markdown deliverable contains all eight sections in order (Dates & Deadlines, Eligibility, Award Information, Application Components, Budget Requirements & Policies, Submission Details, Special Requirements, Important Notes).
+    description: Verify the Markdown deliverable contains all eleven sections in order (Red Flags, Dates & Deadlines, Eligibility, Award Information, Budget Requirements & Policies, Submission Details, Application Components, Compliance Risks, Foreign Influence & International Components, Special Requirements, Important Notes).
   - id: CHK-02
     name: Placement contract enforcement
     category: accuracy
@@ -91,12 +168,14 @@ validation_plan:
       CONTRADICT each other: (a) award amount and duration are present in AWARD
       INFORMATION; (b) the detailed financial rules (cost-share / matching, F&A /
       indirect, funding limits, allowable costs) are present in BUDGET REQUIREMENTS
-      & POLICIES. A figure or rule MAY also be referenced in a second section where
-      it is contextually relevant (e.g. the award range echoed inside a Budget
-      sentence) — this redundancy is ACCEPTABLE and must NOT fail. FAIL only if a
-      primary placement is MISSING (amount/duration absent from Award Information,
-      or the financial rules absent from Budget), or if two sections state
-      CONTRADICTORY values for the same fact.
+      & POLICIES. The RED FLAGS section is the one deliberate exception: it MAY
+      carry a SHORT pointer to a financial trigger (e.g. "Cost share required — see
+      Budget") without restating the detailed rule, and this pointer redundancy is
+      ACCEPTABLE and must NOT fail. Elsewhere a figure or rule MAY also be
+      referenced in a second section where it is contextually relevant. FAIL only
+      if a primary placement is MISSING (amount/duration absent from Award
+      Information, or the financial rules absent from Budget), or if two sections
+      state CONTRADICTORY values for the same fact.
   - id: CHK-03
     name: Monetary amount preservation
     category: formatting
@@ -105,6 +184,29 @@ validation_plan:
     name: Eligibility completeness
     category: completeness
     description: Verify both Eligible Institutions and Eligible Individuals subsections are present and non-empty.
+  - id: CHK-05
+    name: Red Flags section grounded
+    category: accuracy
+    description: >
+      Verify the RED FLAGS section renders and that every flag raised traces to a
+      concrete statement in the announcement (escalation flags: cost share, F&A
+      limit/waiver, commitment letter, limited submission, signature / institution
+      submits; CRU triggers: indemnification, IP / data ownership, publication
+      restrictions, insurance, NDA, FAR / contract terms, governing law of another
+      state, acceptance of T&C on submission, restricted country / foreign
+      ownership, foreign-government / national-lab contracting, CUI / classified).
+      FAIL if a flag is asserted with no supporting basis in the document, or if
+      the section is omitted entirely. When any CRU trigger is "yes", the "route to
+      the Contract Review Unit via VERAS" action line must be present.
+  - id: CHK-06
+    name: Compliance & International sections grounded
+    category: accuracy
+    description: >
+      Verify the COMPLIANCE RISKS and FOREIGN INFLUENCE & INTERNATIONAL COMPONENTS
+      sections render, that only "yes"/"no" areas appear (never "unclear"), and
+      that each rendered area traces to a concrete statement in the announcement.
+      FAIL if a compliance obligation or international restriction is asserted
+      without a supporting basis in the document.
 
 steps:
   - name: Knowledge Base Context Lookup
@@ -167,10 +269,15 @@ steps:
             when distinct from rfa_number; null otherwise.
           - cfda_number: CFDA / Assistance Listing number(s); when
             multiple, comma-separate (e.g., "47.070, 47.076").
+          - funding_instrument_type: The award mechanism as stated —
+            "Grant", "Cooperative Agreement", "Contract", or another
+            instrument the announcement names. Use the document's own
+            term; null when it does not state one. Do NOT guess from the
+            sponsor (e.g., do not assume "Grant" just because it is NSF).
 
           ## Output
 
-          Emit exactly one JSON object with these eight keys. No
+          Emit exactly one JSON object with these nine keys. No
           preamble, no closing commentary, no markdown fences. Example
           shape:
 
@@ -182,7 +289,139 @@ steps:
             "program_code": "NSF/TIP",
             "announcement_url": "https://www.nsf.gov/funding/...",
             "opportunity_number": null,
-            "cfda_number": "47.083"
+            "cfda_number": "47.083",
+            "funding_instrument_type": "Cooperative Agreement"
+          }
+
+      - name: extract-risk-flags
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are extracting the RED FLAGS block of a federal funding
+          announcement. You receive the full uploaded document as your
+          context. Read the ENTIRE document — eligibility, budget /
+          cost principles, submission instructions, required
+          attachments, terms and conditions, and any appendix — because
+          these triggers are frequently buried late or stated only
+          once.
+
+          A pre-award research administrator uses this block to decide,
+          within seconds of opening the report, whether this submission
+          needs a LONGER lead time, extra institutional routing, or
+          Contract Review Unit (CRU) review. Your job is to CHECK FOR
+          each known trigger below and report its status.
+
+          Assess EACH of the fixed checks. Ground every determination in
+          the document — quote or paraphrase the triggering language in
+          `detail`. NEVER assert a trigger the document does not support;
+          when the document does not address a check, use status
+          "unclear" (not "no"). Use "no" only when the document
+          affirmatively indicates the trigger does not apply (e.g., "No
+          cost sharing is required", "Indirect costs are permitted at the
+          negotiated rate"). Accuracy matters more than completeness —
+          the RA would rather see "unclear" than a fabricated flag.
+
+          The checks fall in two groups. Tag each with `category`.
+
+          ### Group 1 — Escalation flags (category: "escalation")
+          Items that lengthen the process or require early institutional
+          action:
+
+          - "Cost share / matching required" — any required or mandatory
+            cost share, matching, or in-kind contribution.
+          - "F&A / indirect limited or waived" — indirect (F&A) rate
+            capped, reduced, disallowed, or a waiver required (e.g.,
+            "indirect costs limited to 10%", "no F&A permitted").
+          - "Institutional / executive commitment letter" — a required
+            letter of commitment or support that must be signed above the
+            PI: institutional, presidential, provost / vice-provost,
+            dean, or chair letter.
+          - "Limited submission" — the sponsor caps how many proposals
+            the INSTITUTION may submit or how many an INDIVIDUAL may be
+            named on. Capture the number in `detail`.
+          - "Documents requiring signature / institution must submit" —
+            an Authorized Organizational Representative (AOR) or
+            institutional-official signature is required, and/or the
+            proposal must be submitted by the institution rather than the
+            PI directly.
+
+          ### Group 2 — Contract Review Unit (CRU) triggers (category: "cru")
+          Terms and conditions that require CRU review BEFORE submission.
+          Any one of these that is "yes" means the proposal and/or its
+          terms must be routed to the Contract Review Officer (via VERAS
+          Correspondence) before submission:
+
+          - "Indemnification" — indemnify-and-hold-harmless or similar
+            liability-assumption language.
+          - "Intellectual property / data ownership restrictions" —
+            sponsor claims on IP, invention rights, or data ownership.
+          - "Publication restrictions" — limits on the right to publish
+            or approval/embargo of publications.
+          - "Insurance requirements" — the sponsor requires the
+            institution to carry specific insurance.
+          - "Nondisclosure agreement (NDA)" — an NDA or confidentiality
+            agreement is required.
+          - "FAR-based or contract-type terms" — the award is a contract
+            or references / is subject to the Federal Acquisition
+            Regulation (FAR); procurement/bid-type assistance.
+          - "Governing law of another state" — the agreement is governed
+            by the law of a state other than Idaho (e.g., Louisiana).
+          - "Acceptance of terms & conditions upon submission" — any
+            language stating that submitting the proposal constitutes
+            acceptance of the sponsor's terms and conditions.
+          - "Restricted country / foreign ownership" — involvement of
+            entities, collaborators, or subrecipients in China, Russia,
+            North Korea, or Iran, including foreign-owned corporations
+            based in those countries (e.g., Syngenta).
+          - "Foreign government or national-lab contracting" — an
+            all-Canadian-Government proposal, or contracting with Idaho
+            National Laboratory (INL) or the Jet Propulsion Laboratory
+            (JPL) (scope review / draft contracts).
+          - "Controlled unclassified information (CUI) or classified
+            information" — the project involves CUI or classified
+            information exchange.
+          - "Other unusual terms and conditions" — any other atypical
+            term that a contract reviewer would need to see. Only when
+            document-supported; otherwise "unclear".
+
+          For EACH check emit an object with these four keys:
+
+          - check: the exact label from the lists above. Required.
+          - category: "escalation" or "cru", per the group. Required.
+          - status: one of "yes", "no", "unclear". Required.
+          - detail: when status is "yes", a short grounded phrase naming
+            the trigger and its specifics (amount, percentage, count, who
+            signs, which country/entity, the clause). When "no", a brief
+            note of the affirming statement. When "unclear", null.
+            Preserve the sponsor's monetary / percentage formatting
+            verbatim.
+
+          You may ALSO append additional objects for any OTHER
+          document-supported condition that would clearly lengthen the
+          process or require early institutional action (e.g., "Required
+          travel to a sponsor meeting"). Give those a descriptive `check`
+          label, the best-fit `category`, and status "yes". Do not
+          manufacture these — only add what the document supports.
+
+          ## Output
+
+          Emit exactly one JSON object with one key, `risk_flags`, whose
+          value is a JSON array containing one object per fixed check (in
+          the order listed) plus any additional supported flags. No
+          preamble, no markdown fences. Example:
+
+          {
+            "risk_flags": [
+              {"check": "Cost share / matching required", "category": "escalation", "status": "yes", "detail": "1:1 non-federal match of the total award required"},
+              {"check": "F&A / indirect limited or waived", "category": "escalation", "status": "yes", "detail": "Indirect costs limited to 10% of total direct costs"},
+              {"check": "Institutional / executive commitment letter", "category": "escalation", "status": "unclear", "detail": null},
+              {"check": "Limited submission", "category": "escalation", "status": "yes", "detail": "Maximum of two proposals per institution"},
+              {"check": "Documents requiring signature / institution must submit", "category": "escalation", "status": "yes", "detail": "Must be submitted via Research.gov by the institution's AOR"},
+              {"check": "Indemnification", "category": "cru", "status": "yes", "detail": "Recipient must indemnify and hold the sponsor harmless (Section 12)"},
+              {"check": "Publication restrictions", "category": "cru", "status": "no", "detail": "No publication approval or embargo stated"},
+              {"check": "Acceptance of terms & conditions upon submission", "category": "cru", "status": "yes", "detail": "Submission constitutes acceptance of the sponsor's terms"}
+            ]
           }
 
       - name: extract-dates-and-deadlines
@@ -200,6 +439,29 @@ steps:
           announcement. For multi-round solicitations include every
           round's LOI, pre-proposal, and full proposal deadlines.
 
+          RESOLVE RECURRING / RELATIVE DEADLINES. Sponsors (especially
+          NSF) often state a deadline as a rule rather than a calendar
+          date — e.g., "the second Tuesday in September", "the fourth
+          Thursday of each October", "the first business day of the
+          fiscal year", or a standing deadline that "recurs annually
+          until 2027". When a deadline is expressed this way:
+          - COMPUTE the concrete calendar date it resolves to and put
+            that ISO date in `date_time` (e.g., a rule of "second Tuesday
+            in September 2026" resolves to "2026-09-08").
+          - Resolve the NEXT upcoming occurrence relative to the
+            announcement's own dates. If the rule recurs and the
+            document names an end year, you may list the next occurrence
+            in `date_time` and describe the recurrence in `notes` (or
+            emit one row per upcoming occurrence when only a few remain).
+          - ALWAYS record the ORIGINAL rule text in `notes` (e.g.,
+            "Sponsor states: second Tuesday in September; recurs annually
+            through 2027") so the RA can verify the computation.
+          This resolution is pure date arithmetic on a rule the document
+          states explicitly — it is NOT invention. Do NOT guess or
+          fabricate a date the document does not define. If a rule is
+          genuinely ambiguous (no year or anchor to compute from), leave
+          `date_time` as the rule text and explain in `notes`.
+
           For each date emit an object with these three keys:
 
           - item: The event label exactly as stated in the document
@@ -207,11 +469,14 @@ steps:
             "Award Notification"). Required.
           - date_time: Full date plus any time and timezone as
             published (e.g., "2026-09-15 5:00 PM ET", "2026-10-01",
-            "Rolling"). Preserve the sponsor's granularity exactly. Do
-            not invent precision. Required.
+            "Rolling"). For a recurring / relative rule, the RESOLVED
+            concrete date (see above). Preserve the sponsor's granularity
+            exactly for absolute dates. Do not invent precision. Required.
           - notes: Any conditions, round identifiers, or clarifications
             attached to this date (e.g., "Track 1 only", "Optional but
-            encouraged"). null when none.
+            encouraged"), AND — for any resolved recurring / relative
+            deadline — the original rule text the date was computed from.
+            null when none.
 
           ## Output
 
@@ -223,7 +488,7 @@ steps:
           {
             "dates_and_deadlines": [
               {"item": "Letter of Intent Due", "date_time": "2026-08-01 5:00 PM ET", "notes": "Required for full proposal eligibility"},
-              {"item": "Full Proposal Deadline", "date_time": "2026-10-15 5:00 PM ET", "notes": null}
+              {"item": "Full Proposal Deadline", "date_time": "2026-09-08 5:00 PM ET", "notes": "Resolved from sponsor rule: second Tuesday in September; recurs annually through 2027"}
             ]
           }
 
@@ -244,6 +509,28 @@ steps:
           compliance_requirements. Do NOT put PI-level rules here —
           those belong to extract-eligible-individuals.
 
+          EXPLICITLY look for and capture, when stated:
+          - LIMITED SUBMISSION caps at the INSTITUTION level — e.g., "an
+            institution may submit no more than two proposals". Record
+            the exact number in compliance_requirements (and it will
+            also surface in Red Flags).
+          - Required institutional CERTIFICATIONS / CREDENTIALS or
+            special status — e.g., Carnegie classification, EPSCoR
+            jurisdiction, minority-serving-institution status, a required
+            accreditation or registration.
+          - SUBRECIPIENT / SUBAWARDEE eligibility, when the announcement
+            states rules specific to subrecipients (domestic-only,
+            foreign-subrecipient restrictions, industry-participation
+            rules, nonprofit requirements, tribal eligibility). Emit
+            these as a SEPARATE entry with type "Subrecipients /
+            Subawardees" and the rules in compliance_requirements. Only
+            when the document states subrecipient-specific rules — do not
+            fabricate this entry.
+
+          Include ONLY categories and rules the announcement actually
+          states; never infer an institution type or restriction that is
+          not in the document.
+
           For each institution category emit an object with these four
           keys:
 
@@ -257,9 +544,12 @@ steps:
           - examples: Sponsor-supplied examples that illustrate the
             category, as a short comma-separated list. null when the
             announcement gives none.
-          - compliance_requirements: Registrations, certifications, or
-            institutional prerequisites attached to this type. null
-            when no institutional compliance terms are attached.
+          - compliance_requirements: Registrations, certifications,
+            institutional prerequisites, or institution-level
+            limited-submission caps attached to this type (e.g.,
+            "SAM.gov registration required", "Maximum of two proposals
+            per institution"). null when no institutional compliance
+            terms are attached.
 
           ## Output
 
@@ -282,9 +572,31 @@ steps:
           List every distinct PI / Co-PI / Senior Key Personnel
           category the sponsor names. Include citizenship,
           career-stage, degree, appointment type, and prior-award
-          restrictions in criteria or conditions. Limits like "one
-          nomination per institution" belong to conditions here, not
-          in Special Requirements.
+          restrictions in criteria or conditions.
+
+          EXPLICITLY look for and capture, when stated:
+          - CITIZENSHIP / residency requirements (e.g., "U.S. citizen or
+            permanent resident required").
+          - CAREER-STAGE restrictions — early-career / new-investigator
+            limits, years-since-degree windows, "no prior R01", etc.
+          - Required CERTIFICATIONS or CREDENTIALS the individual must
+            hold (e.g., a terminal degree, a license, a specific title
+            or tenured/tenure-track appointment).
+          - LIMITED SUBMISSION caps at the INDIVIDUAL level — how many
+            proposals a person may be named on / submit (e.g., "an
+            investigator may appear on only one proposal"). Record the
+            exact number. Institution-wide caps ("one nomination per
+            institution") belong in conditions here (and also surface in
+            Red Flags), NOT in Special Requirements.
+          - LIMITED-SUBMISSION MECHANICS when stated — how collaborative
+            proposals count toward a cap, and any required internal
+            institutional nomination / down-select competition. Put these
+            in conditions.
+
+          Capture ONLY what the announcement states; never infer a cap,
+          a citizenship rule, or a nomination process the document does
+          not give. When an item is not addressed, omit it rather than
+          guessing.
 
           For each individual category emit an object with these four
           keys:
@@ -293,12 +605,15 @@ steps:
             Investigator", "Early-Career Investigator",
             "Co-Investigator"). Required.
           - criteria: Qualifying criteria (degree, career stage,
-            appointment type, citizenship); null when none.
+            appointment type, citizenship, required credentials); null
+            when none.
           - compliance_requirements: ORCID, mentoring plans, or other
             PI compliance items; null when none.
-          - conditions: Restrictions, limits, or preferences (e.g.,
-            "One nomination per institution", "Not eligible if prior
-            RFA-awarded"); null when none.
+          - conditions: Restrictions, limits, or preferences, including
+            per-individual and per-institution submission caps (e.g.,
+            "One nomination per institution", "May appear on only one
+            proposal", "Not eligible if prior RFA-awarded"); null when
+            none.
 
           ## Output
 
@@ -322,17 +637,26 @@ steps:
           in the final deliverable — do NOT capture detailed financial
           rules (those belong to extract-budget-requirements).
 
+          Ground every value in the document. NEVER invent an amount,
+          duration, count, or date, and NEVER infer a "typical" figure
+          from the program or sponsor. Preserve the sponsor's exact
+          numeric formatting. When the announcement does not state a
+          value, use the string "Not specified in the document" for
+          award_duration and amount_per_award, and null for
+          number_of_awards and anticipated_award_date — do not guess.
+
           Extract these four fields:
 
-          - award_duration: Anticipated duration as stated (e.g.,
-            "3 years", "Up to 5 years with option for 2-year
-            extension"). Required.
+          - award_duration: Anticipated duration exactly as stated (e.g.,
+            "3 years", "Up to 5 years with option for 2-year extension").
+            "Not specified in the document" when absent.
           - amount_per_award: Per-award amount including whether the
             figure is total-costs or direct-costs and any restrictions
             bundled into the headline number (e.g., "$500,000 total
             costs including indirect", "$250,000 direct costs per
             year"). Preserve the sponsor's exact formatting (dollar
-            sign, commas, basis annotation). Required.
+            sign, commas, basis annotation). "Not specified in the
+            document" when absent — never estimate.
           - number_of_awards: Anticipated count as stated (e.g.,
             "10-15", "Subject to availability of funds"). null only
             when truly absent.
@@ -351,46 +675,195 @@ steps:
           - workflow_documents
         prompt_inline: |
           You are extracting the APPLICATION COMPONENTS, SUBMISSION
-          DETAILS, and SPECIAL REQUIREMENTS blocks of a federal
-          funding announcement. You receive the full uploaded document
-          as your context. Read every section that describes what to
-          submit and how to submit it.
+          DETAILS, SPECIAL REQUIREMENTS, and FORMATTING REQUIREMENTS
+          blocks of a federal funding announcement. You receive the full
+          uploaded document as your context. Read every section that
+          describes what to submit and how to submit it.
 
           Page limits, font and margin rules, template names, and
           naming conventions live on the INDIVIDUAL component (in
           special_requirements for that component). Submission
           mechanics — portal, file format, upload method — live in
           submission_details, NOT on individual components.
+          Document-wide preparation rules (fonts, margins, spacing, page
+          size, file naming) live in the separate formatting_requirements
+          field described below.
 
-          Extract these four fields:
+          ## Sponsor backbone — ALWAYS include the standard components
+
+          Federal sponsors frequently DO NOT list every required proposal
+          component in an individual announcement, because some are
+          standardized in the sponsor's proposal guide (e.g., the NSF
+          PAPPG). You MUST still include them. Do this:
+
+          1. Identify the sponsor from the document. Hints: "National
+             Science Foundation" / NSF numbers like "NSF 25-543" → NSF;
+             "National Institutes of Health" / "PA-", "PAR-", "RFA-",
+             "NOT-" numbers → NIH; "USDA" / "NIFA" → USDA-NIFA;
+             "Department of Energy" / "DE-FOA-" → DOE; "NASA" / "NNH",
+             "NRA" → NASA.
+          2. Take that sponsor's STANDARD REQUIRED COMPONENTS from the
+             backbone table below and MERGE them with what this specific
+             announcement states:
+             - Every backbone item that is unconditional goes in
+               required_components. Items the backbone marks "(if
+               applicable)" go in optional_components (still listed, so
+               the reviewer can judge applicability).
+             - If the announcement ALSO names a component, do not
+               duplicate — emit ONE entry, using the announcement's
+               description and any page-limit / formatting rule it gives.
+             - If the announcement IMPOSES A CHANGE on a standard
+               component (different page limit, extra content, a new
+               required attachment), keep that change on the component
+               and set its `source` to "Announcement + sponsor standard".
+          3. Set each component's `source` field:
+             - "Announcement" — the announcement explicitly requires it
+               and it is not a backbone item (RFA-unique).
+             - "Sponsor standard" — added from the backbone; the
+               announcement did not list it.
+             - "Announcement + sponsor standard" — present in both, or a
+               backbone item the announcement modifies.
+          4. "Subaward Documents (if applicable)" is a conditional
+             OPTIONAL component: list it with its standard sub-items
+             (Budget (excel); RR Subaward Budget form if applicable;
+             Budget Justification; Senior Key Personnel Documents —
+             sponsor SciENcv Biosketch + Current & Pending; Specific
+             Scope of Work; AOR-signed Letter of Commitment if on the FDP
+             list, or a completed UI subrecipient Commitment form;
+             Facilities/Equipment if applicable) in its description, and
+             note it applies only when the proposal includes a subaward.
+          5. If the sponsor is NOT one of the five below (e.g., a state
+             agency, private foundation, or unrecognized sponsor), DO NOT
+             invent a backbone — extract ONLY the components the
+             announcement actually states, and set every `source` to
+             "Announcement".
+
+          ### Backbone — standard required components by sponsor
+
+          - NSF: Project Summary; Project Description; References Cited;
+            Budget; Budget Justification; Facilities, Equipment & Other
+            Resources; Biographical Sketch (SciENcv); Current & Pending
+            Support (SciENcv); Collaborators & Other Affiliations (COA);
+            Synergistic Activities; Data Management & Sharing Plan;
+            Mentoring Plan (if applicable); Other Supplementary Documents
+            (if applicable); Letters of Collaboration (if applicable);
+            Subaward Documents (if applicable).
+          - NIH: Project Summary/Abstract; Project Narrative; Bibliography
+            & References Cited; Facilities & Other Resources; Equipment;
+            Biographical Sketches (SciENcv, all key personnel); Budget;
+            Budget Justification; Introduction to Application
+            [Resubmission/Revision] (if applicable); Specific Aims;
+            Research Strategy; Data Management and Sharing Plan; Vertebrate
+            Animals Section (if applicable); Select Agent Research (if
+            applicable); Multiple PD/PI Leadership Plan (if applicable);
+            Consortium/Contractual Arrangements (if applicable); Letters
+            of Collaboration (if applicable); Human Subjects/Clinical
+            Trial documents (if applicable); Resource Sharing Plan(s) (if
+            applicable); Authentication of Key Biological and/or Chemical
+            Resources.
+          - USDA-NIFA: Project Summary; Project Narrative; Budget; Budget
+            Justification; Biographical Sketches (SciENcv); Current &
+            Pending Support (SciENcv); Conflict of Interest List;
+            Bibliography & References Cited; Facilities and Other
+            Resources; Equipment; Data Management Plan (if applicable);
+            Mentoring Plan (if applicable); Logic Model (if applicable);
+            Key Personnel Roles (if applicable); Management Plan (if
+            applicable); Documentation of Collaboration (if applicable);
+            Subaward Documents (if applicable).
+          - DOE: Project Summary/Abstract; Project Narrative; Statement of
+            Work; Budget; Budget Justification; Biographical Sketches
+            (SciENcv); Current & Pending Support (SciENcv); Facilities &
+            Other Resources; Equipment; Data Management and Sharing Plan
+            (if applicable); Letters of Collaboration/Commitment (if
+            applicable); Subaward Documents (if applicable).
+          - NASA: Proposal Summary/Abstract;
+            Scientific/Technical/Management Plan; References Cited; Budget;
+            Budget Justification; Biographical Sketches (SciENcv); Current
+            & Pending Support (SciENcv); Facilities, Equipment & Other
+            Resources; Table of Personnel and Work Effort; Data Management
+            Plan (if applicable); Letters of Commitment/Support (if
+            applicable); Subaward Documents (if applicable). Senior Key
+            Personnel documents apply to PI/Co-PI/Co-I with ≥10% effort/yr.
+
+          ## Formatting precedence (fills formatting_requirements)
+
+          If the announcement gives SPECIFIC formatting / document-
+          preparation instructions (fonts, margins, spacing, page size,
+          file naming), use THOSE verbatim. If the announcement is SILENT
+          on formatting, populate formatting_requirements from the
+          sponsor-standard formatting below and prefix it exactly with
+          "Sponsor default (<SPONSOR>):" so the reviewer knows it was not
+          stated in this announcement. If the announcement gives some
+          rules but not others, combine: stated rules first, then note
+          the sponsor default fills the rest. For a non-backbone sponsor
+          with no stated formatting, set formatting_requirements to null.
+
+          ### Backbone — sponsor-standard formatting
+
+          - NSF: Fonts — Arial (not narrow), Courier New, or Palatino
+            Linotype at 10pt+, or Times New Roman / Computer Modern 11pt+.
+            Margins ≥1 inch all sides (incl. headers/footers). Line
+            spacing ≤6 lines/inch. Page size 8.5×11 in.
+          - NIH: Font 11pt+ (smaller allowed only in graphics if legible
+            at 100%). Type density ≤15 characters/inch. Line spacing ≤6
+            lines/inch. Recommended black font (Arial, Georgia, Helvetica,
+            Palatino Linotype). File names ≤50 characters. No URLs except
+            citations in References Cited and Biosketch. No headers or
+            footers.
+          - USDA-NIFA: Typed/word-processed. Font ≥12pt regardless of line
+            spacing. Margins ≥1 inch. Number pages sequentially (unless
+            via eRA). PDF format. File names ≤50 characters, no special
+            characters (& – * % / #), periods, spaces, or accents;
+            underscores allowed; names must be unique.
+          - DOE: Defer to the NOFO/FOA; otherwise 8.5×11 in, 1-inch
+            margins, font 11pt+, PDF, avoid URLs with substantive content
+            unless the FOA permits.
+          - NASA: 8.5×11 in, ≥1-inch margins, single-spaced 12pt, one
+            column, page limits per the NOFO; only non-substantive
+            material in headers/footers.
+
+          ## Fields to emit
 
           - required_components: JSON array of {name, description,
-            special_requirements} objects, one per required proposal
-            component. MUST be non-empty.
-            - name: Component name as stated (e.g., "Project
-              Description", "Biographical Sketch", "Data Management
-              Plan"). Required.
-            - description: What the component must contain, in the
-              sponsor's own terms. Required.
+            special_requirements, source} objects (backbone-merged per
+            the rules above). MUST be non-empty.
+            - name: Component name (backbone or announcement wording).
+              Required.
+            - description: What the component must contain. Use the
+              announcement's terms when it describes the component;
+              otherwise a brief standard description. Required.
             - special_requirements: Page limits, font/margin rules,
               template requirements, or naming conventions specific to
-              this component. null when none.
-          - optional_components: Same item shape as
-            required_components; empty array when none.
+              THIS component (not document-wide formatting). null when
+              none.
+            - source: "Announcement" | "Sponsor standard" | "Announcement
+              + sponsor standard", per the rules above. Required.
+          - optional_components: Same item shape as required_components
+            (including source); empty array when none. Backbone "(if
+            applicable)" items and Subaward Documents go here.
           - submission_details: A single coherent paragraph covering
             submission method / portal, technical and file-format
             requirements, file-naming conventions, and collaboration
-            rules. null only when the announcement contains no
-            submission guidance at all.
+            rules. NAME the specific submission system when the
+            announcement states it (e.g., Grants.gov, Research.gov, eRA
+            Commons, JustGrants, NSPIRES, ProposalCentral, or the named
+            agency portal); do not guess a portal the document does not
+            name. null only when the announcement contains no submission
+            guidance at all.
           - special_requirements: JSON array of strings — unique RFA
             aspects that do not fit into any other section (conference
             travel obligations, data-sharing commitments beyond federal
             defaults, workshop participation). Empty array when none.
+          - formatting_requirements: STRING (single natural-language
+            paragraph) filled per the formatting-precedence rule above.
+            Prefix with "Sponsor default (<SPONSOR>):" when populated from
+            the backbone rather than stated in the announcement. null when
+            neither the announcement nor a backbone provides formatting.
 
           ## Output
 
-          Emit exactly one JSON object with these four keys. No
-          preamble, no markdown fences.
+          Emit exactly one JSON object with these five keys. No preamble,
+          no markdown fences.
 
       - name: extract-budget-requirements
         input_sources:
@@ -406,6 +879,32 @@ steps:
           This block is the SOLE location for detailed financial rules
           in the final deliverable — do NOT restate award amount or
           duration here (those belong to extract-award-information).
+
+          EXPLICITLY look for these specific budget rules and route each
+          into the field named. Include an item ONLY when the
+          announcement states it — do NOT infer a cap or restriction the
+          document does not give, and do NOT fill in a "typical" federal
+          value. If the announcement is silent on an item, leave it out
+          (the absence is itself informative):
+          - Salary caps / salary limits, faculty summer-salary limits →
+            personnel_effort.
+          - Graduate-student support rules, tuition allowed or capped,
+            postdoc support → personnel_effort (or unallowable_costs if
+            explicitly disallowed).
+          - Participant-support costs allowed/limited, consultant limits →
+            allowable_costs / unallowable_costs / other_considerations as
+            stated.
+          - Equipment thresholds or caps, computing/device restrictions →
+            funding_limits or other_considerations as stated.
+          - Food / meals, incentives / participant payments, human-subject
+            payments → allowable_costs / unallowable_costs / other_considerations.
+          - Travel caps, required travel (e.g., a mandatory PI meeting),
+            international-travel restrictions → other_considerations.
+          - Publication / open-access / page charges → allowable_costs or
+            other_considerations.
+          Preserve the sponsor's monetary and percentage formatting
+          verbatim; quote the language for any explicit cap or "no X
+          allowed" restriction.
 
           Extract these eight fields. Quote the sponsor's language
           verbatim for cost-sharing status (when not "Not Specified"),
@@ -467,6 +966,93 @@ steps:
           Emit exactly one JSON object with these eight keys. No
           preamble, no markdown fences.
 
+      - name: extract-compliance-flags
+        input_sources:
+          - step_input
+          - workflow_documents
+        prompt_inline: |
+          You are extracting the COMPLIANCE RISKS and INTERNATIONAL
+          COMPONENTS blocks of a federal funding announcement. You
+          receive the full uploaded document as your context. Read the
+          entire document — program description, eligibility, submission
+          and reporting requirements, terms and conditions, and any
+          appendix — because these obligations are often stated once and
+          drive additional institutional review (IRB, IACUC, IBC, export
+          control, research security).
+
+          Assess EACH fixed area below. Ground every determination in the
+          document; put the triggering language in `detail`. NEVER assert
+          an obligation the document does not support — when the document
+          does not address an area, use status "unclear" (not "no"). Use
+          "no" only when the document affirmatively excludes it (e.g.,
+          "Human subjects research is not permitted under this program").
+          Accuracy over completeness: prefer "unclear" to a guess.
+
+          For every area emit an object with these keys:
+          - area: the exact label from the lists below. Required.
+          - status: "yes" (the announcement invokes / requires / restricts
+            it), "no" (affirmatively excluded), or "unclear" (not
+            addressed). Required.
+          - detail: when "yes", a short grounded phrase with specifics;
+            when "no", the affirming statement; when "unclear", null.
+
+          ## compliance_risks — fixed areas (research-compliance)
+
+          - "Human subjects" — human-subjects research / IRB review /
+            clinical-trial requirements.
+          - "Vertebrate animals" — animal use / IACUC review.
+          - "Biosafety" — recombinant DNA, biohazards, Institutional
+            Biosafety Committee review.
+          - "Export control" — export-control implications (ITAR / EAR),
+            fundamental-research exclusion questions.
+          - "Select agents / dual-use research" — select-agent research or
+            dual-use research of concern (DURC).
+          - "Controlled unclassified information (CUI)" — CUI generation,
+            handling, or marking requirements. (Also flagged as a Contract
+            Review trigger in Red Flags when classified exchange is
+            involved.)
+          - "Data security / cybersecurity" — data-security or
+            cybersecurity controls (e.g., NIST SP 800-171, CMMC, a
+            System Security Plan).
+          - "National security" — national-security considerations or
+            restrictions stated by the sponsor.
+
+          ## international_components — fixed areas (foreign influence)
+
+          - "Foreign collaborators" — whether foreign collaborators /
+            personnel are allowed, required, or restricted.
+          - "Foreign subawards" — whether foreign subawards / subrecipients
+            are allowed or restricted.
+          - "Foreign travel" — foreign-travel allowances or restrictions.
+          - "Foreign talent-program certification" — required
+            certification or disclosure regarding malign foreign talent
+            recruitment programs.
+          - "International data sharing" — restrictions on sharing data or
+            materials internationally.
+          - "Country-specific restrictions" — restrictions tied to
+            specific countries (e.g., prohibitions on China, Russia, North
+            Korea, Iran, or their entities). (Also flagged as a Contract
+            Review trigger in Red Flags.)
+
+          ## Output
+
+          Emit exactly one JSON object with two keys, `compliance_risks`
+          and `international_components`, each a JSON array with one object
+          per fixed area in the order listed. No preamble, no markdown
+          fences. Example:
+
+          {
+            "compliance_risks": [
+              {"area": "Human subjects", "status": "yes", "detail": "Involves human subjects; IRB approval required before award"},
+              {"area": "Vertebrate animals", "status": "no", "detail": "Program excludes animal research"},
+              {"area": "Export control", "status": "unclear", "detail": null}
+            ],
+            "international_components": [
+              {"area": "Foreign subawards", "status": "no", "detail": "Foreign subawards are not permitted under this NOFO"},
+              {"area": "Foreign talent-program certification", "status": "yes", "detail": "Senior personnel must certify no participation in a malign foreign talent recruitment program"}
+            ]
+          }
+
   - name: Consolidation (Markdown deliverable)
     is_output: true
     tasks:
@@ -475,25 +1061,33 @@ steps:
         input_source: step_input
         prompt_inline: |
           You are the consolidation step of the RFA Checklist
-          Extraction workflow. You receive SEVEN JSON object fragments
+          Extraction workflow. You receive NINE JSON object fragments
           from the previous step:
 
           1. Opportunity metadata (rfa_id, rfa_number, rfa_title,
              sponsor_name, program_code, announcement_url,
-             opportunity_number, cfda_number)
-          2. Dates and deadlines (array of {item, date_time, notes})
-          3. Eligible institutions (array of {type, subcategory,
+             opportunity_number, cfda_number, funding_instrument_type)
+          2. Risk flags (risk_flags: array of {check, category, status,
+             detail}; category is "escalation" or "cru")
+          3. Dates and deadlines (array of {item, date_time, notes})
+          4. Eligible institutions (array of {type, subcategory,
              examples, compliance_requirements})
-          4. Eligible individuals (array of {type, criteria,
+          5. Eligible individuals (array of {type, criteria,
              compliance_requirements, conditions})
-          5. Award information (award_duration, amount_per_award,
+          6. Award information (award_duration, amount_per_award,
              number_of_awards, anticipated_award_date)
-          6. Application components (required_components,
+          7. Application components (required_components,
              optional_components, submission_details,
-             special_requirements)
-          7. Budget requirements (funding_limits, cost_sharing_status,
+             special_requirements, formatting_requirements) — component
+             objects carry a `source` field (Announcement / Sponsor
+             standard / Announcement + sponsor standard) marking backbone
+             provenance
+          8. Budget requirements (funding_limits, cost_sharing_status,
              cost_sharing_details, fa_policy, allowable_costs,
              unallowable_costs, personnel_effort, other_considerations)
+          9. Compliance & international (compliance_risks: array of
+             {area, status, detail}; international_components: array of
+             {area, status, detail})
 
           Your job is to render a single, well-formatted Markdown
           checklist for the sponsored-programs analyst (the
@@ -542,6 +1136,75 @@ steps:
           **Announcement URL:** <announcement_url or "Not specified">
           **Opportunity Number:** <opportunity_number or "Not specified">
           **CFDA Number:** <cfda_number or "Not specified">
+          **Funding Instrument:** <funding_instrument_type or "Not specified">
+
+          ---
+
+          ## ⚠️ RED FLAGS
+
+          The FIRST thing the reviewer reads. Surface the triggers that
+          make this submission higher-effort, longer-lead-time, or in
+          need of Contract Review Unit review, so the RA can start the
+          long-pole processes early. Build this section from the RISK
+          FLAGS fragment (fragment 2), which tags each check with a
+          `category` of "escalation" or "cru". Render two subgroups; show
+          ONLY checks whose `status` is "yes".
+
+          ### Escalation & effort
+          Render each `category: "escalation"` check that is "yes" as a
+          bulleted line — bold trigger, grounded detail, then an italic
+          pointer to the section carrying the full rule:
+
+          - **Cost share / matching required** — 1:1 non-federal match of
+            the total award *(see Budget Requirements & Policies)*
+          - **Limited submission** — maximum of two proposals per
+            institution *(see Eligibility)*
+          - **Documents requiring signature / institution must submit** —
+            submitted via Research.gov by the institution's AOR *(see
+            Submission Details)*
+
+          Add the italic pointer for the financial triggers (cost share,
+          F&A → Budget), limited submission (→ Eligibility), and
+          signature/submitter (→ Submission Details). Keep each line to
+          one sentence.
+
+          ### Contract Review Unit (CRU) triggers
+          Render each `category: "cru"` check that is "yes" as a bulleted
+          line — bold trigger, grounded detail. If ONE OR MORE cru checks
+          are "yes", add this action line immediately below the subgroup
+          heading, in bold:
+
+          **⚠️ Route to the Contract Review Unit (CRU) before submission —
+          email the Contract Review Officer via VERAS Correspondence.**
+
+          If NO cru check is "yes", omit the entire "Contract Review Unit
+          (CRU) triggers" subgroup (heading and action line included).
+
+          ### Empty / clear states
+          If NONE of the fixed checks (either group) came back "yes",
+          render exactly this and nothing else in the section:
+
+          > ✅ No red flags identified — standard submission process
+          > expected. Checks performed: cost share; F&A / indirect
+          > limits; institutional / executive commitment letter; limited
+          > submission; signature / institution-must-submit;
+          > indemnification; IP / data ownership; publication
+          > restrictions; insurance; NDA; FAR / contract-type terms;
+          > governing law of another state; acceptance of T&C on
+          > submission; restricted country / foreign ownership; foreign
+          > government or national-lab contracting; CUI / classified.
+
+          When SOME checks are "yes" and others came back "no", after the
+          rendered flags add one closing italic line naming the notable
+          checks that were verified clear, e.g.:
+
+          *Checked and clear: publication restrictions, indemnification,
+          restricted-country involvement.*
+
+          Do NOT list "unclear" checks as either flagged or clear; omit
+          them (the underlying sections still carry whatever the document
+          said). NEVER raise a flag the RISK FLAGS fragment did not mark
+          "yes".
 
           ---
 
@@ -602,23 +1265,6 @@ steps:
 
           ---
 
-          ## APPLICATION COMPONENTS
-
-          ### Required Components
-
-          A Markdown table with these three columns. Always present.
-
-          | Component Name | Description / Details | Special Requirements |
-          |---|---|---|
-
-          ### Optional Components
-
-          Same three-column table. If empty, include a single row:
-
-          | Not specified in this document | — | — |
-
-          ---
-
           ## BUDGET REQUIREMENTS & POLICIES
 
           This is the **sole location** for detailed financial rules.
@@ -654,6 +1300,84 @@ steps:
 
           ---
 
+          ## APPLICATION COMPONENTS
+
+          This list is backbone-merged: for a recognized federal sponsor
+          (NSF, NIH, USDA-NIFA, DOE, NASA) it includes the sponsor's
+          standard required components even when the announcement did not
+          list them. The **Source** column shows provenance so the
+          reviewer can verify. Immediately under the heading, add one
+          italic line naming the basis, e.g.:
+
+          *Includes National Science Foundation standard required
+          components (NSF PAPPG) merged with this announcement. Verify
+          applicability of "if applicable" items.*
+
+          If the sponsor is not one of the five federal backbones (e.g., a
+          state agency or foundation), instead add: *Components reflect
+          only what this announcement states; no sponsor backbone applies.*
+
+          ### Required Components
+
+          A Markdown table with these four columns. Always present. Render
+          each component's `source` verbatim in the Source column.
+
+          | Component Name | Description / Details | Special Requirements | Source |
+          |---|---|---|---|
+
+          ### Optional Components
+
+          Same four-column table (backbone "if applicable" items and
+          Subaward Documents appear here). If empty, include a single row:
+
+          | Not specified in this document | — | — | — |
+
+          ### Formatting Requirements
+
+          Render `formatting_requirements` as a short paragraph. When the
+          value begins with "Sponsor default (…):", keep that prefix so
+          the reviewer sees the rules came from the sponsor standard, not
+          this announcement. If null, state "Not specified in the
+          document; no sponsor default available."
+
+          ---
+
+          ## COMPLIANCE RISKS
+
+          Build from the Compliance & international fragment (fragment 9),
+          `compliance_risks` array. Render ONLY areas whose `status` is
+          "yes" or "no"; OMIT "unclear" areas entirely (do not invent or
+          pad). Use a two-column table:
+
+          | Compliance Area | Requirement / Note |
+          |---|---|
+          | (area) | (detail) |
+
+          Prefix a "yes" row's detail with "⚠️ " and a "no" row's detail
+          with "Not applicable — " so the reviewer can scan. If EVERY
+          compliance area is "unclear", render exactly: "No specific
+          research-compliance requirements identified in this
+          announcement (verify human subjects, animal use, biosafety,
+          export control, select agents, CUI, data security)." Never
+          assert a compliance obligation the fragment did not mark "yes".
+
+          ---
+
+          ## FOREIGN INFLUENCE & INTERNATIONAL COMPONENTS
+
+          Build from the Compliance & international fragment (fragment 9),
+          `international_components` array. Render ONLY areas whose
+          `status` is "yes" or "no"; OMIT "unclear" areas. Use the same
+          two-column table shape (Area | Requirement / Note), with the
+          same "⚠️ " (yes) / "Not applicable — " (no) prefixes. If EVERY
+          area is "unclear", render exactly: "No specific foreign-influence
+          or international requirements identified in this announcement."
+          Do NOT restate the detailed restricted-country contract-review
+          trigger here — that lives in RED FLAGS; this section covers the
+          announcement's own international rules only.
+
+          ---
+
           ## SPECIAL REQUIREMENTS
 
           Render special_requirements as a bulleted list. If empty,
@@ -672,19 +1396,22 @@ steps:
           ## IMPORTANT NOTES
 
           Synthesize 0–5 critical warnings or pitfalls a reviewer would
-          otherwise miss. Pull from across the seven fragments — not
+          otherwise miss. Pull from across the eight fragments — not
           from the document directly. **Do NOT restate financial rules
           here** (cost-share / matching, F&A / indirect, funding limits,
           allowable costs) — those live ONLY in Budget Requirements &
-          Policies. Focus on process / timeline / eligibility pitfalls
-          (e.g. registration or portal lead time, letter-of-intent
-          gating, limited submissions per institution, non-standard
-          required attachments). Render as a bulleted list with each
-          item starting with a bold lead like **Coordinate with OSP at
-          least 6 weeks before submission** — explanation follows. Keep
-          this short. If no critical warnings rise to this bar, state
-          "No critical reviewer warnings beyond what appears in the
-          sections above."
+          Policies. **Do NOT repeat items already raised in the RED
+          FLAGS banner** (cost share, F&A limit/waiver, commitment
+          letter, limited submission, contract-review terms, AOR
+          signature) — Red Flags owns those; Important Notes is for the
+          remaining softer pitfalls. Focus on process / timeline
+          pitfalls (e.g. registration or portal lead time,
+          letter-of-intent gating, non-standard required attachments).
+          Render as a bulleted list with each item starting with a bold
+          lead like **Coordinate with OSP at least 6 weeks before
+          submission** — explanation follows. Keep this short. If no
+          critical warnings rise to this bar, state "No critical
+          reviewer warnings beyond what appears in the sections above."
 
           ---
 
@@ -702,13 +1429,23 @@ steps:
              10% of the total award"), funding limits, and allowable /
              unallowable-cost rules. Do NOT restate, summarize, or
              re-flag these anywhere outside Budget — not even as a
-             "critical warning." If any other fragment surfaces a
-             financial rule, render it under Budget only.
-          3. **Per-component formatting rules (page limits, fonts,
+             "critical warning" in IMPORTANT NOTES. If any other
+             fragment surfaces a financial rule, render it under Budget
+             only.
+          3. **RED FLAGS is the ONE exception to rule 2 — but only as a
+             POINTER.** The Red Flags banner MAY note the PRESENCE of a
+             financial trigger (cost share required, F&A limited/waived)
+             in one short line with an italic "*(see Budget Requirements
+             & Policies)*" pointer. It must NOT reproduce the detailed
+             rule (percentages, base, documentation) — that stays solely
+             in Budget. The same pointer-only rule applies to limited
+             submission (*(see Eligibility)*) and signature / submitter
+             (*(see Submission Details)*).
+          4. **Per-component formatting rules (page limits, fonts,
              naming) appear ONLY on the individual component's Special
              Requirements column** in the APPLICATION COMPONENTS
              table. Not in the top-level SPECIAL REQUIREMENTS section.
-          4. **Submission mechanics (portal, file format, naming)
+          5. **Submission mechanics (portal, file format, naming)
              appear ONLY in SUBMISSION DETAILS.**
 
           ## Formatting rules
