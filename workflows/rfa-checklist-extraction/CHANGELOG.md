@@ -6,6 +6,12 @@ All notable changes to this workflow. Versions follow semver adapted to workflow
 - **MINOR** — prompt body tracking a referenced component MINOR, or additive step/task options that preserve the existing operator flow.
 - **PATCH** — step or task display-name edits, description polish, non-semantic manifest cleanup.
 
+## [3.0.0] — 2026-08-13
+
+- **MAJOR — dual deliverables + model lock** (is_output change per this workflow's semver; no prompt changes). Both features verified against the `ui-insight/vandalizer` backend source:
+  - **Parallel Extraction step sets `is_output: true`** — the raw JSON fragments are now surfaced as a workflow deliverable alongside the Markdown checklist. Vandalizer supports multiple output steps (`import_workflow` preserves per-step `is_output`; `WorkflowStatusResponse.output_step_names` is a list); the "at most one output step" rule was repo-side only, and `build_vandalizer_workflows.py` now requires *at least one* instead.
+  - **New workflow-level `default_task_model: VandalStrong`** — the build script emits `"model": "VandalStrong"` into every task's `data`. The engine resolves `task_data["model"] or run_model` (task wins), so the pin overrides the run dialog's model picker. The name must exactly match a server `available_models[].name` entry; a per-task `model:` manifest key can override the workflow default. Caveat: Vandalizer's optimizer per-step overrides, when enabled, can still swap a model after the pin.
+
 ## [2.0.1] — 2026-08-13
 
 - **JSON quote-escaping rule.** First fully clean end-to-end v2.0.0 run (NSF 22-603 Mid-Career Advancement, new test document, after the operator raised model token limits): all ten tasks emitted minified JSON, backbone stubs and the mandated-structure fragment worked, the deliverable rendered completely with correct red flags and placement-contract enforcement. One residual defect: `extract-mandated-structure` quoted announcement text with unescaped double quotes (`mutual benefits/"added value" of collaboration`), invalidating its fragment's JSON — the consolidation's salvage rule recovered every section, so the deliverable was unaffected, but the fragment should parse. All ten extraction prompts now carry an explicit rule: escape `"` as `\"` inside JSON string values, or rephrase with single quotes.
