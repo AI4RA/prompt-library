@@ -11,9 +11,9 @@ Uploads a federal funding announcement (RFA / FOA / NOFO / program solicitation)
 
 ## What this workflow does
 
-The operator uploads a funding announcement (PDF) into Vandalizer. The workflow runs as three steps (an optional Knowledge Base lookup, parallel extraction, and consolidation):
+The operator uploads a funding announcement (PDF) into Vandalizer. The workflow runs as two steps (parallel extraction and consolidation):
 
-**Step 1 — Parallel Extraction (9 Prompt tasks):** each task receives the full uploaded document via `input_sources: [step_input, workflow_documents]` and emits a **JSON fragment** for its block. (This is the Variant A handoff format. The side-by-side `rfa-checklist-extraction-md` workflow tests an alternative where each task emits a Markdown chunk instead.) Every task carries explicit anti-hallucination guards — ground each value in the document, use "unclear"/null rather than guessing, never infer a typical federal value.
+**Step 1 — Parallel Extraction (9 Prompt tasks):** each task receives the full uploaded document via `input_sources: [workflow_documents]` and emits a **JSON fragment** for its block. (This is the Variant A handoff format. The side-by-side `rfa-checklist-extraction-md` workflow tests an alternative where each task emits a Markdown chunk instead.) Every task carries explicit anti-hallucination guards — ground each value in the document, use "unclear"/null rather than guessing, never infer a typical federal value.
 
 | Task | Block produced |
 |---|---|
@@ -80,14 +80,13 @@ Workflow-local cases should target the nine-section presence (Red Flags first), 
 
 ## Recommended knowledge bases
 
-When attaching a `KnowledgeBaseQuery` step manually in Vandalizer (post-import), the following institutional knowledge bases provide useful context:
+The workflow ships without a Knowledge Base step (removed in v1.0.0 — it was inert on import because Vandalizer blanks `kb_uuid` by design). When adding a `KnowledgeBaseQuery` step manually in Vandalizer (post-import), the following institutional knowledge bases provide useful context:
 
 - **Primary:** OMB Uniform Guidance (2 CFR 200)
 - **Agency-specific (attach the one(s) that match the RFA's sponsor):** NSF PAPPG Reference, NIH Grants Policy Statement, DOE Financial Assistance Rules, DOD Research Funding & DFARS
 - **When proposal has human subjects:** Human Subjects Protection (Common Rule)
 - **When research-security-relevant:** Export Control (EAR & ITAR)
 
-KBs are not auto-wired by the workflow import — Vandalizer's importer blanks `kb_uuid` references by design. Attach them by adding a `KnowledgeBaseQuery` step manually in the Vandalizer UI after import.
 
 ## Building
 

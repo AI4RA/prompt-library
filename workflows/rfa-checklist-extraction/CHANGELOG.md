@@ -6,6 +6,15 @@ All notable changes to this workflow. Versions follow semver adapted to workflow
 - **MINOR** — prompt body tracking a referenced component MINOR, or additive step/task options that preserve the existing operator flow.
 - **PATCH** — step or task display-name edits, description polish, non-semantic manifest cleanup.
 
+## [1.0.0] — 2026-08-13
+
+- **MAJOR — Knowledge Base lookup step removed** (step structure 3 → 2). The optional `KnowledgeBaseQuery` Step 0 (added in v0.4.0) is gone:
+  - KBs were never auto-wired on import anyway — Vandalizer's importer blanks `kb_uuid` by design, so the operator always had to attach one manually, which is exactly what the README's "Recommended knowledge bases" section documents. The checked-in step was inert on a fresh import and confused operators comparing the imported workflow against live Vandalizer copies (which never carried it).
+  - The nine parallel extraction tasks now read `input_sources: [workflow_documents]` only; the vestigial `step_input` entry (empty with no preceding step) is removed. The consolidation task is unchanged (`input_source: step_input` — it consumes the nine fragments).
+  - Operators who want Uniform Guidance / PAPPG / agency-policy context can still add a `KnowledgeBaseQuery` step manually in the Vandalizer UI after import, per the README.
+  - No prompt changes; `validation_plan` unchanged (CHK-01 – CHK-07).
+- Component pin unchanged at `rfa-checklist-extraction-udm@0.1.0`.
+
 ## [0.8.0] — 2026-08-13
 
 - **Announcement-mandated internal structure (`mandated_sections`).** Surfaced by a real run against NSF 25-541 (PCL Test Bed): the solicitation's Section V.A supplements the PAPPG with ten named Project Description sections (Science drivers; Node capabilities with five numbered sub-parts including the Instrument Inventory Table and its three required columns; Cross-Node Collaborations; Training and education; Broadening access; Metrics; Management Plan with a six-milestone Implementation Timeline; Plan for Post-Award Continued Operation) — and the v0.7.0 extraction compressed all of it into one run-on `description` sentence plus the pointer *"Must include all specified subsections listed in Section V.A"*, which is exactly what the checklist is supposed to replace.

@@ -189,6 +189,21 @@ never surfaced the RFA-unique required sections.
   structure from the sponsor backbone (rule: mandated_sections
   null unless the announcement prescribes it).
 
+#### v0.8.0 → v1.0.0 (2026-08-13)
+
+**Not a test-surfaced bug — user decision.** MAJOR bump: removed
+the optional Knowledge Base lookup Step 0 (added v0.4.0). The RA's
+live Vandalizer copy never carried it, KBs are never auto-wired on
+import anyway (Vandalizer blanks kb_uuid by design, so the step was
+inert until an operator manually attached a KB), and the extra step
+confused comparison between the repo-built JSON and the live copy.
+Extraction tasks now read input_sources: [workflow_documents] only
+(vestigial step_input removed); consolidation unchanged; no prompt
+changes; validation_plan unchanged. Operators can still add a
+KnowledgeBaseQuery step manually post-import, per the README's
+Recommended knowledge bases section. The pending v0.8.0 NSF 25-541
+re-test should be run against this v1.0.0 JSON instead.
+
 ### `workflows/foa-checklist-extraction`
 
 **Status**: ⚠️ v0.3.0 import-ready but not yet re-tested by user.
