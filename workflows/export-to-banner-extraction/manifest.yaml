@@ -1,218 +1,634 @@
 # Authored source for the Export to Banner Award Extraction Vandalizer workflow.
 #
-# === Topology (v0.2.0, Variant A + KB injection) ===
+# === Topology (v1.0.0, Variant A + FOATEXT engine, NO KB step) ===
 #
-# v0.2.0 changes vs. v0.1.0:
-#   1. Parallel Extraction tasks converted to Prompt tasks.
-#   2. Output contract: RA-friendly Markdown Export to Banner Reference
-#      Summary (seven SECTIONs per source consolidation.md).
-#   3. Step 0 KnowledgeBaseQuery added — UI OSP is the primary KB
-#      (covers Banner conventions).
+# v1.0.0 (2026-08-13) bundles the RA-feedback rework (Tiers 1-3, from
+# Michele Mattoon's review of the v0.2.0 output) WITH removal of the
+# optional Knowledge Base lookup step. MAJOR: step structure 3 -> 2.
+#
+#   KB removal (mirrors rfa-checklist-extraction v1.0.0 / PR #50):
+#     - The optional KnowledgeBaseQuery Step 0 is removed. It was inert
+#       on a fresh import (Vandalizer blanks kb_uuid by design, so the
+#       operator always had to attach a KB manually) and confused
+#       operators comparing the imported workflow to their live copies.
+#       We will reintroduce KBs once we settle on the right approach.
+#     - The parallel extraction tasks now read
+#       input_sources: [workflow_documents] only (the vestigial
+#       step_input contributed nothing with no preceding step).
+#     - Prompts no longer claim to receive "KB chunks". Sponsor terms &
+#       conditions and the University of Idaho determination guides are
+#       honored WHEN uploaded as workflow documents; the award-over-T&C
+#       precedence rule is retained as a latent rule for that case.
+#
+#   Tier 1 — additive fields (low risk):
+#     - Award Category + funding-source classification (NEW).
+#     - Subrecipients present Y/N + list (NEW).
+#     - Co-PI / Co-I / Co-PD names + Senior/Key Personnel names (NEW).
+#     - Program Income present Y/N + amount (was a single scalar).
+#     - SF-270 required Y/N (NEW).
+#     - Cost-share category detail table (NEW, conditional).
+#     - "Capture ALL variants" for date ranges, sponsors, and awarded
+#       amounts (RA: "the award may mention a couple ... we want them all").
+#     - Provenance: every extracted value cites where in the input
+#       documents it was found (RA Output Note).
+#     - Deliverable reordered to follow the RA's prioritized data-point
+#       list from E2B Workflow Data Points.xlsx.
+#
+#   Tier 2 — decision logic (rubric-driven determinations):
+#     - Award Type, Award Category, Indirect Cost Basis, and Billing Type
+#       are DETERMINED from project attributes + University of Idaho
+#       determination rubrics, NOT copied from the literal word the
+#       sponsor used (RA: sponsors mislabel documents). Each determination
+#       carries a rationale + source.
+#     - Award Type enum corrected to the University of Idaho Banner set:
+#       Grant, Cooperative Agreement, Contract, Letter Award, Gift
+#       Funding, Purchase Order (dropped "Subcontract"; subawards are
+#       captured via the subrecipients fields instead).
+#     - Explicit AWARD-OVER-T&C PRECEDENCE rule (RA + xlsx A1: when the
+#       award document and any sponsor terms & conditions provided
+#       conflict, the AWARD wins).
+#     - NOTE: Michele's exact University of Idaho determination guides
+#       ("how to determine award type / category / indirect basis /
+#       billing type") were not yet in hand at authoring time. The prompts
+#       encode the standard, well-established federal distinctions AND
+#       instruct the model to apply the University of Idaho determination
+#       guide verbatim when it is uploaded as a workflow document. Refine
+#       the rationale blocks once the guides arrive.
+#
+#   Tier 3 — FOATEXT engine (highest value):
+#     - Parallel task extract-foatext-lines scans the award (+ any T&Cs)
+#       against the full Export to Banner FOATEXT line catalog (lines
+#       100-230, sections 5.2-5.8, from FOATEXT Lines - Export To Banner
+#       Form.pdf) and emits ONLY the present/applicable lines with their
+#       line number, standard term, award-specific text, and source
+#       location. Absent terms are omitted (RA rule). This automates the
+#       most labor-intensive part of the analyst's review.
 
 name: Export to Banner Award Extraction
 description: >
-  Uploads a fully-executed federal award document and returns an
-  RA-friendly Markdown Export to Banner Reference Summary covering
-  the seven sections needed to populate VERAS's Export to Banner form:
-  award identification, dates & performance period, sponsor information,
-  budget summary, billing & payment, reporting & compliance, and
-  special terms & FOI items. Mirrors the source
-  ui-insight/ProcessMapping export-to-banner-extraction
-  consolidation.md conventions, including the `[DISCREPANCY - ...]`
-  flag syntax.
+  Uploads a fully-executed award document (optionally alongside the
+  sponsor's general terms & conditions and the University of Idaho
+  determination guides as additional documents) and returns an
+  RA-friendly Markdown Export to Banner Reference Summary. Covers the
+  prioritized data points a University of Idaho sponsored-programs
+  analyst needs to populate VERAS's Export to Banner form: award
+  identification & classification (with rubric-driven Award Type /
+  Category determinations), all date ranges, personnel, sponsor(s),
+  budget & financial terms (indirect basis determination, cost-share
+  detail, program income), billing & payment (billing-type
+  determination, SF-270), reporting & compliance, and a scanned FOATEXT
+  line-item section that flags every standard Banner FOATEXT term (lines
+  100-230) present in the award. Every value cites its source in the
+  input documents, and the award document takes precedence over any
+  sponsor terms & conditions on a conflict.
 
-workflow_version: 0.2.0
+workflow_version: 1.0.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-05-20
-updated: 2026-05-22
+updated: 2026-08-13
 
 components:
   - slug: export-to-banner-extraction-udm
     pinned_version: 0.1.0
 
 validation_plan:
-  - id: CHK-01
-    name: Date range consistency
+  - id: etb-sections-complete
+    name: All deliverable sections rendered
+    category: completeness
+    description: >
+      Verify the deliverable renders every required section in order:
+      Award Identification & Classification, Dates & Performance Period,
+      Personnel, Budget & Financial, Billing & Payment, Reporting &
+      Compliance, FOATEXT Line Items, Special Terms, and the Final
+      Verification Checklist. Sections with no data must still render
+      with their empty-state language rather than being dropped.
+  - id: etb-award-type-determination
+    name: Award Type is a determination, not a copied label
     category: accuracy
-    description: Verify award_start_date < award_end_date and performance_period_start <= award_start_date.
-  - id: CHK-02
-    name: Monetary amount formatting
-    category: formatting
-    description: Verify monetary amounts preserve the source document's currency formatting verbatim.
-  - id: CHK-03
-    name: UEI format
-    category: formatting
-    description: Verify UEIs follow the 12-character alphanumeric format when present.
-  - id: CHK-04
-    name: CFDA number format
-    category: formatting
-    description: Verify CFDA number follows XX.XXX format when present.
+    description: >
+      Verify award_type is one of Grant, Cooperative Agreement, Contract,
+      Letter Award, Gift Funding, or Purchase Order, and that it is
+      accompanied by a determination rationale grounded in the project's
+      attributes (substantial involvement, procurement vs. assistance,
+      deliverables to the government, gift/PO instrument), NOT merely the
+      word the sponsor used. Same expectation for Award Category, Indirect
+      Cost Basis, and Billing Type.
+  - id: etb-award-precedence
+    name: Award-over-T&C precedence honored
+    category: content
+    description: >
+      When any sponsor terms & conditions are provided and conflict with
+      the award document, verify the deliverable uses the AWARD document's
+      value and flags the conflict, rather than silently using the T&C
+      value.
+  - id: etb-all-variants-captured
+    name: All date / sponsor / amount variants captured
+    category: completeness
+    description: >
+      When the award mentions more than one date range, more than one
+      sponsor, or more than one awarded amount, verify the deliverable
+      lists them all (all_date_ranges, all_sponsors, all_award_amounts)
+      rather than collapsing to a single value.
+  - id: etb-foatext-line-mapping
+    name: FOATEXT line items map to the catalog with source
+    category: content
+    description: >
+      Verify every FOATEXT Line Items row references a valid line number
+      from the 100-230 catalog, carries award-specific text to paste into
+      Banner FOATEXT, and cites where in the input document the term was
+      found. Standard terms NOT present in the award must be omitted (no
+      empty line rows).
+  - id: etb-provenance-present
+    name: Extracted values cite their source
+    category: content
+    description: >
+      Verify extracted values cite where in the input documents they were
+      found (document + page/section, and a short snippet), at minimum for
+      the determination fields (Award Type, Category, Indirect Basis,
+      Billing Type), the funding amounts, and the FOATEXT line items.
+  - id: etb-monetary-fidelity
+    name: Monetary amounts verbatim
+    category: accuracy
+    description: >
+      Verify monetary amounts preserve the source document's currency
+      formatting verbatim (no rounding, no added/removed separators or
+      cents).
+  - id: etb-flags-and-personnel-present
+    name: Personnel and Y/N flags present
+    category: completeness
+    description: >
+      Verify Co-PI/Co-I/Co-PD names, Senior/Key Personnel names, the
+      Subrecipients Y/N flag, the Program Income Y/N flag plus amount, and
+      the SF-270 Required Y/N flag are each rendered (with their
+      empty-state language when the award is silent), not omitted.
 
 steps:
-  - name: Knowledge Base Context Lookup
-    tasks:
-      - name: kb-context-lookup
-        kind: KnowledgeBaseQuery
-        query: "federal award Banner ERP export FAIN CFDA NAICS sponsor entity classification budget period cost reimbursable letter of credit drawdown invoice payment terms reporting requirements UI institutional Banner FOI text fields"
-        k: 8
-        knowledge_base_hint:
-          title: "University of Idaho Office of Sponsored Programs"
-          description: >
-            Primary KB — contains UI institutional Banner conventions
-            and FOI text-field formatting standards. For agency-
-            specific terms, swap in NSF PAPPG / NIH GPS / DOE / DOD /
-            FAR. When the operator does not attach a KB, the
-            extraction falls back to reading just the uploaded award
-            document.
-
   - name: Parallel Extraction (Prompt)
     tasks:
       - name: extract-award-identification
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
-          You are extracting award identification fields from a
-          fully-executed federal award document. You receive the
-          uploaded document AND any KB chunks.
+          You are extracting AWARD IDENTIFICATION & CLASSIFICATION fields
+          from a fully-executed award document. You receive the uploaded
+          award document (and, when uploaded, any sponsor terms &
+          conditions and University of Idaho determination guides).
 
-          Be 100% accurate. Quote identifiers verbatim. Use null when
-          absent.
+          ## PRECEDENCE (critical)
+          If the award document and any sponsor terms & conditions
+          provided conflict on a value, USE THE AWARD DOCUMENT'S VALUE and
+          note the conflict in that field's provenance. The award always
+          wins.
 
-          Emit a JSON object with: award_number (FAIN), project_title,
-          pi_name, award_type (one of "Grant", "Cooperative Agreement",
-          "Contract", "Subcontract"), is_pass_through (boolean),
-          prime_sponsor_name (STRING, populated only when is_pass_through
-          is true), cfda_number (STRING in XX.XXX format),
-          naics_code (STRING), federal_agency_name (STRING),
-          action_type (STRING — "New", "Continuation", "Amendment").
+          ## Accuracy
+          Be 100% accurate. Quote identifiers verbatim. Use null when a
+          field is genuinely absent — never guess an identifier.
+
+          ## DETERMINATION vs. word-matching (critical — RA feedback)
+          Sponsors frequently MISLABEL documents (a document titled
+          "Contract" is often really a Cooperative Agreement or Grant).
+          Do NOT copy the literal word the sponsor used. DETERMINE the
+          classification from the instrument's attributes. If a University
+          of Idaho determination guide ("how to determine award type /
+          category") is included in the uploaded documents, APPLY IT
+          verbatim and cite it in the rationale. Otherwise apply these
+          standard federal distinctions:
+
+          award_type — choose exactly one:
+          - "Grant": financial ASSISTANCE to advance a public purpose;
+            NO substantial involvement by the awarding agency.
+          - "Cooperative Agreement": financial ASSISTANCE WITH
+            substantial agency involvement (agency collaboration,
+            approval of phases/stages, embedded federal personnel). Look
+            for "substantial involvement" language even if the document
+            is titled "contract".
+          - "Contract": PROCUREMENT — the sponsor acquires goods/services
+            for its own direct benefit/use; FAR-based; a Statement of
+            Work with deliverables owed TO the sponsor; "contractor"
+            language, FAR/DFARS clauses.
+          - "Letter Award": a short award LETTER (not a full agreement),
+            common for industry / foundation awards.
+          - "Gift Funding": philanthropic funds with NO exchange of
+            deliverables/consideration (often via the University of Idaho
+            Foundation); non-exchange.
+          - "Purchase Order": a PO instrument (fee-for-service), usually
+            carrying a PO number.
+          WRONG: document says "Contract Agreement" at the top -> emit
+          "Contract". CORRECT: the same document has assistance language,
+          no FAR clauses, and describes agency substantial involvement ->
+          emit "Cooperative Agreement" and explain why in
+          award_type_rationale.
+
+          award_category — the University of Idaho Banner award category.
+          If the University of Idaho category-determination guide is
+          uploaded, select the exact category and cite it. Otherwise emit
+          your best category label as a STRING and ALWAYS emit
+          funding_source_classification (used by Banner to pick
+          federal/state/other revenue codes).
+
+          ## Fields — emit a JSON object with:
+          - award_number (STRING — the University of Idaho / Banner award
+            number or FAIN)
+          - prime_sponsor_award_id (STRING — the prime sponsor's award /
+            contract number, when different from award_number; else null)
+          - project_title (STRING — full/long title, verbatim)
+          - pi_name (STRING — recognize "PI", "Principal Investigator",
+            "Project Director", "PD", "Grantee Project Director",
+            "Recipient Project Manager")
+          - co_pi_names (ARRAY of STRINGS — Co-PI / Co-I / Co-PD; [] if none)
+          - key_personnel_names (ARRAY of STRINGS — Senior/Key Personnel;
+            [] if none)
+          - award_type (one of the six enum values above)
+          - award_type_rationale (STRING — WHY, from attributes; cite the
+            University of Idaho guide if applied)
+          - award_category (STRING)
+          - funding_source_classification (one of "Federal", "State",
+            "Local", "Private/Industry", "Foundation/Non-Profit", "Other")
+          - action_type (one of "New", "Continuation", "Amendment",
+            "Modification", "Revision", or null)
+          - cfda_number (STRING in XX.XXX format, or "MULTIPLE", or null)
+          - additional_cfda_numbers (ARRAY of STRINGS; [] if none)
+          - naics_code (STRING or null)
+          - federal_agency_name (STRING or null)
+          - is_pass_through (BOOLEAN)
+          - prime_sponsor_name (STRING — only when is_pass_through is true)
+          - subrecipients_present (BOOLEAN — does the award mention any
+            subrecipient/subaward/subcontract?)
+          - subrecipients (ARRAY of {name, amount}; [] if none)
+          - provenance (ARRAY of {field, source} — for EVERY non-null
+            field above, where source is "<document> <page/section> —
+            '<short verbatim snippet>'". For determined fields write
+            "(determination) <evidence>".)
 
           ## Output
-
-          Emit exactly one JSON object. No preamble, no markdown
-          fences.
+          Emit exactly one JSON object. No preamble, no markdown fences.
 
       - name: extract-dates-and-performance
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
-          You are extracting date fields and performance period from a
-          federal award document. You receive the uploaded document AND
-          any KB chunks.
+          You are extracting DATE fields and performance period from an
+          award document. You receive the uploaded award document (and,
+          when uploaded, any sponsor terms & conditions).
 
-          Dates use ISO YYYY-MM-DD when unambiguous; preserve the
-          document's stated form otherwise. Use null when absent.
+          ## PRECEDENCE
+          If the award and any sponsor T&Cs provided conflict, use the
+          AWARD document's dates and note the conflict in provenance.
 
-          Emit a JSON object with: award_start_date, award_end_date,
-          performance_period_start, performance_period_end (all
-          STRINGS), budget_periods (JSON ARRAY of {period_number,
-          start_date, end_date, amount}), is_multi_year (BOOLEAN or
-          null).
+          ## Capture ALL date ranges (RA feedback)
+          An award commonly states MORE THAN ONE date range — requested
+          vs. awarded project period, budget period, performance period,
+          period of performance for an increment, etc. Capture EVERY
+          distinct range you find; do not collapse them to one.
+
+          Dates use ISO YYYY-MM-DD when unambiguous; otherwise preserve
+          the document's stated form. Use null when absent.
+
+          ## Fields — emit a JSON object with:
+          - award_start_date (STRING) — the awarded project start
+          - award_end_date (STRING) — the awarded project end
+          - performance_period_start (STRING or null)
+          - performance_period_end (STRING or null)
+          - budget_period_start (STRING or null — when distinct from the
+            project period)
+          - budget_period_end (STRING or null)
+          - all_date_ranges (ARRAY of {label, start_date, end_date} —
+            EVERY distinct range found, each labeled with what it is,
+            e.g. "Requested project period", "Awarded project period",
+            "Current budget period")
+          - budget_periods (ARRAY of {period_number, start_date,
+            end_date, amount}; [] if not incremental)
+          - is_multi_year (BOOLEAN or null)
+          - is_incremental (BOOLEAN or null — funded in increments over
+            time)
+          - provenance (ARRAY of {field, source})
 
           ## Output
-
-          Emit exactly one JSON object. No preamble, no markdown
-          fences.
+          Emit exactly one JSON object. No preamble, no markdown fences.
 
       - name: extract-sponsor-and-entity
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
-          You are extracting sponsor and entity classification from a
-          federal award document.
+          You are extracting SPONSOR and ENTITY classification from an
+          award document. You receive the uploaded award document (and,
+          when uploaded, any sponsor terms & conditions).
+
+          ## PRECEDENCE
+          Award document wins over any sponsor T&Cs provided on a
+          conflict; note it in provenance.
+
+          ## Capture ALL sponsors (RA feedback)
+          An award may name MORE THAN ONE sponsor (direct/originating
+          sponsor, prime sponsor, pass-through entity, co-funders).
+          Capture them ALL in all_sponsors; do not collapse.
 
           Be 100% accurate.
 
-          Emit a JSON object with: sponsor_name (STRING, full legal
-          name), sponsor_entity_type (one of "Federal", "State Government",
-          "Non-Profit", "Private Industry", "Foundation", "University",
-          "Other"), classification_evidence (STRING — short note on how
-          the entity type was determined), federal_agency_hierarchy
-          (STRING), sponsor_address (STRING), sponsor_uei (STRING —
-          12-char alphanumeric), awardee_organization (STRING),
-          awardee_uei (STRING), grants_officer_name (STRING),
-          program_officer_name (STRING).
+          ## Fields — emit a JSON object with:
+          - sponsor_name (STRING — full legal name of the direct sponsor
+            we contract with)
+          - all_sponsors (ARRAY of {name, role, entity_type} — role is
+            one of "Direct/Originating", "Prime", "Pass-Through",
+            "Co-Funder"; list every sponsor named)
+          - sponsor_entity_type (one of "Federal", "State Government",
+            "Local Government", "Non-Profit", "Private Industry",
+            "Foundation", "University", "Other")
+          - classification_evidence (STRING — how the entity type was
+            determined)
+          - federal_agency_hierarchy (STRING or null — e.g., "USDA >
+            NIFA")
+          - sponsor_address (STRING or null)
+          - sponsor_uei (STRING — 12-char alphanumeric — or null)
+          - awardee_organization (STRING)
+          - awardee_uei (STRING or null)
+          - grants_officer_name (STRING or null)
+          - program_officer_name (STRING or null)
+          - provenance (ARRAY of {field, source})
 
           ## Output
-
-          Emit exactly one JSON object. No preamble, no markdown
-          fences.
+          Emit exactly one JSON object. No preamble, no markdown fences.
 
       - name: extract-budget-and-financial
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
-          You are extracting budget and financial terms from a federal
-          award document.
+          You are extracting BUDGET and FINANCIAL terms from an award
+          document. You receive the uploaded award document (and, when
+          uploaded, any sponsor terms & conditions and University of Idaho
+          determination guides).
 
-          Be 100% accurate. Monetary fields preserve $X,XXX.XX format
-          verbatim. Use null when absent.
+          ## PRECEDENCE
+          Award document wins over any sponsor T&Cs provided on a
+          conflict; note it in provenance.
 
-          Emit a JSON object with: total_award_amount (STRING),
-          total_anticipated_amount (STRING or null),
-          budget_categories (JSON ARRAY of {category, approved_amount}),
-          total_direct_costs (STRING), total_indirect_costs (STRING),
-          fa_rate (STRING — e.g., "47.5%"), fa_rate_base (one of
-          "MTDC", "TDC", "Salary & Wages", "Other", or null),
-          fa_status (one of "Full Rate", "Reduced", "Waived", or null),
-          is_fa_waived (BOOLEAN or null), cost_share_amount (STRING or
-          null), cost_share_type (STRING or null), program_income
-          (STRING or null).
+          ## Accuracy
+          Be 100% accurate. Monetary fields preserve the source
+          $X,XXX.XX format VERBATIM (no rounding). Use null when absent.
+
+          ## Capture ALL awarded amounts (RA feedback)
+          An award may state MORE THAN ONE amount — this action/increment,
+          cumulative total, total anticipated, obligated to date, etc.
+          Capture them ALL in all_award_amounts; do not collapse.
+
+          ## Indirect Cost Basis determination (Tier 2)
+          Determine fa_rate_base from the awarded budget, not from a
+          stray word. If the University of Idaho indirect-basis
+          determination guide is uploaded, apply it and cite it. Standard
+          rule: if there is ANY waived overhead (even fully waived), the
+          basis is MTDC ("MTDC-A: Standard"), because waived OH is always
+          computed on the University of Idaho federally negotiated rate.
+          Record the reasoning in fa_rate_base_rationale.
+
+          ## Cost-share detail (Tier 1)
+          If cost share / matching applies, capture a category breakdown
+          in cost_share_categories (mirror the budget category table),
+          tagging each row's source (University of Idaho vs. other/
+          third-party) when stated.
+
+          ## Fields — emit a JSON object with:
+          - total_award_amount (STRING)
+          - all_award_amounts (ARRAY of {label, amount} — every distinct
+            amount, labeled)
+          - total_anticipated_amount (STRING or null)
+          - budget_categories (ARRAY of {category, approved_amount})
+          - total_direct_costs (STRING or null)
+          - total_indirect_costs (STRING or null)
+          - fa_rate (STRING — e.g., "47.5%" — or null)
+          - fa_rate_base (one of "MTDC", "TDC", "Salary & Wages", "Other",
+            or null)
+          - fa_rate_base_rationale (STRING)
+          - fa_status (one of "Full Rate", "Reduced", "Waived", or null)
+          - is_fa_waived (BOOLEAN or null)
+          - waived_oh_amount (STRING or null)
+          - cost_share_present (BOOLEAN)
+          - cost_share_amount (STRING or null)
+          - cost_share_type (STRING or null — e.g., "Mandatory",
+            "Voluntary committed")
+          - cost_share_categories (ARRAY of {category, amount, source};
+            [] if none)
+          - program_income_present (BOOLEAN)
+          - program_income_amount (STRING or null)
+          - provenance (ARRAY of {field, source})
 
           ## Output
-
-          Emit exactly one JSON object. No preamble, no markdown
-          fences.
+          Emit exactly one JSON object. No preamble, no markdown fences.
 
       - name: extract-billing-and-payment
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
-          You are extracting billing and payment terms from a federal
-          award document.
+          You are extracting BILLING and PAYMENT terms from an award
+          document, formatted to fill the University of Idaho Export to
+          Banner form (RA feedback: provide billing in the form's shape).
+          You receive the uploaded award document (and, when uploaded,
+          any sponsor terms & conditions and University of Idaho
+          determination guides).
 
-          Emit a JSON object with: billing_type (one of "Cost Reimbursement",
-          "Fixed Price", "Letter of Credit", "Milestone"), billing_frequency
-          (STRING), billing_address (STRING), invoice_email (STRING),
-          pms_loc_code (STRING), payment_terms (STRING),
-          invoice_requirements (JSON ARRAY of STRINGS),
-          final_invoice_deadline (STRING), billing_contact (STRING).
+          ## PRECEDENCE
+          Award document wins over any sponsor T&Cs provided on a
+          conflict; note it in provenance.
+
+          ## Billing Type determination (Tier 2 — Banner form 4.3-4.5)
+          Determine billing_type from the payment mechanism, not a stray
+          word. If the University of Idaho billing-type determination
+          guide is uploaded, apply it and cite it. Standard rules:
+          - billing_type: "Cost Reimbursement" -> Banner billing type
+            monthly or quarterly; "Letter of Credit" -> LOC; fixed-price
+            / lump-sum -> "Fixed Price"; milestone-based -> "Milestone".
+          - minimum_billing: $0 for letters of credit AND fixed-amount
+            (lump-sum) awards; $500 for non-LOC cost-reimbursable UNLESS
+            the sponsor specifies a lower amount OR the award is $1,000 or
+            less (then use that). Record which rule fired in
+            minimum_billing_rationale.
+          - billing_frequency: Bi-Weekly for letters of credit; Monthly
+            or Quarterly for cost-reimbursable; all others (fixed-price /
+            periodic scheduled) per the award. Frequency is tied to
+            billing_type BUT the award can OVERRIDE it — if the award
+            states an explicit cadence, use that and note the override.
+
+          ## SF-270 (Tier 1)
+          sf270_required: does the award (or any T&Cs provided) require an
+          SF-270 request for payment? Boolean.
+
+          ## Fields — emit a JSON object with:
+          - pms_loc_code (STRING or null)
+          - billing_type (one of "Cost Reimbursement", "Fixed Price",
+            "Letter of Credit", "Milestone", or null)
+          - billing_type_rationale (STRING)
+          - minimum_billing (STRING — e.g., "$0", "$500")
+          - minimum_billing_rationale (STRING)
+          - billing_frequency (STRING or null)
+          - billing_frequency_rationale (STRING)
+          - billing_address (STRING or null)
+          - invoice_email (STRING or null)
+          - payment_terms (STRING or null)
+          - invoice_requirements (ARRAY of STRINGS; [] if none)
+          - sf270_required (BOOLEAN)
+          - final_invoice_deadline (STRING or null)
+          - billing_contact (STRING or null)
+          - uses_special_forms (BOOLEAN — electronic invoicing / special
+            forms required?)
+          - provenance (ARRAY of {field, source})
 
           ## Output
-
-          Emit exactly one JSON object. No preamble, no markdown
-          fences.
+          Emit exactly one JSON object. No preamble, no markdown fences.
 
       - name: extract-reporting-and-special
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
-          You are extracting reporting requirements and special terms
-          from a federal award document.
+          You are extracting REPORTING requirements and SPECIAL terms
+          from an award document. You receive the uploaded award document
+          (and, when uploaded, any sponsor terms & conditions).
 
-          Emit a JSON object with: reporting_requirements (JSON ARRAY
-          of {report_type, frequency, due_date_or_timing, submission_method}),
-          record_retention_period (STRING),
-          carry_forward_policy (STRING),
-          prior_approval_requirements (JSON ARRAY of STRINGS),
-          special_terms (JSON ARRAY of STRINGS — terms beyond standard
-          federal requirements; publication restrictions; IP/data
-          provisions; non-standard terms),
-          closeout_requirements (STRING),
-          governing_regulations (JSON ARRAY of STRINGS — 2 CFR 200,
-          RTCs, agency-specific cited regs).
+          ## PRECEDENCE
+          Award document wins over any sponsor T&Cs provided on a
+          conflict; note it in provenance.
+
+          Emit a JSON object with:
+          - reporting_requirements (ARRAY of {report_type, frequency,
+            due_date_or_timing, submission_method})
+          - record_retention_period (STRING or null)
+          - carry_forward_policy (STRING or null)
+          - prior_approval_requirements (ARRAY of STRINGS)
+          - special_terms (ARRAY of STRINGS — terms beyond standard
+            federal requirements AND beyond what the FOATEXT scan
+            captures; publication/IP/data restrictions; non-standard
+            terms)
+          - closeout_requirements (STRING or null)
+          - governing_regulations (ARRAY of STRINGS — 2 CFR 200, agency
+            RTCs, cited regs)
+          - provenance (ARRAY of {field, source})
 
           ## Output
+          Emit exactly one JSON object. No preamble, no markdown fences.
 
-          Emit exactly one JSON object. No preamble, no markdown
-          fences.
+      - name: extract-foatext-lines
+        input_sources:
+          - workflow_documents
+        prompt_inline: |
+          You are the FOATEXT SCANNER for the University of Idaho Export
+          to Banner form. The analyst normally scans every award by hand
+          against ~130 standard boilerplate "lines" (sections 5.2-5.8 of
+          the Export to Banner form) to decide which apply — the most
+          labor-intensive part of the review. Your job is to do that scan
+          for them.
+
+          You receive the uploaded award document (and, when uploaded, any
+          sponsor terms & conditions).
+
+          ## PRECEDENCE
+          If the award and any sponsor T&Cs provided conflict, the AWARD
+          wins. Note the conflict in the row's source_location.
+
+          ## What to do
+          Scan the award (and any T&Cs) for evidence of EACH standard term
+          in the catalog below. For every term that IS present/applicable,
+          emit one row with the award-SPECIFIC text an analyst would paste
+          into Banner FOATEXT (fill in the #placeholders# with the actual
+          value from the award — e.g., the actual percentage, date,
+          quantity, email, or agency), plus where you found it. If a term
+          is NOT present in the input documents, OMIT it entirely — do not
+          emit empty/negative rows.
+
+          ## FOATEXT line catalog (line -> standard term)
+          Section 5.2 Financial Unit Billing Information (100-125):
+          - 100 Detailed IOE (itemized expenditure) required with invoice
+          - 101 Payroll report required with invoice
+          - 102 Additional invoice copies required (#quantity#)
+          - 103 Cost share on invoice (excluding voluntary cost share)
+          - 104 Accrual info required on invoice
+          - 105 Accompanying documents (progress report, etc.) with invoice
+          - 106 Special forms / electronic invoicing details
+          - 107 Main Index / Others
+          - 108 Commission or no-CF annual closeout required + #date#
+          - 109 $0 invoice required
+          - 110 Periodic financial reporting required (ALL ASAP awards)
+          - 111 Email invoice to: #email#
+          - 112 PI reporting dates
+          - 113 Specific drawdown or reporting roles
+          - 114 Patent report required — add #frequency#
+          - 115 Negative patent report NOT required
+          - 116 Funds in holding account 220029 / Account #XXXX#
+          - 117-125 Other miscellaneous billing/invoicing instruction
+            (use only for a real award instruction not covered by 100-116)
+          Section 5.3 Allowability (126-140):
+          - 126 No rebudgeting without prior approval
+          - 127 #XX#% rebudgeting allowed
+          - 128 #XX#% rebudget restriction per line item
+          - 129 No capital outlay (equipment over $5,000) without approval
+          - 130 No tuition without approval
+          - 131 No foreign travel / no travel without approval
+          - 132 Other restrictions
+          - 133 90-day pre-award costs taken/allowed
+          - 134 Carry-forward must be requested
+          - 135 No carryforward
+          - 136 Automatic carryforward allowed
+          - 137 Modular award
+          - 138 Stepped F&A rate applies
+          - 139 No NCTE (no-cost time extension) after #date#
+          - 140 No rebudgeting participant support without approval
+          Section 5.4 Subcontract Information (141-150) — one row per
+            subcontractee (name + amount + approval text):
+          - 141-150 Subcontract / subrecipient — add approval text
+          Section 5.5 Other Information (151-164, 170-172):
+          - 151 Federal pass-through agency: #agency#
+          - 152 Additional CFDA numbers: #list#
+          - 153 90-day final
+          - 154 Cost share: UI $#amt#; Other $#amt# (this is the literal
+            Banner form label — keep "UI" here)
+          - 155 Equipment vests with agency
+          - 156 Time extension pending (#date# & #initials#)
+          - 157 Additional funds pending (#date# & #initials#)
+          - 158 Final in 30 days or less
+          - 159 Final in 45 days
+          - 160 Final in 60 days
+          - 161 Special F&A distribution #%#
+          - 162 No F&A return on waived OH
+          - 163 Multi-year project with incremental funds
+          - 164 NSF survey / HERD survey discipline: #discipline# (if
+            multiple, use the highest-percentage one)
+          - 170 Part of #XXX#-CESU
+          - 171 Equipment transfer: #XXXXXX#
+          - 172 Additional record retention (over 3 years)
+          Section 5.6 Compliance (165-169):
+          - 165 IACUC applicable
+          - 166 IRB applicable
+          - 167 IBC biohazard applicable
+          - 168 RAD radiation number / renewal #date#
+          - 169 Recombinant DNA applicable
+          Section 5.7 Other Miscellaneous (200-210):
+          - 200 PI/Co-PI change information
+          - 202 Other misc. (free-form)
+          - 203 MFTRP (Malign Foreign Talent Recruitment Program) applies
+          - 204 RCR (Responsible Conduct of Research) applies
+          - 205 FCOI (Financial Conflict of Interest) applies
+          - 206 NIFA TFFA max F&A $#X#
+          - 207 RCSP applies
+          - 208 RST applies
+          - 209 Executive Order 14026 applies
+          - 210 Other Support Training (OST) applies
+          Section 5.8 Additional Miscellaneous (220-230):
+          - 223 NIFA Capacity 5% cap on retirement contributions
+          - 220-230 Other misc. (free-form; use only for a real award term)
+
+          ## Fields — emit a JSON object with:
+          - foatext_lines (ARRAY of {
+              line_number (INTEGER from the catalog),
+              section (STRING — e.g., "5.2 Financial Unit Billing"),
+              standard_term (STRING — the catalog term),
+              award_specific_text (STRING — the exact text to paste into
+                Banner FOATEXT, with #placeholders# filled from the award),
+              source_location (STRING — document + page/section),
+              evidence_snippet (STRING — short verbatim quote from the
+                award/T&Cs proving it)
+            } — ONLY present/applicable lines; [] if none apply)
+
+          ## Output
+          Emit exactly one JSON object. No preamble, no markdown fences.
 
   - name: Consolidation (Markdown deliverable)
     is_output: true
@@ -221,77 +637,89 @@ steps:
         kind: Prompt
         input_source: step_input
         prompt_inline: |
-          You are the consolidation step of the Export to Banner
-          Award Extraction workflow. You receive SIX JSON fragments
-          from the previous step.
+          You are the consolidation step of the Export to Banner Award
+          Extraction workflow. You receive SEVEN JSON fragments from the
+          previous step: award-identification, dates-and-performance,
+          sponsor-and-entity, budget-and-financial, billing-and-payment,
+          reporting-and-special, and foatext-lines.
 
-          Cross-validate the fragments. When values contradict, do
-          NOT alter them — flag with
+          ## PRECEDENCE + DISCREPANCIES
+          The AWARD document takes precedence over any sponsor terms &
+          conditions. When two fragments contradict, do NOT alter the
+          values — flag with
           `[DISCREPANCY - Task X states ___ while Task Y states ___]`
-          in the appropriate section.
+          in the relevant section.
 
-          Render a single RA-friendly Markdown Export to Banner
-          Reference Summary. Mirrors source consolidation.md exactly.
+          ## PROVENANCE (RA Output Note — render the sources)
+          Each fragment carries a `provenance` array and the foatext rows
+          carry `source_location` / `evidence_snippet`. Surface the
+          source so the analyst can verify. Render provenance as a short
+          italic parenthetical after a value — `_(source: <doc> <loc>)_`
+          — for the determination fields (Award Type, Award Category,
+          Indirect Basis, Billing Type), the funding amounts, and any
+          flagged item; and as a **Source** column in the FOATEXT and
+          Reporting tables. When a field has no provenance, omit the
+          parenthetical (do NOT write "source: not specified").
+
+          ## ORDERING (RA Output Note)
+          The deliverable follows the RA's prioritized data-point order
+          (from E2B Workflow Data Points.xlsx), grouped into the sections
+          below for the Banner form.
 
           ## CRITICAL — ALWAYS RENDER THE DELIVERABLE
+          Render the FULL Markdown structure (every section below), EVEN
+          WHEN some fields are null/empty/sparse. NEVER refuse with
+          apologetic prose. Substitution rules:
+          - Required scalar fields: "Not specified in the document".
+          - Optional table cells: "—" (em dash).
+          - Empty arrays: the section's empty-state language below.
+          If EVERY field across ALL fragments is null, STILL render the
+          full structure with placeholders and append at the very end:
 
-          You MUST render the FULL Markdown deliverable structure (every
-          section listed below), EVEN WHEN some fragment fields arrive
-          as null, empty, missing, or sparse. NEVER refuse to render
-          with apologetic prose like "The provided context does not
-          contain the required information." That output is unusable —
-          the operator needs the full structure with placeholders so
-          they can see which fields need to be chased.
-
-          Substitution rules when a field is null or missing:
-          - Required scalar fields: substitute the literal string
-            "Not specified in the document".
-          - Optional table cells: substitute "—" (em dash).
-          - Empty arrays: render the section with its empty-state
-            language already specified below (e.g., "No items identified",
-            "Defers to federal defaults", "None identified beyond
-            standard federal requirements").
-
-          If EVERY field across ALL upstream fragments is null (which
-          means the document genuinely contained nothing extractable
-          OR the document was not attached to the run), STILL render
-          the full Markdown structure with "Not specified in the
-          document" placeholders throughout, AND append a single line
-          at the very end of the deliverable:
-
-          > ⚠️ The upstream extraction returned no data from the
-          > uploaded document. Verify the document was attached and
-          > re-run the workflow.
+          > ⚠️ The upstream extraction returned no data from the uploaded
+          > document. Verify the document was attached and re-run.
 
           ## Required structure (in this exact order)
 
           # Export to Banner Reference Summary: <award_number>
 
-          ### SECTION 1: AWARD IDENTIFICATION
+          > **Input precedence:** the award document governs; any sponsor
+          > terms & conditions provided fill gaps and are overridden by
+          > the award on any conflict.
 
-          - **Award Number / FAIN:** <award_number>
-          - **CFDA Number:** <cfda_number or "Not specified">
-          - **NAICS Code:** <naics_code or "Not specified">
+          ### SECTION 1: AWARD IDENTIFICATION & CLASSIFICATION
+
           - **Full Project Title:** <project_title>
           - **Principal Investigator:** <pi_name>
-          - **Award Type:** <award_type>
+          - **Agency / Sponsor(s):** <sponsor_name>; list every entry in
+            all_sponsors as "<name> (<role>)" when more than one
+          - **Award Type:** <award_type> — _Determination: <award_type_rationale>_ _(source: ...)_
+          - **Award Category:** <award_category> (Funding source: <funding_source_classification>) _(source: ...)_
+          - **Prime Sponsor Award ID:** <prime_sponsor_award_id or "Not specified">
+          - **Subrecipients:** <"Yes" / "No" from subrecipients_present>;
+            when Yes, list each subrecipients entry as "<name> — <amount>"
+          - **Award Number / FAIN:** <award_number>
+          - **Assistance Listing / CFDA:** <cfda_number>; when
+            additional_cfda_numbers non-empty, append "plus <list>"
+          - **NAICS Code:** <naics_code or "Not specified">
           - **Action Type:** <action_type or "Not specified">
-          - **Federal Awarding Agency:** <federal_agency_name>
-          - **Federal Agency Hierarchy:** <federal_agency_hierarchy or "Not specified">
-          - **Pass-Through Status:** <"Direct Award" if !is_pass_through else "Pass-Through from " + prime_sponsor_name>
+          - **Federal Awarding Agency:** <federal_agency_name or "Not specified">
+          - **Pass-Through Status:** <"Direct Award" if !is_pass_through
+            else "Pass-Through from " + prime_sponsor_name>
 
           ---
 
           ### SECTION 2: DATES & PERFORMANCE PERIOD
 
-          | Field | Date |
-          |---|---|
-          | Award Start Date | <award_start_date> |
-          | Award End Date | <award_end_date> |
-          | Performance Period Start | <performance_period_start> |
-          | Performance Period End | <performance_period_end> |
+          | Date Range | Start | End |
+          |---|---|---|
 
-          Note: <"Single-period award" if !is_multi_year else "Multi-year incremental award with N periods">
+          One row per all_date_ranges entry (label, start, end). If
+          all_date_ranges is empty, render Award Start/End and
+          Performance Start/End as rows. Then:
+
+          Note: <"Single-period award" if !is_multi_year else "Multi-year
+          award"> <"; funded in increments" if is_incremental>
 
           When budget_periods is non-empty, render a sub-table:
 
@@ -300,49 +728,60 @@ steps:
 
           ---
 
-          ### SECTION 3: SPONSOR INFORMATION
+          ### SECTION 3: PERSONNEL
 
-          - **Sponsor Legal Name:** <sponsor_name>
-          - **Sponsor Entity Type:** <sponsor_entity_type>
-          - **Classification Evidence:** <classification_evidence or "Per Federal Agency designation">
-          - **Sponsor Address:** <sponsor_address or "Not specified">
-          - **Sponsor UEI:** <sponsor_uei or "Not specified">
-          - **Awardee Organization:** <awardee_organization>
-          - **Awardee UEI:** <awardee_uei or "Not specified">
-          - **Grants Officer:** <grants_officer_name or "Not specified">
-          - **Program Officer:** <program_officer_name or "Not specified">
+          - **Co-PI / Co-I / Co-PD:** <comma-list of co_pi_names, or
+            "None identified">
+          - **Senior / Key Personnel:** <comma-list of
+            key_personnel_names, or "None identified">
 
           ---
 
-          ### SECTION 4: BUDGET SUMMARY
+          ### SECTION 4: BUDGET & FINANCIAL
+
+          **Awarded Funding:**
+          - One bullet per all_award_amounts entry ("<label>: <amount>").
+            If empty, show "**Total Award Amount:** <total_award_amount>".
+          - **Total Anticipated:** <total_anticipated_amount or "—">
+
+          **Budget Categories:**
 
           | Category | Amount |
           |---|---|
 
-          One row per budget_categories entry, ending with:
-          | **Total Direct Costs** | **<total_direct_costs>** |
-          | **Total Indirect Costs** | **<total_indirect_costs>** |
+          One row per budget_categories entry, then:
+          | **Total Direct Costs** | **<total_direct_costs or "—">** |
+          | **Total Indirect Costs** | **<total_indirect_costs or "—">** |
           | **Total Award Amount** | **<total_award_amount>** |
 
-          Followed by:
+          - **Indirect Cost Basis & Rate:** <fa_rate or "—"> on <fa_rate_base or "—"> — _Determination: <fa_rate_base_rationale>_ _(source: ...)_
+          - **F&A Status:** <fa_status or "Full Rate"> <"(Waived OH: " + waived_oh_amount + ")" if is_fa_waived>
+          - **Cost Sharing:** <"Yes — " + cost_share_amount + " (" + cost_share_type + ")" if cost_share_present else "No">
 
-          - **F&A Rate and Base:** <fa_rate> <fa_rate_base>
-          - **F&A Status:** <fa_status or "Full Rate">
-          - **Cost Sharing:** <cost_share_amount or "None required"> (<cost_share_type or "—">)
+          When cost_share_categories is non-empty, render:
+
+          | Cost Share Category | Amount | Source |
+          |---|---|---|
+
+          - **Program Income:** <"Yes — " + program_income_amount if
+            program_income_present else "No">
 
           ---
 
           ### SECTION 5: BILLING & PAYMENT
 
-          - **Billing Type:** <billing_type>
-          - **Billing Frequency:** <billing_frequency or "Not specified">
-          - **Invoice Submission:** <billing_address or "Not specified"> (<invoice_email or "no email">)
           - **PMS / LOC Code:** <pms_loc_code or "Not specified">
+          - **Billing Type:** <billing_type> — _Determination: <billing_type_rationale>_ _(source: ...)_
+          - **Minimum Billing:** <minimum_billing> — _<minimum_billing_rationale>_
+          - **Billing Frequency:** <billing_frequency or "Not specified"> — _<billing_frequency_rationale>_
+          - **Invoice Submission:** <billing_address or "Not specified"> (<invoice_email or "no email">)
+          - **SF-270 Required:** <"Yes" / "No" from sf270_required>
+          - **Special / Electronic Invoicing Forms:** <"Yes" if uses_special_forms else "No">
           - **Final Invoice Deadline:** <final_invoice_deadline or "Not specified">
           - **Payment Terms:** <payment_terms or "Not specified">
 
           **Required Invoice Elements:**
-          - <bulleted list from invoice_requirements, or "Not specified">
+          - <bulleted list from invoice_requirements, or "None specified">
 
           ---
 
@@ -350,49 +789,65 @@ steps:
 
           **Required Reports:**
 
-          | Type | Frequency | Due Date |
-          |---|---|---|
+          | Type | Frequency | Due Date | Source |
+          |---|---|---|---|
 
-          One row per reporting_requirements entry.
+          One row per reporting_requirements entry (empty-state:
+          "No reporting requirements identified beyond federal defaults").
 
           - **Record Retention Period:** <record_retention_period or "3 years per 2 CFR 200.334">
           - **Carry-Forward Policy:** <carry_forward_policy or "Standard federal default">
 
           **Key Prior Approval Requirements:**
-          - <bulleted list from prior_approval_requirements>
+          - <bulleted list from prior_approval_requirements, or "None identified beyond standard federal requirements">
 
           **Governing Regulations:**
-          - <bulleted list from governing_regulations>
+          - <bulleted list from governing_regulations, or "Defers to federal defaults (2 CFR 200)">
 
           ---
 
-          ### SECTION 7: SPECIAL TERMS & FOI ITEMS
+          ### SECTION 7: FOATEXT LINE ITEMS
 
-          Banner FOI text fields — copy these into Banner FOI:
+          Banner FOATEXT — copy the text of each present line into the
+          matching FOATEXT sequence in the Export to Banner form. Only
+          lines found in the award are listed.
 
-          - <bulleted list from special_terms>
+          | Line # | Section | Term | Text for Banner FOATEXT | Source |
+          |---|---|---|---|---|
+
+          One row per foatext_lines entry, sorted by line_number.
+          Empty-state (foatext_lines empty): "No standard FOATEXT line
+          terms were found in this award."
+
+          ---
+
+          ### SECTION 8: SPECIAL TERMS
+
+          Non-standard terms beyond the FOATEXT catalog and federal
+          defaults:
+
+          - <bulleted list from special_terms, or "None identified beyond standard federal requirements">
           - **Closeout Requirements:** <closeout_requirements or "Standard federal closeout">
 
           ---
 
           ### FINAL VERIFICATION CHECKLIST
 
-          - [ ] All monetary amounts are exact (no rounding)
-          - [ ] All dates are in their original format
+          - [ ] Award Type / Category / Indirect Basis / Billing Type are DETERMINATIONS (rationale shown), not copied labels
+          - [ ] Award document values used wherever they conflict with any T&Cs provided
+          - [ ] All date ranges, all sponsors, and all awarded amounts captured
+          - [ ] All monetary amounts exact (no rounding); dates in original format
+          - [ ] FOATEXT lines cite valid line numbers with source locations
+          - [ ] Personnel, Subrecipients Y/N, Program Income Y/N, SF-270 Y/N all present
           - [ ] Award number matches across all sections
-          - [ ] No information was lost during consolidation
-          - [ ] "Not specified in the document" preserved where appropriate
-          - [ ] No discrepancies remain unresolved (or all are flagged)
+          - [ ] No discrepancies remain unflagged
 
           ## Rendering rules
-
-          - Bold every label.
-          - Reference document — concise and actionable, not narrative.
+          - Bold every label. Reference document — concise and actionable.
           - Preserve monetary and date formats verbatim.
-          - Use `[DISCREPANCY - Task X states ___ while Task Y states ___]`
-            for any cross-task contradiction.
-          - If any field arrives as a nested JSON object, REWRITE
-            into prose / table.
+          - Render provenance per the PROVENANCE rules above.
+          - If any field arrives as a nested JSON object, REWRITE into
+            prose / table — never pass through `{...}` literals.
           - No JSON code fences around the output.
 
 evals:
