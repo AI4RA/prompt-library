@@ -6,7 +6,7 @@
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Budget Justification Generator",
+      "name": "Budget Justification Generator v0.5.0",
       "description": "Uploads a grant budget form, the project narrative / proposal, and optionally the funding opportunity announcement, and returns a publication-ready RA-friendly Markdown budget-justification narrative document organized in standard R&R Budget / SF-424A category order (A. Senior/Key Personnel through H. Indirect Costs, plus Cost Sharing and Budget Summary). Agency-agnostic — handles SF-424 R&R Detailed (NIH/NSF/DOE-research/DOD-research/EPA-research), SF-424A Non-Construction, numbered-section budget worksheets (HUD-424-CBW, DOI, USDA, ED, EPA, HHS, DOE non-research, DOD non-research, cooperative-agreement variants), and narrative-only budgets. Mirrors the source ui-insight/ProcessMapping budget-justification-generator consolidation.md conventions.",
       "steps": [
         {

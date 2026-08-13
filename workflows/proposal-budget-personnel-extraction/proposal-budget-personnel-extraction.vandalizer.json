@@ -6,7 +6,7 @@
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Proposal Budget Personnel & Compliance Requirements Extraction",
+      "name": "Proposal Budget Personnel & Compliance Requirements Extraction v0.5.0",
       "description": "Uploads a proposal package (budget form, project narrative, sponsor RFA) and returns an RA-friendly Markdown Budget Personnel & Compliance Requirements Analysis covering the personnel summary table, trainee summary with mentoring-plan flag, compliance requirement flags driven by budget content, senior-key-personnel document requirements matrix, subaward document requirements, budget overview table, and cost details. Mirrors the source ui-insight/ProcessMapping proposal-budget-personnel-extraction consolidation.md conventions, including ✅/❌ for compliance flags and ☐ for document checklists.",
       "steps": [
         {

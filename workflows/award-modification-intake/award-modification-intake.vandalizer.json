@@ -6,7 +6,7 @@
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Award Modification Intake & Classification",
+      "name": "Award Modification Intake & Classification v0.2.0",
       "description": "Uploads a federal award amendment / modification document and returns an RA-friendly Markdown Modification Intake Summary covering modification classification, type-specific key-information tables (additional funds / NCE / PI change / rebudget), compliance & conditions, a type-specific processing checklist, pre-filled VERAS form values, and discrepancies & warnings. Mirrors the source ui-insight/ProcessMapping award-modification-intake consolidation.md conventions — including conditional Section 2 tables driven by the classified modification type and the `[DISCREPANCY: ...]` flag syntax for contradictions between tasks.",
       "steps": [
         {

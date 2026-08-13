@@ -6,7 +6,7 @@
   "exported_by": "ai4ra-prompt-library",
   "items": [
     {
-      "name": "Federal Cost Allowability Analysis",
+      "name": "Federal Cost Allowability Analysis v0.1.0",
       "description": "Reviews a single federal-grant expense for cost allowability under the Uniform Guidance (2 CFR 200). Step 1 normalizes the expense, extracts the governing award terms, and classifies whether the expense implicates IRB-, IACUC-, or IBC-regulated activity. Step 2 runs nine single-requirement checks in parallel — period of performance, reasonableness, allocability, consistent treatment, award-terms conformance, federal prior approval, documentation, selected items of cost, and protocol approval. Step 3 synthesizes the findings into one Markdown allowability determination (Allowable, Potential issue, Missing info, or Not allowable). The workflow is decision support and does not replace institutional approval, sponsor prior approval, or final accounting authority.",
       "steps": [
         {
