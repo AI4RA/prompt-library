@@ -2,33 +2,13 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-05-22T00:00:00+00:00",
+  "exported_at": "2026-08-13T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Award Modification Intake & Classification v0.2.0",
+      "name": "Award Modification Intake & Classification v1.0.0",
       "description": "Uploads a federal award amendment / modification document and returns an RA-friendly Markdown Modification Intake Summary covering modification classification, type-specific key-information tables (additional funds / NCE / PI change / rebudget), compliance & conditions, a type-specific processing checklist, pre-filled VERAS form values, and discrepancies & warnings. Mirrors the source ui-insight/ProcessMapping award-modification-intake consolidation.md conventions — including conditional Section 2 tables driven by the classified modification type and the `[DISCREPANCY: ...]` flag syntax for contradictions between tasks.",
       "steps": [
-        {
-          "name": "Knowledge Base Context Lookup",
-          "data": {},
-          "is_output": false,
-          "tasks": [
-            {
-              "name": "KnowledgeBaseQuery",
-              "data": {
-                "name": "kb-context-lookup",
-                "kb_uuid": "",
-                "query": "award modification amendment additional funds no-cost extension NCE PI change rebudget scope change 2 CFR 200.308 prior approval Research Terms and Conditions cumulative total obligated",
-                "k": 8,
-                "_embedded_knowledge_base": {
-                  "title": "OMB Uniform Guidance (2 CFR 200)",
-                  "description": "Primary regulatory KB. For NSF modifications, swap in NSF PAPPG Reference. For NIH modifications, swap in NIH Grants Policy Statement."
-                }
-              }
-            }
-          ]
-        },
         {
           "name": "Parallel Extraction (Prompt)",
           "data": {},
@@ -40,7 +20,6 @@
                 "name": "extract-modification-type-identification",
                 "prompt": "You are identifying the modification type and extracting\ncore identifiers from a federal award modification /\namendment document. You receive the uploaded document AND\nany KB chunks.\n\nBe 100% accurate. Quote identifiers verbatim. Use null when\nabsent. Dates use ISO YYYY-MM-DD when unambiguous.\n\nEmit a JSON object with these keys:\n\n- award_number: STRING (FAIN or sponsor award number).\n- amendment_number: STRING (e.g., \"Amendment 17\", \"Mod 003\",\n  \"L21AC10545-03\").\n- modification_type: one of \"Additional Funds\",\n  \"No-Cost Extension\", \"PI Change\", \"Rebudget\",\n  \"Scope Change\", \"Administrative Change\",\n  \"Combined (multiple types)\".\n- classification_evidence: STRING. 2-3 sentence justification\n  for the modification_type choice, quoting document\n  language.\n- execution_status: one of \"Unilateral (fully executed)\",\n  \"Bilateral (requires signature)\",\n  \"Not specified in the document\".\n- effective_date: STRING (ISO YYYY-MM-DD or document's\n  wording).\n- sponsor_name, pi_name: STRING or null.\n- old_pi, new_pi: STRING (populated ONLY for PI Change /\n  Combined; null otherwise).\n- new_end_date: STRING (populated ONLY for NCE / Combined;\n  null otherwise).\n- pms_code: STRING or null.\n- point_of_contact_changes: STRING or null.\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -51,7 +30,6 @@
                 "name": "extract-financial-impact",
                 "prompt": "You are extracting financial impact from a federal award\nmodification document. You receive the uploaded document AND\nany KB chunks.\n\nBe 100% accurate. Monetary fields are FLAT STRINGS preserving\nthe document's $X,XXX.XX format. Use null when a field is\nabsent — never invent.\n\nEmit a JSON object with these keys:\n\n- modification_amount: STRING ($X). null for non-financial\n  modifications.\n- current_award_amount: STRING ($X). null when absent.\n- total_obligated_amount: STRING ($X). null when absent.\n- fa_rate: STRING (e.g., \"30% MTDC\"). null when absent.\n- fa_amount: STRING ($X). null when absent.\n- budget_breakdown: JSON ARRAY of {category, amount, account_code}\n  objects. Empty when not provided.\n- rebudget_source_account: STRING. null unless rebudget.\n- rebudget_destination_account: STRING. null unless rebudget.\n- rebudget_justification: STRING. Summary of why the rebudget\n  was requested. null unless rebudget.\n- cost_share_changes: STRING. null when no changes.\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -62,7 +40,6 @@
                 "name": "extract-compliance-requirements",
                 "prompt": "You are extracting compliance requirements from a federal\naward modification document. You receive the uploaded\ndocument AND any KB chunks.\n\nBe 100% accurate. Booleans are JSON booleans, not strings.\n\nEmit a JSON object with these keys:\n\n- prior_approval_required: BOOLEAN.\n- approval_date: STRING (ISO YYYY-MM-DD). null when absent.\n- sponsor_conditions: JSON ARRAY of STRINGS. Empty when none.\n- regulatory_references: JSON ARRAY of STRINGS (e.g.,\n  \"2 CFR 200.308\", \"NSF PAPPG VI.D\"). Empty when none.\n- end_date_change: BOOLEAN.\n- requires_financial_unit: BOOLEAN. Rule: true for\n  Additional Funds and NCE; false for Rebudget and most\n  Administrative Changes. Decide from the document.\n- ibc_protocols_required: BOOLEAN or null (null when\n  biosafety not addressed).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -117,7 +94,7 @@
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/award-modification-intake/manifest.yaml",
-        "workflow_version": "0.2.0",
+        "workflow_version": "1.0.0",
         "status": "experimental",
         "components": [
           {

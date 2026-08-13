@@ -2,33 +2,13 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-06-06T00:00:00+00:00",
+  "exported_at": "2026-08-13T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Award Compliance & Financial Overview Extraction v0.2.2",
+      "name": "Award Compliance & Financial Overview Extraction v1.0.0",
       "description": "Uploads a fully-executed federal award notice or agreement and returns an RA-friendly Markdown Award Compliance & Financial Overview covering award header information, financial summary, approved budget & restrictions, governing regulations (prioritized), and key administrative requirements (reporting, prior approval, compliance deadlines). Mirrors the source ui-insight/ProcessMapping award-compliance-extraction consolidation.md conventions.",
       "steps": [
-        {
-          "name": "Knowledge Base Context Lookup",
-          "data": {},
-          "is_output": false,
-          "tasks": [
-            {
-              "name": "KnowledgeBaseQuery",
-              "data": {
-                "name": "kb-context-lookup",
-                "kb_uuid": "",
-                "query": "federal award compliance framework reporting requirements prior approval audit thresholds high-risk conditions financial overview budget periods F&A rate cost sharing 2 CFR 200 Uniform Guidance deliverable schedule",
-                "k": 8,
-                "_embedded_knowledge_base": {
-                  "title": "OMB Uniform Guidance (2 CFR 200)",
-                  "description": "Primary regulatory KB. Swap in agency-specific KBs (NSF PAPPG, NIH GPS, DOE Financial Assistance Rules, DOD Research Funding & DFARS) when the award is from one of those agencies. Pair with Responsible Conduct of Research (RCR) or Export Control (EAR & ITAR) for awards with security or compliance specialty."
-                }
-              }
-            }
-          ]
-        },
         {
           "name": "Parallel Extraction (Prompt)",
           "data": {},
@@ -40,7 +20,6 @@
                 "name": "extract-compliance-framework",
                 "prompt": "You are extracting the compliance framework from a federal\naward document. You receive the uploaded document AND any\nKB chunks.\n\nBe 100% accurate. Quote regulations and deadlines verbatim.\nUse null when absent.\n\nEmit a JSON object with these keys:\n\n- award_number: STRING (FAIN).\n- project_title: STRING.\n- awardee_organization: STRING.\n- performance_period: STRING.\n- reporting_requirements: JSON ARRAY of\n  {report_type, frequency, due_date_or_timing, submission_method}\n  objects.\n- prior_approval_requirements: JSON ARRAY of STRINGS\n  (categorized prior-approval triggers — budget changes >X%,\n  equipment, PI change, NCE, foreign travel).\n- audit_requirements: STRING (Single Audit threshold,\n  cognizant agency).\n- record_retention: STRING (e.g., \"3 years per 2 CFR 200.334\").\n- high_risk_conditions: JSON ARRAY of STRINGS (any\n  special-conditions language indicating high-risk\n  designation). Empty when none.\n- special_conditions: JSON ARRAY of STRINGS (terms beyond\n  standard federal requirements).\n- cross_cutting_federal_requirements: JSON ARRAY of STRINGS\n  (2 CFR 200, agency-specific regs, RTC).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -51,7 +30,6 @@
                 "name": "extract-financial-management",
                 "prompt": "You are extracting financial management details from a\nfederal award document. You receive the uploaded document\nAND any KB chunks.\n\nBe 100% accurate. Monetary fields preserve the document's\n$X,XXX.XX format verbatim. Use null when absent.\n\nEmit a JSON object with these keys:\n\n- total_award_amount: STRING ($X).\n- total_anticipated_amount: STRING ($X). null when absent.\n- budget_periods: JSON ARRAY of\n  {period_number, start_date, end_date, amount} objects.\n- budget_categories: JSON ARRAY of {category, approved_amount,\n  restrictions} objects (one per category: Salary, Fringe,\n  Equipment, Travel, Supplies, Subcontracts, Other, F&A).\n- total_direct_costs: STRING ($X).\n- total_indirect_costs: STRING ($X).\n- fa_rate: STRING (e.g., \"56.5% MTDC\"). null when absent.\n- fa_base: STRING. null when absent.\n- cost_share_amount: STRING ($X). null when not required.\n- cost_share_type: STRING. null when not required.\n- program_income: STRING. null when absent.\n- ffr_requirements: STRING (one-line summary — full FFR\n  detail belongs to ffr-management-extraction-udm).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -118,7 +96,7 @@
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/award-compliance-extraction/manifest.yaml",
-        "workflow_version": "0.2.2",
+        "workflow_version": "1.0.0",
         "status": "experimental",
         "components": [
           {

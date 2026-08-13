@@ -1,5 +1,14 @@
 # Authored source for the NOA Summary Vandalizer workflow.
 #
+# === v1.0.0 (2026-08-13): KB STEP REMOVED (MAJOR, 3 steps -> 2) ===
+# The Step 0 KnowledgeBaseQuery lookup referenced in the historical
+# topology notes below was removed -- it was inert on a fresh import
+# (Vandalizer blanks kb_uuid by design, so a KB always had to be
+# attached manually). The parallel extraction tasks now read
+# input_sources: [workflow_documents] only; consolidation is unchanged.
+# Mirrors rfa-checklist-extraction v1.0.0. KBs will be reintroduced
+# once the right approach is settled.
+#
 # The companion noa-summary.vandalizer.json is generated from this file by
 # scripts/build_vandalizer_workflows.py and committed alongside.
 # Never hand-edit the generated JSON — update this manifest and rebuild.
@@ -41,12 +50,12 @@ description: >
   Administrative Requirements) with finances and deadlines in tables and
   critical restrictions / required approvals bolded.
 
-workflow_version: 0.2.0
+workflow_version: 1.0.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-07-15
-updated: 2026-07-15
+updated: 2026-08-13
 
 components:
   - slug: noa-summary-udm
@@ -92,26 +101,10 @@ validation_plan:
       fragments (hallucination).
 
 steps:
-  - name: Knowledge Base Context Lookup
-    tasks:
-      - name: kb-context-lookup
-        kind: KnowledgeBaseQuery
-        query: "federal Notice of Award administrative requirements prior approval reporting requirements financial reporting indirect cost rate F&A base program income carryover salary cap human subjects IRB FCOI financial conflict of interest data management sharing civil rights nondiscrimination public access subawards consortium audit record retention SAM registration 2 CFR 200 Uniform Guidance terms and conditions special conditions"
-        k: 8
-        knowledge_base_hint:
-          title: "OMB Uniform Guidance (2 CFR 200)"
-          description: >
-            Primary regulatory KB for interpreting a federal Notice of Award's
-            administrative, financial, and compliance terms. For NIH awards,
-            swap in NIH Grants Policy Statement; for NSF, NSF PAPPG. When no KB
-            is attached this step returns empty output gracefully and the
-            extraction falls back to reading just the uploaded award notice.
-
   - name: Extraction (Prompt)
     tasks:
       - name: extract-award-basics-financial
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are analyzing a federal grant Notice of Award (NoA) for university sponsored-programs review. You receive the uploaded NoA AND any knowledge-base chunks the previous step retrieved in your CONTEXT. Use the KB chunks ONLY to interpret regulatory references; extract every fact from the NoA itself.
@@ -171,7 +164,6 @@ steps:
 
       - name: extract-compliance-administrative
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are analyzing a federal grant Notice of Award (NoA) for university sponsored-programs review. You receive the uploaded NoA AND any knowledge-base chunks the previous step retrieved in your CONTEXT. Use the KB chunks ONLY to interpret regulatory references; extract every fact from the NoA itself.

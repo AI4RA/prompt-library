@@ -2,11 +2,13 @@
 
 Uploads one or more award documents (Notice of Award, FOA / NOFO / RFA, modification, proposal) and returns a single structured JSON object scoring 14 institutional risk domains on a 1–5 rubric with evidence-cited justifications, plus aggregate metrics (total / average risk scores, overall risk level enum, high-risk-domain list, key findings, recommended mitigations).
 
-**Workflow version:** 0.1.0
+**Workflow version:** 1.0.0
 **Vandalizer schema version:** 2
 **Status:** experimental
 **Components manifested:** `risk-domain-assessment-udm@0.1.0`
 **Eval posture:** workflow-local — see [`evals/`](evals/)
+
+> **v1.0.0 (KB step removed):** the optional Knowledge Base lookup step was removed (MAJOR, 3 steps → 2) — it was inert on import (Vandalizer blanks `kb_uuid`). Extraction tasks now read the uploaded documents directly. Mirrors `rfa-checklist-extraction` v1.0.0. See the [CHANGELOG](CHANGELOG.md).
 
 ## What this workflow does
 

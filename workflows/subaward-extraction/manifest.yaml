@@ -1,5 +1,14 @@
 # Authored source for the Subaward Agreement Extraction Vandalizer workflow.
 #
+# === v1.0.0 (2026-08-13): KB STEP REMOVED (MAJOR, 3 steps -> 2) ===
+# The Step 0 KnowledgeBaseQuery lookup referenced in the historical
+# topology notes below was removed -- it was inert on a fresh import
+# (Vandalizer blanks kb_uuid by design, so a KB always had to be
+# attached manually). The parallel extraction tasks now read
+# input_sources: [workflow_documents] only; consolidation is unchanged.
+# Mirrors rfa-checklist-extraction v1.0.0. KBs will be reintroduced
+# once the right approach is settled.
+#
 # === Topology (v0.2.0, Variant A + KB injection) ===
 #
 # v0.2.0 changes vs. v0.1.0:
@@ -21,12 +30,12 @@ description: >
   subaward-extraction consolidation.md conventions, including the
   "VERIFY CAREFULLY" annotation on Total Subaward Amount.
 
-workflow_version: 0.2.0
+workflow_version: 1.0.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-04-30
-updated: 2026-05-22
+updated: 2026-08-13
 
 components:
   - slug: subaward-extraction-udm
@@ -47,26 +56,10 @@ validation_plan:
     description: Verify Total Direct Costs + Total Indirect Costs equals Total Subaward Amount; flag any deviation.
 
 steps:
-  - name: Knowledge Base Context Lookup
-    tasks:
-      - name: kb-context-lookup
-        kind: KnowledgeBaseQuery
-        query: "subaward agreement pass-through entity PTE subrecipient federal award subrecipient monitoring 2 CFR 200.331 200.332 FFATA invoicing indirect cost rate prior approval scope of work cost type fixed price cost reimbursable"
-        k: 8
-        knowledge_base_hint:
-          title: "OMB Uniform Guidance (2 CFR 200)"
-          description: >
-            Primary regulatory KB — §§ 200.331-332 cover subaward
-            rules. For contract subawards, swap in Federal Acquisition
-            Regulation (FAR). When the operator does not attach a KB,
-            the extraction falls back to reading just the uploaded
-            subaward agreement.
-
   - name: Parallel Extraction (Prompt)
     tasks:
       - name: extract-core-award
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting the basic award information from a federal
@@ -90,7 +83,6 @@ steps:
 
       - name: extract-contacts
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting contact information from a federal subaward
@@ -114,7 +106,6 @@ steps:
 
       - name: extract-financial
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting financial details from a federal subaward
@@ -139,7 +130,6 @@ steps:
 
       - name: extract-financial-policies
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting financial policies and invoicing rules
@@ -159,7 +149,6 @@ steps:
 
       - name: extract-reporting
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting reporting requirements from a federal
@@ -181,7 +170,6 @@ steps:
 
       - name: extract-compliance
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting compliance requirements and prior-approval

@@ -2,11 +2,13 @@
 
 Uploads a grant budget form, the project narrative, and optionally the funding opportunity announcement (NOFO / RFA), and returns a single structured JSON object capturing both the per-section extracted financial data AND the generated narrative text for each section, plus the final assembled Markdown document organized in R&R Budget / SF-424A category order (A through I).
 
-**Workflow version:** 0.1.0
+**Workflow version:** 1.0.0
 **Vandalizer schema version:** 2
 **Status:** experimental
 **Components manifested:** `budget-justification-generator-udm@0.1.0`
 **Eval posture:** workflow-local — see [`evals/`](evals/)
+
+> **v1.0.0 (KB step removed):** the optional Knowledge Base lookup step was removed (MAJOR, 3 steps → 2) — it was inert on import (Vandalizer blanks `kb_uuid`). Extraction tasks now read the uploaded documents directly. Mirrors `rfa-checklist-extraction` v1.0.0. See the [CHANGELOG](CHANGELOG.md).
 
 ## What this workflow does
 

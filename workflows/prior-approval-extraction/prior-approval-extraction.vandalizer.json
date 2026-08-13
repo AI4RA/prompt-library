@@ -2,33 +2,13 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-05-22T00:00:00+00:00",
+  "exported_at": "2026-08-13T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Prior Approval Extraction v0.2.0",
+      "name": "Prior Approval Extraction v1.0.0",
       "description": "Uploads a federal award notice or agreement and returns an RA-friendly Markdown reference covering prior-approval requirements: budget approvals (rebudgeting thresholds, equipment, F&A changes), scope & timeline approvals (NCE, PI / key personnel changes, scope changes), the approval procedures matrix (Approval Type | Threshold | Required Documentation | Approval Authority | Processing Timeline | Consequences of Non-compliance), and any RTC expanded-authority waivers. Mirrors the source ui-insight/ProcessMapping prior-approval-extraction formatting.md conventions, including the mandatory six-column APPROVAL PROCEDURES table.",
       "steps": [
-        {
-          "name": "Knowledge Base Context Lookup",
-          "data": {},
-          "is_output": false,
-          "tasks": [
-            {
-              "name": "KnowledgeBaseQuery",
-              "data": {
-                "name": "kb-context-lookup",
-                "kb_uuid": "",
-                "query": "prior approval 2 CFR 200.308 expanded authority Research Terms and Conditions rebudgeting threshold no-cost extension PI change scope change equipment threshold cognizant federal agency approval authority processing timeline",
-                "k": 8,
-                "_embedded_knowledge_base": {
-                  "title": "OMB Uniform Guidance (2 CFR 200)",
-                  "description": "Primary regulatory KB — §200.308 is the prior-approval section that drives every federal award's prior-approval matrix. For NSF awards, swap in NSF PAPPG Reference. For NIH awards, swap in NIH Grants Policy Statement. For contract awards, swap in Federal Acquisition Regulation (FAR) or DOD Research Funding & DFARS. When the operator does not attach a KB, this step returns empty output gracefully and the downstream extraction falls back to reading just the uploaded award notice."
-                }
-              }
-            }
-          ]
-        },
         {
           "name": "Extraction (Prompt)",
           "data": {},
@@ -40,7 +20,6 @@
                 "name": "extract-prior-approval",
                 "prompt": "You are extracting prior-approval requirements from a federal\naward notice or agreement. You receive the uploaded document\nAND any KB chunks the previous step retrieved in your\ncontext.\n\nBe 100% accurate. Quote thresholds, dollar amounts, and\napproval-authority titles verbatim. Use null when a field is\nabsent — never invent values.\n\nSearch every section with attention to titles like \"Prior\nApproval Requirements\", \"Terms and Conditions\", \"Special\nConditions\", \"Administrative Requirements\", \"Reporting and\nOther Requirements\", \"Award Provisions\". Keywords to follow:\nprior approval, written approval, sponsor approval, 2 CFR\n200.308, RTC, expanded authority, rebudget, NCE, no-cost\nextension, PI change, key personnel change, scope change,\nequipment, threshold, cognizant agency, grants officer.\n\nCRITICAL — descriptive fields must be FLAT STRINGS, not\nnested objects. The downstream Consolidation renders these\nverbatim into Markdown; nested JSON appears as literal\n`{...}` in the deliverable.\n\nExtract these fields:\n\n- award_number: STRING. Federal Award Identification Number\n  (FAIN). null when absent.\n- pi_name: STRING. Principal Investigator. null when absent.\n- budget_approvals: STRING. Description of budget-approval\n  requirements — rebudgeting thresholds (typically expressed\n  as \"X% of total award\"), category-specific approval\n  triggers (equipment over a threshold, participant support\n  changes, F&A changes, subaward approvals). Concatenate all\n  budget-related approval categories into one\n  natural-language description. null when the document does\n  not specify any.\n- scope_timeline_approvals: STRING. Description of\n  scope-and-timeline approval requirements — no-cost\n  extensions, PI / key personnel changes, scope changes,\n  project-period changes. One natural-language description.\n  null when the document does not specify any.\n- approval_procedures: JSON ARRAY of\n  {approval_type, threshold_or_trigger, required_documentation,\n   approval_authority, processing_timeline,\n   consequences_of_noncompliance} objects — one row per\n  distinct prior-approval category enumerated in the\n  document. Each field is a STRING quoting the document\n  verbatim. Empty array only when the document specifies no\n  prior-approval categories.\n- rtc_waivers: JSON ARRAY of STRINGS. RTC (Research Terms\n  and Conditions) expanded-authority waivers explicitly\n  granted by the award. Empty array when none.\n- regulatory_references: JSON ARRAY of STRINGS. References\n  to regulations cited for prior-approval requirements (e.g.,\n  \"2 CFR 200.308\", \"Research Terms and Conditions\",\n  \"NSF PAPPG VI.B.3\"). Empty array when none.\n\n## Output\n\nEmit exactly one JSON object with the keys above. No\npreamble, no markdown fences. The Consolidation step\nparses this and renders the final Markdown deliverable.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -89,7 +68,7 @@
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/prior-approval-extraction/manifest.yaml",
-        "workflow_version": "0.2.0",
+        "workflow_version": "1.0.0",
         "status": "experimental",
         "components": [
           {

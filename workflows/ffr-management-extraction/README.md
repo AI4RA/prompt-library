@@ -2,11 +2,13 @@
 
 Uploads a federal award notice or agreement and returns a single structured JSON object covering the five buckets a sponsored-programs analyst uses when preparing FFR (SF-425) submissions: submission schedule, submission system and procedures, required financial data, compliance consequences, and preparation timeline.
 
-**Workflow version:** 0.1.0
+**Workflow version:** 1.0.0
 **Vandalizer schema version:** 2
 **Status:** experimental
 **Components manifested:** `ffr-management-extraction-udm@0.1.0`
 **Eval posture:** workflow-local — see [`evals/`](evals/)
+
+> **v1.0.0 (KB step removed):** the optional Knowledge Base lookup step was removed (MAJOR, 3 steps → 2) — it was inert on import (Vandalizer blanks `kb_uuid`). Extraction tasks now read the uploaded documents directly. Mirrors `rfa-checklist-extraction` v1.0.0. See the [CHANGELOG](CHANGELOG.md).
 
 ## What this workflow does
 

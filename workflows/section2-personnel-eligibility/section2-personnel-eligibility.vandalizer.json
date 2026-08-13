@@ -2,33 +2,13 @@
   "vandalizer_export": true,
   "schema_version": 2,
   "export_type": "workflow",
-  "exported_at": "2026-05-22T00:00:00+00:00",
+  "exported_at": "2026-08-13T00:00:00+00:00",
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Section 2 Personnel Eligibility Verification v0.2.0",
+      "name": "Section 2 Personnel Eligibility Verification v1.0.0",
       "description": "Uploads three workflow documents together — the VERAS proposal package, the Banner NBAJOBS extract, and the institutional Department List — and returns an RA-friendly Markdown Section 2 Review Report covering the per-person eligibility matrix (with APM 45.22 status), org-code-to-DGA mapping, DGA completeness assessment, action items for ineligible personnel and missing DGAs, and a review-completion checklist. Mirrors the source ui-insight/ProcessMapping section2-personnel-eligibility consolidation.md conventions.",
       "steps": [
-        {
-          "name": "Knowledge Base Context Lookup",
-          "data": {},
-          "is_output": false,
-          "tasks": [
-            {
-              "name": "KnowledgeBaseQuery",
-              "data": {
-                "name": "kb-context-lookup",
-                "kb_uuid": "",
-                "query": "APM 45.22 Principal Investigator eligibility Co-PI Senior Key Personnel VERAS Section 2.1 Section 2.2A Banner NBAJOBS Departmental Grant Administrator DGA timesheet org code job title professor research associate",
-                "k": 8,
-                "_embedded_knowledge_base": {
-                  "title": "University of Idaho Office of Sponsored Programs",
-                  "description": "Primary KB — this KB contains the APM Section 45.22 eligible-titles list that drives PI / Co-PI eligibility determinations. Do NOT swap. When the operator does not attach a KB, every PI / Co-PI will come back as \"Review Required\" because the workflow cannot evaluate eligibility without the APM 45.22 reference."
-                }
-              }
-            }
-          ]
-        },
         {
           "name": "Parallel Extraction (Prompt)",
           "data": {},
@@ -40,7 +20,6 @@
                 "name": "extract-section-2-personnel",
                 "prompt": "You are extracting Section 2 personnel from a VERAS proposal\npackage. You receive the workflow documents AND any KB chunks\nthe previous step retrieved.\n\nBe 100% accurate. Quote names and roles verbatim. Do not\ninvent personnel. Use null when a field is absent.\n\nEmit a JSON object with these keys:\n\n- section_21_personnel: JSON ARRAY of {name, role, institution}\n  objects from VERAS Section 2.1. role is one of \"PI\",\n  \"Co-PI\". institution is null when not stated. MUST contain\n  at least one entry.\n- section_22_personnel: JSON ARRAY of {name, role, institution}\n  objects from VERAS Section 2.2A. role is always\n  \"Senior/Key Personnel\". Empty array when Section 2.2A is\n  not populated.\n- proposal_identifier: STRING. Proposal identifier (number\n  or title). null when absent.\n- total_personnel_count: INTEGER.\n- pi_copis_requiring_eligibility: JSON ARRAY of STRINGS\n  (names from section_21_personnel).\n- personnel_requiring_org_code_only: JSON ARRAY of STRINGS\n  (names from section_22_personnel).\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -51,7 +30,6 @@
                 "name": "extract-eligibility-and-dga-verification",
                 "prompt": "You are performing eligibility and DGA verification. You\nreceive the workflow documents (VERAS, Banner NBAJOBS extract,\nDepartment List) AND KB chunks (APM 45.22 eligible-titles\nlist).\n\nBe 100% accurate. Do NOT assume employment, eligibility, or\nDGA mapping. When a job title is ambiguous (clinical faculty,\nlecturer, adjunct, dual appointment), emit eligibility_status\n\"Review Required\" — never \"Eligible\" or \"Not Eligible\". When\na workflow document is missing, emit non-compliant defaults\nand capture the gap in notes_about_missing_sources.\n\nSenior / Key Personnel from Section 2.2A do NOT need\neligibility checks — they need org-code collection only.\nEmit eligibility_status \"N/A\" for those rows.\n\nEmit a JSON object with these keys:\n\n- personnel_verification: JSON ARRAY of per-person\n  {name, found_in_banner, current_employee, job_title,\n   timesheet_org_code, notes} objects. One entry per person\n  from Section 2.1 + Section 2.2A combined.\n- eligibility_check: JSON ARRAY of per-PI / Co-PI\n  {name, role, job_title, eligibility_status, evidence}\n  objects. status one of \"Eligible\", \"Not Eligible\",\n  \"Review Required\". evidence is a short APM 45.22 citation\n  or rationale.\n- org_code_compilation: JSON ARRAY of\n  {org_code, personnel_names, count} objects.\n- dga_mapping: JSON ARRAY of\n  {org_code, department_name, dga_names} objects. department_name\n  null and dga_names empty when the org code is not in the\n  Department List.\n- dga_cross_reference: JSON ARRAY of\n  {dga_name, org_codes, listed_in_section_2, action_needed}\n  objects. action_needed is one of \"No action needed\" or\n  \"FLAG — Must be added to Section 2\".\n- notes_about_missing_sources: STRING describing any source\n  document that was not provided; null when all present.\n\n## Output\n\nEmit exactly one JSON object. No preamble, no markdown\nfences.",
                 "input_sources": [
-                  "step_input",
                   "workflow_documents"
                 ]
               }
@@ -106,7 +84,7 @@
       "validation_inputs": [],
       "x_ai4ra": {
         "workflow_source": "workflows/section2-personnel-eligibility/manifest.yaml",
-        "workflow_version": "0.2.0",
+        "workflow_version": "1.0.0",
         "status": "experimental",
         "components": [
           {

@@ -1,5 +1,14 @@
 # Authored source for the Award Modification Intake & Classification Vandalizer workflow.
 #
+# === v1.0.0 (2026-08-13): KB STEP REMOVED (MAJOR, 3 steps -> 2) ===
+# The Step 0 KnowledgeBaseQuery lookup referenced in the historical
+# topology notes below was removed -- it was inert on a fresh import
+# (Vandalizer blanks kb_uuid by design, so a KB always had to be
+# attached manually). The parallel extraction tasks now read
+# input_sources: [workflow_documents] only; consolidation is unchanged.
+# Mirrors rfa-checklist-extraction v1.0.0. KBs will be reintroduced
+# once the right approach is settled.
+#
 # The companion award-modification-intake.vandalizer.json is generated from
 # this file by scripts/build_vandalizer_workflows.py and committed alongside.
 # Never hand-edit the generated JSON — update this manifest and rebuild.
@@ -31,12 +40,12 @@ description: >
   classified modification type and the `[DISCREPANCY: ...]` flag
   syntax for contradictions between tasks.
 
-workflow_version: 0.2.0
+workflow_version: 1.0.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-05-20
-updated: 2026-05-22
+updated: 2026-08-13
 
 components:
   - slug: award-modification-intake-udm
@@ -65,24 +74,10 @@ validation_plan:
       syntax in SECTION 6.
 
 steps:
-  - name: Knowledge Base Context Lookup
-    tasks:
-      - name: kb-context-lookup
-        kind: KnowledgeBaseQuery
-        query: "award modification amendment additional funds no-cost extension NCE PI change rebudget scope change 2 CFR 200.308 prior approval Research Terms and Conditions cumulative total obligated"
-        k: 8
-        knowledge_base_hint:
-          title: "OMB Uniform Guidance (2 CFR 200)"
-          description: >
-            Primary regulatory KB. For NSF modifications, swap in NSF
-            PAPPG Reference. For NIH modifications, swap in NIH Grants
-            Policy Statement.
-
   - name: Parallel Extraction (Prompt)
     tasks:
       - name: extract-modification-type-identification
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are identifying the modification type and extracting
@@ -125,7 +120,6 @@ steps:
 
       - name: extract-financial-impact
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting financial impact from a federal award
@@ -159,7 +153,6 @@ steps:
 
       - name: extract-compliance-requirements
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting compliance requirements from a federal

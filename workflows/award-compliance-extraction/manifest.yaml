@@ -1,4 +1,13 @@
 # Authored source for the Award Compliance & Financial Overview Extraction
+#
+# === v1.0.0 (2026-08-13): KB STEP REMOVED (MAJOR, 3 steps -> 2) ===
+# The Step 0 KnowledgeBaseQuery lookup referenced in the historical
+# topology notes below was removed -- it was inert on a fresh import
+# (Vandalizer blanks kb_uuid by design, so a KB always had to be
+# attached manually). The parallel extraction tasks now read
+# input_sources: [workflow_documents] only; consolidation is unchanged.
+# Mirrors rfa-checklist-extraction v1.0.0. KBs will be reintroduced
+# once the right approach is settled.
 # Vandalizer workflow.
 #
 # === Topology (v0.2.2, Variant A + KB injection) ===
@@ -40,12 +49,12 @@ description: >
   deadlines). Mirrors the source ui-insight/ProcessMapping
   award-compliance-extraction consolidation.md conventions.
 
-workflow_version: 0.2.2
+workflow_version: 1.0.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-04-30
-updated: 2026-06-06
+updated: 2026-08-13
 
 components:
   - slug: award-compliance-extraction-udm
@@ -128,27 +137,10 @@ validation_plan:
       extraction returned no data ... re-run the workflow") be present.
 
 steps:
-  - name: Knowledge Base Context Lookup
-    tasks:
-      - name: kb-context-lookup
-        kind: KnowledgeBaseQuery
-        query: "federal award compliance framework reporting requirements prior approval audit thresholds high-risk conditions financial overview budget periods F&A rate cost sharing 2 CFR 200 Uniform Guidance deliverable schedule"
-        k: 8
-        knowledge_base_hint:
-          title: "OMB Uniform Guidance (2 CFR 200)"
-          description: >
-            Primary regulatory KB. Swap in agency-specific KBs (NSF
-            PAPPG, NIH GPS, DOE Financial Assistance Rules, DOD
-            Research Funding & DFARS) when the award is from one of
-            those agencies. Pair with Responsible Conduct of Research
-            (RCR) or Export Control (EAR & ITAR) for awards with
-            security or compliance specialty.
-
   - name: Parallel Extraction (Prompt)
     tasks:
       - name: extract-compliance-framework
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting the compliance framework from a federal
@@ -188,7 +180,6 @@ steps:
 
       - name: extract-financial-management
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting financial management details from a
