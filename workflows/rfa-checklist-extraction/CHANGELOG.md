@@ -6,6 +6,45 @@ All notable changes to this workflow. Versions follow semver adapted to workflow
 - **MINOR** — prompt body tracking a referenced component MINOR, or additive step/task options that preserve the existing operator flow.
 - **PATCH** — step or task display-name edits, description polish, non-semantic manifest cleanup.
 
+## [0.7.0] — 2026-08-13
+
+- **Red Flags expansion + Compliance/Foreign taxonomy (RA follow-up `Examples of items to include in RFA.docx`).**
+  - **`extract-risk-flags` expanded** from 6 checks to the full SPA-checklist trigger set: 5 escalation flags (cost share, F&A limit/waiver, commitment letter, limited submission, signature/institution-submits) + the Contract-Review-Unit (CRU) triggers — indemnification, IP / data ownership, publication restrictions, insurance, NDA, FAR / contract-type terms, governing law of another state, acceptance of T&C on submission, restricted country / foreign ownership (China/Russia/NK/Iran, incl. foreign-owned e.g. Syngenta), foreign-government / national-lab contracting (JPL/INL), CUI / classified. Each check now carries a `category` (`escalation` \| `cru`). When any CRU trigger is "yes", the Red Flags banner adds the **"route to the Contract Review Unit — email the Contract Review Officer via VERAS Correspondence"** action.
+  - **New `extract-compliance-flags` task** (Step 1 now **9 parallel tasks**) → two new deliverable sections: **COMPLIANCE RISKS** (human subjects, vertebrate animals, biosafety, export control, select agents / DURC, CUI, data security / cybersecurity, national security) and **FOREIGN INFLUENCE & INTERNATIONAL COMPONENTS** (foreign collaborators / subawards / travel, malign-talent-program certification, international data sharing, country-specific restrictions). Both render only "yes"/"no" areas (never "unclear").
+  - **Field enrichments:** metadata gains `funding_instrument_type` (Grant / Cooperative Agreement / Contract), rendered in the header; budget explicitly hunts salary/tuition/equipment/participant/travel/food/incentive/publication rules (no shape change); eligibility adds subrecipient eligibility + limited-submission mechanics/nomination; submission_details names the specific portal (Grants.gov, Research.gov, eRA Commons, JustGrants, NSPIRES, ProposalCentral).
+  - **Anti-hallucination guards audited across all 9 tasks** — every value must be grounded in the document; "unclear"/null over guessing; never infer a typical federal value; `extract-award-information` no longer forces a required amount/duration (uses "Not specified in the document").
+  - Deliverable is now **11 sections** (added Compliance Risks, Foreign Influence after Application Components). Validation: CHK-01 → eleven sections; CHK-05 covers the full trigger set + VERAS action; new **CHK-06** (Compliance & International grounded).
+- **MINOR**: no step-structure change (still KB + parallel + consolidation); adds one parallel task, two consolidation sections, and additive fields.
+- Component pin unchanged at `rfa-checklist-extraction-udm@0.1.0`. **Follow-up unchanged:** component `prompt.md` / `schema.json` + Plan B "Maker-v3" re-baseline still pending (now a larger schema delta: risk_flags category, compliance_risks, international_components, funding_instrument_type, component `source`, formatting_requirements).
+
+## [0.6.0] — 2026-08-13
+
+- **Sponsor backbone (RA follow-up email).** Implements the email's two hard requirements: (R1) auto-include each federal sponsor's standard required proposal components even when the announcement omits them, and (R2) formatting precedence (announcement's rules if stated, else sponsor default).
+  - `extract-application-components` carries a **baked-in reference** of NSF / NIH / USDA-NIFA / DOE / NASA standard required components + subaward document set + standard formatting (from `Required document components and formatting NSF_NIH_USDA_NIFA_DOE_NASA.pdf`). It detects the sponsor from the document and MERGES the standard components with what the announcement states, de-duplicating and preserving announcement-imposed changes.
+  - New **`source`** field on every component object — `Announcement` / `Sponsor standard` / `Announcement + sponsor standard` — surfaced as a **Source column** in the consolidation's component tables so reviewers can verify provenance.
+  - New **`formatting_requirements`** field with the precedence rule; consolidation renders a **Formatting Requirements** subsection under APPLICATION COMPONENTS, keeping the `Sponsor default (<SPONSOR>):` prefix when the value came from the backbone.
+  - **Non-federal sponsors** (e.g., the IDHW test solicitation) get NO backbone — output reflects only what the announcement states; every `source` is `Announcement`.
+  - UI-specific backbone items (AOR letter / FDP list / UI subrecipient Commitment form) are carried verbatim from the reference PDF (per the team's own process).
+- **Chosen wiring: baked-in prompt (Option A)** rather than a per-run second-document upload or KB attachment — zero operator friction, sponsor auto-detected, per Decision D1 (single workflow, auto-detect sponsor).
+- **MINOR**, not MAJOR: no step-structure change (still 8 parallel tasks + consolidation); the component object gains a field and one new top-level field, both additive.
+- Component pin unchanged at `rfa-checklist-extraction-udm@0.1.0`. **Follow-up unchanged:** component `prompt.md` / `schema.json` + Plan B "Maker-v3" re-baseline still pending; the backbone is a schema change to plan into that re-baseline.
+
+## [0.5.0] — 2026-08-13
+
+- **First-round pre-award RA feedback.** Four changes from the first RA feedback meeting (transcript + change list in the `RFA Workflow Evaluation` working dir):
+  1. **NEW `extract-risk-flags` parallel task + RED FLAGS section (top of deliverable).** Step 1 now runs **eight** Prompt tasks; the new task explicitly checks a fixed set of escalation triggers — cost share / matching, F&A / indirect limited or waived, institutional / executive commitment letter, limited submission, contract-review terms (indemnification / IP / publication / foreign-entity), and AOR signature / institution-must-submit — each grounded `yes` / `no` / `unclear` with detail. Consolidation renders the `yes` flags as a triage banner FIRST, with a one-line "checked and clear" summary and a "no red flags" empty state. Reliability-motivated design: a dedicated extraction task rather than consolidation-only synthesis.
+  2. **Section reorder** to match RA triage: Red Flags → Dates & Deadlines → Eligibility → Award Information → **Budget Requirements & Policies (moved up, now adjacent to Award)** → **Submission Details (moved before Application Components)** → Application Components → Special Requirements → Important Notes.
+  3. **Recurring / relative date resolution.** `extract-dates-and-deadlines` now computes concrete calendar dates from rule-based deadlines ("second Tuesday in September", recurring annually), placing the resolved ISO date in `date_time` and the original rule text in `notes`, with an explicit compute-don't-invent guard.
+  4. **Richer eligibility.** `extract-eligible-institutions` / `extract-eligible-individuals` now explicitly capture limited-submission caps (per institution and per individual, with the number), citizenship / residency, career-stage restrictions, and required certifications / credentials.
+- `validation_plan`: CHK-01 updated to nine sections in the new order; CHK-02 amended for the Red-Flags pointer exception; new **CHK-05** (Red Flags grounded).
+- Placement contract gains one exception: the Red Flags banner may carry a SHORT pointer to a financial / eligibility / submission trigger (`*(see Budget Requirements & Policies)*` etc.) without restating the detailed rule, which still lives solely in its home section.
+- **MINOR**, not MAJOR: step count (3) and `is_output` are unchanged; the additions are a new parallel task and consolidation-prompt edits that preserve the operator flow.
+- Component pin unchanged at `rfa-checklist-extraction-udm@0.1.0`. **Follow-up:** the JSON-emitting component (`prompt.md` / `schema.json`) and the Plan B eval baseline are NOT yet synced to these changes — that is the paired "Maker-v3" re-baseline (before→after metrics) tracked separately.
+
+## [0.4.0] — 2026-06-24
+
+- **Optional Knowledge Base lookup as Step 0.** Added a `KnowledgeBaseQuery` task (kb_uuid blanked; title hint → OMB Uniform Guidance 2 CFR 200) and switched the parallel extraction tasks to `input_sources: [step_input, workflow_documents]` so they read KB chunks (when the operator attaches a KB post-import) alongside the uploaded PDF. Runs end-to-end whether or not a KB is attached. Step count 2 → 3.
+
 ## [0.3.0] — 2026-05-22
 
 - **MAJOR step-structure change + output-contract change.** Two-part overhaul to fix the broken-on-real-documents v0.2.0 runtime:
