@@ -4,7 +4,20 @@
 # file by scripts/build_vandalizer_workflows.py and committed alongside.
 # Never hand-edit the generated JSON — update this manifest and rebuild.
 #
-# === Variant A topology (v0.8.0) ===
+# === Variant A topology (v1.0.0) ===
+#
+# v1.0.0 (2026-08-13) REMOVES the optional Knowledge Base lookup step
+# (Step 0, added in v0.4.0). MAJOR: step-structure change (3 steps → 2).
+# Rationale: the RA's live Vandalizer copy never carried the step, KBs
+# are never auto-wired on import anyway (kb_uuid is blanked by design,
+# so the operator must attach one manually — exactly what the README's
+# "Recommended knowledge bases" section already documents), and the
+# inert step confused operators comparing the imported workflow to
+# their working copy. The parallel extraction tasks now read
+# input_sources: [workflow_documents] only (step_input removed — with
+# no preceding step it contributed nothing). Operators who want
+# Uniform Guidance / PAPPG context can still add a KnowledgeBaseQuery
+# step manually in the Vandalizer UI after import, per the README.
 #
 # v0.8.0 (2026-08-13) adds ANNOUNCEMENT-MANDATED INTERNAL STRUCTURE
 # (mandated_sections). Surfaced by NSF 25-541 (PCL Test Bed): the
@@ -129,22 +142,18 @@
 # the evaluation-harness target; this WORKFLOW is the Vandalizer
 # end-user (sponsored-programs analyst) deliverable.
 #
-# Step 0  Knowledge Base context lookup (optional)
-#   1 KnowledgeBaseQuery task with kb_uuid blanked (the operator
-#   selects a local KB in Vandalizer's UI; the embedded title hint
-#   points at OMB Uniform Guidance (2 CFR 200) as the primary
-#   recommendation). Returns empty output when no KB is attached.
 # Step 1  Parallel Prompt
-#   8 Prompt tasks, each receiving input_sources: [step_input,
-#   workflow_documents] — combining the Step 0 KB chunks (when
-#   available) with the uploaded RFA. One metadata task captures the
-#   eight UDM-aligned scalar opportunity fields; a risk-flags task hunts
-#   the escalation triggers for the Red Flags banner; the other six
-#   mirror the source workflow's six parallel extractions. Each task
-#   emits a JSON FRAGMENT for its block (Variant A mid-pipeline format).
+#   9 Prompt tasks, each receiving input_sources: [workflow_documents]
+#   (the uploaded RFA). One metadata task captures the UDM-aligned
+#   scalar opportunity fields; a risk-flags task hunts the escalation +
+#   CRU triggers for the Red Flags banner; a compliance-flags task
+#   feeds the Compliance Risks and Foreign Influence sections; the
+#   other six mirror the source workflow's six parallel extractions.
+#   Each task emits a JSON FRAGMENT for its block (Variant A
+#   mid-pipeline format).
 # Step 2  Consolidation (Markdown deliverable)
-#   1 Prompt task assembles the eight JSON fragments and renders a
-#   single Markdown checklist with nine sections (Red Flags first),
+#   1 Prompt task assembles the nine JSON fragments and renders a
+#   single Markdown checklist with eleven sections (Red Flags first),
 #   enforcing the strict-de-duplication placement contract from source.
 
 name: RFA Checklist Extraction
@@ -170,7 +179,7 @@ description: >
   the expanded Red Flags / Contract-Review trigger set and Compliance
   Risks + Foreign Influence sections from the RA's SPA checklist.
 
-workflow_version: 0.8.0
+workflow_version: 1.0.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
@@ -250,34 +259,10 @@ validation_plan:
       internal structure — the block must then be absent, not rendered empty.
 
 steps:
-  - name: Knowledge Base Context Lookup
-    tasks:
-      - name: kb-context-lookup
-        kind: KnowledgeBaseQuery
-        query: "RFA FOA NOFO eligibility budget cost sharing F&A indirect cost rates allowable unallowable personnel effort submission deadlines compliance requirements Uniform Guidance"
-        k: 8
-        knowledge_base_hint:
-          title: "OMB Uniform Guidance (2 CFR 200)"
-          description: >
-            Primary regulatory KB for federal funding announcement
-            interpretation. The KnowledgeBaseQueryNode runs against
-            this KB and returns the top-8 chunks matching the query
-            above. Downstream parallel extraction tasks read both the
-            KB chunks (via step_input) and the uploaded RFA PDF (via
-            workflow_documents) into their LLM context. When the
-            operator does not attach a KB in Vandalizer's UI, this
-            step returns empty output gracefully and the parallel
-            tasks fall back to reading just the PDF. The operator can
-            alternatively swap in an agency-specific KB (NSF PAPPG
-            Reference, NIH Grants Policy Statement, DOE Financial
-            Assistance Rules, DOD Research Funding & DFARS) when the
-            RFA's sponsor calls for one.
-
   - name: Parallel Extraction (Prompt)
     tasks:
       - name: extract-opportunity-metadata
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting the scalar OPPORTUNITY METADATA from a
@@ -336,7 +321,6 @@ steps:
 
       - name: extract-risk-flags
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting the RED FLAGS block of a federal funding
@@ -467,7 +451,6 @@ steps:
 
       - name: extract-dates-and-deadlines
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting the DATES & DEADLINES block of a federal
@@ -535,7 +518,6 @@ steps:
 
       - name: extract-eligible-institutions
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting the ELIGIBLE INSTITUTIONS subsection of a
@@ -602,7 +584,6 @@ steps:
 
       - name: extract-eligible-individuals
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting the ELIGIBLE INDIVIDUALS subsection of a
@@ -666,7 +647,6 @@ steps:
 
       - name: extract-award-information
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting the AWARD INFORMATION block of a federal
@@ -712,7 +692,6 @@ steps:
 
       - name: extract-application-components
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting the APPLICATION COMPONENTS, SUBMISSION
@@ -1069,7 +1048,6 @@ steps:
 
       - name: extract-budget-requirements
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting the BUDGET REQUIREMENTS & POLICIES block
@@ -1170,7 +1148,6 @@ steps:
 
       - name: extract-compliance-flags
         input_sources:
-          - step_input
           - workflow_documents
         prompt_inline: |
           You are extracting the COMPLIANCE RISKS and INTERNATIONAL
