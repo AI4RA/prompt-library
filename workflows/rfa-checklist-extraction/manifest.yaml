@@ -4,7 +4,32 @@
 # file by scripts/build_vandalizer_workflows.py and committed alongside.
 # Never hand-edit the generated JSON — update this manifest and rebuild.
 #
-# === Variant A topology (v1.1.0) ===
+# === Variant A topology (v1.2.0) ===
+#
+# v1.2.0 (2026-08-13) — COMPACTNESS-BLOCK PLACEMENT FIX + BACKBONE
+# STUBS. The v1.1.0 NSF 25-541 re-test fixed fragment truncation but
+# surfaced two regressions caused by the compactness block itself:
+#   1. PROMPT-TAIL DISPLACEMENT: the block was appended AFTER the
+#      "## Output" schema section, so it became the final instruction.
+#      The extract-risk-flags model latched onto "emit minified JSON",
+#      claimed "no schema was provided", and returned conversational
+#      prose — collapsing RED FLAGS to a false "no red flags
+#      identified". Fix: the block now sits BEFORE "## Output" (schema
+#      is always the last instruction) and every prompt ends with an
+#      anti-chat anchor ("Begin your reply with `{` ... no questions,
+#      no offers to help").
+#   2. BACKBONE DROPPED / CONTENT OVER-COMPRESSION: the model treated
+#      "spend your budget on announcement-specific content" as license
+#      to omit the 10 backbone components entirely (1-row table), and
+#      the award task shortened "Up to $5M/year for 4 years..." to
+#      "$20M per PCL Node". Fix: "minify the SYNTAX only — never
+#      shorten content values"; backbone components are now emitted as
+#      STUBS ({name, source} only, ~60 chars each — no budget excuse
+#      to drop them) with an explicit NEVER-drop rule and the run-3
+#      failure as the WRONG example. The consolidation renders stub
+#      rows with "—" cells and never invents descriptions.
+#   3. Deliverable economy: Important Notes tightened to 0–3 bullets
+#      (run-3 consolidation clipped its final line at the cap).
 #
 # v1.1.0 (2026-08-13) — OUTPUT-TOKEN ECONOMY. Surfaced by two NSF
 # 25-541 runs that truncated mid-string at hard output-token caps the
@@ -205,7 +230,7 @@ description: >
   the expanded Red Flags / Contract-Review trigger set and Compliance
   Risks + Foreign Influence sections from the RA's SPA checklist.
 
-workflow_version: 1.1.0
+workflow_version: 1.2.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
@@ -327,6 +352,22 @@ steps:
             term; null when it does not state one. Do NOT guess from the
             sponsor (e.g., do not assume "Grant" just because it is NSF).
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a verbose fragment gets cut off mid-string, which
+          destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Minify the SYNTAX only — do NOT shorten, summarize, or drop
+            content values. Every fact the schema asks for is still
+            required, stated fully ("Up to $5M/year for 4 years, total not
+            to exceed $20M" must NOT become "$20M total").
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
           ## Output
 
           Emit exactly one JSON object with these nine keys. No
@@ -345,17 +386,9 @@ steps:
             "funding_instrument_type": "Cooperative Agreement"
           }
 
-          ## Output compactness (CRITICAL)
-
-          Your output feeds a downstream consolidation step and is never
-          read by a human. The runtime enforces a hard output-token cap on
-          this task — a pretty-printed fragment can get cut off mid-string,
-          which destroys every field after the cut. Therefore:
-
-          - Emit MINIFIED JSON: one single line, no indentation, no
-            newlines inside the JSON, no spaces after `:` or `,`.
-          - Any JSON examples shown in this prompt are indented for
-            readability only — YOUR output must be minified.
+          Begin your reply with the character `{` and emit NOTHING except
+          the single minified JSON object — no preamble, no questions, no
+          offers to help, no commentary, no markdown fences.
 
       - name: extract-risk-flags
         input_sources:
@@ -467,6 +500,22 @@ steps:
           label, the best-fit `category`, and status "yes". Do not
           manufacture these — only add what the document supports.
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a verbose fragment gets cut off mid-string, which
+          destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Minify the SYNTAX only — do NOT shorten, summarize, or drop
+            content values. Every fact the schema asks for is still
+            required, stated fully ("Up to $5M/year for 4 years, total not
+            to exceed $20M" must NOT become "$20M total").
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
           ## Output
 
           Emit exactly one JSON object with one key, `risk_flags`, whose
@@ -487,17 +536,9 @@ steps:
             ]
           }
 
-          ## Output compactness (CRITICAL)
-
-          Your output feeds a downstream consolidation step and is never
-          read by a human. The runtime enforces a hard output-token cap on
-          this task — a pretty-printed fragment can get cut off mid-string,
-          which destroys every field after the cut. Therefore:
-
-          - Emit MINIFIED JSON: one single line, no indentation, no
-            newlines inside the JSON, no spaces after `:` or `,`.
-          - Any JSON examples shown in this prompt are indented for
-            readability only — YOUR output must be minified.
+          Begin your reply with the character `{` and emit NOTHING except
+          the single minified JSON object — no preamble, no questions, no
+          offers to help, no commentary, no markdown fences.
 
       - name: extract-dates-and-deadlines
         input_sources:
@@ -552,6 +593,22 @@ steps:
             deadline — the original rule text the date was computed from.
             null when none.
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a verbose fragment gets cut off mid-string, which
+          destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Minify the SYNTAX only — do NOT shorten, summarize, or drop
+            content values. Every fact the schema asks for is still
+            required, stated fully ("Up to $5M/year for 4 years, total not
+            to exceed $20M" must NOT become "$20M total").
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
           ## Output
 
           Emit exactly one JSON object with one key,
@@ -566,17 +623,9 @@ steps:
             ]
           }
 
-          ## Output compactness (CRITICAL)
-
-          Your output feeds a downstream consolidation step and is never
-          read by a human. The runtime enforces a hard output-token cap on
-          this task — a pretty-printed fragment can get cut off mid-string,
-          which destroys every field after the cut. Therefore:
-
-          - Emit MINIFIED JSON: one single line, no indentation, no
-            newlines inside the JSON, no spaces after `:` or `,`.
-          - Any JSON examples shown in this prompt are indented for
-            readability only — YOUR output must be minified.
+          Begin your reply with the character `{` and emit NOTHING except
+          the single minified JSON object — no preamble, no questions, no
+          offers to help, no commentary, no markdown fences.
 
       - name: extract-eligible-institutions
         input_sources:
@@ -636,6 +685,22 @@ steps:
             per institution"). null when no institutional compliance
             terms are attached.
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a verbose fragment gets cut off mid-string, which
+          destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Minify the SYNTAX only — do NOT shorten, summarize, or drop
+            content values. Every fact the schema asks for is still
+            required, stated fully ("Up to $5M/year for 4 years, total not
+            to exceed $20M" must NOT become "$20M total").
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
           ## Output
 
           Emit exactly one JSON object with one key,
@@ -644,17 +709,9 @@ steps:
           entry with type "Not specified in this document". No
           preamble, no markdown fences.
 
-          ## Output compactness (CRITICAL)
-
-          Your output feeds a downstream consolidation step and is never
-          read by a human. The runtime enforces a hard output-token cap on
-          this task — a pretty-printed fragment can get cut off mid-string,
-          which destroys every field after the cut. Therefore:
-
-          - Emit MINIFIED JSON: one single line, no indentation, no
-            newlines inside the JSON, no spaces after `:` or `,`.
-          - Any JSON examples shown in this prompt are indented for
-            readability only — YOUR output must be minified.
+          Begin your reply with the character `{` and emit NOTHING except
+          the single minified JSON object — no preamble, no questions, no
+          offers to help, no commentary, no markdown fences.
 
       - name: extract-eligible-individuals
         input_sources:
@@ -711,6 +768,22 @@ steps:
             proposal", "Not eligible if prior RFA-awarded"); null when
             none.
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a verbose fragment gets cut off mid-string, which
+          destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Minify the SYNTAX only — do NOT shorten, summarize, or drop
+            content values. Every fact the schema asks for is still
+            required, stated fully ("Up to $5M/year for 4 years, total not
+            to exceed $20M" must NOT become "$20M total").
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
           ## Output
 
           Emit exactly one JSON object with one key,
@@ -719,17 +792,9 @@ steps:
           with type "Not specified in this document". No preamble, no
           markdown fences.
 
-          ## Output compactness (CRITICAL)
-
-          Your output feeds a downstream consolidation step and is never
-          read by a human. The runtime enforces a hard output-token cap on
-          this task — a pretty-printed fragment can get cut off mid-string,
-          which destroys every field after the cut. Therefore:
-
-          - Emit MINIFIED JSON: one single line, no indentation, no
-            newlines inside the JSON, no spaces after `:` or `,`.
-          - Any JSON examples shown in this prompt are indented for
-            readability only — YOUR output must be minified.
+          Begin your reply with the character `{` and emit NOTHING except
+          the single minified JSON object — no preamble, no questions, no
+          offers to help, no commentary, no markdown fences.
 
       - name: extract-award-information
         input_sources:
@@ -771,22 +836,30 @@ steps:
             given, otherwise free text (e.g., "Spring 2027"). null
             when absent.
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a verbose fragment gets cut off mid-string, which
+          destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Minify the SYNTAX only — do NOT shorten, summarize, or drop
+            content values. Every fact the schema asks for is still
+            required, stated fully ("Up to $5M/year for 4 years, total not
+            to exceed $20M" must NOT become "$20M total").
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
           ## Output
 
           Emit exactly one JSON object with these four keys. No
           preamble, no markdown fences.
 
-          ## Output compactness (CRITICAL)
-
-          Your output feeds a downstream consolidation step and is never
-          read by a human. The runtime enforces a hard output-token cap on
-          this task — a pretty-printed fragment can get cut off mid-string,
-          which destroys every field after the cut. Therefore:
-
-          - Emit MINIFIED JSON: one single line, no indentation, no
-            newlines inside the JSON, no spaces after `:` or `,`.
-          - Any JSON examples shown in this prompt are indented for
-            readability only — YOUR output must be minified.
+          Begin your reply with the character `{` and emit NOTHING except
+          the single minified JSON object — no preamble, no questions, no
+          offers to help, no commentary, no markdown fences.
 
       - name: extract-application-components
         input_sources:
@@ -1101,8 +1174,11 @@ steps:
             - name: Component name (backbone or announcement wording).
               Required.
             - description: What the component must contain. Use the
-              announcement's terms when it describes the component;
-              otherwise a brief standard description. Required.
+              announcement's terms when it describes the component.
+              Required for components whose source contains
+              "Announcement"; OMITTED for pure "Sponsor standard"
+              backbone stubs (see the Output compactness rules — a
+              stub is {name, source} only).
             - special_requirements: Page limits, font/margin rules,
               template requirements, or naming conventions specific to
               THIS component (not document-wide formatting). null when
@@ -1139,20 +1215,19 @@ steps:
             the backbone rather than stated in the announcement. null when
             neither the announcement nor a backbone provides formatting.
 
-          ## Output
-
-          Emit exactly one JSON object with these five keys. No preamble,
-          no markdown fences.
-
           ## Output compactness (CRITICAL)
 
           Your output feeds a downstream consolidation step and is never
           read by a human. The runtime enforces a hard output-token cap on
-          this task — a pretty-printed fragment can get cut off mid-string,
-          which destroys every field after the cut. Therefore:
+          this task — a verbose fragment gets cut off mid-string, which
+          destroys every field after the cut. Therefore:
 
           - Emit MINIFIED JSON: one single line, no indentation, no
             newlines inside the JSON, no spaces after `:` or `,`.
+          - Minify the SYNTAX only — do NOT shorten, summarize, or drop
+            content values. Every fact the schema asks for is still
+            required, stated fully ("Up to $5M/year for 4 years, total not
+            to exceed $20M" must NOT become "$20M total").
           - Any JSON examples shown in this prompt are indented for
             readability only — YOUR output must be minified.
 
@@ -1167,19 +1242,38 @@ steps:
           - Within required_components, list components whose `source`
             contains "Announcement" FIRST (they carry the
             announcement-unique content, including mandated_sections),
-            then the pure "Sponsor standard" backbone components.
-          - OMIT any component-object key whose value would be null
-            (special_requirements, mandated_sections) — the consolidation
-            treats a missing key as null. Never omit name, description,
+            then the "Sponsor standard" backbone components.
+          - BACKBONE STUBS: for a pure "Sponsor standard" component emit
+            ONLY {"name":"...","source":"Sponsor standard"} — omit
+            description, special_requirements, and mandated_sections
+            entirely. The consolidation renders standard components from
+            the name alone. A stub costs ~60 characters, so there is NO
+            output-budget reason to drop the backbone.
+          - NEVER drop the backbone. Emitting only the announcement-named
+            components with the backbone missing is an extraction failure.
+            WRONG: "required_components":[{"name":"Project Description",
+            ...}] and nothing else (10 standard components missing).
+            CORRECT: "required_components":[{"name":"Project Description",
+            ...},{"name":"Project Summary","source":"Sponsor standard"},
+            {"name":"References Cited","source":"Sponsor standard"},...]
+            — every backbone item present as a stub.
+          - OMIT any component-object key whose value would be null — the
+            consolidation treats a missing key as null. Never omit name
             or source.
-          - Keep pure backbone "Sponsor standard" component descriptions
-            to 12 words or fewer — reviewers know these standard items;
-            spend the output budget on announcement-specific content.
           - Keep each mandated_sections `requirements` string tight (aim
             for 30 words or fewer) while still enumerating EVERY named
             sub-part, table column, and milestone — compress the wording,
             never drop a list item. Milestone lists may use compact forms
             like "Alpha release ≤1 yr".
+
+          ## Output
+
+          Emit exactly one JSON object with these five keys. No preamble,
+          no markdown fences.
+
+          Begin your reply with the character `{` and emit NOTHING except
+          the single minified JSON object — no preamble, no questions, no
+          offers to help, no commentary, no markdown fences.
 
       - name: extract-budget-requirements
         input_sources:
@@ -1276,22 +1370,30 @@ steps:
             into one readable description. null when
             absent.
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a verbose fragment gets cut off mid-string, which
+          destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Minify the SYNTAX only — do NOT shorten, summarize, or drop
+            content values. Every fact the schema asks for is still
+            required, stated fully ("Up to $5M/year for 4 years, total not
+            to exceed $20M" must NOT become "$20M total").
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
           ## Output
 
           Emit exactly one JSON object with these eight keys. No
           preamble, no markdown fences.
 
-          ## Output compactness (CRITICAL)
-
-          Your output feeds a downstream consolidation step and is never
-          read by a human. The runtime enforces a hard output-token cap on
-          this task — a pretty-printed fragment can get cut off mid-string,
-          which destroys every field after the cut. Therefore:
-
-          - Emit MINIFIED JSON: one single line, no indentation, no
-            newlines inside the JSON, no spaces after `:` or `,`.
-          - Any JSON examples shown in this prompt are indented for
-            readability only — YOUR output must be minified.
+          Begin your reply with the character `{` and emit NOTHING except
+          the single minified JSON object — no preamble, no questions, no
+          offers to help, no commentary, no markdown fences.
 
       - name: extract-compliance-flags
         input_sources:
@@ -1360,6 +1462,22 @@ steps:
             Korea, Iran, or their entities). (Also flagged as a Contract
             Review trigger in Red Flags.)
 
+          ## Output compactness (CRITICAL)
+
+          Your output feeds a downstream consolidation step and is never
+          read by a human. The runtime enforces a hard output-token cap on
+          this task — a verbose fragment gets cut off mid-string, which
+          destroys every field after the cut. Therefore:
+
+          - Emit MINIFIED JSON: one single line, no indentation, no
+            newlines inside the JSON, no spaces after `:` or `,`.
+          - Minify the SYNTAX only — do NOT shorten, summarize, or drop
+            content values. Every fact the schema asks for is still
+            required, stated fully ("Up to $5M/year for 4 years, total not
+            to exceed $20M" must NOT become "$20M total").
+          - Any JSON examples shown in this prompt are indented for
+            readability only — YOUR output must be minified.
+
           ## Output
 
           Emit exactly one JSON object with two keys, `compliance_risks`
@@ -1379,17 +1497,9 @@ steps:
             ]
           }
 
-          ## Output compactness (CRITICAL)
-
-          Your output feeds a downstream consolidation step and is never
-          read by a human. The runtime enforces a hard output-token cap on
-          this task — a pretty-printed fragment can get cut off mid-string,
-          which destroys every field after the cut. Therefore:
-
-          - Emit MINIFIED JSON: one single line, no indentation, no
-            newlines inside the JSON, no spaces after `:` or `,`.
-          - Any JSON examples shown in this prompt are indented for
-            readability only — YOUR output must be minified.
+          Begin your reply with the character `{` and emit NOTHING except
+          the single minified JSON object — no preamble, no questions, no
+          offers to help, no commentary, no markdown fences.
 
   - name: Consolidation (Markdown deliverable)
     is_output: true
@@ -1675,6 +1785,13 @@ steps:
           | Component Name | Description / Details | Special Requirements | Source |
           |---|---|---|---|
 
+          Backbone components arrive as STUBS — {name, source} only,
+          no description. Render a stub's Description / Details and
+          Special Requirements cells as "—". Do NOT invent a
+          description, and do NOT drop the row: every component in
+          the fragment gets a table row, stub or not. (The same rule
+          applies to stubs in the Optional Components table.)
+
           For any component whose `mandated_sections` is non-null and
           non-empty, append "**See required structure below.**" to that
           component's Special Requirements cell.
@@ -1777,7 +1894,7 @@ steps:
 
           ## IMPORTANT NOTES
 
-          Synthesize 0–5 critical warnings or pitfalls a reviewer would
+          Synthesize 0–3 critical warnings or pitfalls a reviewer would
           otherwise miss. Pull from across the eight fragments — not
           from the document directly. **Do NOT restate financial rules
           here** (cost-share / matching, F&A / indirect, funding limits,
