@@ -6,7 +6,7 @@
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Section 2 Personnel Eligibility Verification",
+      "name": "Section 2 Personnel Eligibility Verification v0.2.0",
       "description": "Uploads three workflow documents together — the VERAS proposal package, the Banner NBAJOBS extract, and the institutional Department List — and returns an RA-friendly Markdown Section 2 Review Report covering the per-person eligibility matrix (with APM 45.22 status), org-code-to-DGA mapping, DGA completeness assessment, action items for ineligible personnel and missing DGAs, and a review-completion checklist. Mirrors the source ui-insight/ProcessMapping section2-personnel-eligibility consolidation.md conventions.",
       "steps": [
         {

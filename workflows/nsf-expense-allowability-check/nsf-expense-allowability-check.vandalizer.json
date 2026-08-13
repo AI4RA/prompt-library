@@ -6,7 +6,7 @@
   "exported_by": "ai4ra-prompt-library",
   "items": [
     {
-      "name": "NSF Expense Allowability Check",
+      "name": "NSF Expense Allowability Check v1.0.0",
       "description": "Single-step Vandalizer workflow that reviews one expense against supplied NSF award, budget, policy, and documentation evidence, then emits a chat-ready allowability assessment.",
       "steps": [
         {

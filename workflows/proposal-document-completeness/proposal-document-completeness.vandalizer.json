@@ -6,7 +6,7 @@
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Proposal Document Completeness",
+      "name": "Proposal Document Completeness v0.2.0",
       "description": "Uploads a federal proposal package (VERAS or sponsor portal export) plus the RFA / FOA for the announcement and returns an RA-friendly Markdown Completeness Report covering required-documents checklist, per-person document matrix, subaward document status, conditional requirements, personnel discrepancies, prioritized missing-documents summary for PI communication, and warnings. Mirrors the source ui-insight/ProcessMapping proposal-document-completeness consolidation.md conventions.",
       "steps": [
         {

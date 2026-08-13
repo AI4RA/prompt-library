@@ -6,7 +6,7 @@
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Compliance Personnel Verification (SFI & RST)",
+      "name": "Compliance Personnel Verification (SFI & RST) v0.2.0",
       "description": "Uploads three workflow documents together — the VERAS proposal package, the institutional SFI disclosure records, and the most recent daily RST completion spreadsheet — and returns an RA-friendly Markdown Compliance Status Report covering the per-person SFI / RST status matrix, summary counts, action items for non-compliant personnel, discrepancies & warnings, and a completion checklist. Mirrors the source ui-insight/ProcessMapping compliance-personnel-verification consolidation.md conventions.",
       "steps": [
         {
