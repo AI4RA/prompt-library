@@ -147,6 +147,48 @@ bulleted entries with compliance sub-bullets. Final section's
 Important Notes synthesized critical reviewer warnings from across
 the seven fragments.
 
+#### v0.7.0 → v0.8.0 (2026-08-13)
+
+**Test input**: NSF 25-541 "Test Bed: Toward a Network of
+Programmable Cloud Laboratories (PCL-Test Bed)" solicitation PDF
+(26 pages), run on the v0.7.0-equivalent Vandalizer copy ("RFA
+Checklist Extraction New (Copy)").
+
+**Bug surfaced**: The solicitation's Section V.A supplements the
+PAPPG with ten named Project Description sections (Science drivers;
+Node capabilities with five numbered sub-parts incl. the Instrument
+Inventory Table and its three required columns; Cross-Node
+Collaborations; Training and education; Broadening access; Metrics;
+Management Plan with a six-milestone Implementation Timeline; Plan
+for Post-Award Continued Operation). The extraction compressed all
+of it into one run-on `description` sentence plus the pointer
+"Must include all specified subsections listed in Section V.A" —
+the schema had no field to hold the enumeration, so the checklist
+never surfaced the RFA-unique required sections.
+
+**Changes**:
+- `extract-application-components`: component objects gain
+  `mandated_sections` ({name, requirements, subsections}) with
+  enumeration rules (announcement order, names verbatim, sub-parts
+  / table columns / milestones spelled out), an explicit ban on
+  pointer-only phrasing, and a WRONG vs CORRECT worked example
+  where the WRONG side is the literal failing NSF 25-541 output
+  and the CORRECT side enumerates all ten sections.
+- `rfa-checklist-consolidation`: renders a "📋 Required structure:
+  <Component>" block after the Required Components table for each
+  component carrying `mandated_sections`; the component's Special
+  Requirements cell appends "See required structure below.";
+  placement contract rule 6 keeps the enumeration out of top-level
+  SPECIAL REQUIREMENTS. Block omitted entirely when no component
+  has mandated structure.
+- `validation_plan`: new CHK-07 (mandated structure enumerated;
+  FAIL on pointer substitution).
+- Re-test pending: re-import v0.8.0 JSON, re-run on NSF 25-541,
+  verify all ten sections render; also spot-check a
+  structure-free RFA to confirm the model doesn't invent
+  structure from the sponsor backbone (rule: mandated_sections
+  null unless the announcement prescribes it).
+
 ### `workflows/foa-checklist-extraction`
 
 **Status**: ⚠️ v0.3.0 import-ready but not yet re-tested by user.
