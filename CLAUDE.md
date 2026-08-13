@@ -331,6 +331,33 @@ in runs 3–4, so it runs on a larger-context assignment.
   ten sections and the components fragment carries the backbone
   stubs.
 
+#### v2.0.0 → v2.0.1 (2026-08-13)
+
+**Test input**: NSF 22-603 Mid-Career Advancement (MCA)
+solicitation — a NEW test document (generalization test), run
+after the operator (John) raised the model token limits.
+
+**Result: first fully clean end-to-end run.** All ten fragments
+emitted minified (no chatting, no truncation, no token errors);
+backbone stubs rendered as "—" rows with announcement-modified
+components first; mandated-structure fragment captured the three
+MCA-mandated Project Description sections (Candidate's Past
+Research; Research Advancement and Training Plan; Long-Term
+Career Plans); red flags correct (commitment letter + AOR
+flagged, limited submission clear); consolidation enforced the
+placement contract unprompted (dropped the cost-sharing item
+from Special Requirements because Budget owns it); deliverable
+ended cleanly.
+
+**One residual defect → v2.0.1**: extract-mandated-structure
+quoted announcement text with unescaped double quotes
+("mutual benefits/\"added value\" of collaboration"),
+invalidating its fragment's JSON. The consolidation's salvage
+rule recovered every section, so the deliverable was unaffected
+— but the fragment should parse. PATCH: all ten extraction
+prompts now carry an explicit escape-or-rephrase rule for double
+quotes inside JSON string values. No other changes.
+
 ### `workflows/foa-checklist-extraction`
 
 **Status**: ⚠️ v0.3.0 import-ready but not yet re-tested by user.
