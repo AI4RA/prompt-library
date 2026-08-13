@@ -204,6 +204,97 @@ KnowledgeBaseQuery step manually post-import, per the README's
 Recommended knowledge bases section. The pending v0.8.0 NSF 25-541
 re-test should be run against this v1.0.0 JSON instead.
 
+#### v1.0.0 → v1.1.0 (2026-08-13)
+
+**Test input**: NSF 25-541 (PCL Test Bed) solicitation PDF, two
+in-Vandalizer runs of the v1.0.0-equivalent workflow.
+
+**Bug surfaced**: hard output-token caps in Vandalizer (operator
+cannot raise them) truncated LLM output mid-string in both runs,
+at different pipeline stages depending on model assignment:
+- Run 1: extraction complete (~11K-char components fragment), but
+  the consolidation deliverable cut at ~9.3K chars — mid-sentence
+  inside the Required-structure block; everything downstream
+  (mandated sections 3–8, Optional Components, Formatting,
+  Compliance, Foreign Influence, Special Requirements, Important
+  Notes) missing.
+- Run 2 (user changed model assignment): consolidation completed,
+  but the extract-application-components fragment itself cut at
+  ~4.9K chars mid-way through the Implementation Timeline string —
+  unparseable JSON; the deliverable lost the backbone components
+  (1-row Required Components table), submission_details,
+  formatting_requirements, and the last two milestones. The
+  consolidation LLM salvaged the parseable prefix gracefully.
+  Separate model-quality note: run 2's model found BABA + CHIPS
+  §10636 CRU triggers (better than run 1) but returned empty
+  allowable_costs (worse than run 1).
+
+**Changes** (output-token economy, since caps are not adjustable):
+- All 9 extraction tasks: "Output compactness (CRITICAL)" block —
+  minified single-line JSON (run-2's pretty-printed fragment spent
+  ~35% of its budget on indentation); in-prompt examples flagged
+  as indented-for-readability-only.
+- extract-application-components: scalar keys emitted first, then
+  Announcement-sourced components (with mandated_sections) before
+  backbone rows, so any future cap-hit clips low-value tail
+  content; null component keys omitted; backbone descriptions
+  ≤12 words; mandated_sections requirements ≤~30 words with the
+  hard rule "compress wording, never drop an enumerated item".
+- Consolidation: told fragments arrive minified / reordered /
+  null-keys-omitted, and to salvage truncated or malformed
+  fragments field-by-field rather than discarding.
+- Re-test pending: re-import v1.1.0, re-run NSF 25-541 under the
+  run-2 model assignment; verify the components fragment parses,
+  the Required Components table has all backbone rows, and all
+  six Implementation Timeline milestones survive.
+
+#### v1.1.0 → v1.2.0 (2026-08-13)
+
+**Test input**: NSF 25-541, in-Vandalizer run of imported v1.1.0
+(run 3).
+
+**Bugs surfaced**: v1.1.0's minification WORKED (components
+fragment parsed at 4,851 chars minified; scalar-first ordering
+held; all 8 mandated sections, 5 subsections, and all 6
+Implementation Timeline milestones survived; Submission Details
+and Formatting Requirements populated). But the compactness block
+itself caused two regressions:
+1. extract-risk-flags returned conversational PROSE ("Since no
+   specific question or JSON schema was provided... I'm ready to
+   format or extract exactly what you need") — the block was
+   appended AFTER the ## Output schema, became the final
+   instruction, and the weak model lost the schema entirely. The
+   deliverable rendered the false empty-state "✅ No red flags
+   identified", hiding the real limited-submission and AOR flags
+   as clear. Worst failure mode of the three runs.
+2. Backbone dropped: required_components contained ONLY Project
+   Description (10 standard components + 4 optional missing);
+   the "spend budget on announcement-specific content" framing
+   over-steered. Also award task over-compressed content ("Up to
+   $5M/year for 4 years" → "$20M per PCL Node").
+3. Consolidation clipped its final Important Notes line at the
+   output cap (~10.5K chars) even without backbone rows.
+
+**Changes**:
+- All 9 tasks: compactness block relocated BEFORE ## Output (the
+  schema is always the final instruction); every prompt now ends
+  with an anti-chat anchor ("Begin your reply with `{` ... no
+  questions, no offers to help, no commentary").
+- Generic block gains "minify the SYNTAX only — never shorten,
+  summarize, or drop content values" with the observed award-
+  amount over-compression as the example.
+- Components task: backbone components emitted as STUBS
+  ({name, source} only, ~60 chars) with a NEVER-drop rule and
+  run-3's backbone-less output as the WRONG example; description
+  field spec updated (required only for Announcement-sourced
+  components).
+- Consolidation: stub rows render with "—" cells (no invented
+  descriptions, no dropped rows); Important Notes 0–5 → 0–3.
+- Re-test: verify RED FLAGS shows limited-submission + AOR +
+  PI-meeting flags again, Required Components has all 11 rows
+  (announcement + backbone stubs), and the deliverable reaches
+  its final line without truncation.
+
 ### `workflows/foa-checklist-extraction`
 
 **Status**: ⚠️ v0.3.0 import-ready but not yet re-tested by user.

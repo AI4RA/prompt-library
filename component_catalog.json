@@ -3810,7 +3810,7 @@
       "slug": "rfa-checklist-extraction",
       "name": "RFA Checklist Extraction",
       "description": "Uploads a federal funding announcement (RFA, FOA, NOFO, or program solicitation) and returns a single RA-friendly Markdown checklist organized in the pre-award sections a sponsored-programs analyst uses when triaging an opportunity, led by a Red Flags section that surfaces escalation and contract-review triggers first: Red Flags, Dates & Deadlines, Eligibility, Award Information, Budget Requirements & Policies, Submission Details, Application Components, Compliance Risks, Foreign Influence & International Components, Special Requirements, and Important Notes. The pipeline runs nine parallel Prompt tasks (each emitting a JSON fragment for its block) plus a Consolidation Prompt that renders the final Markdown checklist with strict de-duplication. Mirrors the ui-insight/ProcessMapping rfa-checklist-extraction workflow's consolidated sections and placement contract, extended with the 2026-08 pre-award RA feedback (Red Flags, section reorder, recurring date resolution, richer eligibility) and a baked-in sponsor backbone that auto-includes each federal sponsor's standard required components and default formatting when the announcement omits them. v0.7.0 adds the expanded Red Flags / Contract-Review trigger set and Compliance Risks + Foreign Influence sections from the RA's SPA checklist.",
-      "workflow_version": "1.0.0",
+      "workflow_version": "1.2.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
