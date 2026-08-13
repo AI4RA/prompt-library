@@ -6,7 +6,7 @@
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "Risk Domain Assessment",
+      "name": "Risk Domain Assessment v0.3.0",
       "description": "Uploads federal award documents (Notice of Award, FOA / NOFO / RFA, modification, proposal) and returns an RA-friendly Risk Domain Assessment Report scoring 14 institutional risk domains on a 1-5 rubric with evidence citations, aggregate metrics, high-risk-areas list, key findings, and recommended mitigations. The deliverable is rendered as plain-text inside a Markdown code block per the source ui-insight/ProcessMapping risk-domain-assessment consolidation.md output template — dot-leader score lines, underlined section headers, fixed-width layout for legibility.",
       "steps": [
         {

@@ -6,7 +6,7 @@
   "exported_by": "ai4ra-prompt-library",
   "items": [
     {
-      "name": "NSF Budget Spreadsheet Justification (UDM)",
+      "name": "NSF Budget Spreadsheet Justification (UDM) v1.0.0",
       "description": "Read an NSF-style proposal budget workbook (or extracted workbook evidence) and emit a JSON array of eight NSF budget-justification sections (A–H) that validates against components/nsf-budget-justification-udm/schema.json at #/$defs/output.",
       "steps": [
         {

@@ -6,7 +6,7 @@
   "exported_by": "ui-insight",
   "items": [
     {
-      "name": "NOA Summary",
+      "name": "NOA Summary v0.2.0",
       "description": "Uploads a federal Notice of Award (NoA) and returns an RA-friendly Markdown Grant Award Summary for a university Office of Sponsored Programs: a five-part synthesis (Key Personnel & Contacts; Grant Summary At-a-Glance; Financial & Period of Performance; Reporting & Critical Deadlines; Key Compliance & Administrative Requirements) with finances and deadlines in tables and critical restrictions / required approvals bolded.",
       "steps": [
         {

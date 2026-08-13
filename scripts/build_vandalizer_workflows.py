@@ -473,7 +473,10 @@ def build_workflow(manifest_path: Path) -> tuple[dict, Path]:
         "exported_at": exported_at,
         "exported_by": manifest.get("owner") or "ai4ra-prompt-library-build",
         "items": [{
-            "name": manifest["name"],
+            # The export name carries the workflow version so imports are
+            # distinguishable in Vandalizer's UI (the x_ai4ra block also
+            # records it, but Vandalizer only displays `name`).
+            "name": f"{manifest['name']} v{manifest['workflow_version']}",
             "description": description,
             "steps": built_steps,
             "input_config": {},
