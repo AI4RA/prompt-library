@@ -1446,7 +1446,7 @@
       ],
       "triad_integration": {
         "evaluation_datasets": [],
-        "harness_notes": "Validate JSON outputs against schema.json. Canonical single-call invocation surface is prompt.md. The companion top-level workflows/export-to-banner-extraction Vandalizer workflow at v0.1.0 implements the contract as six parallel Extraction tasks plus a Consolidation Prompt that converts quoted-dollar strings to JSON numbers, normalizes four enums (award_type, sponsor_entity_type, fa_rate_base, billing_type), and enforces the two source cross-field rules (CFR-01 award_start < award_end; CFR-02 performance_period_start <= award_start_date) as flag emissions on reporting_special.special_terms. Campaign authors should record both single-call and post-consolidation signals when both are available.",
+        "harness_notes": "Validate JSON outputs against schema.json — the canonical single-call invocation surface (prompt.md) remains this component's six-block JSON contract. The companion top-level workflows/export-to-banner-extraction Vandalizer workflow has DIVERGED from that shape and, as of v0.3.0, is a superset: an RA-facing Markdown deliverable produced by seven parallel Prompt extraction tasks (award identification with rubric-driven award-type/category determinations, dates, sponsor(s), budget, billing, reporting, and a FOATEXT line scanner over form lines 100-230) plus a Consolidation Prompt that renders provenance and honors award-over-T&C precedence. As of workflow v1.0.0 the inert KnowledgeBaseQuery step was removed (mirrors rfa-checklist-extraction v1.0.0); extraction reads the uploaded documents directly. Score the component prompt directly for THIS component's JSON contract; score the post-consolidation Markdown for the workflow's RA deliverable. Record both when available.",
         "udm_alignment": {
           "status": "shared_udm_semantics_repo_local_schema",
           "notes": "Broad UDM alignment via leaf-field column bindings: Award (Award_Number, Award_Title, Original_Start_Date, Original_End_Date, Flow_Through_Indicator, CFDA_Number, Current_Total_Funded, Total_Anticipated_Funding); Personnel (First_Name, Last_Name); Organization (Organization_Name, Organization_Type, UEI); AwardBudget; AwardBudgetPeriod; IndirectRate (Rate_Percentage, Base_Type); CostShare (Committed_Amount); ContactDetails (ContactDetails_Value); Terms (Payment_Method, Invoicing_Frequency). The six-block Banner-setup shape itself is repo-local."
@@ -3509,8 +3509,8 @@
     {
       "slug": "export-to-banner-extraction",
       "name": "Export to Banner Award Extraction",
-      "description": "Uploads a fully-executed federal award document and returns an RA-friendly Markdown Export to Banner Reference Summary covering the seven sections needed to populate VERAS's Export to Banner form: award identification, dates & performance period, sponsor information, budget summary, billing & payment, reporting & compliance, and special terms & FOI items. Mirrors the source ui-insight/ProcessMapping export-to-banner-extraction consolidation.md conventions, including the `[DISCREPANCY - ...]` flag syntax.",
-      "workflow_version": "0.2.0",
+      "description": "Uploads a fully-executed award document (optionally alongside the sponsor's general terms & conditions and the University of Idaho determination guides as additional documents) and returns an RA-friendly Markdown Export to Banner Reference Summary. Covers the prioritized data points a University of Idaho sponsored-programs analyst needs to populate VERAS's Export to Banner form: award identification & classification (with rubric-driven Award Type / Category determinations), all date ranges, personnel, sponsor(s), budget & financial terms (indirect basis determination, cost-share detail, program income), billing & payment (billing-type determination, SF-270), reporting & compliance, and a scanned FOATEXT line-item section that flags every standard Banner FOATEXT term (lines 100-230) present in the award. Every value cites its source in the input documents, and the award document takes precedence over any sponsor terms & conditions on a conflict.",
+      "workflow_version": "1.0.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3524,7 +3524,7 @@
         "export-to-banner-extraction-udm"
       ],
       "steps": {
-        "step_count": 3,
+        "step_count": 2,
         "task_count": 8,
         "output_step_name": "Consolidation (Markdown deliverable)"
       },

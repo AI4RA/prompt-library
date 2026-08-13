@@ -1,0 +1,42 @@
+Hi Labib and Barrie,
+
+ 
+
+Please find attached:
+
+ 
+
+Examples of items to include in RFA.docx – this document contains examples of the items we were discussing to include in the Vandalizer RFA output.
+
+Required document components and formatting NSF_NIH_USDA_NIFA_DOE_NASA.pdf – this document contains a list of standard required items (components) for the 5 federal sponsors that do not normally list out all of the required items in their funding announcements. I also included the standard formatting requirements.  
+ 
+
+The Vandalizer RFA output should automatically include the standard required proposal components identified in NSF_NIH_USDA_NIFA_DOE_NASA.pdf, even when the funding announcement does not explicitly list all required submission elements.
+
+If the RFP, RFA, NOFO or other funding solicitation provides specific formatting or document preparation instructions, those instructions should be used in the Vandalizer RFA output. If the solicitation does not provide specific guidance, the Vandalizer RFA output should populate formatting requirements from the sponsor-specific standards contained in the NSF_NIH_USDA_NIFA_DOE_NASA.pdf reference document.
+
+ 
+
+Examples of funding solicitations I am currently working on right now:
+ 
+
+National Science Foundation (NSF)
+
+NSF_22_600__Joint_DMS_NIGMS_Initiative_...NSF___U.S.pdf
+NSF_25_543__Computer_and_Information_Science_and_Engineering.pdf
+ 
+
+National Institutes of Health (NIH)
+
+PAR-25-41_ SuRE-First Award_R16 - Clinical Trial Not Allowed.pdf
+PA_27_102.pdf
+ 
+
+Idaho Department of Health and Welfare (IDHW)
+
+1_Chronic_Disease_Prevention_and_Cancer_Screening_Solicitation_Final_Draft.pdf
+ 
+
+Department of Energy  (DOE) - (this is a recent past solicitation but is an example of a large solicitation)
+
+DE-FOA-0003612.000003.pdf

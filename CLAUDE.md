@@ -935,6 +935,58 @@ depth so the repo plans work even on an unpatched Vandalizer.
 `validation_plan` in this runtime schema (core-contract depth) the
 same way, then re-import + Validate each.
 
+### `workflows/export-to-banner-extraction`
+
+**Status**: ⚠️ v1.0.0 import-ready from a live RA feedback session;
+in-Vandalizer re-test still pending. First workflow reworked from
+*direct RA feedback on real output* rather than an internal test run.
+
+#### v0.2.0 → v1.0.0 (2026-08-13) — RA feedback (Michele Mattoon) + KB removal
+
+**How the change was surfaced**: Michele Mattoon (pre-award reviewer)
+reviewed the v0.2.0 Markdown output and returned a 23-min meeting
+transcript + a post-meeting email with two attachments:
+`E2B Workflow Data Points.xlsx` (a prioritized 22-item data-point spec
++ FOATEXT lines 100–114, each annotated with whether the v0.2.0 output
+had it) and `FOATEXT Lines - Export To Banner Form.pdf` (the actual
+Export to Banner form + the full FOATEXT line catalog 100–230). The
+feedback package lives at `Feedback Meetings/Export To Banner/`.
+
+**Gaps identified** (from the xlsx "Did your Workflow Results have
+these data points?" column + transcript): no Award Category; no
+Subrecipients Y/N; no Co-PI / Co-I / Co-PD or Senior/Key Personnel;
+Program Income not split Y/N + amount; no SF-270; no cost-share detail;
+Award Type came off the literal word (RA wants it *determined* from
+attributes via UI rubric docs — sponsors mislabel); Award Type enum
+wrong (had "Subcontract"; missing Letter Award / Gift Funding /
+Purchase Order); dates/sponsors/amounts collapsed to one value; no
+provenance; no award-over-T&C precedence; the ~130-line FOATEXT manual
+scan was not automated.
+
+**Changes applied** — Tier 1 additive fields; Tier 2 rubric-driven
+determinations + enum fix + precedence rule; Tier 3 new
+`extract-foatext-lines` scanner over the full 100–230 catalog. Bundled
+with **KB-step removal** (see below). Bumped **0.2.0 → 1.0.0** (MAJOR:
+step structure 3 → 2). Validation plan rewritten to 8 core-contract
+`etb-*` checks in the Vandalizer runtime schema. See the workflow
+CHANGELOG `[1.0.0]` entry for the field-by-field list.
+
+**KB removal**: mirrors `rfa-checklist-extraction` v1.0.0 (PR #50) —
+the inert `KnowledgeBaseQuery` Step 0 is removed, extraction tasks read
+`input_sources: [workflow_documents]` only, prompts no longer reference
+"KB chunks", and "UI" is spelled out as "University of Idaho" in prose
+(the FOATEXT line-154 form literal "UI $" is kept). Sponsor T&Cs / the
+UI determination guides are honored when uploaded as documents; the
+award-over-T&C precedence rule is retained as a latent rule.
+
+**Open dependency**: Michele's exact UI determination guides (award
+type / category / indirect basis / billing type) were NOT yet in hand.
+The Tier 2 prompts encode the standard federal distinctions AND
+instruct the model to apply the UI guide verbatim when uploaded as a
+document — refine the rationale blocks once the guides arrive. Also
+pending: her promised field-by-field comparison of the v0.2.0 output
+against a real E2B review.
+
 ### Workflows not yet tested
 
 The following workflows have v0.2.0 manifestations from the Variant
@@ -945,7 +997,6 @@ document yet:
 - `budget-justification-generator`
 - `compliance-personnel-verification`
 - `effort-reporting-extraction`
-- `export-to-banner-extraction`
 - `nsf-budget-justification-multistep`
 - `nsf-budget-spreadsheet-justification`
 - `nsf-expense-allowability-check`
@@ -954,12 +1005,14 @@ document yet:
 - `section2-personnel-eligibility`
 - `subaward-extraction`
 
-The compliance-personnel / section2-personnel / export-to-banner
-trio is the highest-priority cluster to test next — they work on the
-same federal NoA / proposal document shape that surfaced the PI
-synonym and subaward classification bugs in
+The compliance-personnel / section2-personnel pair is the
+highest-priority remaining cluster to test — they work on the same
+federal NoA / proposal document shape that surfaced the PI synonym and
+subaward classification bugs in
 `proposal-budget-personnel-extraction`, so they may benefit from
-preemptive porting of the v0.3.0+ patches.
+preemptive porting of the v0.3.0+ patches. (`export-to-banner` has
+since moved to its own v1.0.0 entry above following the RA feedback
+session.)
 
 ### Test input documents catalog
 

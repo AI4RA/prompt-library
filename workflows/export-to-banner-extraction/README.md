@@ -1,8 +1,8 @@
 # Export to Banner Award Extraction
 
-Uploads a fully-executed federal award document and returns a single structured JSON object covering the six blocks needed to populate the VERAS Export to Banner form.
+Uploads a fully-executed award document (optionally alongside the sponsor's general terms & conditions and the University of Idaho determination guides as additional documents) and returns an **RA-friendly Markdown Export to Banner Reference Summary** — the prioritized data points a University of Idaho sponsored-programs analyst needs to populate the VERAS Export to Banner form.
 
-**Workflow version:** 0.1.0
+**Workflow version:** 1.0.0
 **Vandalizer schema version:** 2
 **Status:** experimental
 **Components manifested:** `export-to-banner-extraction-udm@0.1.0`
@@ -10,45 +10,57 @@ Uploads a fully-executed federal award document and returns a single structured 
 
 ## What this workflow does
 
-The operator uploads a fully-executed federal award document (notice of award, cooperative agreement, contract, or modification) into Vandalizer. The workflow runs as two steps:
+The operator uploads a fully-executed award document (notice of award, cooperative agreement, contract, or modification) into Vandalizer. The workflow runs as two steps. (There is **no** knowledge-base step as of v1.0.0 — see the note below; sponsor terms & conditions or the University of Idaho determination guides can be uploaded as additional documents when available.)
 
-**Step 1 — Parallel Extraction (6 Extraction tasks):**
+**Step 1 — Parallel Extraction (7 `Prompt` tasks):**
 
-| Task | Schema target | SearchSet items (highlights) |
+| Task | Covers | Highlights |
 |---|---|---|
-| `extract-award-identification` | `award_identification` | `award_number`, `project_title`, `pi_name`, `award_type` (enum), `is_pass_through`, `prime_sponsor_name`, `cfda_number`, `naics_code`, `federal_agency_name` |
-| `extract-dates-and-performance` | `dates_and_performance` | `award_start_date`, `award_end_date`, `performance_period_start`, `performance_period_end`, `budget_periods`, `is_multi_year` |
-| `extract-sponsor-and-entity` | `sponsor_entity` | `sponsor_name`, `sponsor_entity_type` (enum), `federal_agency_hierarchy`, `sponsor_address`, `sponsor_uei`, `awardee_organization`, `awardee_uei` |
-| `extract-budget-and-financial` | `budget_financial` | `total_award_amount` (JSON number), `total_anticipated_amount`, `budget_categories`, `total_direct_costs`, `total_indirect_costs`, `fa_rate`, `fa_rate_base` (enum), `is_fa_waived`, `cost_share_amount`, `cost_share_type`, `program_income` |
-| `extract-billing-and-payment` | `billing_payment` | `billing_type` (enum), `billing_frequency`, `billing_address`, `invoice_email`, `pms_loc_code`, `payment_terms`, `invoice_requirements`, `final_invoice_deadline`, `billing_contact` |
-| `extract-reporting-and-special` | `reporting_special` | `reporting_requirements` (typed-row table), `record_retention_period`, `carry_forward_policy`, `prior_approval_requirements`, `special_terms`, `closeout_requirements`, `governing_regulations` |
+| `extract-award-identification` | Identification & classification | `award_type` + `award_category` **determinations** (rubric-driven, not copied labels), Co-PI/key personnel, subrecipients Y/N, prime sponsor award ID, CFDA |
+| `extract-dates-and-performance` | Dates | `all_date_ranges` (captures **every** range), budget periods, multi-year/incremental flags |
+| `extract-sponsor-and-entity` | Sponsor(s) | `all_sponsors` (captures **every** sponsor), entity type, UEIs, officers |
+| `extract-budget-and-financial` | Budget & financial | `all_award_amounts` (captures **every** amount), indirect-basis determination, cost-share detail table, program income Y/N + amount |
+| `extract-billing-and-payment` | Billing & payment | billing-type determination, `minimum_billing` + frequency logic mapped to Banner form 4.3–4.5, SF-270 Y/N |
+| `extract-reporting-and-special` | Reporting & special | report table, retention, carry-forward, prior approvals, governing regs |
+| `extract-foatext-lines` | **FOATEXT scanner** | scans the award against the full FOATEXT line catalog (lines 100–230, §5.2–5.8) and emits **only present lines** with line #, Banner-ready text, and source |
 
-**Step 2 — Consolidation (1 Prompt task):** `export-to-banner-extraction-consolidation` assembles the six JSON fragments into the schema-conformant six-block object, converts quoted dollar strings to JSON numbers (this is the boss's number-vs-string requirement), normalizes the four enums (`award_type`, `sponsor_entity_type`, `fa_rate_base`, `billing_type`), and enforces the two source cross-field rules (CFR-01 `award_start < award_end`; CFR-02 `performance_period_start <= award_start_date`) as flag strings appended to `reporting_special.special_terms` rather than altering the dates.
+**Step 2 — Consolidation (1 `Prompt` task):** `export-to-banner-consolidation` assembles the seven JSON fragments into the RA-friendly Markdown deliverable (eight sections + verification checklist), rendering provenance for the determination fields, funding amounts, and FOATEXT table; flagging cross-task contradictions with `[DISCREPANCY - ...]`; and honoring the **award-over-T&C precedence** rule.
 
-The runtime mirrors the source `ui-insight/ProcessMapping/workflows/export-to-banner-extraction/` workflow one-for-one.
+Every extracted value cites where in the input documents it was found (an RA Output Note), and the deliverable follows the RA's prioritized data-point order.
+
+## Design provenance — RA feedback (2026-08-13)
+
+v1.0.0 implements three tiers of feedback from Michele Mattoon's review of the v0.2.0 output (transcript + `E2B Workflow Data Points.xlsx` + the `FOATEXT Lines - Export To Banner Form.pdf`), bundled with removal of the inert KB step:
+
+- **Tier 1 — additive fields:** award category, subrecipients Y/N, Co-PI/key personnel, program income amount, SF-270, cost-share detail, "capture all variants" for dates/sponsors/amounts, provenance, output reordering.
+- **Tier 2 — decision logic:** Award Type / Category / Indirect Basis / Billing Type reframed as rubric-driven determinations; Award Type enum corrected to the University of Idaho Banner set (Grant, Cooperative Agreement, Contract, Letter Award, Gift Funding, Purchase Order); explicit award-over-T&C precedence.
+- **Tier 3 — FOATEXT engine:** the `extract-foatext-lines` scanner.
+- **KB step removed (MAJOR, 3 steps → 2):** the optional `KnowledgeBaseQuery` Step 0 was inert on import (Vandalizer blanks `kb_uuid`, so a KB always had to be attached manually) and confused operators comparing against their live copies. Mirrors `rfa-checklist-extraction` v1.0.0. Extraction tasks now read `input_sources: [workflow_documents]` only. KBs will be reintroduced once the right approach is settled.
+
+> **Open dependency:** Michele's exact University of Idaho determination guides for award type / category / indirect basis / billing type were not in hand at authoring time. The Tier 2 prompts encode the standard federal distinctions **and** instruct the model to apply the University of Idaho guide verbatim when it is uploaded as a workflow document. Refine the rationale blocks once the guides arrive.
 
 ## Components
 
-- [`export-to-banner-extraction-udm@0.1.0`](../../components/export-to-banner-extraction-udm/) — the sole component. The six Extraction tasks carry focused `prompt_inline` bodies in [`manifest.yaml`](manifest.yaml); the canonical full-document prompt at [`components/export-to-banner-extraction-udm/prompt.md`](../../components/export-to-banner-extraction-udm/prompt.md) remains the single-call reference for harness invocations.
+- [`export-to-banner-extraction-udm@0.1.0`](../../components/export-to-banner-extraction-udm/) — the pinned component. Its JSON `schema.json` / `prompt.md` remain the **single-call harness reference** (a six-block JSON contract). This WORKFLOW intentionally diverges from that shape: it is the end-user Vandalizer **Markdown deliverable**, and since v1.0.0 it is a superset (personnel, FOATEXT, determinations, provenance) driven by RA feedback. The seven Extraction tasks carry focused `prompt_inline` bodies in [`manifest.yaml`](manifest.yaml).
 
 ## Validation plan
 
-Carried into the Vandalizer export at the workflow level (mirrors the source ProcessMapping `Validation_Plan`):
+Authored in the Vandalizer runtime schema (`id` / `name` / `description` / `category`) and carried into the export verbatim:
 
-| Check | Type | Severity |
-|---|---|---|
-| `CHK-01` Date range consistency | consistency | error |
-| `CHK-02` Monetary amount formatting | format | error |
-| `CHK-03` UEI format validation | format | warning |
-| `CHK-04` CFDA number format | format | warning |
-
-The two source `Cross_Field_Rules` (CFR-01 `award_start_date < award_end_date`, CFR-02 `performance_period_start <= award_start_date`) are enforced by the Consolidation Prompt at runtime as flag strings on `reporting_special.special_terms` rather than as separate validation entries.
+| Check | Category |
+|---|---|
+| `etb-sections-complete` — all deliverable sections rendered | completeness |
+| `etb-award-type-determination` — Award Type is a determination, not a copied label | accuracy |
+| `etb-award-precedence` — award-over-T&C precedence honored | content |
+| `etb-all-variants-captured` — all date / sponsor / amount variants captured | completeness |
+| `etb-foatext-line-mapping` — FOATEXT rows map to the catalog with source | content |
+| `etb-provenance-present` — extracted values cite their source | content |
+| `etb-monetary-fidelity` — monetary amounts verbatim | accuracy |
+| `etb-flags-and-personnel-present` — personnel + Y/N flags present | completeness |
 
 ## Eval posture
 
-Workflow-local — see [`evals/`](evals/). The workflow is **not** a 1:1 repackaging of the canonical component prompt: each Extraction task carries a focused `prompt_inline` body covering a single block, and the Consolidation Prompt converts quoted-dollar strings to JSON numbers and emits CFR-01 / CFR-02 flag strings, so per [`docs/contracts.md`](../../docs/contracts.md) workflow-local cases are required to cover behavior that emerges from the seven-task topology.
-
-Workflow-local cases should target the four enum coverages (`award_type`, `sponsor_entity_type`, `fa_rate_base`, `billing_type`), the quoted-dollar-to-JSON-number conversion, the `budget_periods` array population for multi-year incremental awards, and the CFR-01 / CFR-02 flag-emission paths.
+Workflow-local — see [`evals/`](evals/). Per [`docs/contracts.md`](../../docs/contracts.md), workflow-local cases are required because behavior emerges from the eight-task topology rather than a single component prompt. Cases should target: the four rubric-driven determinations (award type / category / indirect basis / billing type), the "capture all variants" arrays, the FOATEXT scan (present-line detection + line-number fidelity + omission of absent terms), the award-over-T&C precedence path, and provenance rendering.
 
 ## Building
 
@@ -66,10 +78,10 @@ The committed `export-to-banner-extraction.vandalizer.json` can be uploaded dire
 
 ## Triad integration
 
-- **Evaluation datasets:** none yet — planned: an authorized, de-identified federal cooperative agreement with multi-year incremental funding and a structured reporting table.
-- **Harness notes:** the seven-task runtime is not identical to running the canonical full-document prompt in one shot. Harness campaigns that score the component prompt directly are still the primary signal for the contract, but workflow-level scoring (post-consolidation JSON) is the right signal for the v0.1.0 runtime — record both when both are available.
+- **Evaluation datasets:** none yet — planned: an authorized, de-identified award (with sponsor T&Cs) exercising a mislabeled instrument (Tier 2 determination), multiple date ranges/amounts, and several present FOATEXT lines.
+- **Harness notes:** the eight-task runtime is not identical to running the canonical component prompt in one shot, and since v1.0.0 the workflow deliverable is a superset of the component's six-block JSON. Harness campaigns that score the component prompt directly remain the primary signal for the component contract; workflow-level scoring (the post-consolidation Markdown) is the right signal for this RA-facing runtime.
 - **Shared UDM relationship:** inherits from the `export-to-banner-extraction-udm` component's UDM alignment (broad bindings to `Award`, `Personnel`, `Organization`, `AwardBudget`, `AwardBudgetPeriod`, `IndirectRate`, `CostShare`, `ContactDetails`, `Terms`).
 
 ## Provenance
 
-Authored 2026-05-20 alongside the initial `export-to-banner-extraction-udm` component, against `ui-insight/ProcessMapping` at commit `2c1f47f46474130743af5aee44d074bcd21787e9`. Built from the `PROC-EXPORT-TO-BANNER-REVIEW` source process map.
+Authored 2026-05-20 alongside the initial `export-to-banner-extraction-udm` component, against `ui-insight/ProcessMapping` at commit `2c1f47f46474130743af5aee44d074bcd21787e9`. v1.0.0 (2026-08-13) reworks the workflow against Michele Mattoon's RA feedback and removes the inert KB step (see the workflow [`CHANGELOG`](CHANGELOG.md) and the prompt-library `CLAUDE.md` workflow testing log).
