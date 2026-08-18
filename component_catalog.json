@@ -3329,6 +3329,69 @@
           "notes": "Output aligns to the repo-local NSF award notice extraction schema, which itself is UDM-aligned but maintained in prompt-library."
         }
       }
+    },
+    {
+      "component_id": "prompt.viva-engage-reformat",
+      "slug": "viva-engage-reformat",
+      "name": "viva-engage-reformat",
+      "summary": "Reformats a table of proposal-submission information (one proposal per row) into fixed-format \"Proposal Submission\" announcement blocks suitable for pasting into Microsoft Teams / Viva Engage.",
+      "version": "0.2.0",
+      "category": "transformation",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "proposal-submissions",
+        "reformatting",
+        "teams",
+        "viva-engage",
+        "announcement"
+      ],
+      "audience": [
+        "research-administrators",
+        "sponsored-programs-offices"
+      ],
+      "paths": {
+        "component_dir": "components/viva-engage-reformat",
+        "readme": "components/viva-engage-reformat/README.md",
+        "prompt": "components/viva-engage-reformat/prompt.md",
+        "schema": null,
+        "evals_dir": "components/viva-engage-reformat/evals",
+        "eval_case_metadata_glob": "components/viva-engage-reformat/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/viva-engage-reformat/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/viva-engage-reformat/prompt.md",
+          "version": "0.2.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "plain_text_blocks",
+          "scope": "repo_local_announcement_reformat_contract",
+          "notes": "Repo-local plain-text transformation contract: one fixed six-field \"Proposal Submission\" block (Proposal Number, Proposal Title, Sponsor, Prime Sponsor, Principal Investigator, Budget Total) per input table row, suitable for pasting into Microsoft Teams / Viva Engage. No JSON output schema and no UDM binding.",
+          "schema_path": null,
+          "schema_entrypoints": [],
+          "validation_surfaces": []
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Canonical invocation surface is prompt.md. Score responses against per-row block completeness, six-label presence, verbatim field values, and absence of surrounding prose. Invoked as the single output task of the workflows/viva-engage Vandalizer workflow; prompt captured verbatim from the live University of Idaho Vandalizer saved prompt on 2026-08-18.",
+        "udm_alignment": {
+          "status": "repo_local_announcement_reformat_contract",
+          "notes": "Plain-text announcement output; no shared UDM fields are read or produced."
+        }
+      }
     }
   ],
   "workflows": [
@@ -3912,6 +3975,33 @@
       "evaluation": {
         "posture": "workflow_local",
         "source": "workflows/subaward-extraction/evals"
+      }
+    },
+    {
+      "slug": "viva-engage",
+      "name": "Viva Engage",
+      "description": "Reformats a table of proposal-submission information (e.g. rows from an Excel export) into per-proposal \"Proposal Submission\" announcement blocks — proposal number, title, sponsor, prime sponsor, principal investigator, and budget total — suitable for pasting into Microsoft Teams / Viva Engage.",
+      "workflow_version": "0.2.0",
+      "status": "experimental",
+      "vandalizer_schema_version": 2,
+      "paths": {
+        "workflow_dir": "workflows/viva-engage",
+        "manifest": "workflows/viva-engage/manifest.yaml",
+        "export": "workflows/viva-engage/viva-engage.vandalizer.json",
+        "readme": "workflows/viva-engage/README.md",
+        "changelog": "workflows/viva-engage/CHANGELOG.md"
+      },
+      "components_manifested": [
+        "viva-engage-reformat"
+      ],
+      "steps": {
+        "step_count": 1,
+        "task_count": 1,
+        "output_step_name": "Reformatting Prompt"
+      },
+      "evaluation": {
+        "posture": "inherited",
+        "source": "components/viva-engage-reformat/evals"
       }
     }
   ]

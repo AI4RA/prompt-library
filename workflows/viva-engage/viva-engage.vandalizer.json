@@ -1,0 +1,86 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "exported_at": "2026-08-18T00:00:00+00:00",
+  "exported_by": "ui-insight",
+  "items": [
+    {
+      "name": "Viva Engage v0.2.0",
+      "description": "Reformats a table of proposal-submission information (e.g. rows from an Excel export) into per-proposal \"Proposal Submission\" announcement blocks — proposal number, title, sponsor, prime sponsor, principal investigator, and budget total — suitable for pasting into Microsoft Teams / Viva Engage.",
+      "steps": [
+        {
+          "name": "Reformatting Prompt",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "viva-engage-reformat",
+                "prompt": "For each row in the input, produce one entry in exactly this format, with a blank line between entries:\n\nProposal Submission\nProposal Number:\nProposal Title:\nSponsor:\nPrime Sponsor:\nPrincipal Investigator:\nBudget Total: $\n\nRules:\n\n1. Fill in Proposal Number, Proposal Title, and Sponsor exactly as they appear in the row — do not paraphrase, abbreviate, or correct them.\n2. Leave \"Prime Sponsor:\" blank. Output nothing after the colon, even when the input row has a prime sponsor value. The PreAward SPA completes this field if applicable.\n3. Leave \"Budget Total: $\" blank. Output nothing after the \"$\", even when the input row has a budget amount. The PreAward SPA completes this field if applicable.\n4. The input lists the Principal Investigator as \"last name, first name middle\". Reorder it to first name, then middle initial or middle name (when present), then last name.\n   - Input \"Smith, Jane A\" → output \"Principal Investigator: Jane A. Smith\"\n   - Input \"Garcia, Luis\" (no middle) → output \"Principal Investigator: Luis Garcia\"\n5. Produce one entry per input row — never drop, merge, or invent rows. Skip header rows.\n6. Output only the entries. No introduction, commentary, or closing remarks.",
+                "input_sources": [
+                  "step_input"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "id": "VE-01",
+          "name": "One block per input row",
+          "category": "completeness",
+          "description": "The output contains exactly one \"Proposal Submission\" block per data row in the input table. FAIL if any row is dropped, merged, or if a block appears that has no corresponding input row.\n"
+        },
+        {
+          "id": "VE-02",
+          "name": "All six fields present per entry",
+          "category": "completeness",
+          "description": "Every entry carries all six labeled field lines in order — Proposal Number, Proposal Title, Sponsor, Prime Sponsor, Principal Investigator, Budget Total — single-spaced, with a blank line only between entries. FAIL if a label is missing, renamed, or reordered.\n"
+        },
+        {
+          "id": "VE-03",
+          "name": "Number, title, and sponsor verbatim",
+          "category": "accuracy",
+          "description": "Proposal Number, Proposal Title, and Sponsor match their source cells exactly — no paraphrase, abbreviation, or correction. FAIL on any altered or invented value.\n"
+        },
+        {
+          "id": "VE-04",
+          "name": "Prime Sponsor and Budget Total left blank",
+          "category": "accuracy",
+          "description": "Every entry renders \"Prime Sponsor:\" with nothing after the colon and \"Budget Total: $\" with nothing after the dollar sign, even when the input row carries values for them (the PreAward SPA completes these). FAIL if either field is populated in any entry.\n"
+        },
+        {
+          "id": "VE-05",
+          "name": "PI name reordered to first-middle-last",
+          "category": "accuracy",
+          "description": "The Principal Investigator renders as first name, middle initial or middle name when present, then last name (input arrives as \"last name, first name middle\"). Name components themselves are unchanged. FAIL if any entry keeps last-name-first order or drops/alters a name component.\n"
+        },
+        {
+          "id": "VE-06",
+          "name": "No prose outside the entries",
+          "category": "content",
+          "description": "The output consists only of the \"Proposal Submission\" entries — no introductions, commentary, headers, or trailing remarks. FAIL if conversational text surrounds the entries.\n"
+        }
+      ],
+      "validation_inputs": [],
+      "x_ai4ra": {
+        "workflow_source": "workflows/viva-engage/manifest.yaml",
+        "workflow_version": "0.2.0",
+        "status": "experimental",
+        "components": [
+          {
+            "slug": "viva-engage-reformat",
+            "version": "0.2.0",
+            "prompt_sha256": "e4cc1969ed1b52edb848abc60965d7a723ff441d8d7c422fe6238f1ec5e8789b"
+          }
+        ]
+      }
+    }
+  ]
+}
