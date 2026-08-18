@@ -411,6 +411,20 @@ changes — re-test only needs to confirm both steps appear as
 deliverables and runs use VandalStrong regardless of the model
 picked in the run dialog.
 
+#### v3.0.0 → v3.1.0 (2026-08-18)
+
+**Not a test-surfaced bug — feature rollback.** The
+default_task_model: VandalStrong pin (v3.0.0 ask 2) was removed:
+John could not confirm how to pin the model / what the real
+server available_models[].name entry is, and an unmatched name
+would point every task at a nonexistent model on import. Tasks
+once again use the model chosen in Vandalizer's run dialog. The
+dual-deliverable is_output change (v3.0.0 ask 1) is retained.
+MINOR: manifest-key removal only — no step-structure, prompt, or
+is_output changes. The build script keeps generic
+default_task_model support for future use. Re-test only needs to
+confirm both steps still appear as deliverables.
+
 ### `workflows/foa-checklist-extraction`
 
 **Status**: ⚠️ v0.3.0 import-ready but not yet re-tested by user.
