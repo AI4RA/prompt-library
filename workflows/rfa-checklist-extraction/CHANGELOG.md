@@ -6,6 +6,11 @@ All notable changes to this workflow. Versions follow semver adapted to workflow
 - **MINOR** — prompt body tracking a referenced component MINOR, or additive step/task options that preserve the existing operator flow.
 - **PATCH** — step or task display-name edits, description polish, non-semantic manifest cleanup.
 
+## [3.1.0] — 2026-08-18
+
+- **Model pin removed.** The v3.0.0 `default_task_model: VandalStrong` key is deleted. The pinned name was never verified against a real Vandalizer server `available_models[].name` entry (the operator could not confirm the model name), and an unmatched name would have pointed every task at a nonexistent model on import. Tasks once again use the model chosen in Vandalizer's run dialog. The dual-deliverable `is_output` change from v3.0.0 is retained.
+- **MINOR**: manifest-key removal only; no step-structure, prompt, or `is_output` changes.
+
 ## [3.0.0] — 2026-08-13
 
 - **MAJOR — dual deliverables + model lock** (is_output change per this workflow's semver; no prompt changes). Both features verified against the `ui-insight/vandalizer` backend source:
