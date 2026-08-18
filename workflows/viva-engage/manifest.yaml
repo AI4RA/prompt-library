@@ -1,0 +1,120 @@
+# Authored source for the Viva Engage Vandalizer workflow.
+#
+# The companion viva-engage.vandalizer.json is generated from this file by
+# scripts/build_vandalizer_workflows.py and committed alongside.
+# Never hand-edit the generated JSON — update this manifest and rebuild.
+#
+# === Topology (v0.2.0) ===
+#
+# v0.2.0 (2026-08-18) — RA FEEDBACK (Tami Clabough, pre-award SPA).
+# Tami had been fixing the v0.1.0-equivalent output with a Vandalizer
+# "Formatter" post-processing prompt on the task's Output tab (a
+# second LLM pass; not carried in workflow exports). Her rules are
+# folded into the main prompt instead: Prime Sponsor and Budget Total
+# always blank (PreAward SPA completes them), PI name reordered from
+# the input's "last, first middle" to "first middle-initial last",
+# compact single-spaced entries per her example. MINOR: prompt tracks
+# component viva-engage-reformat 0.1.0 → 0.2.0; topology unchanged.
+#
+#
+# Captured 2026-08-18 from the University of Idaho RA team's live
+# Vandalizer workflow "Viva Engage" (exported by brobison@uidaho.edu).
+# Single step, single Prompt task: reformats a table of proposal
+# submissions (one row per proposal) into fixed-format "Proposal
+# Submission" announcement blocks for pasting into Teams / Viva Engage.
+#
+# Deltas from the live export, both deliberate:
+#   1. The live task referenced the saved prompt by
+#      saved_prompt_uuid (946c8f59-0be4-4bb7-b796-dc355fab9a1f);
+#      exports do not embed saved-prompt bodies, so the prompt text
+#      is captured in components/viva-engage-reformat/prompt.md and
+#      inlined at build time via prompt_ref.
+#   2. The live task pinned "model": "qwen/qwen3.6-27b". The repo
+#      version drops the pin (run-dialog model applies), consistent
+#      with rfa-checklist-extraction v3.1.0. The exported name is
+#      recorded here as a known-valid available_models[].name on the
+#      Vandalizer server, should a pin ever be wanted.
+#
+# Input model preserved from the export: the task reads step_input
+# (pasted/step-provided table text), NOT workflow_documents.
+
+name: Viva Engage
+description: >
+  Reformats a table of proposal-submission information (e.g. rows from an
+  Excel export) into per-proposal "Proposal Submission" announcement blocks
+  — proposal number, title, sponsor, prime sponsor, principal investigator,
+  and budget total — suitable for pasting into Microsoft Teams / Viva
+  Engage.
+
+workflow_version: 0.2.0
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-08-18
+updated: 2026-08-18
+
+components:
+  - slug: viva-engage-reformat
+    pinned_version: 0.2.0
+
+validation_plan:
+  - id: VE-01
+    name: One block per input row
+    category: completeness
+    description: >
+      The output contains exactly one "Proposal Submission" block per data
+      row in the input table. FAIL if any row is dropped, merged, or if a
+      block appears that has no corresponding input row.
+  - id: VE-02
+    name: All six fields present per entry
+    category: completeness
+    description: >
+      Every entry carries all six labeled field lines in order — Proposal
+      Number, Proposal Title, Sponsor, Prime Sponsor, Principal
+      Investigator, Budget Total — single-spaced, with a blank line only
+      between entries. FAIL if a label is missing, renamed, or reordered.
+  - id: VE-03
+    name: Number, title, and sponsor verbatim
+    category: accuracy
+    description: >
+      Proposal Number, Proposal Title, and Sponsor match their source
+      cells exactly — no paraphrase, abbreviation, or correction. FAIL on
+      any altered or invented value.
+  - id: VE-04
+    name: Prime Sponsor and Budget Total left blank
+    category: accuracy
+    description: >
+      Every entry renders "Prime Sponsor:" with nothing after the colon
+      and "Budget Total: $" with nothing after the dollar sign, even when
+      the input row carries values for them (the PreAward SPA completes
+      these). FAIL if either field is populated in any entry.
+  - id: VE-05
+    name: PI name reordered to first-middle-last
+    category: accuracy
+    description: >
+      The Principal Investigator renders as first name, middle initial or
+      middle name when present, then last name (input arrives as "last
+      name, first name middle"). Name components themselves are unchanged.
+      FAIL if any entry keeps last-name-first order or drops/alters a name
+      component.
+  - id: VE-06
+    name: No prose outside the entries
+    category: content
+    description: >
+      The output consists only of the "Proposal Submission" entries — no
+      introductions, commentary, headers, or trailing remarks. FAIL if
+      conversational text surrounds the entries.
+
+steps:
+  - name: Reformatting Prompt
+    is_output: true
+    tasks:
+      - name: viva-engage-reformat
+        input_sources:
+          - step_input
+        prompt_ref:
+          component: viva-engage-reformat
+          from_section: "## Prompt"
+
+evals:
+  inherits_from: components/viva-engage-reformat/evals
