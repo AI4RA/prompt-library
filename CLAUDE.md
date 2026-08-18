@@ -1192,6 +1192,12 @@ carried a KB step and keep their prior versions:
 - `proposal-document-completeness`
 - `section2-personnel-eligibility`
 - `subaward-extraction`
+- `viva-engage` (v0.1.0, added 2026-08-18 — captured from the live
+  University of Idaho Vandalizer workflow, which IS in production
+  use; the repo-built import with the inlined prompt has not been
+  re-tested. Live copy ran on model `qwen/qwen3.6-27b` — a
+  known-valid server available_models[].name; repo version drops
+  the pin)
 
 The compliance-personnel / section2-personnel pair is the
 highest-priority remaining cluster to test — they work on the same
