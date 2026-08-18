@@ -1,5 +1,26 @@
 # Authored source for the Export to Banner Award Extraction Vandalizer workflow.
 #
+# === v1.1.0 (2026-08-18): Tier 2 determinations use UI rubrics ===
+# MINOR (prompt-content only; topology unchanged). Michele Mattoon
+# delivered the "Banner Help Tip" determination guides that were the
+# Tier 2 open dependency. The three determination tasks now encode UI's
+# ACTUAL rubrics instead of generic federal distinctions:
+#   - Award Type: UI comparative-characteristics + 5-signal matrix
+#     (origination / involvement / payment / purpose / reporting).
+#   - Award Category: the 20-code single-letter tree (F,5,D,E,K,C,W,B,H,
+#     A,Z,P,Q,I,S,J,T,U,O,R) -> award_category_code + label + rationale
+#     (replaces the old free-text award_category + funding_source_
+#     classification).
+#   - Indirect Cost Basis: fa_rate_base enum corrected to UI basis codes
+#     (MTDC-A default / PARSUP / SPEC-A / SPEC-R / SPEC-S; MTDC-B banned);
+#     new fa_rate_code (Rate Codes table + waived-OH "W" prefix).
+#   - Billing Type: collapsed to UI's 3 setups (Cost Reimbursement /
+#     Letter of Credit / Fixed; dropped "Milestone") + SF-270 event map.
+#   - cfda_number: ALN decision tree + 2-digit agency table; adds
+#     cfda_rationale.
+# Guides committed under Feedback Meetings/Export To Banner/Banner Help
+# Tip Docs/. One guide has a typo flagged to Michele (Category code H).
+#
 # === Topology (v1.0.0, Variant A + FOATEXT engine, NO KB step) ===
 #
 # v1.0.0 (2026-08-13) bundles the RA-feedback rework (Tiers 1-3, from
@@ -82,12 +103,12 @@ description: >
   input documents, and the award document takes precedence over any
   sponsor terms & conditions on a conflict.
 
-workflow_version: 1.0.0
+workflow_version: 1.1.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-05-20
-updated: 2026-08-13
+updated: 2026-08-18
 
 components:
   - slug: export-to-banner-extraction-udm
@@ -186,47 +207,76 @@ steps:
           Be 100% accurate. Quote identifiers verbatim. Use null when a
           field is genuinely absent — never guess an identifier.
 
-          ## DETERMINATION vs. word-matching (critical — RA feedback)
-          Sponsors frequently MISLABEL documents (a document titled
-          "Contract" is often really a Cooperative Agreement or Grant).
-          Do NOT copy the literal word the sponsor used. DETERMINE the
-          classification from the instrument's attributes. If a University
-          of Idaho determination guide ("how to determine award type /
-          category") is included in the uploaded documents, APPLY IT
-          verbatim and cite it in the rationale. Otherwise apply these
-          standard federal distinctions:
+          ## DETERMINATION vs. word-matching (RA feedback + UI guides)
+          Sponsors MISLABEL documents — a doc titled "Contract" is often
+          really a Cooperative Agreement or Grant. Do NOT copy the
+          sponsor's word; DETERMINE from ATTRIBUTES using the University of
+          Idaho rubrics below (from the "Banner Help Tip" determination
+          guides). If a UI determination guide is also uploaded, it
+          governs and you cite it.
 
-          award_type — choose exactly one:
-          - "Grant": financial ASSISTANCE to advance a public purpose;
-            NO substantial involvement by the awarding agency.
-          - "Cooperative Agreement": financial ASSISTANCE WITH
-            substantial agency involvement (agency collaboration,
-            approval of phases/stages, embedded federal personnel). Look
-            for "substantial involvement" language even if the document
-            is titled "contract".
-          - "Contract": PROCUREMENT — the sponsor acquires goods/services
-            for its own direct benefit/use; FAR-based; a Statement of
-            Work with deliverables owed TO the sponsor; "contractor"
-            language, FAR/DFARS clauses.
-          - "Letter Award": a short award LETTER (not a full agreement),
-            common for industry / foundation awards.
-          - "Gift Funding": philanthropic funds with NO exchange of
-            deliverables/consideration (often via the University of Idaho
-            Foundation); non-exchange.
-          - "Purchase Order": a PO instrument (fee-for-service), usually
-            carrying a PO number.
-          WRONG: document says "Contract Agreement" at the top -> emit
-          "Contract". CORRECT: the same document has assistance language,
-          no FAR clauses, and describes agency substantial involvement ->
-          emit "Cooperative Agreement" and explain why in
-          award_type_rationale.
+          ### award_type (classify by attributes, NOT the title)
+          Grant / CA / Letter / Gift are ASSISTANCE (PI-conceived,
+          flexible scope & re-budgeting, lump-sum or cost-reimbursable
+          payments, annual or minimal reporting). Contract / PO are
+          PROCUREMENT (sponsor-conceived, inflexible scope, deliverable /
+          milestone payments, restrictive re-budgeting, frequent
+          reporting). Choose exactly one:
+          - "Grant": public-purpose assistance; minimal sponsor
+            involvement.
+          - "Cooperative Agreement": assistance WITH substantial sponsor
+            involvement / collaboration.
+          - "Contract": procures goods/services for the sponsor's direct
+            benefit; high responsibility to deliver specific results.
+          - "Letter Award": grant-like but no formal agreement / minimal
+            T&Cs (a short award letter).
+          - "Gift Funding": philanthropic funds via the UI Foundation;
+            little/no reporting (rare).
+          - "Purchase Order": contract-like PO instrument — BUT a PO that
+            is part of a Grant award is treated as a Grant.
+          Decision signals (any strong one): origination (PI vs sponsor),
+          involvement (none / substantial / expects deliverables),
+          payment (lump-sum or cost-reimb vs milestone), purpose (R&D vs
+          procurement), reporting (annual/minimal vs frequent). Record the
+          deciding signals in award_type_rationale. (Pass-through portions
+          become a Subaward for Grant/CA/Letter, a Subcontract for
+          Contract — captured via subrecipients, not award_type.)
 
-          award_category — the University of Idaho Banner award category.
-          If the University of Idaho category-determination guide is
-          uploaded, select the exact category and cite it. Otherwise emit
-          your best category label as a STRING and ALWAYS emit
-          funding_source_classification (used by Banner to pick
-          federal/state/other revenue codes).
+          ### award_category (UI Banner single-letter code)
+          Determine from the sponsor / prime sponsor and pass-through
+          status (award §1.10 / §1.11). Emit the CODE + label:
+          - Direct FEDERAL award -> "F" Federal; use "5" Federal Non-SEFA
+            when it is a federal PROCUREMENT contract acquiring
+            goods/services for the government's direct benefit.
+          - Pass-through, FEDERAL prime -> "D" (pass-thru is State of
+            Idaho govt) / "E" (pass-thru is other); "K" if the prime is
+            NON-federal.
+          - Name contains "Commission" -> "C" if it also contains
+            "Idaho", else "W".
+          - Private industry -> "H" if Idaho-based, else "B".
+          - Foreign entity -> "A"; entity CONTROLLED by a foreign entity
+            (e.g. Bayer-owned) -> "Z".
+          - Foundation -> "P"; the UI Foundation specifically -> "Q".
+          - Government -> "I" State of Idaho, "S" other states, "J" Idaho
+            city/county.
+          - University/college -> "T" Idaho, "U" other.
+          - "O" Pending only when genuinely unclear (RA must then contact
+            the sponsor); "R" Other only if nothing else fits.
+
+          ### cfda_number / ALN (decision tree)
+          - Not federal (no federal prime/pass-thru; funds not federal)
+            -> "NA.AAAA".
+          - Full ALN present -> use it verbatim (format ##.####).
+          - Multiple federal sources -> "MULTIPLE" (list them in
+            additional_cfda_numbers; RA adds detail to FOATEXT line 152).
+          - Else, federal agency known + Research project -> "<2-digit
+            agency>.RD" (e.g. USDA 10.RD); non-Research -> "<2-digit
+            agency>." (e.g. USDA 10.).
+          - Federal but agency unknown -> "FF.WAIT".
+          2-digit agencies: 10 USDA, 11 Commerce, 12 DoD, 14 HUD,
+          15 Interior, 16 Justice, 17 Labor, 19 State, 20 Transportation,
+          43 NASA, 45 NEA/NEH, 47 NSF, 59 SBA, 66 EPA, 77 NRC, 81 DOE,
+          84 Education, 93 HHS, 97 DHS, 98 USAID.
 
           ## Fields — emit a JSON object with:
           - award_number (STRING — the University of Idaho / Banner award
@@ -241,14 +291,20 @@ steps:
           - key_personnel_names (ARRAY of STRINGS — Senior/Key Personnel;
             [] if none)
           - award_type (one of the six enum values above)
-          - award_type_rationale (STRING — WHY, from attributes; cite the
-            University of Idaho guide if applied)
-          - award_category (STRING)
-          - funding_source_classification (one of "Federal", "State",
-            "Local", "Private/Industry", "Foundation/Non-Profit", "Other")
+          - award_type_rationale (STRING — the deciding signals; cite the
+            UI guide if one was uploaded)
+          - award_category_code (STRING — the single UI Banner category
+            code: one of F,5,D,E,K,C,W,B,H,A,Z,P,Q,I,S,J,T,U,O,R)
+          - award_category_label (STRING — the code's label, e.g.
+            "Federal", "Federal Flow Thru – Other", "Foundation – Non-Profit")
+          - award_category_rationale (STRING — which branch of the tree
+            and why)
           - action_type (one of "New", "Continuation", "Amendment",
             "Modification", "Revision", or null)
-          - cfda_number (STRING in XX.XXX format, or "MULTIPLE", or null)
+          - cfda_number (STRING — the derived ALN per the decision tree:
+            a full "##.####", or "MULTIPLE", "NA.AAAA", "##.RD", "##.",
+            "FF.WAIT"; null only if truly indeterminable)
+          - cfda_rationale (STRING — which decision-tree branch applied)
           - additional_cfda_numbers (ARRAY of STRINGS; [] if none)
           - naics_code (STRING or null)
           - federal_agency_name (STRING or null)
@@ -373,14 +429,42 @@ steps:
           cumulative total, total anticipated, obligated to date, etc.
           Capture them ALL in all_award_amounts; do not collapse.
 
-          ## Indirect Cost Basis determination (Tier 2)
-          Determine fa_rate_base from the awarded budget, not from a
-          stray word. If the University of Idaho indirect-basis
-          determination guide is uploaded, apply it and cite it. Standard
-          rule: if there is ANY waived overhead (even fully waived), the
-          basis is MTDC ("MTDC-A: Standard"), because waived OH is always
-          computed on the University of Idaho federally negotiated rate.
-          Record the reasoning in fa_rate_base_rationale.
+          ## Indirect Cost Basis + Rate Code determination (Tier 2, UI guides)
+          fa_rate_base is a University of Idaho BASIS CODE (from the
+          "Indirect cost basis" guide) — choose one:
+          - "MTDC-A" (Standard) — the DEFAULT; the base in UI's federally
+            negotiated rate agreement. MTDC = all direct costs MINUS:
+            equipment >$5,000, capital expenditures, patient care, tuition
+            remission, off-site facility rent, scholarships/fellowships,
+            participant support, and the portion of each subaward/
+            subcontract OVER $25,000.
+          - "PARSUP" — rate applied to all direct costs EXCEPT participant
+            support.
+          - "SPEC-A" — rate applied to ALL direct costs.
+          - "SPEC-R" — all direct costs except out-of-state per diem (E5397).
+          - "SPEC-S" — all direct costs except travel or capital outlay.
+          NEVER emit "MTDC-B" (2024 Standard is marked DO NOT USE). If
+          there is ANY waived overhead (even fully waived), the basis is
+          "MTDC-A" (waived OH is always computed on UI's federally
+          negotiated rate). Record reasoning in fa_rate_base_rationale.
+
+          fa_rate_code — the Banner indirect-cost RATE CODE, when derivable
+          (from the "Indirect Cost Rate Code" + "Rate Codes" guides):
+          - UI negotiated rate -> <schedule-year><type><location>[I for
+            industry], e.g. 21ORO (FY21 Organized Research On-campus
+            47.5%), 21ORF (Off 26%), 21IGO (Instruction On), 21PSO (Other
+            Sponsored Activity On), 21ESO (Ag Experiment Station). State
+            of Idaho, not fed flow-through -> "20" (base TDC).
+          - Sponsor rate that is NOT a UI negotiated rate -> the sponsor's
+            numeric rate as the code, no "%" (e.g. "8").
+          - Sponsor allows NO indirect -> null (blank).
+          - WAIVED OH used as cost share -> prefix "W": code is
+            W<(UI negotiated − sponsor rate)><suffix>, e.g. "W30B" (8%
+            allowed, 30% waived); set is_fa_waived true.
+          Deriving the negotiated code needs project type (Research /
+          Instruction / OSA) and location (on/off campus); if those are
+          not in the provided documents, leave fa_rate_code null and say
+          so in fa_rate_base_rationale (the Financial Unit derives it).
 
           ## Cost-share detail (Tier 1)
           If cost share / matching applies, capture a category breakdown
@@ -397,8 +481,10 @@ steps:
           - total_direct_costs (STRING or null)
           - total_indirect_costs (STRING or null)
           - fa_rate (STRING — e.g., "47.5%" — or null)
-          - fa_rate_base (one of "MTDC", "TDC", "Salary & Wages", "Other",
-            or null)
+          - fa_rate_base (one of "MTDC-A", "PARSUP", "SPEC-A", "SPEC-R",
+            "SPEC-S", or null — NEVER "MTDC-B")
+          - fa_rate_code (STRING — Banner rate code per the rules above,
+            or null when not derivable)
           - fa_rate_base_rationale (STRING)
           - fa_status (one of "Full Rate", "Reduced", "Waived", or null)
           - is_fa_waived (BOOLEAN or null)
@@ -431,32 +517,36 @@ steps:
           Award document wins over any sponsor T&Cs provided on a
           conflict; note it in provenance.
 
-          ## Billing Type determination (Tier 2 — Banner form 4.3-4.5)
-          Determine billing_type from the payment mechanism, not a stray
-          word. If the University of Idaho billing-type determination
-          guide is uploaded, apply it and cite it. Standard rules:
-          - billing_type: "Cost Reimbursement" -> Banner billing type
-            monthly or quarterly; "Letter of Credit" -> LOC; fixed-price
-            / lump-sum -> "Fixed Price"; milestone-based -> "Milestone".
-          - minimum_billing: $0 for letters of credit AND fixed-amount
-            (lump-sum) awards; $500 for non-LOC cost-reimbursable UNLESS
-            the sponsor specifies a lower amount OR the award is $1,000 or
-            less (then use that). Record which rule fired in
-            minimum_billing_rationale.
-          - billing_frequency: Bi-Weekly for letters of credit; Monthly
-            or Quarterly for cost-reimbursable; all others (fixed-price /
-            periodic scheduled) per the award. Frequency is tied to
-            billing_type BUT the award can OVERRIDE it — if the award
-            states an explicit cadence, use that and note the override.
+          ## Billing Type determination (Tier 2 — UI "Billing Type" guide)
+          The University of Idaho uses THREE billing setups (not four).
+          Determine billing_type from the payment mechanism:
+          - "Cost Reimbursement" — UI incurs costs, then invoices (Banner
+            event BILL, invoiced Monthly=MBIL or Quarterly=QBIL). SF-270
+            federal payment requests use event MBEV/QBEV, format 270B.
+          - "Letter of Credit" — a cost-reimbursement paid via electronic
+            drawdown, billed each payroll (Banner event & format LOC).
+          - "Fixed" — sponsor requests specific amounts at set times or on
+            deliverables/milestones (Banner event LS%, format UIBL). This
+            ABSORBS what other agencies call fixed-price, lump-sum, OR
+            milestone billing.
+          - minimum_billing: $0 for Letter of Credit AND Fixed (lump-sum);
+            $500 for non-LOC Cost Reimbursement UNLESS the sponsor
+            specifies a lower amount OR the award is $1,000 or less. Record
+            which rule fired in minimum_billing_rationale.
+          - billing_frequency: Bi-Weekly for Letter of Credit; Monthly or
+            Quarterly for Cost Reimbursement; per the award for Fixed.
+            Frequency follows billing_type BUT the award can OVERRIDE it —
+            if the award states an explicit cadence, use it and note it.
 
           ## SF-270 (Tier 1)
           sf270_required: does the award (or any T&Cs provided) require an
-          SF-270 request for payment? Boolean.
+          SF-270 federal payment request? Boolean. When true, billing_type
+          is "Cost Reimbursement" (Banner event MBEV/QBEV, format 270B).
 
           ## Fields — emit a JSON object with:
           - pms_loc_code (STRING or null)
-          - billing_type (one of "Cost Reimbursement", "Fixed Price",
-            "Letter of Credit", "Milestone", or null)
+          - billing_type (one of "Cost Reimbursement", "Letter of Credit",
+            "Fixed", or null)
           - billing_type_rationale (STRING)
           - minimum_billing (STRING — e.g., "$0", "$500")
           - minimum_billing_rationale (STRING)
@@ -694,7 +784,7 @@ steps:
           - **Agency / Sponsor(s):** <sponsor_name>; list every entry in
             all_sponsors as "<name> (<role>)" when more than one
           - **Award Type:** <award_type> — _Determination: <award_type_rationale>_ _(source: ...)_
-          - **Award Category:** <award_category> (Funding source: <funding_source_classification>) _(source: ...)_
+          - **Award Category:** <award_category_label> (Code `<award_category_code>`) — _Determination: <award_category_rationale>_ _(source: ...)_
           - **Prime Sponsor Award ID:** <prime_sponsor_award_id or "Not specified">
           - **Subrecipients:** <"Yes" / "No" from subrecipients_present>;
             when Yes, list each subrecipients entry as "<name> — <amount>"
@@ -754,7 +844,7 @@ steps:
           | **Total Indirect Costs** | **<total_indirect_costs or "—">** |
           | **Total Award Amount** | **<total_award_amount>** |
 
-          - **Indirect Cost Basis & Rate:** <fa_rate or "—"> on <fa_rate_base or "—"> — _Determination: <fa_rate_base_rationale>_ _(source: ...)_
+          - **Indirect Cost Basis & Rate:** <fa_rate or "—"> on <fa_rate_base or "—"> <"(rate code `" + fa_rate_code + "`)" if fa_rate_code> — _Determination: <fa_rate_base_rationale>_ _(source: ...)_
           - **F&A Status:** <fa_status or "Full Rate"> <"(Waived OH: " + waived_oh_amount + ")" if is_fa_waived>
           - **Cost Sharing:** <"Yes — " + cost_share_amount + " (" + cost_share_type + ")" if cost_share_present else "No">
 

@@ -1053,9 +1053,9 @@ same way, then re-import + Validate each.
 
 ### `workflows/export-to-banner-extraction`
 
-**Status**: ⚠️ v1.0.0 import-ready from a live RA feedback session;
-in-Vandalizer re-test still pending. First workflow reworked from
-*direct RA feedback on real output* rather than an internal test run.
+**Status**: ⚠️ v1.1.0 import-ready; in-Vandalizer re-test still
+pending. First workflow reworked from *direct RA feedback on real
+output* rather than an internal test run.
 
 #### v0.2.0 → v1.0.0 (2026-08-13) — RA feedback (Michele Mattoon) + KB removal
 
@@ -1102,6 +1102,44 @@ instruct the model to apply the UI guide verbatim when uploaded as a
 document — refine the rationale blocks once the guides arrive. Also
 pending: her promised field-by-field comparison of the v0.2.0 output
 against a real E2B review.
+
+#### v1.0.0 → v1.1.0 (2026-08-18) — Tier 2 determination guides applied
+
+**How the change was surfaced**: Michele delivered the 8 "Banner Help
+Tip" determination guides that were the v1.0.0 Tier 2 open dependency
+(committed under `Feedback Meetings/Export To Banner/Banner Help Tip
+Docs/`): Award Type, Award Category, Billing Type, Indirect cost basis,
+Indirect Cost Rate Code, Rate Codes, ALN CFDA Decision Tree, and the
+2-digit agency ALN/CFDA numbers.
+
+**Changes** (MINOR — prompt-content only, no topology/step change; the
+three determination tasks now encode UI's ACTUAL rubrics rather than
+generic federal distinctions):
+- Award Type: UI comparative-characteristics + 5-signal matrix
+  (origination / involvement / payment / purpose / reporting); enum
+  unchanged; added the "PO that is part of a Grant → Grant" rule.
+- Award Category: the 20-code single-letter tree replaces the old
+  free-text `award_category` + `funding_source_classification` →
+  `award_category_code` + `_label` + `_rationale`.
+- Indirect basis: `fa_rate_base` enum corrected to UI codes (MTDC-A
+  default / PARSUP / SPEC-A / SPEC-R / SPEC-S; MTDC-B banned); new
+  `fa_rate_code` (Rate Codes table + waived-OH "W" prefix).
+- Billing: `billing_type` collapsed to UI's 3 setups (Cost
+  Reimbursement / Letter of Credit / Fixed; dropped "Milestone") +
+  SF-270 event map.
+- CFDA: ALN decision tree + 2-digit agency table; added
+  `cfda_rationale`.
+- Consolidation renders the new category code/label and `fa_rate_code`.
+- All extraction prompts stayed ≤ ~6.1K chars (well under the ~10K /
+  8192-token guideline). See the workflow CHANGELOG `[1.1.0]`.
+
+**Doc bug flagged to Michele**: Award Category code `H` (Private
+Business – Idaho) reads "Select when the sponsor is NOT based in Idaho"
+— a copy-paste typo; the prompt encodes the corrected logic (`H` =
+Idaho-based, `B` = non-Idaho). Still pending: her field-by-field
+comparison of the output against a real E2B review, and the fa_rate_code
+derivation needs project type (§2.3) + location (§2.4), often absent
+from the award alone.
 
 ### Batch: KB-step removal across remaining Variant-A workflows (v1.0.0, 2026-08-13)
 
