@@ -135,6 +135,7 @@ nav:
       - sponsor-doc-defaults-udm: components/sponsor-doc-defaults-udm.md
       - subaward-extraction-udm: components/subaward-extraction-udm.md
       - vandalizer-to-udm-translation: components/vandalizer-to-udm-translation.md
+      - viva-engage-reformat: components/viva-engage-reformat.md
   - Taxonomy: taxonomy.md
   - Contracts: contracts.md
   - Ecosystem: ecosystem.md

@@ -1514,3 +1514,28 @@ components:
           The determination surfaces a compliance-oversight flag when the
           protocol-approval check, gated by the classifier, returns
           anything other than not_applicable.
+
+  viva-engage-reformat:
+    output_contract:
+      format: plain_text_blocks
+      scope: repo_local_announcement_reformat_contract
+      notes: >
+        Repo-local plain-text transformation contract: one fixed
+        six-field "Proposal Submission" block (Proposal Number, Proposal
+        Title, Sponsor, Prime Sponsor, Principal Investigator, Budget
+        Total) per input table row, suitable for pasting into Microsoft
+        Teams / Viva Engage. No JSON output schema and no UDM binding.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Canonical invocation surface is prompt.md. Score responses
+        against per-row block completeness, six-label presence, verbatim
+        field values, and absence of surrounding prose. Invoked as the
+        single output task of the workflows/viva-engage Vandalizer
+        workflow; prompt captured verbatim from the live University of
+        Idaho Vandalizer saved prompt on 2026-08-18.
+      udm_alignment:
+        status: repo_local_announcement_reformat_contract
+        notes: >
+          Plain-text announcement output; no shared UDM fields are read
+          or produced.

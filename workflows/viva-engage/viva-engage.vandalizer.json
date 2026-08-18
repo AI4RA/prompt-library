@@ -1,0 +1,74 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "exported_at": "2026-08-18T00:00:00+00:00",
+  "exported_by": "ui-insight",
+  "items": [
+    {
+      "name": "Viva Engage v0.1.0",
+      "description": "Reformats a table of proposal-submission information (e.g. rows from an Excel export) into per-proposal \"Proposal Submission\" announcement blocks — proposal number, title, sponsor, prime sponsor, principal investigator, and budget total — suitable for pasting into Microsoft Teams / Viva Engage.",
+      "steps": [
+        {
+          "name": "Reformatting Prompt",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "viva-engage-reformat",
+                "prompt": "for each row in the input, produce an output in this format:\nProposal Submission\n\nProposal Number:\n\nProposal Title:\n\nSponsor:\n\nPrime Sponsor:\n\nPrincipal Investigator:\n\nBudget Total: $",
+                "input_sources": [
+                  "step_input"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "id": "VE-01",
+          "name": "One block per input row",
+          "category": "completeness",
+          "description": "The output contains exactly one \"Proposal Submission\" block per data row in the input table. FAIL if any row is dropped, merged, or if a block appears that has no corresponding input row.\n"
+        },
+        {
+          "id": "VE-02",
+          "name": "All six fields present per block",
+          "category": "completeness",
+          "description": "Every block carries all six labeled fields in order — Proposal Number, Proposal Title, Sponsor, Prime Sponsor, Principal Investigator, Budget Total. A field whose source cell is empty still renders its label. FAIL if a label is missing or renamed.\n"
+        },
+        {
+          "id": "VE-03",
+          "name": "Values verbatim from the source row",
+          "category": "accuracy",
+          "description": "Each field value matches its source cell — proposal numbers, names, and titles copied exactly; the budget total carries a $ and preserves the source amount without rounding or reformatting beyond currency notation. FAIL on any altered or invented value.\n"
+        },
+        {
+          "id": "VE-04",
+          "name": "No prose outside the blocks",
+          "category": "content",
+          "description": "The output consists only of the \"Proposal Submission\" blocks — no introductions, commentary, headers, or trailing remarks. FAIL if conversational text surrounds the blocks.\n"
+        }
+      ],
+      "validation_inputs": [],
+      "x_ai4ra": {
+        "workflow_source": "workflows/viva-engage/manifest.yaml",
+        "workflow_version": "0.1.0",
+        "status": "experimental",
+        "components": [
+          {
+            "slug": "viva-engage-reformat",
+            "version": "0.1.0",
+            "prompt_sha256": "5a74e5242474ec5610562a60a7e934a9960b2ce1c360195a1bbfa1f281197cb1"
+          }
+        ]
+      }
+    }
+  ]
+}
