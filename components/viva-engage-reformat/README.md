@@ -19,33 +19,31 @@ principal investigator, and budget total.
 
 ## Output
 
-For each input row, one block:
+For each input row, one compact entry (blank line between entries):
 
 ```
 Proposal Submission
-
-Proposal Number:
-
-Proposal Title:
-
-Sponsor:
-
+Proposal Number: <verbatim from row>
+Proposal Title: <verbatim from row>
+Sponsor: <verbatim from row>
 Prime Sponsor:
-
-Principal Investigator:
-
+Principal Investigator: <reordered: first name, middle initial/name, last name>
 Budget Total: $
 ```
 
-with each field populated from the corresponding row.
+Prime Sponsor and Budget Total are **always left blank** — the
+PreAward SPA completes them if applicable. The PI name arrives in the
+input as "last name, first name middle" and is reordered on output.
 
 ## Provenance
 
 Captured 2026-08-18 from the University of Idaho RA team's live
 Vandalizer saved prompt "Viva Engage" (used by the workflow of the
-same name). The prompt body is recorded verbatim as v0.1.0; hardening
-(empty-cell handling, header-row detection, verbatim-value anchors)
-can follow once a baseline test run is logged.
+same name); recorded verbatim as v0.1.0. v0.2.0 folds in pre-award
+reviewer feedback from Tami Clabough (blank Prime Sponsor / Budget
+Total, PI name reordering, compact format), replacing the "Formatter"
+post-processing prompt she had been using to fix the output after the
+fact.
 
 ## Used by
 
