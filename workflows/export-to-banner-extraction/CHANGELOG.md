@@ -2,6 +2,23 @@
 
 All notable changes to this workflow. Versions follow semver: MAJOR for step-structure changes, MINOR for additive changes (e.g., new search_set_items, validation checks), PATCH for display-name or wording edits.
 
+## [1.1.0] — 2026-08-18
+
+**MINOR — Tier 2 determinations now use University of Idaho's actual rubrics** (prompt-content only; topology unchanged). Michele Mattoon delivered the "Banner Help Tip" determination guides that were the Tier 2 open dependency flagged in v1.0.0, so the generic federal distinctions are replaced with UI's real decision logic. The 8 guides are committed under `Feedback Meetings/Export To Banner/Banner Help Tip Docs/`.
+
+- **`extract-award-identification`:**
+  - **Award Type** — replaced the generic FAR/2-CFR distinctions with UI's comparative-characteristics + 5-signal matrix (origination PI-vs-sponsor · involvement none/substantial/deliverables · payment lump-sum/cost-reimb-vs-milestone · purpose R&D-vs-procurement · reporting annual/minimal-vs-frequent), plus the rule "a PO that is part of a Grant award is treated as a Grant." Enum unchanged.
+  - **Award Category** — replaced the free-text `award_category` + `funding_source_classification` with the UI 20-code single-letter tree (`F,5,D,E,K,C,W,B,H,A,Z,P,Q,I,S,J,T,U,O,R`), emitted as `award_category_code` + `award_category_label` + `award_category_rationale`.
+  - **ALN/CFDA** — embedded the ALN decision tree (`NA.AAAA` / full `##.####` / `MULTIPLE` / `<2-digit agency>.RD` for Research or `<2-digit agency>.` otherwise / `FF.WAIT`) and the 2-digit agency table; added `cfda_rationale`.
+- **`extract-budget-and-financial`:**
+  - **`fa_rate_base`** enum corrected to UI basis codes: `MTDC-A` (default) / `PARSUP` / `SPEC-A` / `SPEC-R` / `SPEC-S`, with `MTDC-B` explicitly banned; MTDC exclusion list spelled out (incl. subaward portion over $25k).
+  - New **`fa_rate_code`** — the Banner rate code from the Rate Codes table (e.g. `21ORO`), the sponsor's numeric rate when non-negotiated, or the waived-OH `W`-prefixed code (e.g. `W30B`); null when project type/location aren't in the inputs (Financial Unit derives it).
+- **`extract-billing-and-payment`:** `billing_type` collapsed to UI's **three** setups — `Cost Reimbursement` / `Letter of Credit` / `Fixed` (dropped the spurious `Milestone`, which folds into `Fixed`) — with the Banner event mapping (BILL/MBIL/QBIL, LOC, LS%/UIBL) and the SF-270 → MBEV/QBEV/270B detail.
+- **Consolidation:** SECTION 1 renders `award_category_label` + code + rationale; SECTION 4 renders the `fa_rate_code` when present. No fragment count or topology change.
+- **One doc bug flagged to Michele:** Award Category code `H` (Private Business – Idaho) reads "Select when the sponsor is NOT based in Idaho" — a copy-paste typo; the prompt encodes the corrected logic (`H` = Idaho-based, `B` = non-Idaho).
+
+**Status:** import-ready; in-Vandalizer re-test still pending. This closes the Tier 2 open dependency from v1.0.0.
+
 ## [1.0.0] — 2026-08-13
 
 **MAJOR — step-structure change (3 steps → 2, KB step removed) bundled with additive fields, decision logic, and a new FOATEXT task**, implementing three tiers of RA feedback from Michele Mattoon's review of the v0.2.0 output (meeting transcript + `E2B Workflow Data Points.xlsx` + `FOATEXT Lines - Export To Banner Form.pdf`). No extraction task was collapsed.
