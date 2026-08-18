@@ -4,7 +4,16 @@
 # file by scripts/build_vandalizer_workflows.py and committed alongside.
 # Never hand-edit the generated JSON — update this manifest and rebuild.
 #
-# === Variant A topology (v3.0.0) ===
+# === Variant A topology (v3.1.0) ===
+#
+# v3.1.0 (2026-08-18) — MODEL PIN REMOVED. The v3.0.0
+# `default_task_model: VandalStrong` pin was never verified against a
+# real server available_models[].name entry (the operator could not
+# confirm the model name), and an unmatched name would break every
+# task on import. The key is removed; tasks once again use the model
+# chosen in Vandalizer's run dialog. The dual-deliverable is_output
+# change from v3.0.0 is retained. MINOR: no step-structure, prompt,
+# or is_output changes.
 #
 # v3.0.0 (2026-08-13) — DUAL DELIVERABLES + MODEL LOCK. Two operator
 # requests, both verified against ui-insight/vandalizer backend source:
@@ -273,20 +282,12 @@ description: >
   the expanded Red Flags / Contract-Review trigger set and Compliance
   Risks + Foreign Influence sections from the RA's SPA checklist.
 
-workflow_version: 3.0.0
-
-# Pin every task's LLM call to this model, overriding the model chosen in
-# Vandalizer's run dialog (engine precedence: task model > run model). Must
-# EXACTLY match an available_models[].name entry on the Vandalizer server;
-# if the server renames the model, update this and rebuild. Note
-# Vandalizer's optimizer per-step overrides, when enabled, can still swap
-# a model after this pin.
-default_task_model: VandalStrong
+workflow_version: 3.1.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-04-24
-updated: 2026-08-13
+updated: 2026-08-18
 
 components:
   - slug: rfa-checklist-extraction-udm
