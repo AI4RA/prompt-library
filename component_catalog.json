@@ -3510,7 +3510,7 @@
       "slug": "export-to-banner-extraction",
       "name": "Export to Banner Award Extraction",
       "description": "Uploads a fully-executed award document (optionally alongside the sponsor's general terms & conditions and the University of Idaho determination guides as additional documents) and returns an RA-friendly Markdown Export to Banner Reference Summary. Covers the prioritized data points a University of Idaho sponsored-programs analyst needs to populate VERAS's Export to Banner form: award identification & classification (with rubric-driven Award Type / Category determinations), all date ranges, personnel, sponsor(s), budget & financial terms (indirect basis determination, cost-share detail, program income), billing & payment (billing-type determination, SF-270), reporting & compliance, and a scanned FOATEXT line-item section that flags every standard Banner FOATEXT term (lines 100-230) present in the award. Every value cites its source in the input documents, and the award document takes precedence over any sponsor terms & conditions on a conflict.",
-      "workflow_version": "1.0.0",
+      "workflow_version": "1.1.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
