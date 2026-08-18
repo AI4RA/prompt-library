@@ -10,7 +10,7 @@ budget total — suitable for pasting into Microsoft Teams / Viva Engage.
 
 | Step | Task | Input | Output |
 |---|---|---|---|
-| 1. Reformatting Prompt (output step) | `viva-engage-reformat` (Prompt) | `step_input` (pasted / step-provided table text) | One fixed-format "Proposal Submission" block per input row |
+| 1. Reformatting Prompt (output step) | `viva-engage-reformat` (Prompt) | `step_input` (pasted / step-provided table text) | One fixed-format "Proposal Submission" entry per input row — Prime Sponsor and Budget Total left blank for the PreAward SPA; PI name reordered to first-middle-last |
 
 The prompt body lives in `components/viva-engage-reformat/prompt.md`
 and is inlined into the generated JSON at build time.
@@ -33,10 +33,20 @@ brobison@uidaho.edu). Two deliberate deltas from the live export:
    drops the pin (consistent with `rfa-checklist-extraction` v3.1.0);
    that string is a known-valid `available_models[].name` on the
    server if a pin is ever wanted again.
+3. (v0.2.0) The live copy relied on a "Formatter" post-processing
+   prompt on the task's Output tab to blank Prime Sponsor / Budget
+   Total and reorder the PI name — a second LLM pass that workflow
+   exports do not carry. The repo version encodes those rules in the
+   single main prompt, so no post-processing step is needed after
+   import.
 
 ## Status
 
 Experimental — not yet re-tested from a repo-built import. First
 re-test: import the generated JSON, paste a real proposal-submission
-table, and check the four `VE-*` validation-plan items (one block per
-row, all six labels, verbatim values, no surrounding prose).
+table, and check the six `VE-*` validation-plan items (one entry per
+row; six labels; number/title/sponsor verbatim; Prime Sponsor and
+Budget Total blank; PI name first-middle-last; no surrounding prose).
+If a "Formatter" post-process prompt is still attached on the task's
+Output tab from an earlier copy, remove it — its rules are now in the
+main prompt, and leaving both risks double-application.

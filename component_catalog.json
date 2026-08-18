@@ -3335,7 +3335,7 @@
       "slug": "viva-engage-reformat",
       "name": "viva-engage-reformat",
       "summary": "Reformats a table of proposal-submission information (one proposal per row) into fixed-format \"Proposal Submission\" announcement blocks suitable for pasting into Microsoft Teams / Viva Engage.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "transformation",
       "domain": "research-administration",
       "status": "experimental",
@@ -3363,7 +3363,7 @@
         {
           "type": "prompt",
           "path": "components/viva-engage-reformat/prompt.md",
-          "version": "0.1.0",
+          "version": "0.2.0",
           "role": "canonical_prompt"
         }
       ],
@@ -3981,7 +3981,7 @@
       "slug": "viva-engage",
       "name": "Viva Engage",
       "description": "Reformats a table of proposal-submission information (e.g. rows from an Excel export) into per-proposal \"Proposal Submission\" announcement blocks — proposal number, title, sponsor, prime sponsor, principal investigator, and budget total — suitable for pasting into Microsoft Teams / Viva Engage.",
-      "workflow_version": "0.1.0",
+      "workflow_version": "0.2.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {

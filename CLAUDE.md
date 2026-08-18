@@ -1155,6 +1155,44 @@ comparison of the output against a real E2B review, and the fa_rate_code
 derivation needs project type (§2.3) + location (§2.4), often absent
 from the award alone.
 
+### `workflows/viva-engage`
+
+**Status**: ⚠️ v0.2.0 import-ready; not yet re-tested from a
+repo-built import. The live University of Idaho copy (which this
+captures) IS in production use by the pre-award team.
+
+#### v0.1.0 (2026-08-18) — initial capture
+
+Captured from the live Vandalizer workflow "Viva Engage" (exported by
+brobison@uidaho.edu). The export carried only a saved_prompt_uuid —
+the operator supplied the prompt body, recorded verbatim in
+components/viva-engage-reformat v0.1.0. Live model pin
+`qwen/qwen3.6-27b` dropped (known-valid available_models[].name,
+recorded for reference). Single output step, one Prompt task reading
+step_input.
+
+#### v0.1.0 → v0.2.0 (2026-08-18)
+
+**Surfaced by RA feedback email** (Tami Clabough, Sponsored Programs
+Administrator II, pre-award), not a repo test run. Tami had been
+compensating for the base prompt with a Vandalizer "Formatter"
+post-processing prompt on the task's Output tab — a second LLM pass
+that workflow exports do not carry — and it still wasn't producing
+what she wanted. Her rules, folded into the single main prompt
+(component 0.1.0 → 0.2.0):
+1. "Prime Sponsor:" and "Budget Total: $" always rendered BLANK —
+   the PreAward SPA completes them if applicable — even when the
+   input row has values.
+2. PI name reordered: input arrives "last name, first name middle";
+   output renders "first name, middle initial or name (if present),
+   last name". Worked examples for both middle/no-middle cases.
+3. Compact single-spaced entry format per her example (v0.1.0 had
+   blank lines between fields).
+Validation plan 4 → 6 checks (blank-field enforcement VE-04, PI
+order VE-05). Re-test note: if a copy still carries the Formatter
+post-process prompt, remove it — the rules now live in the main
+prompt and leaving both risks double-application.
+
 ### Batch: KB-step removal across remaining Variant-A workflows (v1.0.0, 2026-08-13)
 
 PR #2 (branch `remove-kb-step-remaining-workflows`) removes the inert
@@ -1192,12 +1230,9 @@ carried a KB step and keep their prior versions:
 - `proposal-document-completeness`
 - `section2-personnel-eligibility`
 - `subaward-extraction`
-- `viva-engage` (v0.1.0, added 2026-08-18 — captured from the live
-  University of Idaho Vandalizer workflow, which IS in production
-  use; the repo-built import with the inlined prompt has not been
-  re-tested. Live copy ran on model `qwen/qwen3.6-27b` — a
-  known-valid server available_models[].name; repo version drops
-  the pin)
+- `viva-engage` (v0.2.0, added 2026-08-18 — see its workflow-log
+  section above; the live UI copy is in production use but the
+  repo-built import has not been re-tested)
 
 The compliance-personnel / section2-personnel pair is the
 highest-priority remaining cluster to test — they work on the same
