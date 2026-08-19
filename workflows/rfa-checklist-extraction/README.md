@@ -112,3 +112,9 @@ The committed `rfa-checklist-extraction.vandalizer.json` can be uploaded directl
 ## Provenance
 
 Authored 2026-04-24 alongside the initial `rfa-checklist-extraction-udm` component. Upgraded to v0.3.0 on 2026-05-22 with two changes: (1) parallel tasks converted from Vandalizer Extraction (SearchSet) to Vandalizer Prompt (full-document NLU) — necessary because grant documents in practice don't use the literal field labels SearchSet keyword retrieval expects; (2) output contract switched from JSON-against-schema to RA-friendly Markdown deliverable, with the harness target remaining the JSON-emitting component. Against `ui-insight/ProcessMapping` at commit `2c1f47f46474130743af5aee44d074bcd21787e9`; the eight-section structure follows the source `consolidation.md` conventions verbatim.
+
+## Evaluation (Plan A / B)
+
+This workflow is evaluated under two complementary plans; evidence lives in [`AI4RA/evaluation-data-sets`](https://github.com/AI4RA/evaluation-data-sets/tree/main/evaluation_results/rfa-checklist-extraction):
+- **Plan A** — large-scale, silver-referenced study of the extraction tasks (135 RFAs × v2/v3 OCR representations × 10 reps) via the evaluation-harness.
+- **Plan B** — human-gold, end-to-end evaluation of the shipped workflow on 20 curated RFAs (paired **v0.4.0 → v3.1.0**), scored per field against a hand-authored answer key → `evaluation_results/rfa-checklist-extraction/plan-b/` (gold currently DRAFT / pre-verification).
