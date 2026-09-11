@@ -1067,9 +1067,64 @@ same way, then re-import + Validate each.
 
 ### `workflows/export-to-banner-extraction`
 
-**Status**: ⚠️ v1.1.0 import-ready; in-Vandalizer re-test still
-pending. First workflow reworked from *direct RA feedback on real
-output* rather than an internal test run.
+**Status**: ⚠️ v1.2.0 import-ready; in-Vandalizer re-test on the two
+round-2 awards still pending. First workflow reworked from *direct RA
+feedback on real output* rather than an internal test run — and the
+first with a real field-by-field output review (v1.1.0 → v1.2.0).
+
+#### v1.1.0 → v1.2.0 (2026-09-11) — pass-through + round-2 RA fixes
+
+**How surfaced**: Michele ran **v1.1.0 on two real awards** and returned
+a field-by-field review (`Feedback Meetings/Export To Banner/New
+feedback (8-31)/`: two emails, `E2B Workflow Data Points_v2.xlsx` with
+col C = SESTA / col D = Mint / col E = original, and both award docs +
+their v1.1.0 output PDFs). Ground truth was verified against the docs
+(SESTA page 1; Mint Attachment B contact table, rendered from the
+scanned PDF via PyMuPDF since it has no text layer).
+
+**Bugs (mostly one root cause)**:
+- **Pass-through miss (SESTA, cascaded to ~5 fields)**: SESTA page 1 is
+  literally an "IDE Subaward Agreement" (Prime Recipient = Idaho Dept of
+  Ed, Subrecipient = UI, Awarding Agency = U.S. Dept of Education, ALN
+  84.027A). v1.1.0 called it Direct Award / Cooperative Agreement /
+  Category "I" / CFDA "NA.AAAA" and flagged a false sponsor discrepancy.
+  Ironically FOATEXT line 151 DID catch "Federal pass-through agency:
+  U.S. Department of Education" — one task saw it, the identification
+  task didn't.
+- **Invoice-to inverted (both)**: "Invoice Submission" + FOATEXT line 111
+  showed UI's own `osp-billing@uidaho.edu` instead of where UI SENDS the
+  invoice. Mint Attachment B is a two-column University|Sponsor contact
+  table; the correct invoice-to is the Sponsor column (Roger Batt,
+  `roger@amgidaho.com`, since Sponsor Financial Contact was blank).
+- **False multi-year (both)**: both single 7/1/26–6/30/27 awards flagged
+  multi-year; the Mint SOW says "expected to last two years" (aspiration,
+  not awarded period).
+- **F&A "Full Rate" with no F&A (Mint)**: budget had no indirect line;
+  consolidation defaulted "Full Rate".
+- **Personnel over-listing (SESTA)**: listed all 18 staff, not just
+  named Senior/Key.
+- **FOATEXT misses (Mint)**: line 111 (email) + line 155 (equipment
+  vests with UI, Section 10).
+
+**Changes** (MINOR — prompt-content only): pass-through/subaward
+detection block in award-identification + sponsor tasks; `Subaward` /
+`Subcontract` added to the award_type enum (user chose approach "a");
+award_category guard to the D/E/K branch; ALN terminology + explicit-
+number-wins ordering; invoice-to = Sponsor column of the contact table;
+awarded-period-based is_multi_year; `fa_status` "No F&A"; named-only
+key personnel; FOATEXT line 155 recognition; provenance de-duplication +
+wider sourcing. award-identification grew to ~9.2K chars (~2.3K tokens),
+still under the 8192-token extraction budget — watch it next round. The
+`New feedback (8-31)/` package is committed with this change.
+
+**Design decision recorded**: when UI is a subrecipient, award_type is
+"Subaward"/"Subcontract" (a 7th/8th enum value) rather than the prime's
+type + a flag — Michele checks for the "Subaward" label directly.
+
+**Still pending**: re-test v1.2.0 on both awards (esp. SESTA pass-through
+→ category D + CFDA 84.027A + Subaward, and the invoice-to on Mint); and
+`fa_rate_code`'s negotiated-rate derivation still needs project type /
+location that the award alone often lacks.
 
 #### v0.2.0 → v1.0.0 (2026-08-13) — RA feedback (Michele Mattoon) + KB removal
 
