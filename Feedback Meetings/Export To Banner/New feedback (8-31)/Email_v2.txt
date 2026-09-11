@@ -1,0 +1,5 @@
+Hi Labib,
+
+I was able to test one other award. I have updated my spreadsheet with those results in column C (the previous review moved to column D). I have attached the awards and outputs for each of the tests (The first two go together and the last two go together.)
+
+One other note: anytime the output provides where it found the information the more trust we can build with RAs, and this is very true for this workflow, so think about building that in as much as possible.

@@ -1,5 +1,31 @@
 # Authored source for the Export to Banner Award Extraction Vandalizer workflow.
 #
+# === v1.2.0 (2026-09-11): pass-through + RA round-2 fixes ===
+# MINOR (prompt-content only; topology unchanged). Michele ran v1.1.0 on
+# two real awards and returned field-by-field feedback (New feedback
+# (8-31)/). Fixes:
+#   - PASS-THROUGH DETECTION (headline): when UI is a subrecipient under a
+#     pass-through entity with a federal prime, detect it. Was the root
+#     cause of ~5 cascaded errors on the IDE→UI SESTA award (wrong
+#     award_type, category, CFDA, direct-vs-passthru, false sponsor
+#     discrepancy).
+#   - award_type: added "Subaward"/"Subcontract" enum values (approach a).
+#   - award_category: guard to use the D/E/K pass-through branch, not the
+#     pass-through entity's own type (was emitting "I" instead of "D").
+#   - CFDA/ALN: search for "ALN"/"Assistance Listing" (not just CFDA);
+#     an explicit number wins over the not-federal fallback (was NA.AAAA
+#     while "ALN 84.027A" sat on page 1).
+#   - INVOICE-TO: billing_address/invoice_email and FOATEXT line 111 are
+#     the SPONSOR's remit contact (Sponsor column of the contact table),
+#     never UI's own osp-billing@uidaho.edu.
+#   - is_multi_year: base on the AWARDED period only — a single ≤12-month
+#     award is not multi-year even if the SOW says "two-year project".
+#   - fa_status: "No F&A" when no indirect line; never default "Full Rate".
+#   - key_personnel_names: only NAMED Senior/Key personnel, not all staff.
+#   - FOATEXT line 155 (equipment vests with UI) recognition added.
+#   - Provenance: fixed the doubled "(determination)…(source:
+#     (determination)…)" rendering; render sources more widely (RA ask).
+#
 # === v1.1.0 (2026-08-18): Tier 2 determinations use UI rubrics ===
 # MINOR (prompt-content only; topology unchanged). Michele Mattoon
 # delivered the "Banner Help Tip" determination guides that were the
@@ -103,12 +129,12 @@ description: >
   input documents, and the award document takes precedence over any
   sponsor terms & conditions on a conflict.
 
-workflow_version: 1.1.0
+workflow_version: 1.2.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
 created: 2026-05-20
-updated: 2026-08-18
+updated: 2026-09-11
 
 components:
   - slug: export-to-banner-extraction-udm
@@ -130,12 +156,13 @@ validation_plan:
     category: accuracy
     description: >
       Verify award_type is one of Grant, Cooperative Agreement, Contract,
-      Letter Award, Gift Funding, or Purchase Order, and that it is
-      accompanied by a determination rationale grounded in the project's
-      attributes (substantial involvement, procurement vs. assistance,
-      deliverables to the government, gift/PO instrument), NOT merely the
-      word the sponsor used. Same expectation for Award Category, Indirect
-      Cost Basis, and Billing Type.
+      Letter Award, Gift Funding, Purchase Order, Subaward, or Subcontract,
+      and that it is accompanied by a determination rationale grounded in
+      the project's attributes (substantial involvement, procurement vs.
+      assistance, deliverables to the government, gift/PO instrument,
+      subrecipient-of-a-pass-through), NOT merely the word the sponsor
+      used. Same expectation for Award Category, Indirect Cost Basis, and
+      Billing Type.
   - id: etb-award-precedence
     name: Award-over-T&C precedence honored
     category: content
@@ -207,6 +234,38 @@ steps:
           Be 100% accurate. Quote identifiers verbatim. Use null when a
           field is genuinely absent — never guess an identifier.
 
+          ## PASS-THROUGH / SUBAWARD STRUCTURE (critical — read FIRST)
+          Many awards reach UI through a pass-through entity, not directly
+          from the funder. DETECT this BEFORE classifying — it drives
+          award_type, award_category, CFDA/ALN, and pass-through status,
+          and a v1.1.0 test missed it entirely (RA feedback). Signals: the
+          title/header says "Subaward" or "Subcontract"; the parties are
+          labeled "Prime Recipient" / "Pass-Through Entity" and
+          "Subrecipient"; a separate "Awarding Agency" / "Prime Sponsor" /
+          "Federal Awarding Agency" field names a funder DIFFERENT from the
+          entity UI signed with.
+          When UI is the SUBRECIPIENT:
+          - is_pass_through = true; Pass-Through status is NOT "Direct".
+          - The DIRECT sponsor (the entity UI contracts with) is the
+            PASS-THROUGH entity — use ITS type as the pass-through in the
+            award_category tree.
+          - prime_sponsor_name = the ultimate funder from the Awarding
+            Agency / Prime field (often a FEDERAL agency).
+          - Two funders here is NORMAL, NOT a discrepancy — list both with
+            roles; never emit a discrepancy flag just because a prime and a
+            pass-through both appear.
+          - If funds trace to a FEDERAL prime, the award IS federal for
+            CFDA/ALN and award_category, even though UI's direct sponsor is
+            not federal.
+          WORKED EXAMPLE (IDE→UI SESTA, the v1.1.0 miss): page 1 "IDE
+          Subaward Agreement", Prime Recipient = Idaho Department of
+          Education, Subrecipient = UI, Awarding Agency = U.S. Department of
+          Education, "ALN 84.027A". → is_pass_through true; direct sponsor
+          Idaho Dept of Education (State of Idaho govt); prime_sponsor_name
+          "U.S. Department of Education" (Federal); federal for CFDA →
+          84.027A; award_category "D" (Federal Flow Thru – State of Idaho);
+          award_type "Subaward".
+
           ## DETERMINATION vs. word-matching (RA feedback + UI guides)
           Sponsors MISLABEL documents — a doc titled "Contract" is often
           really a Cooperative Agreement or Grant. Do NOT copy the
@@ -234,17 +293,29 @@ steps:
             little/no reporting (rare).
           - "Purchase Order": contract-like PO instrument — BUT a PO that
             is part of a Grant award is treated as a Grant.
+          - "Subaward": UI is the SUBRECIPIENT under a pass-through of a
+            Grant / Cooperative Agreement / Letter (the common case). Use
+            this whenever the document is titled or described as a subaward
+            and UI is the subrecipient — do NOT force it into
+            "Cooperative Agreement" (a v1.1.0 miss: the doc said
+            "cost-reimbursable subaward" but was classified CA).
+          - "Subcontract": UI is the subrecipient under a pass-through of a
+            Contract.
           Decision signals (any strong one): origination (PI vs sponsor),
           involvement (none / substantial / expects deliverables),
           payment (lump-sum or cost-reimb vs milestone), purpose (R&D vs
-          procurement), reporting (annual/minimal vs frequent). Record the
-          deciding signals in award_type_rationale. (Pass-through portions
-          become a Subaward for Grant/CA/Letter, a Subcontract for
-          Contract — captured via subrecipients, not award_type.)
+          procurement), reporting (annual/minimal vs frequent). If the
+          PASS-THROUGH check above found UI is a subrecipient, pick
+          "Subaward"/"Subcontract" over the base types. Record the deciding
+          signals in award_type_rationale.
 
           ### award_category (UI Banner single-letter code)
           Determine from the sponsor / prime sponsor and pass-through
-          status (award §1.10 / §1.11). Emit the CODE + label:
+          status (award §1.10 / §1.11). Emit the CODE + label. FIRST apply
+          the PASS-THROUGH result: if is_pass_through with a FEDERAL prime,
+          the code is D/E/K below — NOT "I"/"S"/"T"/etc. from the
+          pass-through entity's own type (the v1.1.0 miss emitted "I"
+          Government–Idaho when the correct code was "D").
           - Direct FEDERAL award -> "F" Federal; use "5" Federal Non-SEFA
             when it is a federal PROCUREMENT contract acquiring
             goods/services for the government's direct benefit.
@@ -264,9 +335,17 @@ steps:
             the sponsor); "R" Other only if nothing else fits.
 
           ### cfda_number / ALN (decision tree)
-          - Not federal (no federal prime/pass-thru; funds not federal)
-            -> "NA.AAAA".
-          - Full ALN present -> use it verbatim (format ##.####).
+          The number may be labeled "ALN", "Assistance Listing Number",
+          "CFDA", or "Federal Award Identification" — search for ALL of
+          these (a v1.1.0 miss returned "NA.AAAA" while "ALN 84.027A" sat
+          on page 1). An award reaching UI through a FEDERAL pass-through
+          prime IS federal, even though UI's direct sponsor is a state/other
+          entity. Apply in order:
+          - An explicit ALN/CFDA number is present -> use it VERBATIM
+            (format ##.#### or ##.###X, e.g. 84.027A), regardless of who
+            UI's direct sponsor is.
+          - Not federal at all (no federal prime or pass-thru; funds not
+            federal) -> "NA.AAAA".
           - Multiple federal sources -> "MULTIPLE" (list them in
             additional_cfda_numbers; RA adds detail to FOATEXT line 152).
           - Else, federal agency known + Research project -> "<2-digit
@@ -288,9 +367,13 @@ steps:
             "Project Director", "PD", "Grantee Project Director",
             "Recipient Project Manager")
           - co_pi_names (ARRAY of STRINGS — Co-PI / Co-I / Co-PD; [] if none)
-          - key_personnel_names (ARRAY of STRINGS — Senior/Key Personnel;
-            [] if none)
-          - award_type (one of the six enum values above)
+          - key_personnel_names (ARRAY of STRINGS — ONLY people explicitly
+            designated Senior Personnel / Key Personnel / named as key on
+            the award or SOW. Do NOT list every person in the budget or
+            project team, support staff, students, or administrative
+            contacts (a v1.1.0 miss listed all 18 project staff). [] if none)
+          - award_type (one of the EIGHT enum values above — the six base
+            types plus "Subaward" / "Subcontract" when UI is a subrecipient)
           - award_type_rationale (STRING — the deciding signals; cite the
             UI guide if one was uploaded)
           - award_category_code (STRING — the single UI Banner category
@@ -339,6 +422,17 @@ steps:
           period of performance for an increment, etc. Capture EVERY
           distinct range you find; do not collapse them to one.
 
+          ## MULTI-YEAR — base it on the AWARDED period only (RA feedback)
+          is_multi_year describes the AWARDED / funded period, NOT the
+          project's aspirations. A single awarded period of ~12 months or
+          less is NOT multi-year, even if a narrative/SOW says the project
+          is "expected to last two years" or mentions a longer overall
+          effort. Set is_multi_year = true ONLY when the AWARDED period
+          spans more than ~12 months OR there are multiple distinct
+          awarded/budget periods (increments). v1.1.0 wrongly flagged two
+          single-year awards (each 7/1/2026–6/30/2027) as multi-year
+          because their SOWs mentioned a two-year project — do not.
+
           Dates use ISO YYYY-MM-DD when unambiguous; otherwise preserve
           the document's stated form. Use null when absent.
 
@@ -356,7 +450,10 @@ steps:
             "Current budget period")
           - budget_periods (ARRAY of {period_number, start_date,
             end_date, amount}; [] if not incremental)
-          - is_multi_year (BOOLEAN or null)
+          - is_multi_year (BOOLEAN or null — true ONLY if the AWARDED
+            period exceeds ~12 months or has multiple awarded/budget
+            periods; a single ≤12-month award is false regardless of
+            narrative "two-year project" language)
           - is_incremental (BOOLEAN or null — funded in increments over
             time)
           - provenance (ARRAY of {field, source})
@@ -376,10 +473,19 @@ steps:
           Award document wins over any sponsor T&Cs provided on a
           conflict; note it in provenance.
 
-          ## Capture ALL sponsors (RA feedback)
-          An award may name MORE THAN ONE sponsor (direct/originating
-          sponsor, prime sponsor, pass-through entity, co-funders).
-          Capture them ALL in all_sponsors; do not collapse.
+          ## Capture ALL sponsors + PASS-THROUGH roles (RA feedback)
+          An award may name MORE THAN ONE sponsor. Capture them ALL in
+          all_sponsors with correct roles; do not collapse. Two funders is
+          NORMAL and NOT a discrepancy — never treat "prime + pass-through"
+          as a conflict.
+          When the award is a SUBAWARD to UI (title "Subaward"/parties
+          "Prime Recipient"/"Subrecipient", or a separate "Awarding Agency"
+          field): the entity UI contracts with is the "Pass-Through"; the
+          upstream funder in the Awarding Agency / Prime field is the
+          "Prime" (often federal). sponsor_name is the DIRECT (pass-through)
+          sponsor. Example: IDE→UI SESTA → sponsor_name "Idaho Department of
+          Education" (Pass-Through, State Government); all_sponsors also
+          lists "U.S. Department of Education" (Prime, Federal).
 
           Be 100% accurate.
 
@@ -486,7 +592,13 @@ steps:
           - fa_rate_code (STRING — Banner rate code per the rules above,
             or null when not derivable)
           - fa_rate_base_rationale (STRING)
-          - fa_status (one of "Full Rate", "Reduced", "Waived", or null)
+          - fa_status (one of "No F&A", "Full Rate", "Reduced", "Waived",
+            or null — use "No F&A" when the award/budget charges NO
+            indirect (no indirect line in the budget, or the sponsor
+            disallows F&A); NEVER default to "Full Rate" merely because
+            indirect is absent. When fa_status is "No F&A", fa_rate is null
+            and fa_rate_base/fa_rate_code are null. A v1.1.0 miss showed
+            "Full Rate" for an $18K award whose budget had no indirect line.)
           - is_fa_waived (BOOLEAN or null)
           - waived_oh_amount (STRING or null)
           - cost_share_present (BOOLEAN)
@@ -543,6 +655,22 @@ steps:
           SF-270 federal payment request? Boolean. When true, billing_type
           is "Cost Reimbursement" (Banner event MBEV/QBEV, format 270B).
 
+          ## INVOICE-TO — the SPONSOR's remit contact, NOT UI's (RA feedback)
+          billing_address and invoice_email are WHERE UI SENDS ITS INVOICE
+          — the SPONSOR's remit-to contact — NOT UI's own address/email.
+          Awards often carry a two-column "University | Sponsor" (or
+          "Recipient | Sponsor") contact table (e.g. Attachment B /
+          Attachment 4): take the SPONSOR column's Financial Contact. If the
+          Sponsor Financial Contact is blank, follow the table's stated
+          fallback (usually the Sponsor Technical or Authorized Contact).
+          NEVER use UI's own contacts (osp-billing@uidaho.edu, 875 Perimeter
+          Drive, Office of Sponsored Programs) as the invoice-to. v1.1.0
+          misses: Award 1 emitted UI's own address / no email when the
+          correct invoice-to was Roger Batt, roger@amgidaho.com (Sponsor
+          Authorized Contact, since the Sponsor Financial Contact was
+          blank); Award 2 emitted osp-billing@uidaho.edu instead of the IDE
+          Financial Contact in Attachment 4.
+
           ## Fields — emit a JSON object with:
           - pms_loc_code (STRING or null)
           - billing_type (one of "Cost Reimbursement", "Letter of Credit",
@@ -552,8 +680,10 @@ steps:
           - minimum_billing_rationale (STRING)
           - billing_frequency (STRING or null)
           - billing_frequency_rationale (STRING)
-          - billing_address (STRING or null)
-          - invoice_email (STRING or null)
+          - billing_address (STRING or null — the SPONSOR's remit-to
+            address UI sends invoices to, NOT UI's address)
+          - invoice_email (STRING or null — the SPONSOR's invoice-to email,
+            NOT UI's osp-billing@uidaho.edu)
           - payment_terms (STRING or null)
           - invoice_requirements (ARRAY of STRINGS; [] if none)
           - sf270_required (BOOLEAN)
@@ -637,7 +767,10 @@ steps:
           - 108 Commission or no-CF annual closeout required + #date#
           - 109 $0 invoice required
           - 110 Periodic financial reporting required (ALL ASAP awards)
-          - 111 Email invoice to: #email#
+          - 111 Email invoice to: #email# (the SPONSOR's invoice-to email —
+            where UI SENDS invoices, from the Sponsor column of the contact
+            table; NOT UI's own osp-billing@uidaho.edu. e.g. Award 1 =
+            roger@amgidaho.com. This line was missed/wrong in v1.1.0.)
           - 112 PI reporting dates
           - 113 Specific drawdown or reporting roles
           - 114 Patent report required — add #frequency#
@@ -670,7 +803,10 @@ steps:
           - 153 90-day final
           - 154 Cost share: UI $#amt#; Other $#amt# (this is the literal
             Banner form label — keep "UI" here)
-          - 155 Equipment vests with agency
+          - 155 Equipment vests with #UI or agency# (detect equipment
+            ownership/vesting language, e.g. "University hereby owns any
+            equipment and materials it purchases ... with funds provided by
+            Sponsor" → "Equipment vests with UI". Missed in v1.1.0.)
           - 156 Time extension pending (#date# & #initials#)
           - 157 Additional funds pending (#date# & #initials#)
           - 158 Final in 30 days or less
@@ -735,21 +871,32 @@ steps:
 
           ## PRECEDENCE + DISCREPANCIES
           The AWARD document takes precedence over any sponsor terms &
-          conditions. When two fragments contradict, do NOT alter the
-          values — flag with
-          `[DISCREPANCY - Task X states ___ while Task Y states ___]`
-          in the relevant section.
+          conditions. When two fragments genuinely contradict, do NOT alter
+          the values — flag with a plain-English
+          `[DISCREPANCY - <Section> shows ___ but ___]` (NEVER leak raw
+          field names like "sponsorname"). A prime sponsor AND a
+          pass-through sponsor both appearing is NORMAL — it is NOT a
+          discrepancy; render both with their roles and do not flag it (a
+          v1.1.0 miss flagged the pass-through as a discrepancy).
 
-          ## PROVENANCE (RA Output Note — render the sources)
-          Each fragment carries a `provenance` array and the foatext rows
-          carry `source_location` / `evidence_snippet`. Surface the
-          source so the analyst can verify. Render provenance as a short
-          italic parenthetical after a value — `_(source: <doc> <loc>)_`
-          — for the determination fields (Award Type, Award Category,
-          Indirect Basis, Billing Type), the funding amounts, and any
-          flagged item; and as a **Source** column in the FOATEXT and
-          Reporting tables. When a field has no provenance, omit the
-          parenthetical (do NOT write "source: not specified").
+          ## PROVENANCE (RA Output Note — render the sources; do MORE)
+          Building trust with RAs means showing WHERE each value came from,
+          so surface sources widely. Each fragment carries a `provenance`
+          array and the foatext rows carry `source_location` /
+          `evidence_snippet`.
+          - Render provenance as ONE short italic parenthetical after a
+            value: `_(source: <doc> <page/section>)_`.
+          - For a DETERMINATION field (Award Type, Award Category, Indirect
+            Basis, Billing Type) render exactly: `— _Determination:
+            <plain rationale>_ _(source: <loc>)_`. Write the rationale and
+            the source ONCE each — do NOT repeat the literal token
+            "(determination)" or nest "(source: (determination) …)" (a
+            v1.1.0 rendering bug doubled these).
+          - Also add `_(source: …)_` to the funding amounts, dates, sponsor
+            names, PMS/LOC, invoice-to, and any flagged item; use a
+            **Source** column in the FOATEXT and Reporting tables.
+          - When a field truly has no provenance, omit the parenthetical
+            (never write "source: not specified").
 
           ## ORDERING (RA Output Note)
           The deliverable follows the RA's prioritized data-point order
@@ -793,9 +940,9 @@ steps:
             additional_cfda_numbers non-empty, append "plus <list>"
           - **NAICS Code:** <naics_code or "Not specified">
           - **Action Type:** <action_type or "Not specified">
-          - **Federal Awarding Agency:** <federal_agency_name or "Not specified">
+          - **Federal Awarding Agency:** <federal_agency_name, else prime_sponsor_name when is_pass_through and the prime is federal, else "Not specified">
           - **Pass-Through Status:** <"Direct Award" if !is_pass_through
-            else "Pass-Through from " + prime_sponsor_name>
+            else "Pass-Through — federal prime " + prime_sponsor_name + " via " + sponsor_name (the pass-through entity)>
 
           ---
 
@@ -845,7 +992,7 @@ steps:
           | **Total Award Amount** | **<total_award_amount>** |
 
           - **Indirect Cost Basis & Rate:** <fa_rate or "—"> on <fa_rate_base or "—"> <"(rate code `" + fa_rate_code + "`)" if fa_rate_code> — _Determination: <fa_rate_base_rationale>_ _(source: ...)_
-          - **F&A Status:** <fa_status or "Full Rate"> <"(Waived OH: " + waived_oh_amount + ")" if is_fa_waived>
+          - **F&A Status:** <fa_status or "Not specified"> <"(Waived OH: " + waived_oh_amount + ")" if is_fa_waived>  (render "No F&A" when the award charges no indirect — never assume "Full Rate")
           - **Cost Sharing:** <"Yes — " + cost_share_amount + " (" + cost_share_type + ")" if cost_share_present else "No">
 
           When cost_share_categories is non-empty, render:
