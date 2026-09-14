@@ -768,6 +768,27 @@ components:
           review-process, and submission-system focus across its eight
           reference sections.
 
+  funding-opportunity-finder:
+    output_contract:
+      format: markdown_review
+      scope: repo_local_chat_contract
+      notes: >
+        Chat-first research component: a ranked, linked list of grants.gov
+        opportunities from a project idea, a record summary with attachment
+        links on request, and a compact three-hit form when called by another
+        task. No JSON schema. Needs a grants.gov search tool and a document
+        fetch tool at run time.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Live grants.gov results change daily, so cases pin recorded tool
+        responses and score presentation: every entry linked, no invented
+        fields, forecasts labelled, at most ten entries.
+    related_components:
+      - slug: narrative-to-budget-worksheet
+        relationship: downstream_consumer
+        notes: The chosen announcement is the RFA input of the budget worksheet component.
+
   narrative-to-budget-worksheet:
     output_contract:
       format: spreadsheet

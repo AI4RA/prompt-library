@@ -1612,6 +1612,74 @@
       }
     },
     {
+      "component_id": "prompt.funding-opportunity-finder",
+      "slug": "funding-opportunity-finder",
+      "name": "funding-opportunity-finder",
+      "summary": "Turns a project idea, topic, sponsor or opportunity number into a short ranked list of current federal funding opportunities on grants.gov, each as a clickable link, and hands the chosen one on: a summary of the record with its attachment links, the full announcement read in pages, or the budget worksheet component. It is a chat-first component that also works as a step for another task, where it returns the best three hits in the shortest form.",
+      "version": "0.1.0",
+      "category": "research",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "rfa",
+        "nofo",
+        "solicitation",
+        "grants-gov",
+        "pre-award",
+        "search",
+        "research-administration"
+      ],
+      "audience": [
+        "principal-investigators",
+        "pre-award-staff",
+        "proposal-developers"
+      ],
+      "paths": {
+        "component_dir": "components/funding-opportunity-finder",
+        "readme": "components/funding-opportunity-finder/README.md",
+        "prompt": "components/funding-opportunity-finder/prompt.md",
+        "schema": null,
+        "evals_dir": "components/funding-opportunity-finder/evals",
+        "eval_case_metadata_glob": "components/funding-opportunity-finder/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/funding-opportunity-finder/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/funding-opportunity-finder/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "markdown_review",
+          "scope": "repo_local_chat_contract",
+          "notes": "Chat-first research component: a ranked, linked list of grants.gov opportunities from a project idea, a record summary with attachment links on request, and a compact three-hit form when called by another task. No JSON schema. Needs a grants.gov search tool and a document fetch tool at run time.",
+          "schema_path": null,
+          "schema_entrypoints": [],
+          "validation_surfaces": []
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "narrative-to-budget-worksheet",
+          "relationship": "downstream_consumer",
+          "notes": "The chosen announcement is the RFA input of the budget worksheet component."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Live grants.gov results change daily, so cases pin recorded tool responses and score presentation: every entry linked, no invented fields, forecasts labelled, at most ten entries."
+      }
+    },
+    {
       "component_id": "prompt.narrative-to-budget-worksheet",
       "slug": "narrative-to-budget-worksheet",
       "name": "narrative-to-budget-worksheet",
