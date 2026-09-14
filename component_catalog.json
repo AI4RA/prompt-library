@@ -1612,6 +1612,81 @@
       }
     },
     {
+      "component_id": "prompt.narrative-to-budget-worksheet",
+      "slug": "narrative-to-budget-worksheet",
+      "name": "narrative-to-budget-worksheet",
+      "summary": "Builds a first-draft proposal budget worksheet from a project narrative and/or a funding announcement. The component reads what the documents say (team, activities, trips, equipment; sponsor ceiling, caps, cost sharing), asks the user one question at a time for the numbers only the institution, the PI or the sponsor can supply (an empty reply or \"skip\" takes the stated estimate), estimates what is not supplied, and writes a worksheet in which every derived cell is a spreadsheet formula and every estimate is filled yellow. It is the estimation head of the budget pipeline: its summary block is laid out so that `nsf-budget-spreadsheet-ingest-udm` can read it and the justification drafters can follow.",
+      "version": "0.1.0",
+      "category": "drafting",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "budget",
+        "pre-award",
+        "drafting",
+        "spreadsheet",
+        "estimation",
+        "rfa",
+        "nsf",
+        "rr-budget",
+        "research-administration"
+      ],
+      "audience": [
+        "pre-award-staff",
+        "principal-investigators",
+        "proposal-developers"
+      ],
+      "paths": {
+        "component_dir": "components/narrative-to-budget-worksheet",
+        "readme": "components/narrative-to-budget-worksheet/README.md",
+        "prompt": "components/narrative-to-budget-worksheet/prompt.md",
+        "schema": null,
+        "evals_dir": "components/narrative-to-budget-worksheet/evals",
+        "eval_case_metadata_glob": "components/narrative-to-budget-worksheet/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/narrative-to-budget-worksheet/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/narrative-to-budget-worksheet/prompt.md",
+          "version": "0.1.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "spreadsheet",
+          "scope": "repo_local_worksheet_contract",
+          "notes": "First-draft proposal budget worksheet built from a narrative and/or a funding announcement. No JSON schema: the deliverable is a sheet whose derived cells are spreadsheet formulas and whose estimated inputs are filled yellow. Summary rows use the NSF A–H categories and sub-lines of nsf-budget-justification-udm #/$defs/input so the sheet can be ingested by nsf-budget-spreadsheet-ingest-udm.",
+          "schema_path": null,
+          "schema_entrypoints": [],
+          "validation_surfaces": []
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [
+        {
+          "slug": "nsf-budget-spreadsheet-ingest-udm",
+          "relationship": "downstream_consumer",
+          "notes": "Reads the worksheet's summary and detail blocks into the structured budget object."
+        },
+        {
+          "slug": "budget-justification-generator-udm",
+          "relationship": "downstream_consumer",
+          "notes": "Drafts the justification once the worksheet's estimates have been confirmed."
+        }
+      ],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Conversational component: it asks for rates and decisions before it builds, so a harness case must script the reply. Structural scoring (blocks present, every summary cell a formula, every estimate marked) is mechanical; the estimates need a pre-award reviewer."
+      }
+    },
+    {
       "component_id": "prompt.noa-summary-udm",
       "slug": "noa-summary-udm",
       "name": "noa-summary-udm",

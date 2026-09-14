@@ -768,6 +768,32 @@ components:
           review-process, and submission-system focus across its eight
           reference sections.
 
+  narrative-to-budget-worksheet:
+    output_contract:
+      format: spreadsheet
+      scope: repo_local_worksheet_contract
+      notes: >
+        First-draft proposal budget worksheet built from a narrative and/or
+        a funding announcement. No JSON schema: the deliverable is a sheet
+        whose derived cells are spreadsheet formulas and whose estimated
+        inputs are filled yellow. Summary rows use the NSF A–H categories
+        and sub-lines of nsf-budget-justification-udm #/$defs/input so the
+        sheet can be ingested by nsf-budget-spreadsheet-ingest-udm.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Conversational component: it asks for rates and decisions before it
+        builds, so a harness case must script the reply. Structural scoring
+        (blocks present, every summary cell a formula, every estimate marked)
+        is mechanical; the estimates need a pre-award reviewer.
+    related_components:
+      - slug: nsf-budget-spreadsheet-ingest-udm
+        relationship: downstream_consumer
+        notes: Reads the worksheet's summary and detail blocks into the structured budget object.
+      - slug: budget-justification-generator-udm
+        relationship: downstream_consumer
+        notes: Drafts the justification once the worksheet's estimates have been confirmed.
+
   budget-justification-generator-udm:
     output_contract:
       format: json_object
