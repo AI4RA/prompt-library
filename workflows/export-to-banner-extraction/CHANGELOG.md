@@ -2,6 +2,25 @@
 
 All notable changes to this workflow. Versions follow semver: MAJOR for step-structure changes, MINOR for additive changes (e.g., new search_set_items, validation checks), PATCH for display-name or wording edits.
 
+## [1.2.0] — 2026-09-11
+
+- Review correction: use neutral “prime” in Pass-Through Status so nonfederal pass-through awards are not labeled federal. Added federal/nonfederal validation cases.
+
+**MINOR — pass-through detection + round-2 RA fixes** (prompt-content only; topology unchanged). Michele ran **v1.1.0 on two real awards** (Idaho Mint Commission direct award V250742; IDE→UI SESTA subaward V260458) and returned field-by-field feedback (`New feedback (8-31)/`, committed with this change). Fixes, in priority order:
+
+- **Pass-through / subaward detection (headline).** `extract-award-identification` (+ `extract-sponsor-and-entity`) now detect when UI is a **subrecipient** under a pass-through entity with a federal prime — from "Subaward Agreement" titles, "Prime Recipient"/"Subrecipient" parties, and a separate "Awarding Agency" field. This was the root cause of ~5 cascaded errors on SESTA (page 1: *"IDE Subaward Agreement,"* Prime = Idaho Dept of Ed, Awarding Agency = U.S. Dept of Education, ALN 84.027A). Sets `is_pass_through`, `prime_sponsor_name` = federal prime; two funders is **not** a discrepancy.
+- **Award Type — added `Subaward` / `Subcontract`** enum values (approach "a"). SESTA was mislabeled "Cooperative Agreement" when the doc said "cost-reimbursable subaward."
+- **Award Category** — guard to use the D/E/K pass-through branch, not the pass-through entity's own type (SESTA emitted "I" Government–Idaho; correct is "D" Federal Flow Thru–State of Idaho).
+- **CFDA/ALN** — search for **"ALN" / "Assistance Listing Number"** (not just "CFDA"); an explicit number wins over the not-federal fallback (SESTA returned "NA.AAAA" while "ALN 84.027A" was on page 1); a federal pass-through prime makes the award federal.
+- **Invoice-to (both awards)** — `billing_address` / `invoice_email` and **FOATEXT line 111** are the **SPONSOR's remit contact** (Sponsor column of the two-column `University | Sponsor` contact table), never UI's own `osp-billing@uidaho.edu`. Confirmed against Award 1's Attachment B: correct invoice-to is Roger Batt, `roger@amgidaho.com`.
+- **Multi-year (both awards)** — `is_multi_year` is based on the **awarded period only**; a single ≤12-month award is not multi-year even if the SOW says "expected to last two years."
+- **F&A status (Award 1)** — `fa_status` = **"No F&A"** when the budget has no indirect line; consolidation no longer defaults to "Full Rate."
+- **Senior/Key Personnel (Award 2)** — only **named** Senior/Key personnel, not all 18 project staff.
+- **FOATEXT line 155** — equipment-vesting recognition ("University hereby owns any equipment… → Equipment vests with UI"); missed in v1.1.0.
+- **Provenance** — fixed the doubled `(determination) … (source: (determination) …)` rendering; render sources more widely and never leak raw field names in discrepancy flags (RA: *"anytime the output provides where it found the information, the more trust we build"*).
+
+Validation check `etb-award-type-determination` updated to include Subaward/Subcontract. All extraction prompts stayed ≤ ~9.2K chars (award-identification, the largest, ~2.3K tokens — under the ~10K/8192-token guideline). **Status:** import-ready; in-Vandalizer re-test on these two awards pending.
+
 ## [1.1.0] — 2026-08-18
 
 **MINOR — Tier 2 determinations now use University of Idaho's actual rubrics** (prompt-content only; topology unchanged). Michele Mattoon delivered the "Banner Help Tip" determination guides that were the Tier 2 open dependency flagged in v1.0.0, so the generic federal distinctions are replaced with UI's real decision logic. The 8 guides are committed under `Feedback Meetings/Export To Banner/Banner Help Tip Docs/`.
