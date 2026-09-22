@@ -4,6 +4,8 @@ All notable changes to this workflow. Versions follow semver: MAJOR for step-str
 
 ## [1.2.0] — 2026-09-11
 
+- Review correction: use neutral “prime” in Pass-Through Status so nonfederal pass-through awards are not labeled federal. Added federal/nonfederal validation cases.
+
 **MINOR — pass-through detection + round-2 RA fixes** (prompt-content only; topology unchanged). Michele ran **v1.1.0 on two real awards** (Idaho Mint Commission direct award V250742; IDE→UI SESTA subaward V260458) and returned field-by-field feedback (`New feedback (8-31)/`, committed with this change). Fixes, in priority order:
 
 - **Pass-through / subaward detection (headline).** `extract-award-identification` (+ `extract-sponsor-and-entity`) now detect when UI is a **subrecipient** under a pass-through entity with a federal prime — from "Subaward Agreement" titles, "Prime Recipient"/"Subrecipient" parties, and a separate "Awarding Agency" field. This was the root cause of ~5 cascaded errors on SESTA (page 1: *"IDE Subaward Agreement,"* Prime = Idaho Dept of Ed, Awarding Agency = U.S. Dept of Education, ALN 84.027A). Sets `is_pass_through`, `prime_sponsor_name` = federal prime; two funders is **not** a discrepancy.

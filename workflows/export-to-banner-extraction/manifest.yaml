@@ -163,6 +163,15 @@ validation_plan:
       subrecipient-of-a-pass-through), NOT merely the word the sponsor
       used. Same expectation for Award Category, Indirect Cost Basis, and
       Billing Type.
+  - id: etb-pass-through-funding-source
+    name: Pass-through does not imply federal funding
+    category: accuracy
+    description: >
+      Check both a federal prime (U.S. Department of Education via Idaho
+      Department of Education) and a nonfederal prime (a private foundation
+      via a university). Both summaries name the prime and intermediary;
+      only the federal example populates Federal Awarding Agency. Neither
+      derives federal funding from is_pass_through alone.
   - id: etb-award-precedence
     name: Award-over-T&C precedence honored
     category: content
@@ -942,7 +951,10 @@ steps:
           - **Action Type:** <action_type or "Not specified">
           - **Federal Awarding Agency:** <federal_agency_name, else prime_sponsor_name when is_pass_through and the prime is federal, else "Not specified">
           - **Pass-Through Status:** <"Direct Award" if !is_pass_through
-            else "Pass-Through — federal prime " + prime_sponsor_name + " via " + sponsor_name (the pass-through entity)>
+            else "Pass-Through — prime " + prime_sponsor_name + " via " + sponsor_name (the pass-through entity)>.
+            Pass-through status alone does NOT establish federal funding.
+            For example, a private-foundation prime via a university remains
+            nonfederal; name that prime without calling it a federal agency.
 
           ---
 
