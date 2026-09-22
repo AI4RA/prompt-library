@@ -2,7 +2,7 @@
 
 Uploads a fully-executed award document (optionally alongside the sponsor's general terms & conditions and the University of Idaho determination guides as additional documents) and returns an **RA-friendly Markdown Export to Banner Reference Summary** — the prioritized data points a University of Idaho sponsored-programs analyst needs to populate the VERAS Export to Banner form.
 
-**Workflow version:** 1.1.0
+**Workflow version:** 1.2.0
 **Vandalizer schema version:** 2
 **Status:** experimental
 **Components manifested:** `export-to-banner-extraction-udm@0.1.0`
@@ -38,6 +38,8 @@ v1.0.0 implements three tiers of feedback from Michele Mattoon's review of the v
 - **KB step removed (MAJOR, 3 steps → 2):** the optional `KnowledgeBaseQuery` Step 0 was inert on import (Vandalizer blanks `kb_uuid`, so a KB always had to be attached manually) and confused operators comparing against their live copies. Mirrors `rfa-checklist-extraction` v1.0.0. Extraction tasks now read `input_sources: [workflow_documents]` only. KBs will be reintroduced once the right approach is settled.
 
 > **Tier 2 dependency resolved (v1.1.0, 2026-08-18):** Michele delivered the University of Idaho "Banner Help Tip" determination guides (committed under [`Feedback Meetings/Export To Banner/Banner Help Tip Docs/`](../../Feedback%20Meetings/Export%20To%20Banner/Banner%20Help%20Tip%20Docs/)). The Tier 2 prompts now encode UI's **actual** rubrics — the Award Type 5-signal matrix, the 20-code Award Category tree, the UI indirect-cost basis codes (`MTDC-A`…`SPEC-S`) + Rate Codes table, UI's three billing setups, and the ALN/CFDA decision tree — instead of the generic federal distinctions. See the [CHANGELOG](CHANGELOG.md) `[1.1.0]` entry. (One guide has a typo flagged back to Michele — Award Category code `H`.)
+
+> **Round-2 field-by-field feedback (v1.2.0, 2026-09-11):** Michele ran v1.1.0 on two real awards ([`Feedback Meetings/Export To Banner/New feedback (8-31)/`](../../Feedback%20Meetings/Export%20To%20Banner/New%20feedback%20(8-31)/)). The headline fix is **pass-through/subaward detection** — when UI is a subrecipient under a pass-through entity with a federal prime (which had cascaded into wrong Award Type, Category, CFDA/ALN, and a false sponsor discrepancy). Also: `Subaward`/`Subcontract` added to the Award Type enum; ALN terminology; the **invoice-to** now resolves to the sponsor's remit contact (not UI's own); awarded-period-based multi-year; "No F&A"; named-only key personnel; FOATEXT line 155; and cleaner/wider provenance. See the [CHANGELOG](CHANGELOG.md) `[1.2.0]` entry.
 
 ## Components
 
