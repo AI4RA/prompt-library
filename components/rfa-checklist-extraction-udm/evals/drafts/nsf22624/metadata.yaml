@@ -1,0 +1,23 @@
+case: NSF 22-624 — Astronomy and Astrophysics Research Grants (AAG)
+status: draft  # not validated; see notes.md. Move to ../../cases/ once validated.
+source: "NSF program solicitation 22-624 (clean web text used for the Plan B gold)"
+retrieved: 2026-10-06
+
+structural_features:
+  - nsf-standard-solicitation
+  - recurring-annual-submission-window
+  - defers-to-pappg
+  - solicitation-specific-coa-deviation
+  - nasa-data-conditional-section
+
+schema_features:
+  - cost-sharing-prohibited-null-details
+  - nsf-sponsor-backbone-merge
+  - announcement-plus-sponsor-standard-components
+  - sponsor-default-formatting
+  - unclear-for-silent-checks
+
+# Filled in by the validating reviewer when the case moves to cases/.
+validated_by: null
+validated_at: null
+validated_against_version: null

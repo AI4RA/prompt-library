@@ -9,6 +9,19 @@ Each case lives under `cases/<case-slug>/` with at minimum:
 
 Run artifacts go under `runs/` (gitignored).
 
+## Drafts
+
+`drafts/<case-slug>/` holds cases that are complete and schema-valid but **not yet validated**. The lint and the
+component catalog read only `cases/`, so a draft does not count as an evaluated case. Each draft's `notes.md` says
+which fields restate validated gold and which were drafted, and lists the decisions a reviewer has to make. Once
+a sponsored-programs reviewer has checked it, move the directory to `cases/` and fill in `validated_by`,
+`validated_at` and `validated_against_version`.
+
+- [`drafts/nsf22624/`](drafts/nsf22624/): NSF 22-624 (AAG). Cost sharing prohibited, NSF backbone merge, recurring
+  submission window. It restates the Plan B gold where that exists (metadata, dates, eligibility, award, budget,
+  the 5 escalation flags) and drafts the rest (the 12 CRU flags, the 14 compliance and international areas,
+  mandated structure, special requirements, important notes).
+
 ## Planned cases
 
 The first cases should exercise distinct structural features of the contract, not simply add volume:
