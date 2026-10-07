@@ -47,7 +47,7 @@ Some backbone items are University-of-Idaho-specific (e.g., the AOR-signed Lette
 
 This workflow's **Markdown output is for end users (sponsored-programs analysts)**, not for the evaluation harness. The split:
 
-- **Component** (`components/rfa-checklist-extraction-udm/`) — JSON-emitting, `schema.json`-backed, single-call canonical prompt. This is the evaluation-harness target.
+- **Component** (`components/rfa-checklist-extraction-udm/`) — JSON-emitting, `schema.json`-backed, single-call canonical prompt. Since 1.0.0 it mirrors this workflow's ten extraction fragments field for field, so it doubles as their combined JSON contract.
 - **Workflow** (this folder) — Markdown-emitting, Vandalizer-shaped pipeline. This is the RA-via-Vandalizer deliverable.
 
 The two outputs serve different consumers without doubling maintenance.
@@ -75,9 +75,9 @@ Carried into the Vandalizer export at the workflow level (re-targeted for the Ma
 
 ## Eval posture
 
-Workflow-local — see [`evals/`](evals/). The workflow's deliverable is Markdown, so workflow-local cases use `expected.md` rather than `expected.json`. The component-level evals at [`components/rfa-checklist-extraction-udm/evals/`](../../components/rfa-checklist-extraction-udm/evals/) remain the JSON-against-schema test for the harness.
+Workflow-local — see [`evals/`](evals/). The workflow's deliverable is Markdown, so workflow-local cases use `expected.md` rather than `expected.json`. The component-level evals at [`components/rfa-checklist-extraction-udm/evals/`](../../components/rfa-checklist-extraction-udm/evals/) are the JSON-against-schema test for the single-call prompt. The evaluation harness (`AI4RA/evaluation-harness`, runner `rfa-checklist-vandalizer`) replays this workflow's ten extraction tasks and validates each fragment against its v3.1.0 fragment schema.
 
-Workflow-local cases should target the nine-section presence (Red Flags first), the placement contract enforcement during consolidation (any cost-sharing inadvertently mentioned by extract-award-information should be moved to BUDGET REQUIREMENTS & POLICIES; per-component formatting in SPECIAL REQUIREMENTS should be moved onto the matching component row), monetary preservation, and IMPORTANT NOTES synthesis.
+Workflow-local cases should target the eleven-section presence (Red Flags first), the placement contract enforcement during consolidation (any cost-sharing inadvertently mentioned by extract-award-information should be moved to BUDGET REQUIREMENTS & POLICIES; per-component formatting in SPECIAL REQUIREMENTS should be moved onto the matching component row), monetary preservation, and IMPORTANT NOTES synthesis.
 
 ## Recommended knowledge bases
 
@@ -105,9 +105,9 @@ The committed `rfa-checklist-extraction.vandalizer.json` can be uploaded directl
 
 ## Triad integration
 
-- **Evaluation datasets:** none yet — planned: add an RFA case to `real.nsf_awards` or a new `real.rfa_checklists` dataset with `expected.md` produced from a sponsored-programs-reviewed Markdown deliverable.
-- **Harness notes:** the harness's primary RFA-checklist evaluation target is the JSON-emitting `rfa-checklist-extraction-udm` component via `prompt.md`. This workflow's Markdown output is a secondary signal; pair workflow-level Markdown-diff scoring (against `expected.md`) with component-level JSON-against-schema scoring when both are available.
-- **Shared UDM relationship:** inherits from the `rfa-checklist-extraction-udm` component's UDM alignment (`rfa_id`, `sponsor_name` resolve to UDM `RFA` and `Sponsor_Organization`; `cost_sharing` to `CostShare`; `fa_policy` to `IndirectRate`; `personnel_effort` to `Effort`).
+- **Evaluation datasets:** the Plan B human answer key for this workflow (20 NSF RFAs, keyed by task and fragment field) is `evaluation_results/rfa-checklist-extraction/plan-b/answer_key_v3.1.0.jsonl` in `AI4RA/evaluation-data-sets`; see Evaluation (Plan A / B) below. No workflow-local `expected.md` case exists yet.
+- **Harness notes:** the harness runner `rfa-checklist-vandalizer` replays this workflow's ten extraction tasks (the faithful Vandalizer prompt layers around each task prompt) and scores each JSON fragment against its v3.1.0 fragment schema; the Plan B gold is scored against workflow fragments (the shipped product's run and the harness replays). The Markdown consolidation output is not scored by the harness.
+- **Shared UDM relationship:** inherits from the `rfa-checklist-extraction-udm` component's UDM alignment (`rfa_id`, `sponsor_name` resolve to UDM `RFA` and `Sponsor_Organization`; `cost_sharing_status` / `cost_sharing_details` to `CostShare`; `fa_policy` to `IndirectRate`; `personnel_effort` to `Effort`).
 
 ## Provenance
 
@@ -117,4 +117,4 @@ Authored 2026-04-24 alongside the initial `rfa-checklist-extraction-udm` compone
 
 This workflow is evaluated under two complementary plans; evidence lives in [`AI4RA/evaluation-data-sets`](https://github.com/AI4RA/evaluation-data-sets/tree/main/evaluation_results/rfa-checklist-extraction):
 - **Plan A** — large-scale, silver-referenced study of the extraction tasks (135 RFAs × v2/v3 OCR representations × 10 reps) via the evaluation-harness.
-- **Plan B** — human-gold, end-to-end evaluation of the shipped workflow on 20 curated RFAs (paired **v0.4.0 → v3.1.0**), scored per field against a hand-authored answer key → `evaluation_results/rfa-checklist-extraction/plan-b/` (gold currently DRAFT / pre-verification).
+- **Plan B** — human-gold, end-to-end evaluation of the shipped workflow on 20 curated RFAs (paired **v0.4.0 → v3.1.0**), scored per field against a hand-authored answer key → `evaluation_results/rfa-checklist-extraction/plan-b/`. The gold is validated against the source solicitations; the judge is not yet calibrated to the κ ≥ 0.80 bar, so Plan B scores are agreement, not accuracy (see that README).
