@@ -1,8 +1,8 @@
 # RFA Checklist Extraction — UDM JSON
 
-Extracts a federal funding announcement (RFA / FOA / NOFO / program solicitation) into a structured JSON object organized around the **eight-section pre-award checklist** that a sponsored-programs analyst actually uses when triaging a new opportunity. The shape enforces placement rules — award amount lives in `award_information` only, detailed financial rules in `budget_requirements` only — so downstream consolidation does not have to re-adjudicate where a fact belongs.
+Extracts a federal funding announcement (RFA / FOA / NOFO / program solicitation) into one structured JSON object organized around the pre-award checklist a sponsored-programs analyst uses when triaging a new opportunity: Red Flags, dates, eligibility, award, application components (merged with the sponsor's standard components), mandated proposal structure, budget, compliance and foreign-influence checks, and important notes. The shape enforces placement rules — the award amount lives in `award_information` only, detailed financial rules in `budget_requirements` only — so downstream consumers do not have to re-adjudicate where a fact belongs.
 
-**Current version:** 0.1.0
+**Current version:** 1.0.0
 **Category:** extraction
 **Domain:** research-administration
 **Status:** experimental
@@ -12,44 +12,47 @@ Extracts a federal funding announcement (RFA / FOA / NOFO / program solicitation
 
 ## Inputs
 
-Full text of a funding announcement — pasted text, attached PDF/DOCX/HTML, or URL. Optional knowledge-base context from Uniform Guidance (2 CFR 200), NSF PAPPG, or NIH Grants Policy Statement is injected by the runtime workflow but not required by the prompt itself.
+Full text of a funding announcement — pasted text, attached PDF/DOCX/HTML, or URL.
 
 ## Outputs
 
-A single JSON object with:
+A single JSON object whose fields are the ten extraction fragments of the [`rfa-checklist-extraction` workflow](https://github.com/AI4RA/prompt-library/tree/main/workflows/rfa-checklist-extraction) v3.1.0, field for field:
 
-- **Scalar opportunity metadata** — `rfa_id`, `rfa_number`, `rfa_title`, `sponsor_name`, `program_code`, `announcement_url`, `opportunity_number`, `cfda_number`
-- **Eight structured sections** matching the consolidated checklist:
-  - `dates_and_deadlines` — array of `{item, date_time, notes}`
-  - `eligible_institutions` — array of `{type, subcategory, examples, compliance_requirements}`
-  - `eligible_individuals` — array of `{type, criteria, compliance_requirements, conditions}`
-  - `award_information` — `{award_duration, amount_per_award, number_of_awards, anticipated_award_date}`
-  - `required_components` / `optional_components` — arrays of `{name, description, special_requirements}`
-  - `budget_requirements` — `{funding_limits, cost_sharing: {status, details}, fa_policy, allowable_costs, unallowable_costs, personnel_effort, other_considerations}`
-  - `submission_details` — string
-  - `special_requirements` — array of strings
-  - `important_notes` — array of strings
+- **Opportunity metadata** (top-level scalars) — `rfa_id`, `rfa_number`, `rfa_title`, `sponsor_name`, `program_code`, `announcement_url`, `opportunity_number`, `cfda_number`, `funding_instrument_type`
+- `risk_flags` — `{check, category, status, detail}`: 17 fixed checks (5 escalation, 12 Contract Review Unit) with status `yes` / `no` / `unclear`, plus optional extra flags
+- `dates_and_deadlines` — `{item, date_time, notes}`, with recurring / relative deadline rules resolved to a concrete date
+- `eligible_institutions` — `{type, subcategory, examples, compliance_requirements}`, including limited-submission caps and subrecipient rules
+- `eligible_individuals` — `{type, criteria, compliance_requirements, conditions}`
+- `award_information` — `{award_duration, amount_per_award, number_of_awards, anticipated_award_date}`
+- `required_components` / `optional_components` — `{name, description, special_requirements, source}`, merged with the NSF / NIH / USDA-NIFA / DOE / NASA sponsor backbone; a pure "Sponsor standard" component is a `{name, source}` stub
+- `submission_details` (string), `special_requirements` (array of strings), `formatting_requirements` (string)
+- `mandated_structure` — `{component, mandated_sections: [{name, requirements, subsections}]}`
+- `budget_requirements` — `{funding_limits, cost_sharing_status, cost_sharing_details, fa_policy, allowable_costs, unallowable_costs, personnel_effort, other_considerations}`
+- `compliance_risks` (8 fixed areas) and `international_components` (6 fixed areas) — `{area, status, detail}`
+- `important_notes` — array of strings
 
-See [`schema.json`](schema.json) for the authoritative definition and [`prompt.md`](prompt.md) for the encoding rules (date formats, placement contract, quotation requirements, extraction strategy).
+See [`schema.json`](schema.json) for the authoritative definition and [`prompt.md`](prompt.md) for the extraction rules (fixed check and area labels, sponsor backbone, formatting precedence, placement contract).
 
 ## Contract scope
 
-Repo-local, UDM-aligned. The scalar fields (`rfa_id`, `rfa_number`, `rfa_title`, `sponsor_name`, `cfda_number`, ...) follow standard opportunity-metadata conventions and resolve downstream to UDM entities (`RFA`, `Sponsor_Organization`). The structured sections do not duplicate any shared UDM schema — they are repo-local to this component and mirror the eight-section deliverable produced by the [`rfa-checklist-extraction` Vandalizer workflow](https://github.com/ui-insight/ProcessMapping/tree/main/workflows/rfa-checklist-extraction) in the ui-insight/ProcessMapping process-mapping corpus. Selected leaf fields reference UDM columns: `cost_sharing` → `CostShare`, `fa_policy` → `IndirectRate`, `personnel_effort` → `Effort`.
+Repo-local, UDM-aligned. The scalar fields (`rfa_id`, `rfa_number`, `rfa_title`, `sponsor_name`, `cfda_number`, ...) follow standard opportunity-metadata conventions and resolve downstream to UDM entities (`RFA`, `Sponsor_Organization`). The structured sections are repo-local to this component and mirror the deliverable of the `rfa-checklist-extraction` workflow. Selected leaf fields reference UDM columns: `cost_sharing_status` / `cost_sharing_details` → `CostShare`, `fa_policy` → `IndirectRate`, `personnel_effort` → `Effort`.
+
+## Relationship to the workflow
+
+The canonical runtime is the [`rfa-checklist-extraction` workflow](https://github.com/AI4RA/prompt-library/tree/main/workflows/rfa-checklist-extraction) at the top level of this repo. Its source of truth is [`manifest.yaml`](https://github.com/AI4RA/prompt-library/blob/main/workflows/rfa-checklist-extraction/manifest.yaml); the companion `.vandalizer.json` is generated by [`scripts/build_vandalizer_workflows.py`](https://github.com/AI4RA/prompt-library/blob/main/scripts/build_vandalizer_workflows.py).
+
+- **Step 1 (parallel extraction)** — ten Prompt tasks, each emitting one JSON fragment. The fragments map onto this component's fields one to one; `award_information` and `budget_requirements` nest the award and budget fragments.
+- **Step 2 (consolidation)** — renders the fragments into an RA-facing Markdown checklist with eleven sections and synthesizes IMPORTANT NOTES (this component's `important_notes`).
+
+So a merged set of the workflow's ten fragments, plus `important_notes`, is an instance of this contract. Checked on 2026-10-06 against the evaluation harness's v3.1.0 replays (gpt-oss-120b and Kimi K3 over 135 RFAs, Qwen3.8-27B over 20; 2,900 runs, each one (RFA, input, replicate)): a merged run validates against `schema.json` exactly when all ten fragments pass the harness's v3.1.0 fragment schemas.
+
+**Version pin.** Workflow v3.1.0 still pins component 0.1.0 and records the lag with `pinned_version_sha`, so its shipped prompts and version did not change when the component was synced. The component, in turn, follows the workflow: when a task prompt changes, `prompt.md` and `schema.json` change with it.
 
 ## Triad integration
 
-- **Evaluation datasets:** none yet — planned: add an RFA case to `real.nsf_awards` or a new `real.rfa_checklists` dataset with `expected.json` produced from a sponsored-programs-reviewed extraction.
-- **Harness notes:** canonical manifestation is `prompt.md`. Validation surface is `schema.json`. Vendored into runners via `harness prompts vendor --source-ref=<sha>`; pinned in `prompts.lock.json`.
-- **Shared UDM relationship:** aligned, not owning. `rfa_id`, `sponsor_name`, and the three UDM-column leaf fields match the naming conventions in AI4RA-UDM but this component does not redefine UDM tables.
-
-## Runtime topology — the Vandalizer workflow
-
-The canonical runtime for this component is the [`rfa-checklist-extraction` workflow](https://github.com/AI4RA/prompt-library/tree/main/workflows/rfa-checklist-extraction) shipped at the top level of this repo. The single source of truth is [`workflows/rfa-checklist-extraction/manifest.yaml`](https://github.com/AI4RA/prompt-library/blob/main/workflows/rfa-checklist-extraction/manifest.yaml); the companion `.vandalizer.json` envelope is generated by [`scripts/build_vandalizer_workflows.py`](https://github.com/AI4RA/prompt-library/blob/main/scripts/build_vandalizer_workflows.py) and committed alongside. The runtime mirrors the source [`ui-insight/ProcessMapping/workflows/rfa-checklist-extraction/`](https://github.com/ui-insight/ProcessMapping/tree/main/workflows/rfa-checklist-extraction) workflow:
-
-- **Step 1 (parallel Extraction)** — seven Extraction tasks. Six mirror the source workflow one-for-one (dates, eligible institutions, eligible individuals, award info, application components, budget). A seventh `extract-opportunity-metadata` task captures the eight UDM-aligned scalar opportunity fields the schema adds on top of the source workflow. Each task carries an embedded SearchSet whose item titles match this component's schema field names; `cost_sharing_status` is exposed as the four-value enum.
-- **Step 2 (consolidation Prompt)** — assembles the seven JSON fragments into the schema-conformant object, including the nested `cost_sharing: {status, details}` rebuild and `important_notes` synthesis from cross-section signals.
-
-Regenerate the workflow JSON whenever this component bumps MINOR or MAJOR (or whenever the workflow manifest changes); CI fails if the committed `.vandalizer.json` drifts from a fresh build.
+- **Evaluation datasets:** the Plan B human answer key for the workflow (20 NSF RFAs) is `evaluation_results/rfa-checklist-extraction/plan-b/answer_key_v3.1.0.jsonl` in [`AI4RA/evaluation-data-sets`](https://github.com/AI4RA/evaluation-data-sets). Its rows are keyed by workflow task and fragment field (e.g. `budget-requirements` / `cost_sharing_status`), the same field names this contract uses (apart from about a hundred control and retired rows covering five fields outside the v3.1.0 contract). It is scored against the workflow's fragments, not against this single-call prompt.
+- **Harness notes:** canonical manifestation is `prompt.md`; validation surface is `schema.json`. The harness runner `rfa-checklist-vandalizer` replays the workflow itself (per-task fragments), not this single-call prompt.
+- **Shared UDM relationship:** aligned, not owning. `rfa_id`, `sponsor_name` and the three UDM-column leaf fields match AI4RA-UDM naming conventions, but this component does not redefine UDM tables.
 
 ## Manifestations
 
@@ -57,8 +60,4 @@ Regenerate the workflow JSON whenever this component bumps MINOR or MAJOR (or wh
 
 ## Evals
 
-See [`evals/`](evals/) for reference inputs and known-good outputs. Initial case pending: NSF-published RFA with a multi-round structure, cost-sharing prohibition, and explicit allowable/unallowable categories to exercise the placement contract.
-
-## Provenance
-
-Authored 2026-04-24 against the existing `rfa-checklist-extraction` process-mapping workflow (v2) in `ui-insight/ProcessMapping`, which was built from walkthrough transcripts of University of Idaho sponsored-programs staff reviewing NSF and NIH announcements. Created to make that workflow a harness-evaluatable, versioned artifact rather than a runtime-embedded configuration.
+See [`evals/`](evals/). No golden case has been added yet.
