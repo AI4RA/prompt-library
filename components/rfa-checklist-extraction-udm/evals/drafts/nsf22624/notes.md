@@ -42,8 +42,8 @@ Those rows were verified or corrected against the source text on 2026-09-17, exc
 
 ## Decisions for the reviewer
 
-1. **`announcement_url` = `null`.** The web text has only relative links (`/funding/opportunities/aag-…`), no
-   absolute URL, and the prompt says null when the document does not state a value. Gold #5 holds
+1. **`announcement_url` = `null`.** The web text links to this solicitation only through relative paths
+   (`/funding/opportunities/aag-…`), with no absolute URL for it, and the prompt says null when the document does not state a value. Gold #5 holds
    `https://www.nsf.gov/funding/opportunities/aag-astronomy-astrophysics-research-grants/nsf22-624/solicitation`.
    It was re-derived on 2026-10-02 from the corpus anchor index (`corpus/rfa_index.csv`) under rubric v1.1 C1, not
    from the text; the PDF's print footer carries the URL. Keep `null` for the web-text input, or switch the case
