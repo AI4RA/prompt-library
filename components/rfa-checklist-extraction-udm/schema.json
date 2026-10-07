@@ -314,7 +314,8 @@
               "string",
               "null"
             ],
-            "description": "Page limits, title rules, fonts, templates and naming for this component only. Never a pointer to an announcement section, never internal section structure (that lives in mandated_structure). Null or omitted when none."
+            "description": "Page limits, title rules, fonts, templates and naming for this component only. Never a pointer to an announcement section, never internal section structure (that lives in mandated_structure). Null or omitted when none.",
+            "minLength": 1
           },
           "source": {
             "type": "string",
@@ -369,7 +370,8 @@
               "string",
               "null"
             ],
-            "description": "Page limits, title rules, fonts, templates and naming for this component only. Never a pointer to an announcement section, never internal section structure (that lives in mandated_structure). Null or omitted when none."
+            "description": "Page limits, title rules, fonts, templates and naming for this component only. Never a pointer to an announcement section, never internal section structure (that lives in mandated_structure). Null or omitted when none.",
+            "minLength": 1
           },
           "source": {
             "type": "string",

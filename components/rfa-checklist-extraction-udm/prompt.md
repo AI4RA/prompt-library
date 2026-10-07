@@ -132,7 +132,7 @@ Explicitly look for institution-level limited-submission caps, required institut
 One entry per distinct PI / Co-PI / senior-personnel category. Each entry:
 
 - `type` — the category (e.g., "Principal Investigator", "Early-Career Investigator").
-- `criteria` — degree, career stage, appointment type, citizenship, required credentials, prior-award restrictions (e.g., "no prior R01"); null when none.
+- `criteria` — degree, career stage, appointment type, citizenship, required credentials, prior-award restrictions (these may also go in `conditions`); null when none.
 - `compliance_requirements` — ORCID, mentoring plans or other PI compliance items; null when none.
 - `conditions` — restrictions, limits or preferences, including per-individual caps ("May appear on only one proposal"), per-institution caps ("One nomination per institution"; these go here, not in `special_requirements`), prior-award exclusions ("Not eligible if prior RFA-awarded"), and limited-submission mechanics (how collaborative proposals count toward a cap, internal nomination or down-select); null when none.
 
@@ -240,7 +240,7 @@ Route these rules, when stated, to the field named:
 - travel caps, required travel (e.g., a mandatory PI meeting), international-travel restrictions → `other_considerations`;
 - publication / open-access / page charges → `allowable_costs` or `other_considerations`.
 
-Descriptive fields are **flat strings** (one natural-language sentence or short paragraph), never nested objects. For example, `cost_sharing_details` is NOT `{"type": ["cash", "in-kind"], "rate": "≥100% of award", "documentation": "Matching Fund Verification Letter"}` but "Cash and in-kind, matching contributions equal to or greater than the funding request (≥100% of the award), with at least 50% in cash; documented via Matching Fund Verification Letter(s)."
+Descriptive fields are **flat strings** (one natural-language sentence or short paragraph), never nested objects. For example (abbreviated from the workflow task), `cost_sharing_details` is NOT `{"type": ["cash", "in-kind"], "rate": "≥100% of award", "documentation": "Matching Fund Verification Letter"}` but "Cash and in-kind, matching contributions equal to or greater than the funding request (≥100% of the award), with at least 50% in cash; documented via Matching Fund Verification Letter(s)."
 
 - `funding_limits` — program-wide or per-year caps and category-specific limits not already in `amount_per_award`. Null when absent.
 - `cost_sharing_status` — one of `"Required"`, `"Voluntary"`, `"Prohibited"`, `"Not Specified"`.

@@ -111,7 +111,7 @@ The committed `rfa-checklist-extraction.vandalizer.json` can be uploaded directl
 
 ## Provenance
 
-Authored 2026-04-24 alongside the initial `rfa-checklist-extraction-udm` component. Upgraded to v0.3.0 on 2026-05-22 with two changes: (1) parallel tasks converted from Vandalizer Extraction (SearchSet) to Vandalizer Prompt (full-document NLU) — necessary because grant documents in practice don't use the literal field labels SearchSet keyword retrieval expects; (2) output contract switched from JSON-against-schema to RA-friendly Markdown deliverable, with the harness target remaining the JSON-emitting component. Against `ui-insight/ProcessMapping` at commit `2c1f47f46474130743af5aee44d074bcd21787e9`; the eight-section structure follows the source `consolidation.md` conventions verbatim.
+Authored 2026-04-24 alongside the initial `rfa-checklist-extraction-udm` component. Upgraded to v0.3.0 on 2026-05-22 with two changes: (1) parallel tasks converted from Vandalizer Extraction (SearchSet) to Vandalizer Prompt (full-document NLU) — necessary because grant documents in practice don't use the literal field labels SearchSet keyword retrieval expects; (2) output contract switched from JSON-against-schema to RA-friendly Markdown deliverable, with the harness target remaining the JSON-emitting component (at the time; the harness now replays this workflow's extraction fragments). Against `ui-insight/ProcessMapping` at commit `2c1f47f46474130743af5aee44d074bcd21787e9`; the eight-section structure follows the source `consolidation.md` conventions verbatim.
 
 ## Evaluation (Plan A / B)
 
