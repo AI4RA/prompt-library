@@ -187,7 +187,8 @@
         "components": [
           {
             "slug": "rfa-checklist-extraction-udm",
-            "version": "0.1.0"
+            "version": "0.1.0",
+            "pinned_version_sha": "a0b131cfe94493b381fe951a4cc1cc32e56c5a99"
           }
         ]
       }

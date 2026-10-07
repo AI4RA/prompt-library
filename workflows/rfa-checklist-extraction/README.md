@@ -1,11 +1,11 @@
 # RFA Checklist Extraction
 
-Uploads a federal funding announcement (RFA / FOA / NOFO / program solicitation) and returns a single **RA-friendly Markdown checklist** organized in the pre-award sections a sponsored-programs analyst uses when triaging an opportunity, led by a **Red Flags** banner that surfaces escalation triggers first: Red Flags, Dates & Deadlines, Eligibility, Award Information, Budget Requirements & Policies, Submission Details, Application Components, Special Requirements, and Important Notes.
+Uploads a federal funding announcement (RFA / FOA / NOFO / program solicitation) and returns a single **RA-friendly Markdown checklist** organized in the pre-award sections a sponsored-programs analyst uses when triaging an opportunity, led by a **Red Flags** banner that surfaces escalation triggers first: Red Flags, Dates & Deadlines, Eligibility, Award Information, Budget Requirements & Policies, Submission Details, Application Components, Compliance Risks, Foreign Influence & International Components, Special Requirements, and Important Notes.
 
-**Workflow version:** 0.7.0
+**Workflow version:** 3.1.0
 **Vandalizer schema version:** 2
 **Status:** experimental
-**Components manifested:** `rfa-checklist-extraction-udm@0.1.0`
+**Components manifested:** `rfa-checklist-extraction-udm@0.1.0` (pinned with `pinned_version_sha`; the component itself is at 1.0.0, see below)
 **Eval posture:** workflow-local — see [`evals/`](evals/)
 **Output contract:** RA-friendly Markdown checklist (11 sections, Red-Flags-led, sponsor-backbone-merged components, placement-rule de-duplication)
 
@@ -54,7 +54,7 @@ The two outputs serve different consumers without doubling maintenance.
 
 ## Components
 
-- [`rfa-checklist-extraction-udm@0.1.0`](../../components/rfa-checklist-extraction-udm/) — the sole component. The component itself emits JSON for evaluation; this workflow's eight parallel Prompt tasks carry focused `prompt_inline` bodies in [`manifest.yaml`](manifest.yaml) that emit JSON fragments for clean step-input handoff, and the Consolidation step renders the final Markdown. **Note (v0.5.0):** the workflow prompts have moved ahead of the component (Red Flags task, recurring-date resolution, richer eligibility); the component `prompt.md` / `schema.json` are a pending sync — see CHANGELOG.
+- [`rfa-checklist-extraction-udm`](../../components/rfa-checklist-extraction-udm/) — the sole component. The component emits one JSON object; this workflow's ten parallel Prompt tasks carry focused `prompt_inline` bodies in [`manifest.yaml`](manifest.yaml) that emit JSON fragments for clean step-input handoff, and the Consolidation step renders the final Markdown. **Sync (2026-10-06):** component 1.0.0 mirrors this workflow's v3.1.0 fragments field for field, so a merged set of the ten fragments is an instance of its `schema.json`. The workflow still pins component 0.1.0, and the manifest records that lag with `pinned_version_sha`, so the v3.1.0 prompts and version are unchanged.
 
 ## A/B test sibling
 

@@ -383,30 +383,36 @@ components:
       format: json_object
       scope: shared_udm_semantics_repo_local_schema
       notes: >
-        Repo-local eight-section pre-award checklist contract for funding
-        announcements. Scalar opportunity metadata aligns with UDM opportunity
-        semantics; the eight structured sections enforce the pre-award
+        Repo-local pre-award checklist contract for funding announcements.
+        Since 1.0.0 its fields are the ten extraction fragments of the
+        rfa-checklist-extraction workflow v3.1.0, field for field (metadata,
+        risk flags, dates, eligibility, award, application components with the
+        sponsor backbone, mandated structure, budget, compliance and
+        international areas) plus important_notes. Scalar opportunity metadata
+        aligns with UDM opportunity semantics; the shape enforces the
         de-duplication placement rules (award amount only in award_information,
-        detailed financial rules only in budget_requirements) at schema level.
+        detailed financial rules only in budget_requirements).
     triad_integration:
       evaluation_datasets: []
       harness_notes: >
         Validate JSON outputs against schema.json. Canonical single-call
         invocation surface is prompt.md. The companion top-level
-        workflows/rfa-checklist-extraction Vandalizer workflow at v0.2.0
-        implements the same contract as a seven-task parallel Extraction
-        pipeline (six section extractions plus a metadata extraction)
-        followed by a Consolidation Prompt; campaign authors should record
-        both single-call and post-consolidation signals when both are
-        available.
+        workflows/rfa-checklist-extraction Vandalizer workflow (v3.1.0)
+        implements the same contract as ten parallel Prompt tasks, each
+        emitting one JSON fragment, followed by a Markdown Consolidation
+        Prompt. A merged set of the ten fragments (plus important_notes) is
+        an instance of this schema. The evaluation-harness runner
+        rfa-checklist-vandalizer replays the workflow fragments, not this
+        single-call prompt.
       udm_alignment:
         status: shared_udm_semantics_repo_local_schema
         notes: >
           Scalar metadata (rfa_id, rfa_number, sponsor_name, cfda_number)
           resolves to UDM RFA and
           Sponsor_Organization entities. Leaf fields carry UDM column bindings:
-          cost_sharing to CostShare, fa_policy to IndirectRate, personnel_effort
-          to Effort. The eight-section shape itself is repo-local.
+          cost_sharing_status / cost_sharing_details to CostShare, fa_policy to
+          IndirectRate, personnel_effort to Effort. The section shape itself is
+          repo-local.
     related_components: []
 
   solicitation-doc-modifications-udm:
