@@ -8,6 +8,8 @@ All notable changes to this workflow. Versions follow semver adapted to workflow
 
 ## [3.1.0] — 2026-08-18
 
+> **Manifest note (2026-10-06, no version change, no prompt change):** the component `rfa-checklist-extraction-udm` moved to 1.0.0, which mirrors this workflow's ten fragments field for field. This workflow keeps its 0.1.0 pin, and the manifest now records the lag with `pinned_version_sha: a0b131c…`. The only change to the generated `.vandalizer.json` is that field in its `x_ai4ra` provenance block; every step and prompt is byte-identical.
+
 - **Model pin removed.** The v3.0.0 `default_task_model: VandalStrong` key is deleted. The pinned name was never verified against a real Vandalizer server `available_models[].name` entry (the operator could not confirm the model name), and an unmatched name would have pointed every task at a nonexistent model on import. Tasks once again use the model chosen in Vandalizer's run dialog. The dual-deliverable `is_output` change from v3.0.0 is retained.
 - **MINOR**: manifest-key removal only; no step-structure, prompt, or `is_output` changes.
 
