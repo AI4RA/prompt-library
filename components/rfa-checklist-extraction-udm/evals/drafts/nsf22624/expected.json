@@ -1,0 +1,108 @@
+{
+  "rfa_id": "NSF-22-624",
+  "rfa_number": "22-624",
+  "rfa_title": "Astronomy and Astrophysics Research Grants (AAG)",
+  "sponsor_name": "National Science Foundation",
+  "program_code": "AST (Division of Astronomical Sciences, Directorate for Mathematical and Physical Sciences)",
+  "announcement_url": "https://www.nsf.gov/funding/opportunities/aag-astronomy-astrophysics-research-grants/nsf22-624/solicitation",
+  "opportunity_number": null,
+  "cfda_number": "47.049",
+  "funding_instrument_type": "Grant",
+  "risk_flags": [
+    {"check": "Cost share / matching required", "category": "escalation", "status": "no", "detail": "Inclusion of voluntary committed cost sharing is prohibited."},
+    {"check": "F&A / indirect limited or waived", "category": "escalation", "status": "no", "detail": "Indirect Cost (F&A) Limitations: Not Applicable."},
+    {"check": "Institutional / executive commitment letter", "category": "escalation", "status": "unclear", "detail": null},
+    {"check": "Limited submission", "category": "escalation", "status": "no", "detail": "No restrictions or limits on the number of proposals per organization or per PI or co-PI."},
+    {"check": "Documents requiring signature / institution must submit", "category": "escalation", "status": "yes", "detail": "Unaffiliated individuals are not eligible to submit; the organization submits (AOR) and award notification goes to the submitting organization."},
+    {"check": "Indemnification", "category": "cru", "status": "unclear", "detail": null},
+    {"check": "Intellectual property / data ownership restrictions", "category": "cru", "status": "unclear", "detail": null},
+    {"check": "Publication restrictions", "category": "cru", "status": "unclear", "detail": null},
+    {"check": "Insurance requirements", "category": "cru", "status": "unclear", "detail": null},
+    {"check": "Nondisclosure agreement (NDA)", "category": "cru", "status": "unclear", "detail": null},
+    {"check": "FAR-based or contract-type terms", "category": "cru", "status": "no", "detail": "Anticipated Type of Award: Standard Grant or Continuing Grant (assistance award, not a contract); standard NSF award conditions apply."},
+    {"check": "Governing law of another state", "category": "cru", "status": "unclear", "detail": null},
+    {"check": "Acceptance of terms & conditions upon submission", "category": "cru", "status": "unclear", "detail": null},
+    {"check": "Restricted country / foreign ownership", "category": "cru", "status": "unclear", "detail": null},
+    {"check": "Foreign government or national-lab contracting", "category": "cru", "status": "unclear", "detail": null},
+    {"check": "Controlled unclassified information (CUI) or classified information", "category": "cru", "status": "unclear", "detail": null},
+    {"check": "Other unusual terms and conditions", "category": "cru", "status": "unclear", "detail": null}
+  ],
+  "dates_and_deadlines": [
+    {"item": "Full Proposal Submission Window", "date_time": "October 01, 2022 - November 15, 2022", "notes": "Due by 5 p.m. submitting organization's local time on the last day of the window. Sponsor states: October 1 - November 15, Annually Thereafter."}
+  ],
+  "eligible_institutions": [
+    {"type": "Categories of proposers identified in the NSF PAPPG, Chapter I.E", "subcategory": null, "examples": null, "compliance_requirements": null},
+    {"type": "Unaffiliated individuals", "subcategory": null, "examples": null, "compliance_requirements": "Not eligible to submit proposals in response to this solicitation."}
+  ],
+  "eligible_individuals": [
+    {"type": "Principal Investigator", "criteria": null, "compliance_requirements": null, "conditions": "Who May Serve as PI: There are no restrictions or limits."}
+  ],
+  "award_information": {
+    "award_duration": "Not specified in the document",
+    "amount_per_award": "Not specified in the document",
+    "number_of_awards": "100 (about 100 projects will be funded per year, pending availability of funds)",
+    "anticipated_award_date": null
+  },
+  "required_components": [
+    {"name": "Project Description", "description": "Must demonstrate the astronomical context of the work (proposals that do not are returned without review) and clearly place the work within the appropriate field of study; proposals with an extensive effort to model or analyze data from NASA missions or archives must include a labeled section explaining why NASA data are required.", "source": "Announcement + sponsor standard"},
+    {"name": "Project Summary", "description": "Must clearly place the work within the appropriate field of study (review panels: EXC, GAL, PLA, SAA).", "source": "Announcement + sponsor standard"},
+    {"name": "Collaborators & Other Affiliations (COA)", "description": "Collaborators & Other Affiliations Information per the PAPPG, with one solicitation-specific deviation.", "special_requirements": "Table 4: list only the first three (3) co-authors; instructions for Tables 1, 2, 3 and 5 are unchanged from the PAPPG.", "source": "Announcement + sponsor standard"},
+    {"name": "References Cited", "source": "Sponsor standard"},
+    {"name": "Budget", "source": "Sponsor standard"},
+    {"name": "Budget Justification", "source": "Sponsor standard"},
+    {"name": "Facilities, Equipment & Other Resources", "source": "Sponsor standard"},
+    {"name": "Biographical Sketch (SciENcv)", "source": "Sponsor standard"},
+    {"name": "Current & Pending Support (SciENcv)", "source": "Sponsor standard"},
+    {"name": "Synergistic Activities", "source": "Sponsor standard"},
+    {"name": "Data Management & Sharing Plan", "source": "Sponsor standard"}
+  ],
+  "optional_components": [
+    {"name": "Mentoring Plan (if applicable)", "source": "Sponsor standard"},
+    {"name": "Other Supplementary Documents (if applicable)", "source": "Sponsor standard"},
+    {"name": "Letters of Collaboration (if applicable)", "source": "Sponsor standard"},
+    {"name": "Subaward Documents (if applicable)", "description": "Budget (excel); RR Subaward Budget form if applicable; Budget Justification; Senior Key Personnel Documents — sponsor SciENcv Biosketch + Current & Pending; Specific Scope of Work; AOR-signed Letter of Commitment if on the FDP list, or a completed UI subrecipient Commitment form; Facilities/Equipment if applicable.", "source": "Sponsor standard"}
+  ],
+  "submission_details": "Proposals may be submitted via Research.gov or Grants.gov (PAPPG guidelines apply for Research.gov; the NSF Grants.gov Application Guide applies for Grants.gov). Collaborative proposals submitted as separate submissions from multiple organizations must be submitted via Research.gov.",
+  "special_requirements": [
+    "Accomplishment-Based Renewal proposals will not be accepted and will be returned without review.",
+    "Research in Undergraduate Institutions (RUI) and Computational and Data Enabled Science and Engineering (CDS&E) proposals are accepted and must meet the AAG requirements, guidelines and deadlines; CDS&E proposals must explicitly address the CDS&E program goals within the 15-page Project Description.",
+    "Under an MOU, NSF may share information from proposals with NASA for consideration of joint funding and may invite NASA employees to observe merit review panels."
+  ],
+  "formatting_requirements": "Sponsor default (NSF): Fonts — Arial (not narrow), Courier New, or Palatino Linotype at 10pt+, or Times New Roman / Computer Modern 11pt+. Margins ≥1 inch all sides (incl. headers/footers). Line spacing ≤6 lines/inch. Page size 8.5×11 in.",
+  "mandated_structure": [
+    {"component": "Project Description", "mandated_sections": [
+      {"name": "NASA data justification (labeled section; only for proposals with an extensive effort to model or analyze NASA mission or archive data)", "requirements": "Explain why NASA data are required to advance the scientific goals of the NSF proposal."}
+    ]}
+  ],
+  "budget_requirements": {
+    "funding_limits": "Not Applicable (Other Budgetary Limitations: Not Applicable).",
+    "cost_sharing_status": "Prohibited",
+    "cost_sharing_details": null,
+    "fa_policy": "Indirect Cost (F&A) Limitations: Not Applicable",
+    "allowable_costs": [],
+    "unallowable_costs": [],
+    "personnel_effort": null,
+    "other_considerations": "Other Budgetary Limitations: Not Applicable"
+  },
+  "compliance_risks": [
+    {"area": "Human subjects", "status": "unclear", "detail": null},
+    {"area": "Vertebrate animals", "status": "unclear", "detail": null},
+    {"area": "Biosafety", "status": "unclear", "detail": null},
+    {"area": "Export control", "status": "unclear", "detail": null},
+    {"area": "Select agents / dual-use research", "status": "unclear", "detail": null},
+    {"area": "Controlled unclassified information (CUI)", "status": "unclear", "detail": null},
+    {"area": "Data security / cybersecurity", "status": "unclear", "detail": null},
+    {"area": "National security", "status": "unclear", "detail": null}
+  ],
+  "international_components": [
+    {"area": "Foreign collaborators", "status": "unclear", "detail": null},
+    {"area": "Foreign subawards", "status": "unclear", "detail": null},
+    {"area": "Foreign travel", "status": "unclear", "detail": null},
+    {"area": "Foreign talent-program certification", "status": "unclear", "detail": null},
+    {"area": "International data sharing", "status": "unclear", "detail": null},
+    {"area": "Country-specific restrictions", "status": "unclear", "detail": null}
+  ],
+  "important_notes": [
+    "Proposals that predominantly exploit NASA data or resources are expected to be submitted to NASA; contact a cognizant AST program officer about the suitability of the proposal for AAG."
+  ]
+}
