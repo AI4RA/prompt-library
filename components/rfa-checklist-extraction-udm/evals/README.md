@@ -14,20 +14,20 @@ Run artifacts go under `runs/` (gitignored).
 `drafts/<case-slug>/` holds cases that are complete and schema-valid but **not yet validated**. The lint and the
 component catalog read only `cases/`, so a draft does not count as an evaluated case. Each draft's `notes.md` says
 which fields restate validated gold and which were drafted, and lists the decisions a reviewer has to make. Once
-a sponsored-programs reviewer has checked it, move the directory to `cases/` and fill in `validated_by`,
-`validated_at` and `validated_against_version`.
+a sponsored-programs reviewer has checked it, move the directory to `cases/`, fill in `validated_by`,
+`validated_at` and `validated_against_version`, and drop the draft-only `status: draft` key from `metadata.yaml`.
 
 - [`drafts/nsf22624/`](drafts/nsf22624/): NSF 22-624 (AAG). Cost sharing prohibited, NSF backbone merge, recurring
   submission window. It restates the Plan B gold where that exists (metadata, dates, eligibility, award, budget,
   the 5 escalation flags) and drafts the rest (the 12 CRU flags, the 14 compliance and international areas,
-  mandated structure, special requirements, important notes).
+  mandated structure, special requirements, important notes). Seven reviewer decisions are listed in its notes.
 
 ## Planned cases
 
 The first cases should exercise distinct structural features of the contract, not simply add volume:
 
 - **Multi-round NSF solicitation** — exercises `dates_and_deadlines` round handling, LOI vs. full proposal placement, and round-specific notes.
-- **Cost-sharing prohibition (NSF PAPPG-compliant)** — exercises `budget_requirements.cost_sharing_status: "Prohibited"` with a null `cost_sharing_details`.
+- **Cost-sharing prohibition (NSF PAPPG-compliant)** — draft: `drafts/nsf22624/`. Exercises `budget_requirements.cost_sharing_status: "Prohibited"` with a null `cost_sharing_details`.
 - **NIH R01 or K-award** — exercises `eligible_individuals.criteria` with career-stage and citizenship rules, `budget_requirements.personnel_effort` with percent-effort minimums, and the NIH sponsor backbone.
 - **Announcement with mandated Project Description sections and contract-review terms** — exercises `mandated_structure` (sections and sub-parts written out, never a pointer) and `risk_flags` CRU checks with grounded `detail`.
 - **Announcement with explicit allowable/unallowable enumeration** — exercises both `allowable_costs` and `unallowable_costs` as non-empty arrays with sponsor-quoted language.
