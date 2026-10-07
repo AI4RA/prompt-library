@@ -84,7 +84,7 @@ Assess EACH fixed check below and emit one object per check, in the order listed
 **Group 1 — escalation flags** (`category: "escalation"`): items that lengthen the process or need early institutional action.
 
 - "Cost share / matching required" — any required or mandatory cost share, matching or in-kind contribution.
-- "F&A / indirect limited or waived" — the indirect (F&A) rate is capped, reduced or disallowed, or a waiver is required.
+- "F&A / indirect limited or waived" — the indirect (F&A) rate is capped, reduced or disallowed, or a waiver is required (e.g., "indirect costs limited to 10%", "no F&A permitted").
 - "Institutional / executive commitment letter" — a required letter of commitment or support signed above the PI (institutional, presidential, provost / vice-provost, dean or chair).
 - "Limited submission" — the sponsor caps how many proposals the institution may submit or how many an individual may be named on. Put the number in `detail`.
 - "Documents requiring signature / institution must submit" — an Authorized Organizational Representative (AOR) or institutional-official signature is required, and/or the institution rather than the PI must submit.
@@ -97,10 +97,10 @@ Assess EACH fixed check below and emit one object per check, in the order listed
 - "Insurance requirements" — the institution must carry specific insurance.
 - "Nondisclosure agreement (NDA)" — an NDA or confidentiality agreement is required.
 - "FAR-based or contract-type terms" — the award is a contract or is subject to the Federal Acquisition Regulation (FAR); procurement / bid-type assistance.
-- "Governing law of another state" — the agreement is governed by the law of a state other than Idaho.
+- "Governing law of another state" — the agreement is governed by the law of a state other than Idaho (e.g., Louisiana).
 - "Acceptance of terms & conditions upon submission" — submitting the proposal constitutes acceptance of the sponsor's terms and conditions.
 - "Restricted country / foreign ownership" — entities, collaborators or subrecipients in China, Russia, North Korea or Iran, including foreign-owned corporations based there (e.g., Syngenta).
-- "Foreign government or national-lab contracting" — an all-Canadian-Government proposal, or contracting with Idaho National Laboratory (INL) or the Jet Propulsion Laboratory (JPL).
+- "Foreign government or national-lab contracting" — an all-Canadian-Government proposal, or contracting with Idaho National Laboratory (INL) or the Jet Propulsion Laboratory (JPL) (scope review / draft contracts).
 - "Controlled unclassified information (CUI) or classified information" — the project involves CUI or classified information exchange.
 - "Other unusual terms and conditions" — any other atypical term a contract reviewer would need to see; `"unclear"` unless the document supports it.
 
@@ -123,18 +123,18 @@ One entry per distinct institution category the sponsor names; never infer a cat
 - `type` — the category label as stated (e.g., "Institutions of Higher Education").
 - `subcategory` — a more specific classification when given (e.g., "HBCUs", "EPSCoR-eligible"); null otherwise.
 - `examples` — sponsor-supplied examples as a short comma-separated list; null when none.
-- `compliance_requirements` — registrations, certifications and institutional prerequisites (SAM.gov registration, domestic-only restrictions, audit status), and institution-level limited-submission caps with the exact number (e.g., "Maximum of two proposals per institution"); null when none.
+- `compliance_requirements` — registrations, certifications and institutional prerequisites (SAM.gov registration, domestic-only restrictions, A-133 audit status), and institution-level limited-submission caps with the exact number (e.g., "Maximum of two proposals per institution"); null when none.
 
-Explicitly look for institution-level limited-submission caps, required institutional certifications or status (Carnegie classification, EPSCoR jurisdiction, minority-serving-institution status, accreditation), and subrecipient / subawardee rules. When the document states subrecipient-specific rules, emit them as a separate entry with type "Subrecipients / Subawardees". PI-level rules belong in `eligible_individuals`. If nothing is stated, emit one entry with type "Not specified in this document".
+Explicitly look for institution-level limited-submission caps, required institutional certifications or status (Carnegie classification, EPSCoR jurisdiction, minority-serving-institution status, accreditation), and subrecipient / subawardee rules. When the document states subrecipient-specific rules (domestic-only, foreign-subrecipient restrictions, industry-participation rules, nonprofit requirements, tribal eligibility), emit them as a separate entry with type "Subrecipients / Subawardees", with the rules in `compliance_requirements`. Do not create this entry otherwise. PI-level rules belong in `eligible_individuals`. If nothing is stated, emit one entry with type "Not specified in this document".
 
 ### `eligible_individuals`
 
 One entry per distinct PI / Co-PI / senior-personnel category. Each entry:
 
 - `type` — the category (e.g., "Principal Investigator", "Early-Career Investigator").
-- `criteria` — degree, career stage, appointment type, citizenship, required credentials; null when none.
+- `criteria` — degree, career stage, appointment type, citizenship, required credentials, prior-award restrictions (e.g., "no prior R01"); null when none.
 - `compliance_requirements` — ORCID, mentoring plans or other PI compliance items; null when none.
-- `conditions` — restrictions, limits or preferences, including per-individual caps ("May appear on only one proposal"), per-institution caps ("One nomination per institution"), and limited-submission mechanics (how collaborative proposals count toward a cap, internal nomination or down-select); null when none.
+- `conditions` — restrictions, limits or preferences, including per-individual caps ("May appear on only one proposal"), per-institution caps ("One nomination per institution"; these go here, not in `special_requirements`), prior-award exclusions ("Not eligible if prior RFA-awarded"), and limited-submission mechanics (how collaborative proposals count toward a cap, internal nomination or down-select); null when none.
 
 Explicitly look for citizenship or residency requirements, career-stage restrictions, required credentials or appointments, and individual-level limited-submission caps with the exact number. Capture only what the document states. If nothing is stated, emit one entry with type "Not specified in this document".
 
@@ -144,7 +144,7 @@ The sole location for the primary award parameters. Do not put detailed financia
 
 - `award_duration` — the anticipated duration exactly as stated (e.g., "Up to 5 years with option for 2-year extension"); `"Not specified in the document"` when absent.
 - `amount_per_award` — the per-award amount with its basis (total vs direct costs) and any restriction bundled into the headline number (e.g., "$500,000 total costs including indirect"), in the sponsor's formatting; `"Not specified in the document"` when absent. Never estimate.
-- `number_of_awards` — the anticipated count as stated: text such as "10-15" or "Subject to availability of funds", or a bare integer when the document gives a single number; null only when truly absent.
+- `number_of_awards` — the anticipated count as stated (e.g., "10-15", "Subject to availability of funds"); a bare integer such as `40` is also accepted. Null only when truly absent.
 - `anticipated_award_date` — as stated: ISO `YYYY-MM-DD` when a date is given, otherwise free text (e.g., "Spring 2027"); null when absent.
 
 ### Application components, submission and formatting
@@ -210,20 +210,46 @@ Announcements often prescribe named sections that must appear inside one compone
 4. Never replace an enumeration with a pointer such as "must include all subsections listed in Section V.A".
 5. Only structure this announcement prescribes; do not invent structure from the sponsor's standard proposal guide. If no component has mandated structure, emit `[]`.
 
+Example: an NSF solicitation states "All PCL Node proposals should clearly include sections for each of the following aspects:" and names the sections.
+
+- WRONG (structure lost): a component whose `special_requirements` says "Must include all specified subsections listed in Section V.A", and no `mandated_structure` entry.
+- CORRECT (abbreviated; a real answer lists EVERY section the announcement names, in order):
+
+```json
+{"component": "Project Description", "mandated_sections": [
+  {"name": "Science drivers", "requirements": "Science drivers driving Node development; identified users/communities; how capabilities transform the science; impact on U.S. competitiveness/security."},
+  {"name": "Node capabilities", "requirements": "What makes the Node capable/unique in supporting the science drivers.", "subsections": [
+    {"name": "Instrument Inventory Table", "requirements": "Separate document, NOT in the 20-page limit; per instrument: type/description + count; relevance with example workflows; available time (duty cycle, hours/day)."},
+    {"name": "Node Expertise", "requirements": "Team and expertise for science drivers and data/AI issues."}]},
+  {"name": "Management Plan", "requirements": "Roles of PI/co-PIs/staff; coordination meetings.", "subsections": [
+    {"name": "Implementation Timeline", "requirements": "Milestones: Project Kickoff; Alpha ≤1 yr; Beta ≤1.5 yr; Robust User Service ≤2 yr; Test Bed 2.0; Project end (Yr 4) deployment plan."}]}
+]}
+```
+
 ### `budget_requirements`
 
 The sole location for detailed financial rules. Do not restate the award amount or duration. Include an item only when the announcement states it; leave silent items out rather than filling in a typical federal value. Quote the sponsor's language for any explicit cap or "no X allowed" restriction, for cost-sharing status other than "Not Specified", for salary caps and for unallowable-cost categories.
 
-Descriptive fields are **flat strings** (one natural-language sentence or short paragraph), never nested objects.
+Route these rules, when stated, to the field named:
 
-- `funding_limits` — program-wide or per-year caps and category-specific limits not already in `amount_per_award`; equipment thresholds or caps where stated. Null when absent.
+- salary caps / limits and faculty summer-salary limits → `personnel_effort`;
+- graduate-student support, tuition allowed or capped, postdoc support → `personnel_effort` (or `unallowable_costs` if explicitly disallowed);
+- participant-support costs and consultant limits → `allowable_costs` / `unallowable_costs` / `other_considerations` as stated;
+- equipment thresholds or caps, computing / device restrictions → `funding_limits` or `other_considerations` as stated;
+- food / meals, incentives / participant payments, human-subject payments → `allowable_costs` / `unallowable_costs` / `other_considerations`;
+- travel caps, required travel (e.g., a mandatory PI meeting), international-travel restrictions → `other_considerations`;
+- publication / open-access / page charges → `allowable_costs` or `other_considerations`.
+
+Descriptive fields are **flat strings** (one natural-language sentence or short paragraph), never nested objects. For example, `cost_sharing_details` is NOT `{"type": ["cash", "in-kind"], "rate": "≥100% of award", "documentation": "Matching Fund Verification Letter"}` but "Cash and in-kind, matching contributions equal to or greater than the funding request (≥100% of the award), with at least 50% in cash; documented via Matching Fund Verification Letter(s)."
+
+- `funding_limits` — program-wide or per-year caps and category-specific limits not already in `amount_per_award`. Null when absent.
 - `cost_sharing_status` — one of `"Required"`, `"Voluntary"`, `"Prohibited"`, `"Not Specified"`.
 - `cost_sharing_details` — type (cash / in-kind / third-party), rate, basis, documentation and source restrictions in one paragraph; null when the status is "Prohibited" or "Not Specified".
 - `fa_policy` — F&A / indirect-cost policy: rate, base (MTDC / TDC / S&W), excluded categories, documentation; null when absent.
-- `allowable_costs` — array of category labels the sponsor explicitly enumerates as allowable (e.g., participant support, publication charges, food or participant incentives where stated); empty when the announcement defers to federal defaults.
-- `unallowable_costs` — array of category labels the sponsor explicitly enumerates as unallowable (including tuition or other student costs when explicitly disallowed); empty when none.
-- `personnel_effort` — PI / key-personnel effort floors or ceilings, salary caps, faculty summer-salary limits, graduate-student / tuition and postdoc support rules, consultant limits; null when absent.
-- `other_considerations` — pre-award costs, program income, budget revisions, sponsor-specific budget forms, travel caps and required travel (e.g., a mandatory PI meeting), international-travel restrictions, and other stated items that fit no field above; null when absent.
+- `allowable_costs` — array of category labels the sponsor explicitly enumerates as allowable; empty when the announcement defers to federal defaults.
+- `unallowable_costs` — array of category labels the sponsor explicitly enumerates as unallowable; empty when none.
+- `personnel_effort` — PI / key-personnel effort floors or ceilings, salary caps, student / postdoc support, consultant limits; null when absent.
+- `other_considerations` — pre-award costs, program income, budget revisions, sponsor-specific budget forms; null when absent.
 
 ### `compliance_risks` and `international_components`
 
@@ -258,10 +284,10 @@ Zero to three critical warnings or pitfalls a reviewer would otherwise miss, syn
 
 ### Output contract
 
-Emit exactly one JSON object with all 24 top-level keys in `schema.json`. Emit no preamble, closing commentary or markdown fences. If your runtime requires fenced output, wrap the object in a single ` ```json ... ``` ` block and emit nothing outside it.
+Emit exactly one JSON object with all 24 top-level keys in `schema.json`. Begin your reply with `{` and emit nothing except the object: no preamble, closing commentary or markdown fences.
 
 - Arrays with no entries are `[]`, never null. The exceptions are `eligible_institutions`, `eligible_individuals` and `required_components`, which must be non-empty, as described above.
-- Scalars the document does not state are null, except the two award fields that use "Not specified in the document".
+- Scalars the document does not state are null, except the two award fields that use "Not specified in the document" and `cost_sharing_status`, which uses "Not Specified".
 - Inside string values, escape double quotes as `\"` or use single quotes. One unescaped quote invalidates the whole object.
 - Minified JSON is fine. Minify only the syntax: never shorten, summarize or drop content values ("Up to $5M/year for 4 years, total not to exceed $20M" must not become "$20M total").
 

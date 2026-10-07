@@ -50,7 +50,7 @@ So a merged set of the workflow's ten fragments, plus `important_notes`, is an i
 
 ## Triad integration
 
-- **Evaluation datasets:** the Plan B human answer key for the workflow (20 NSF RFAs) is `evaluation_results/rfa-checklist-extraction/plan-b/answer_key_v3.1.0.jsonl` in [`AI4RA/evaluation-data-sets`](https://github.com/AI4RA/evaluation-data-sets). Its rows are keyed by workflow task and fragment field (e.g. `budget-requirements` / `cost_sharing_status`), the same field names this contract uses. It is scored against the workflow's fragments, not against this single-call prompt.
+- **Evaluation datasets:** the Plan B human answer key for the workflow (20 NSF RFAs) is `evaluation_results/rfa-checklist-extraction/plan-b/answer_key_v3.1.0.jsonl` in [`AI4RA/evaluation-data-sets`](https://github.com/AI4RA/evaluation-data-sets). Its rows are keyed by workflow task and fragment field (e.g. `budget-requirements` / `cost_sharing_status`), the same field names this contract uses (apart from a few control and retired rows for fields outside the v3.1.0 contract). It is scored against the workflow's fragments, not against this single-call prompt.
 - **Harness notes:** canonical manifestation is `prompt.md`; validation surface is `schema.json`. The harness runner `rfa-checklist-vandalizer` replays the workflow itself (per-task fragments), not this single-call prompt.
 - **Shared UDM relationship:** aligned, not owning. `rfa_id`, `sponsor_name` and the three UDM-column leaf fields match AI4RA-UDM naming conventions, but this component does not redefine UDM tables.
 
