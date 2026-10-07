@@ -290,8 +290,12 @@ created: 2026-04-24
 updated: 2026-08-18
 
 components:
+  # 2026-10-06: the component moved to 1.0.0, which mirrors THIS workflow's v3.1.0
+  # fragments field for field. The workflow keeps its 0.1.0 pin (the sha below
+  # records the intentional lag) so the v3.1.0 prompts and version are unchanged.
   - slug: rfa-checklist-extraction-udm
     pinned_version: 0.1.0
+    pinned_version_sha: a0b131cfe94493b381fe951a4cc1cc32e56c5a99
 
 validation_plan:
   - id: CHK-01

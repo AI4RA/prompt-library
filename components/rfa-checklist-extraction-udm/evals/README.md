@@ -14,10 +14,11 @@ Run artifacts go under `runs/` (gitignored).
 The first cases should exercise distinct structural features of the contract, not simply add volume:
 
 - **Multi-round NSF solicitation** — exercises `dates_and_deadlines` round handling, LOI vs. full proposal placement, and round-specific notes.
-- **Cost-sharing prohibition (NSF PAPPG-compliant)** — exercises the `cost_sharing.status: "Prohibited"` branch with no `details`.
-- **NIH R01 or K-award** — exercises `eligible_individuals.criteria` with career-stage and citizenship rules, and `personnel_effort` with percent-effort minimums.
+- **Cost-sharing prohibition (NSF PAPPG-compliant)** — exercises `budget_requirements.cost_sharing_status: "Prohibited"` with a null `cost_sharing_details`.
+- **NIH R01 or K-award** — exercises `eligible_individuals.criteria` with career-stage and citizenship rules, `budget_requirements.personnel_effort` with percent-effort minimums, and the NIH sponsor backbone.
+- **Announcement with mandated Project Description sections and contract-review terms** — exercises `mandated_structure` (sections and sub-parts written out, never a pointer) and `risk_flags` CRU checks with grounded `detail`.
 - **Announcement with explicit allowable/unallowable enumeration** — exercises both `allowable_costs` and `unallowable_costs` as non-empty arrays with sponsor-quoted language.
-- **Rolling / open-ended announcement** — exercises `dates_and_deadlines` with `"Rolling"` entries and `submission_deadline` null-equivalent.
+- **Rolling / open-ended announcement** — exercises `dates_and_deadlines` with `"Rolling"` `date_time` entries and no fixed deadline.
 
 ## `validated_against_version`
 
