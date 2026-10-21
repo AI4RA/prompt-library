@@ -1,0 +1,699 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "search_set",
+  "exported_at": "2026-10-21T20:54:37.785484+00:00",
+  "exported_by": "brobison@uidaho.edu",
+  "items": [
+    {
+      "title": "NSFAwardExtract 1021",
+      "set_type": "extraction",
+      "extraction_config": {
+        "mode": "one_pass",
+        "one_pass": {
+          "structured": true,
+          "model": "moonshotai/kimi-k3"
+        },
+        "key_chunking": {
+          "enabled": true,
+          "max_keys": 20
+        }
+      },
+      "items": [
+        {
+          "searchphrase": "Award Number (FAIN)",
+          "searchtype": "extraction",
+          "title": "Award Number (FAIN)",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Managing Division Abbreviation",
+          "searchtype": "extraction",
+          "title": "Managing Division Abbreviation",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Amendment Number",
+          "searchtype": "extraction",
+          "title": "Amendment Number",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Recipient Legal Business Name",
+          "searchtype": "extraction",
+          "title": "Recipient Legal Business Name",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Recipient Address",
+          "searchtype": "extraction",
+          "title": "Recipient Address",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Official Recipient Email Address",
+          "searchtype": "extraction",
+          "title": "Official Recipient Email Address",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Unique Entity Identifier",
+          "searchtype": "extraction",
+          "title": "Unique Entity Identifier",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Amendment Type",
+          "searchtype": "extraction",
+          "title": "Amendment Type",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Amendment Date",
+          "searchtype": "extraction",
+          "title": "Amendment Date",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Proposal Number",
+          "searchtype": "extraction",
+          "title": "Proposal Number",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Amendment Description",
+          "searchtype": "extraction",
+          "title": "Amendment Description",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Award Instrument",
+          "searchtype": "extraction",
+          "title": "Award Instrument",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Award Date",
+          "searchtype": "extraction",
+          "title": "Award Date",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Award Period of Performance Start Date",
+          "searchtype": "extraction",
+          "title": "Award Period of Performance Start Date",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Award Period of Performance End Date",
+          "searchtype": "extraction",
+          "title": "Award Period of Performance End Date",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Project Title",
+          "searchtype": "extraction",
+          "title": "Project Title",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Research and Development Award",
+          "searchtype": "extraction",
+          "title": "Research and Development Award",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Funding Opportunity",
+          "searchtype": "extraction",
+          "title": "Funding Opportunity",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Assistance Listing Number(s) and Name(s)",
+          "searchtype": "extraction",
+          "title": "Assistance Listing Number(s) and Name(s)",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Amount Obligated by This Amendment",
+          "searchtype": "extraction",
+          "title": "Amount Obligated by This Amendment",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Total Intended Award Amount",
+          "searchtype": "extraction",
+          "title": "Total Intended Award Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Total Approved Cost Share or Matching Amount",
+          "searchtype": "extraction",
+          "title": "Total Approved Cost Share or Matching Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Total Amount Obligated to Date",
+          "searchtype": "extraction",
+          "title": "Total Amount Obligated to Date",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Expenditure Limitation",
+          "searchtype": "extraction",
+          "title": "Expenditure Limitation",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Principal Investigator Name",
+          "searchtype": "extraction",
+          "title": "Principal Investigator Name",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Principal Investigator Email",
+          "searchtype": "extraction",
+          "title": "Principal Investigator Email",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Principal Investigator Organization",
+          "searchtype": "extraction",
+          "title": "Principal Investigator Organization",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Co\u2011Principal Investigator Name",
+          "searchtype": "extraction",
+          "title": "Co\u2011Principal Investigator Name",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Co\u2011Principal Investigator Email",
+          "searchtype": "extraction",
+          "title": "Co\u2011Principal Investigator Email",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Co\u2011Principal Investigator Organization",
+          "searchtype": "extraction",
+          "title": "Co\u2011Principal Investigator Organization",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Managing Grants Official Name",
+          "searchtype": "extraction",
+          "title": "Managing Grants Official Name",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Managing Grants Official Email",
+          "searchtype": "extraction",
+          "title": "Managing Grants Official Email",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Managing Grants Official Phone",
+          "searchtype": "extraction",
+          "title": "Managing Grants Official Phone",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Awarding Official Name",
+          "searchtype": "extraction",
+          "title": "Awarding Official Name",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Awarding Official Email",
+          "searchtype": "extraction",
+          "title": "Awarding Official Email",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Managing Program Officer Name",
+          "searchtype": "extraction",
+          "title": "Managing Program Officer Name",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Managing Program Officer Email",
+          "searchtype": "extraction",
+          "title": "Managing Program Officer Email",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Managing Program Officer Phone",
+          "searchtype": "extraction",
+          "title": "Managing Program Officer Phone",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Senior Personnel Count",
+          "searchtype": "extraction",
+          "title": "Senior Personnel Count",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Senior Personnel Calendar Months",
+          "searchtype": "extraction",
+          "title": "Senior Personnel Calendar Months",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Senior Personnel Academic Months",
+          "searchtype": "extraction",
+          "title": "Senior Personnel Academic Months",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Senior Personnel Summer Months",
+          "searchtype": "extraction",
+          "title": "Senior Personnel Summer Months",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Senior Personnel Amount",
+          "searchtype": "extraction",
+          "title": "Senior Personnel Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Post Doctoral Count",
+          "searchtype": "extraction",
+          "title": "Post Doctoral Count",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Post Doctoral Calendar Months",
+          "searchtype": "extraction",
+          "title": "Post Doctoral Calendar Months",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Post Doctoral Academic Months",
+          "searchtype": "extraction",
+          "title": "Post Doctoral Academic Months",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Post Doctoral Summer Months",
+          "searchtype": "extraction",
+          "title": "Post Doctoral Summer Months",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Post Doctoral Amount",
+          "searchtype": "extraction",
+          "title": "Post Doctoral Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Other Professionals Count",
+          "searchtype": "extraction",
+          "title": "Other Professionals Count",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Other Professionals Calendar Months",
+          "searchtype": "extraction",
+          "title": "Other Professionals Calendar Months",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Other Professionals Academic Months",
+          "searchtype": "extraction",
+          "title": "Other Professionals Academic Months",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Other Professionals Summer Months",
+          "searchtype": "extraction",
+          "title": "Other Professionals Summer Months",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Other Professionals Amount",
+          "searchtype": "extraction",
+          "title": "Other Professionals Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Graduate Students Count",
+          "searchtype": "extraction",
+          "title": "Graduate Students Count",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Graduate Students Amount",
+          "searchtype": "extraction",
+          "title": "Graduate Students Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Undergraduate Students Count",
+          "searchtype": "extraction",
+          "title": "Undergraduate Students Count",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Undergraduate Students Amount",
+          "searchtype": "extraction",
+          "title": "Undergraduate Students Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Secretarial Clerical Count",
+          "searchtype": "extraction",
+          "title": "Secretarial Clerical Count",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Secretarial Clerical Amount",
+          "searchtype": "extraction",
+          "title": "Secretarial Clerical Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Other Budget Count",
+          "searchtype": "extraction",
+          "title": "Other Budget Count",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Other Budget Amount",
+          "searchtype": "extraction",
+          "title": "Other Budget Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Total Salaries and Wages",
+          "searchtype": "extraction",
+          "title": "Total Salaries and Wages",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Fringe Benefits Amount",
+          "searchtype": "extraction",
+          "title": "Fringe Benefits Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Total Salaries Wages and Fringe Benefits",
+          "searchtype": "extraction",
+          "title": "Total Salaries Wages and Fringe Benefits",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Equipment Amount",
+          "searchtype": "extraction",
+          "title": "Equipment Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Travel Domestic Amount",
+          "searchtype": "extraction",
+          "title": "Travel Domestic Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Travel International Amount",
+          "searchtype": "extraction",
+          "title": "Travel International Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Participant Support Costs Stipends",
+          "searchtype": "extraction",
+          "title": "Participant Support Costs Stipends",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Participant Support Costs Travel",
+          "searchtype": "extraction",
+          "title": "Participant Support Costs Travel",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Participant Support Costs Subsistence",
+          "searchtype": "extraction",
+          "title": "Participant Support Costs Subsistence",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Participant Support Costs Other",
+          "searchtype": "extraction",
+          "title": "Participant Support Costs Other",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Total Number of Participants",
+          "searchtype": "extraction",
+          "title": "Total Number of Participants",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Total Participant Costs",
+          "searchtype": "extraction",
+          "title": "Total Participant Costs",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Materials Supplies Amount",
+          "searchtype": "extraction",
+          "title": "Materials Supplies Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Publication Costs Amount",
+          "searchtype": "extraction",
+          "title": "Publication Costs Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Consultant Services Amount",
+          "searchtype": "extraction",
+          "title": "Consultant Services Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Computer Services Amount",
+          "searchtype": "extraction",
+          "title": "Computer Services Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Subawards Amount",
+          "searchtype": "extraction",
+          "title": "Subawards Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Other Direct Costs Amount",
+          "searchtype": "extraction",
+          "title": "Other Direct Costs Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Total Other Direct Costs",
+          "searchtype": "extraction",
+          "title": "Total Other Direct Costs",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Total Direct Costs",
+          "searchtype": "extraction",
+          "title": "Total Direct Costs",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Indirect Costs Amount",
+          "searchtype": "extraction",
+          "title": "Indirect Costs Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Total Direct and Indirect Costs",
+          "searchtype": "extraction",
+          "title": "Total Direct and Indirect Costs",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Fees Amount",
+          "searchtype": "extraction",
+          "title": "Fees Amount",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Total Amount of Request",
+          "searchtype": "extraction",
+          "title": "Total Amount of Request",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Cost Sharing Proposed Level",
+          "searchtype": "extraction",
+          "title": "Cost Sharing Proposed Level",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Indirect Cost Rate Name",
+          "searchtype": "extraction",
+          "title": "Indirect Cost Rate Name",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Indirect Cost Rate Value",
+          "searchtype": "extraction",
+          "title": "Indirect Cost Rate Value",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "COLLABORATIVE INFORMATION PROPOSAL ID",
+          "searchtype": "extraction",
+          "title": "COLLABORATIVE INFORMATION PROPOSAL ID",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "COLLABORATIVE INFORMATION Lead",
+          "searchtype": "extraction",
+          "title": "COLLABORATIVE INFORMATION Lead",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "COLLABORATIVE INFORMATION PI Name",
+          "searchtype": "extraction",
+          "title": "COLLABORATIVE INFORMATION PI Name",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "COLLABORATIVE INFORMATION Organization",
+          "searchtype": "extraction",
+          "title": "COLLABORATIVE INFORMATION Organization",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "ORCID Number",
+          "searchtype": "extraction",
+          "title": "ORCID Number",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "Graduate Student Full Name",
+          "searchtype": "extraction",
+          "title": "Graduate Student Full Name",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "PI SSN",
+          "searchtype": "extraction",
+          "title": "PI SSN",
+          "is_optional": false,
+          "enum_values": []
+        },
+        {
+          "searchphrase": "University Mascot",
+          "searchtype": "extraction",
+          "title": "University Mascot",
+          "is_optional": false,
+          "enum_values": []
+        }
+      ],
+      "test_cases": []
+    }
+  ]
+}

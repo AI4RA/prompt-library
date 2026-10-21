@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "artifact": "vandalizer_search_set_versions",
+  "slug": "nsf-award-extract",
+  "latest_version": "0.2.0",
+  "status": "experimental",
+  "version_policy": "Independent pre-1.0 search-set versions; pin repository commit, version, artifact path and SHA256. New extraction fields or model configuration changes require a minor release. Existing snapshots are retained.",
+  "versions": [
+    {
+      "version": "0.1.0",
+      "version_assigned_at": "2026-10-21",
+      "note": "Retrospective version label for the unchanged June capture; no version was present in the original artifact.",
+      "path": "nsf-award-extract.searchset.json",
+      "sha256": "35df9de7f177ce1c89a21e7fac8bbe58ef6ba093d36e54f6500c98f5bac3c281",
+      "format": "vandalizer_search_set capture",
+      "captured_at": "2026-06-11T20:50:25.587008+00:00",
+      "search_set_uuid": "8d32c4a3-676e-43b6-acbc-557d5941fba6",
+      "title": "NSFAwardExtract",
+      "field_count": 92,
+      "model": null,
+      "model_note": "No model recorded in the captured extraction configuration.",
+      "fieldmap_path": "fieldmap.yaml",
+      "fieldmap_version": "0.1.0"
+    },
+    {
+      "version": "0.2.0",
+      "released_at": "2026-10-21",
+      "path": "versions/0.2.0/nsf-award-extract.vandalizer.json",
+      "sha256": "ad661dd00f5d0efe8341d4524a1fbb38d178ff95ffc9fc3ff78ecc80c55d884a",
+      "source_filename": "NSFAwardExtract 1021.vandalizer.json",
+      "format": "vandalizer export schema_version 2",
+      "exported_at": "2026-10-21T20:54:37.785484+00:00",
+      "title": "NSFAwardExtract 1021",
+      "field_count": 96,
+      "model": "moonshotai/kimi-k3",
+      "search_set_uuid": null,
+      "identity_note": "The export contains no search-set UUID; do not inherit the baseline UUID.",
+      "added_fields": [
+        "ORCID Number",
+        "Graduate Student Full Name",
+        "PI SSN",
+        "University Mascot"
+      ],
+      "removed_fields": [],
+      "changed_existing_fields": [],
+      "evaluation": {
+        "test_case_count": 0,
+        "status": "not_evaluated"
+      },
+      "fieldmap_path": "fieldmap.yaml",
+      "fieldmap_version": "0.1.0",
+      "fieldmap_scope": "Baseline mapping only; the four added fields have no declared UDM mapping."
+    }
+  ]
+}
