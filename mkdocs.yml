@@ -129,6 +129,7 @@ nav:
       - protocol-approval-allowability-check: components/protocol-approval-allowability-check.md
       - regulated-activity-classifier: components/regulated-activity-classifier.md
       - rfa-checklist-extraction-udm: components/rfa-checklist-extraction-udm.md
+      - rfa-checklist-plain-prompt: components/rfa-checklist-plain-prompt.md
       - risk-domain-assessment-udm: components/risk-domain-assessment-udm.md
       - section2-personnel-eligibility-udm: components/section2-personnel-eligibility-udm.md
       - solicitation-doc-modifications-udm: components/solicitation-doc-modifications-udm.md

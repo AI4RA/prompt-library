@@ -415,6 +415,24 @@ components:
           repo-local.
     related_components: []
 
+  rfa-checklist-plain-prompt:
+    output_contract:
+      format: markdown_document
+      scope: repo_local_human_readable_checklist_contract
+      notes: >
+        Repo-local plain-prompt condition for RFA checklists. One natural-language
+        prompt, of the kind a research administrator might write, asks a
+        general-purpose AI tool for a checklist under the 11 sections of the
+        rfa-checklist-extraction workflow v3.1.0. It has no JSON output schema
+        and none of the workflow's decomposition or rendering rules.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        No runner or scoring yet. Tools, models, input handling (attached PDF
+        or text), replicates, and how a free-form checklist is checked against
+        a validated reference are undecided. Outputs are not field-for-field
+        comparable with the workflow's extraction fragments.
+
   solicitation-doc-modifications-udm:
     output_contract:
       format: json_object

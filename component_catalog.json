@@ -2831,6 +2831,69 @@
       }
     },
     {
+      "component_id": "prompt.rfa-checklist-plain-prompt",
+      "slug": "rfa-checklist-plain-prompt",
+      "name": "rfa-checklist-plain-prompt",
+      "summary": "A single natural-language prompt of the kind a research administrator might write when asking a general-purpose AI tool to turn a funding announcement into a pre-award checklist. It is the plain-prompt comparison condition for the governed [`rfa-checklist-extraction`](../../workflows/rfa-checklist-extraction/) workflow v3.1.0: same 11 checklist sections, none of the workflow's decomposition, schemas, or rendering rules.",
+      "version": "1.0.0",
+      "category": "extraction",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "rfa",
+        "foa",
+        "nofo",
+        "grants",
+        "pre-award",
+        "checklist",
+        "plain-prompt",
+        "baseline",
+        "markdown"
+      ],
+      "audience": [
+        "sponsored-programs-staff",
+        "pre-award-teams"
+      ],
+      "paths": {
+        "component_dir": "components/rfa-checklist-plain-prompt",
+        "readme": "components/rfa-checklist-plain-prompt/README.md",
+        "prompt": "components/rfa-checklist-plain-prompt/prompt.md",
+        "schema": null,
+        "evals_dir": "components/rfa-checklist-plain-prompt/evals",
+        "eval_case_metadata_glob": "components/rfa-checklist-plain-prompt/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/rfa-checklist-plain-prompt/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/rfa-checklist-plain-prompt/prompt.md",
+          "version": "1.0.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "markdown_document",
+          "scope": "repo_local_human_readable_checklist_contract",
+          "notes": "Repo-local plain-prompt condition for RFA checklists. One natural-language prompt, of the kind a research administrator might write, asks a general-purpose AI tool for a checklist under the 11 sections of the rfa-checklist-extraction workflow v3.1.0. It has no JSON output schema and none of the workflow's decomposition or rendering rules.",
+          "schema_path": null,
+          "schema_entrypoints": [],
+          "validation_surfaces": []
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "No runner or scoring yet. Tools, models, input handling (attached PDF or text), replicates, and how a free-form checklist is checked against a validated reference are undecided. Outputs are not field-for-field comparable with the workflow's extraction fragments."
+      }
+    },
+    {
       "component_id": "prompt.risk-domain-assessment-udm",
       "slug": "risk-domain-assessment-udm",
       "name": "risk-domain-assessment-udm",
