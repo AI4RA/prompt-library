@@ -433,6 +433,22 @@ components:
         a validated reference are undecided. Outputs are not field-for-field
         comparable with the workflow's extraction fragments.
 
+  rfa-checklist-field-mapper:
+    output_contract:
+      format: json_object
+      scope: repo_local_field_mapping_contract
+      notes: >
+        Repo-local evaluation instrument. Copies passages from a free-form RFA
+        checklist into the 28 RFA Plan B gold fields (descriptions from
+        rfa-checklist-extraction-udm schema.json v1.0.0); every value is a list
+        of verbatim passages, checked by the caller.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Run by runners/rfa-checklist-vandalizer/scripts/run_field_mapper.py,
+        under the plan in evaluation-data-sets
+        arms/plain-prompt/field-mapping/MAPPING_PLAN.md.
+
   solicitation-doc-modifications-udm:
     output_contract:
       format: json_object

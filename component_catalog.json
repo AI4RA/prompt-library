@@ -2831,6 +2831,70 @@
       }
     },
     {
+      "component_id": "prompt.rfa-checklist-field-mapper",
+      "slug": "rfa-checklist-field-mapper",
+      "name": "rfa-checklist-field-mapper",
+      "summary": "Sorts the text of a free-form RFA checklist into the 28 fields of the RFA Plan B human gold, by copying passages only. It lets a checklist that has no JSON contract, such as the output of [`rfa-checklist-plain-prompt`](../rfa-checklist-plain-prompt/), be scored with the CLEF judge field by field, like the `rfa-checklist-extraction` workflow v3.1.0 field output.",
+      "version": "1.0.0",
+      "category": "extraction",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "rfa",
+        "checklist",
+        "field-mapping",
+        "evaluation",
+        "plain-prompt",
+        "clef",
+        "json"
+      ],
+      "audience": [
+        "evaluation-staff"
+      ],
+      "paths": {
+        "component_dir": "components/rfa-checklist-field-mapper",
+        "readme": "components/rfa-checklist-field-mapper/README.md",
+        "prompt": "components/rfa-checklist-field-mapper/prompt.md",
+        "schema": "components/rfa-checklist-field-mapper/schema.json",
+        "evals_dir": "components/rfa-checklist-field-mapper/evals",
+        "eval_case_metadata_glob": "components/rfa-checklist-field-mapper/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/rfa-checklist-field-mapper/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/rfa-checklist-field-mapper/prompt.md",
+          "version": "1.0.0",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_object",
+          "scope": "repo_local_field_mapping_contract",
+          "notes": "Repo-local evaluation instrument. Copies passages from a free-form RFA checklist into the 28 RFA Plan B gold fields (descriptions from rfa-checklist-extraction-udm schema.json v1.0.0); every value is a list of verbatim passages, checked by the caller.",
+          "schema_path": "components/rfa-checklist-field-mapper/schema.json",
+          "schema_entrypoints": [
+            "#"
+          ],
+          "validation_surfaces": [
+            "json_schema"
+          ]
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Run by runners/rfa-checklist-vandalizer/scripts/run_field_mapper.py, under the plan in evaluation-data-sets arms/plain-prompt/field-mapping/MAPPING_PLAN.md."
+      }
+    },
+    {
       "component_id": "prompt.rfa-checklist-plain-prompt",
       "slug": "rfa-checklist-plain-prompt",
       "name": "rfa-checklist-plain-prompt",
