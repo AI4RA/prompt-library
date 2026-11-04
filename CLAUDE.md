@@ -1250,9 +1250,9 @@ prompt and leaving both risks double-application.
 
 ### `workflows/hhs-draw-justification`
 
-**Status**: ⚠️ v0.4.0 import-ready (PR #21). v0.1.0 and v0.2.0 were
-run in Vandalizer on the 10/23 and 11/06/2026 CB7897 draws; the PI
-reviewed the v0.3.0-era CSV; v0.3.x / v0.4.0 not yet run.
+**Status**: ✅ v0.4.0 confirmed on the 11/06/2026 CB7897 draw against
+the PI's own submitted justifications (PR #21). Pay-period rule still
+rests on one example; confirm with OSP/Payroll.
 
 #### v0.1.0 (2026-11-04) — initial build
 
@@ -1390,6 +1390,23 @@ empty justification. HDJ-06 rewritten. Component 0.3.1 → 0.4.0.
 
 **Re-test**: upload the 11/06 sheet + her completed 10/23 sheet as the
 prior; payroll sentences should match her 11/06 submission exactly.
+
+#### v0.4.0 confirmation run (2026-11-04)
+
+**Test input**: the 11/06/2026 CB7897 billing sheet + Deb's completed
+10/23 sheet as the prior, v0.4.0 import, CSV download; compared
+cell-by-cell with the sheet she submitted to OSP.
+
+**Result: pass.** 17 rows × 15 columns, header "ACTIVITY", "CB7897
+Total" row kept in place with an empty justification. All 14 copied
+columns match her sheet on every row (dates render ISO in the CSV vs
+Excel serials in hers; same values). 13 of 16 justifications match
+hers word for word: all 5 payroll lines (prior_wording reuse with the
+10/11–10/24 period) and all 8 F&A lines. The 3 differences carry
+PI-only knowledge the workflow correctly does not invent: LARF ("(LARF)"
+acronym, "September" without year), Elsevier (her journal name), Amazon
+(her "tools … to repair pipettes"). The PI edits 2–3 cells instead of
+writing 16.
 
 ### Batch: KB-step removal across remaining Variant-A workflows (v1.0.0, 2026-08-13)
 

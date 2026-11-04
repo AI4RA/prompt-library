@@ -125,6 +125,8 @@ the sheet. v0.2.0 ran on the real 11/06/2026 CB7897 sheet (16 lines)
 and downloaded as a clean 16 × 15 CSV. The PI reviewed it ("Not bad!
 ... would lean toward using less specific language") and returned the
 sheet she submitted; v0.4.0 adopts her wording and drops the
-award-document step. v0.4.0 is not yet run: re-run the 11/06 sheet
-(with the 10/23 completed sheet as the prior sheet) and compare
-column O with what she submitted.
+award-document step. v0.4.0 confirmed on the 11/06 sheet with the
+10/23 completed sheet as the prior: every copied cell matches her
+submitted sheet, 13 of 16 justifications match hers word for word, and
+the other 3 differ only by specifics only the PI knows (journal name,
+purpose of a purchase).
