@@ -1,6 +1,6 @@
 ---
 name: hhs-payment-justification
-version: "0.3.0"
+version: "0.3.1"
 category: drafting
 domain: research-administration
 status: experimental
@@ -113,6 +113,10 @@ travel "to present findings from ..." or "to conduct field work for
 - **Timeframe**: use `period_start`–`period_end` as dates in
   M/D/YYYY form. For a non-payroll cost with a single date, write "in
   <Month YYYY>" or "on <M/D/YYYY>". Never invent a date range.
+- **Payroll with no pay period** (`period_start` missing and
+  `timeframe_basis` starts "pay date"): write "for the pay period paid
+  on <M/D/YYYY>" in place of "from ... to ...". Never present the pay
+  date as the dates worked.
 - **<research_topic>**: from the award-purpose fragment, word for
   word, the same on every direct-cost line of the draw. If it is
   missing, end the sentence at "... the research supported by this
@@ -165,10 +169,16 @@ are, in this order:
 Every object must carry every key, even when the value is "", so the
 spreadsheet columns line up. Do not add any other key: no row
 numbers, notes, totals, or flags (the sheet goes back to OSP as is).
-If `columns` or a line's `cells` is missing, build the object from
-the named fields instead (PMSCode = pms_code, AcctCode = acct_code,
+If `columns` is missing, or any line's `cells` is missing or has a
+different length from `columns`, use this fixed header list for EVERY
+row instead (OSP's standard report columns, in order): PMSCode,
+GrantCode, FundCode, BillRunDate, TransDate, DocCode, AcctCode,
+BillingStatus, BillInvoiceSeqNum, AcctClassCode, ItemNumber,
+Description, SponsorAccount, Amount, then the justification key. Fill
+PMSCode = pms_code, AcctCode = acct_code, AcctClassCode = acct_class,
 Description = description, SponsorAccount = sponsor_account, Amount =
-amount).
+amount, GrantCode = grant_code, and "" for any other column. Every row
+must have the same keys in the same order either way.
 
 Shape (values illustrative; the keys come from the sheet; topic omitted here):
 [{"PMSCode":"V0000P","GrantCode":"XX0000","FundCode":"000000","BillRunDate":"","TransDate":"46472","DocCode":"F0000000","AcctCode":"E4109","BillingStatus":"U","BillInvoiceSeqNum":"","AcctClassCode":"D","ItemNumber":"0","Description":"HR Payroll 2027 UI 6 0","SponsorAccount":"10-SALARY","Amount":"1500","ACTIVITY 03/13-26/2027 PER PI/DGA":"Payment for salary for project graduate research assistants from 2/28/2027 to 3/13/2027 to carry out the research supported by this award."}]

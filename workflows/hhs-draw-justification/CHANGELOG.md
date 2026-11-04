@@ -5,6 +5,23 @@ workflow semantics: MAJOR for step-structure changes, MINOR for prompt
 tracking a referenced component MINOR or additive options, PATCH for
 display-name / description polish.
 
+## [0.3.1] — 2026-11-04
+
+- Fixes from a Codex review of PR #21:
+  - Payroll lines with a pay date outside the table get "for the pay
+    period paid on <date>" and a flag, never the pay date as the dates
+    worked.
+  - The fallback for a missing or misaligned `cells` array uses OSP's
+    fixed header list for every row, so CSV columns stay aligned.
+  - Names stay in OSP's copied cells but are banned from every derived
+    field (resolves a contradiction with verbatim copying).
+  - E4135 / E4282 default roles are now "project student research
+    assistants"; narrower categories need prior wording or a document.
+  - Eval posture changed to `workflow_local: true` with a stub case,
+    per `docs/contracts.md` for multi-step workflows.
+  - README no longer mentions the removed subaccount paragraph.
+- Tracks `hhs-payment-justification` 0.3.0 → 0.3.1.
+
 ## [0.3.0] — 2026-11-04
 
 - First v0.2.0 run on the real 11/06/2026 CB7897 sheet (16 lines:

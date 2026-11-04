@@ -5,6 +5,11 @@
 # alongside. Never hand-edit the generated JSON — update this manifest
 # and rebuild.
 #
+# === v0.3.1 (2026-11-04): CODEX REVIEW FIXES (PR #21) ===
+# Unknown-pay-period wording, a fixed-header fallback when cells are
+# missing, names kept in copied cells but banned from derived fields,
+# generic student roles for E4135/E4282, workflow-local eval posture.
+#
 # === v0.3.0 (2026-11-04): SENTENCE SHAPE + SERVICE-MONTH TIMEFRAME ===
 # First v0.2.0 run on the real 11/06/2026 CB7897 sheet (16 lines incl.
 # animal per diem, publication, supplies): CSV opened as 16 x 15 with
@@ -74,7 +79,7 @@ description: >
   line, as HHS now requires for each PMS drawdown. Download the result as
   CSV, open it in Excel, and return it to OSP.
 
-workflow_version: 0.3.0
+workflow_version: 0.3.1
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
@@ -83,7 +88,7 @@ updated: 2026-11-04
 
 components:
   - slug: hhs-payment-justification
-    pinned_version: 0.3.0
+    pinned_version: 0.3.1
 
 validation_plan:
   - id: HDJ-01
@@ -204,12 +209,14 @@ steps:
 
           `role` — who the cost is for, as a ROLE, never a name:
           - AcctCode E4109 → "project graduate research assistants"
-          - AcctCode E4135 → "project undergraduate and medical student
-            research assistants"
+          - AcctCode E4135 → "project student research assistants"
           - AcctCode E4106 → "project staff"
           - AcctCode E4281 → fringe for "project staff"
-          - AcctCode E4282 → fringe for "project graduate, undergraduate,
-            and medical student research assistants"
+          - AcctCode E4282 → fringe for "project student research
+            assistants"
+          Keep these defaults general: name a narrower category (e.g.
+          medical students) only when `prior_wording` or an uploaded
+          document supports it for this grant.
           - indirect lines → null
           - non-personnel costs → null
           - any other personnel code → "project personnel" and add a flag
@@ -224,7 +231,8 @@ steps:
             TransDate may appear as a date or as an Excel serial number;
             both columns are given. timeframe_basis = "pay period".
           - Not in the table → period_start/period_end null,
-            timeframe_basis = "pay date <TransDate>", and add a flag.
+            timeframe_basis = "pay date <TransDate as M/D/YYYY>", and add
+            a flag. Never use the pay date itself as the work period.
           - NON-PAYROLL direct lines: if Description names the month
             or period the goods or service were provided (e.g. "ef/IDG
             Sep 2026 LARF PD" = animal facility per diem for September
@@ -268,8 +276,15 @@ steps:
 
           `flags` — short strings for the reviewer: unknown personnel
           code, pay date not in the table, a person's name appearing in
-          Description (do NOT copy the name into any other field), a
-          non-payroll description too vague to name the cost.
+          Description, a non-payroll description too vague to name the
+          cost.
+
+          Names: `cells` and `description` are copies of OSP's own sheet
+          and keep every value exactly, including any person's name.
+          Every DERIVED field (`cost_type`, `role`, `flags`,
+          `prior_wording` role text) must never contain a person's name;
+          a name-in-Description flag says "a person's name appears in
+          the Description", without repeating the name.
 
           Top-level: `grant_code`, `sponsor_award_id` (the sponsor ID, if
           shown anywhere, e.g. "REY012146F"; else null), `columns`,
@@ -345,4 +360,4 @@ steps:
           from_section: "## Prompt"
 
 evals:
-  inherits_from: components/hhs-payment-justification/evals
+  workflow_local: true

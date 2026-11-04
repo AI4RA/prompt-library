@@ -1250,7 +1250,9 @@ prompt and leaving both risks double-application.
 
 ### `workflows/hhs-draw-justification`
 
-**Status**: ⚠️ v0.1.0 import-ready; not yet run in Vandalizer.
+**Status**: ⚠️ v0.3.1 import-ready (PR #21). v0.1.0 and v0.2.0 were
+run in Vandalizer on the 10/23 and 11/06/2026 CB7897 draws; v0.3.x is
+not yet run.
 
 #### v0.1.0 (2026-11-04) — initial build
 
@@ -1342,6 +1344,23 @@ award on <topic>." (personnel) / "... used to carry out ..."
 the run's dangling sentence as the WRONG example; non-payroll
 timeframe prefers a service period named in Description (the LARF
 line as the WRONG example). Component 0.2.0 → 0.3.0.
+
+#### v0.3.0 → v0.3.1 (2026-11-04)
+
+**Surfaced by**: Codex (gpt-6.1-sol, medium) review of PR #21, not a
+test run. Fixes: (1) the missing-`cells` fallback built rows from five
+fields, so keys could differ between rows; it now uses OSP's fixed
+14-column header list for every row; (2) payroll lines with a pay date
+outside the table had no sentence rule; now "for the pay period paid
+on <date>", never the pay date as dates worked; (3) "do NOT copy the
+name into any other field" contradicted verbatim `cells`; now names
+stay in copied cells and are banned from derived fields; (4) E4135 /
+E4282 defaults said "undergraduate and medical student", inferred from
+one grant; now "project student research assistants" unless prior
+wording or a document supports more; (5) eval posture inherits →
+`workflow_local: true` with a stub case, per docs/contracts.md; (6)
+README's stale "subaccount justification ~90 words" removed.
+Component 0.3.0 → 0.3.1.
 
 ### Batch: KB-step removal across remaining Variant-A workflows (v1.0.0, 2026-08-13)
 

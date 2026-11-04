@@ -83,8 +83,9 @@ The draw-window dates in the justification column header (for example
 
 - **PMS character limit.** The HHS guidance says justifications must
   fit "the character limit available in PMS" but the limit was not in
-  the material we had (the HHS PDF blocks automated download). The
-  subaccount justification is kept to about 90 words.
+  the material we had (the HHS PDF blocks automated download). Line
+  justifications run one sentence (roughly 30-50 words); confirm they
+  fit once OSP knows the limit.
 - **Per line or per subaccount?** OSP's sheet asks for one
   justification per line, so that is what the workflow fills. If OSP
   also wants a combined per-subaccount paragraph for PMS, that would be

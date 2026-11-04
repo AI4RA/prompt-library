@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1] — 2026-11-04
+
+- From a Codex review of PR #21: payroll lines without a pay period read
+  "for the pay period paid on <date>" (never the pay date as dates
+  worked); the missing-`cells` fallback now uses OSP's fixed 14-column
+  header list for every row so keys never differ between rows.
+
 ## [0.3.0] — 2026-11-04
 
 - Reads `research_topic` (a noun phrase) in place of `activity_phrase`.
