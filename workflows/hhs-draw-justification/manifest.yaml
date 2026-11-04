@@ -5,6 +5,20 @@
 # alongside. Never hand-edit the generated JSON — update this manifest
 # and rebuild.
 #
+# === v0.4.0 (2026-11-04): PI STYLE — GENERIC AWARD LINK, ONE EXTRACTION ===
+# Deb reviewed the v0.3.0 CSV ("Not bad! ... would lean toward using
+# less specific language") and returned the sheet she actually
+# submitted for the 11/06/2026 draw. She kept the generic "to conduct
+# the research activities supported by this award", her own role
+# wording, and wrote non-payroll lines as "Payment for <service>, as
+# described in the approved budget, for <period>, to support research
+# activities supported by this award." So: extract-award-purpose is
+# REMOVED (no NoA / aims upload needed; parallel tasks 2 → 1); the
+# sentences follow her patterns; a prior completed sheet, when
+# uploaded, supplies her exact payroll sentences (dates swapped);
+# justification header fallback "ACTIVITY"; total rows copied with an
+# empty justification.
+#
 # === v0.3.1 (2026-11-04): CODEX REVIEW FIXES (PR #21) ===
 # Unknown-pay-period wording, a fixed-header fallback when cells are
 # missing, names kept in copied cells but banned from derived fields,
@@ -73,13 +87,13 @@
 name: HHS Draw Justification
 description: >
   Reads the OSP "Billed-Unbilled Detail by PMS Code" spreadsheet for an HHS
-  discretionary award (plus, optionally, the Notice of Award and specific
-  aims page) and returns the same sheet with its justification column
+  discretionary award (plus, optionally, the PI's last completed sheet)
+  and returns the same sheet with its justification column
   filled: one plain-language, PII-free payment justification per expense
   line, as HHS now requires for each PMS drawdown. Download the result as
   CSV, open it in Excel, and return it to OSP.
 
-workflow_version: 0.3.1
+workflow_version: 0.4.0
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
@@ -88,7 +102,7 @@ updated: 2026-11-04
 
 components:
   - slug: hhs-payment-justification
-    pinned_version: 0.3.1
+    pinned_version: 0.4.0
 
 validation_plan:
   - id: HDJ-01
@@ -113,8 +127,8 @@ validation_plan:
     description: >
       Every direct-cost justification names the cost, the role (not a
       person, for personnel), the timeframe, and how the cost supports the
-      award (e.g., "to carry out the research supported by this award on
-      ..."), as one grammatical sentence. Non-payroll lines use the
+      award (e.g., "to conduct the research activities supported by this
+      award"), as one grammatical sentence. Non-payroll lines use the
       service period named in Description (e.g., "Sep 2026 LARF PD" →
       September 2026), not the posting date.
       Indirect (F&A) lines use HHS's negotiated-rate wording. FAIL if any
@@ -137,13 +151,15 @@ validation_plan:
       a payroll line's dates are invented, use the transaction date as the
       work period, or differ between lines from the same payroll run.
   - id: HDJ-06
-    name: Award activity grounded in the documents
+    name: Generic award link, no invented specifics
     category: accuracy
     description: >
-      Any specific research activity named in the justifications appears in
-      the uploaded Notice of Award or aims page. When neither was uploaded,
-      the sentence ends at "the research supported by this award." FAIL on
-      an invented aim or topic.
+      Justifications link costs to "the research activities supported by
+      this award" without naming research topics, aims, journals, or
+      purchase purposes that are not in the billing sheet or the PI's prior
+      wording. When a prior completed sheet was uploaded, payroll lines
+      reuse the PI's sentence for the same account code with the dates
+      updated. FAIL on an invented specific.
   - id: HDJ-07
     name: Raw JSON that downloads as CSV
     category: formatting
@@ -171,8 +187,13 @@ steps:
           BillInvoiceSeqNum, AcctClassCode, ItemNumber, Description,
           SponsorAccount, Amount, and often a last column for the PI's
           justification (its header may read like "ACTIVITY 10/10-23/2026
-          PER PI/DGA"). Other uploaded documents (Notice of Award, aims
-          page) are NOT expense lines; ignore them here.
+          PER PI/DGA" or just "ACTIVITY"). Any other uploaded document is
+          not an expense sheet; ignore it.
+
+          A TOTAL or subtotal row (e.g. "CB7897 Total" with only an
+          Amount; no AcctCode) is not an expense line: still include it
+          in `lines` in its place, with its `cells` copied and
+          `cost_type` = "total", so the sheet's shape is kept.
 
           If TWO billing sheets are uploaded, the CURRENT draw is the one
           whose justification column is empty; the other is a PRIOR draw.
@@ -204,8 +225,12 @@ steps:
           - "11-FRINGE" → "fringe benefits"
           - "60-F and A" or AcctClassCode I → "indirect"
           - anything else → a short plain phrase from the account name and
-            Description ("laboratory supplies", "travel", "animal care",
-            "publication costs"); never the code itself.
+            Description; never the code itself. Known patterns:
+            "LARF PD" → "services provided by the Laboratory Animal
+            Research Facility"; a publisher (Elsevier, Springer, Wiley,
+            etc.) → "publication costs"; a retail vendor (Amazon, Fisher,
+            VWR, etc.) → "laboratory supplies"; otherwise a short plain
+            phrase ("travel", "equipment").
 
           `role` — who the cost is for, as a ROLE, never a name:
           - AcctCode E4109 → "project graduate research assistants"
@@ -271,8 +296,11 @@ steps:
           | 06/04/2027 | 46542 | 05/09/2027 | 05/22/2027 |
           | 06/18/2027 | 46556 | 05/23/2027 | 06/05/2027 |
 
-          `prior_wording` — the PI's earlier justification text for this
-          AcctCode (from the prior sheet or the filled column), else null.
+          `prior_wording` — the PI's earlier justification sentence for
+          this AcctCode, copied verbatim (from the prior sheet or the
+          filled column), else null. Only for payroll lines (salary,
+          fringe) and indirect lines; null for other costs, whose
+          specifics change from draw to draw.
 
           `flags` — short strings for the reviewer: unknown personnel
           code, pay date not in the table, a person's name appearing in
@@ -299,52 +327,6 @@ steps:
 
           ## Output
           {"grant_code":"","sponsor_award_id":"","columns":["PMSCode","GrantCode","..."],"draw_header":"","lines":[{"row":2,"cells":["V0000P","XX0000","..."],"pms_code":"","acct_code":"","sponsor_account":"","acct_class":"D","description":"","amount":0,"cost_type":"","role":"","period_start":"M/D/YYYY","period_end":"M/D/YYYY","timeframe_basis":"","prior_wording":"","flags":[]}],"flags":[]}
-
-          Begin your reply with `{`. Output only the JSON: no questions,
-          no offers to help, no commentary.
-      - name: extract-award-purpose
-        input_sources:
-          - workflow_documents
-        prompt_inline: |
-          You are reading the documents uploaded for an HHS (usually NIH)
-          grant drawdown to find a plain-language statement of what the
-          award pays for. The uploads may include a Notice of Award (NoA),
-          a specific aims page, a project summary/abstract, and the OSP
-          billing spreadsheet. Ignore the billing spreadsheet here.
-
-          If NO Notice of Award, aims page, or abstract was uploaded,
-          return exactly {"source":"none"}. Do not guess the science from
-          the grant code, the PI's department, or the expense lines.
-
-          Otherwise extract:
-          - `award_title` — the project title verbatim.
-          - `project_number` — e.g. "5R01XX000000-03" verbatim, if shown.
-          - `budget_period` — start and end dates verbatim, if shown.
-          - `aims` — each specific aim restated in at most 15 plain words
-            (no gene names, abbreviations, or jargon a member of the
-            public would not know), in the document's order.
-          - `research_topic` — ONE plain-language phrase of at most 15
-            words that completes the sentence "Payment for salary for
-            project staff from 9/27/2026 to 10/10/2026 to carry out the
-            research supported by this award on ___." It names WHAT the
-            award studies, covering the award as a whole, not one aim. Do
-            not start it with "to". Example: "how household income
-            changes after job training in rural counties" (shape only;
-            write yours from the documents).
-          - `source` — which document(s) you used ("Notice of Award",
-            "Specific Aims", "Abstract").
-
-          Rules: no person names, no budget figures, nothing that is not
-          stated in the documents. Plain language: write for a reviewer at
-          HHS who is not a scientist.
-
-          ## Output compactness
-          Emit minified single-line JSON (no indentation, no line breaks).
-          Omit keys whose value is null. If a value must contain a double
-          quote, escape it as \" or rephrase.
-
-          ## Output
-          {"award_title":"","project_number":"","budget_period":"","aims":[""],"research_topic":"","source":""}
 
           Begin your reply with `{`. Output only the JSON: no questions,
           no offers to help, no commentary.

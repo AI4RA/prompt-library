@@ -13,15 +13,14 @@ OSP billing sheet's rows with the justification column filled in.
 
 ## Input
 
-Two JSON fragments, produced by the extraction step of
+One JSON fragment, produced by the extraction step of
 `workflows/hhs-draw-justification`:
 
 1. **Draw lines**: the sheet's column headers plus each row's cells
    verbatim, with its cost type, personnel role, and timeframe already
    resolved.
-2. **Award purpose**: the award title, aims, and a plain-language
-   research topic taken from the Notice of Award or aims page (may be
-   empty).
+   It carries the PI's prior wording for payroll and indirect account
+   codes when a completed earlier sheet was uploaded.
 
 ## Output
 

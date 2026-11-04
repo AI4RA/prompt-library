@@ -3,8 +3,7 @@
 Drafts the payment justifications HHS now requires with every Payment
 Management System (PMS) drawdown on a discretionary award. Upload the
 OSP "Billed-Unbilled Detail by PMS Code" spreadsheet (and, ideally, the
-Notice of Award and specific aims page); the workflow returns the same
-sheet with the justification column filled in, one justification per
+PI's last completed sheet); the workflow returns the same sheet with the justification column filled in, one justification per
 expense line, as a CSV file the PI opens in Excel and sends back to
 OSP.
 
@@ -33,18 +32,15 @@ must:
 | Step | Task | Input | Output |
 |---|---|---|---|
 | 1. Extraction | `extract-draw-lines` (Prompt) | `workflow_documents` | Minified JSON: every billing-sheet row with cost type, role (never a name), and timeframe resolved |
-| 1. Extraction | `extract-award-purpose` (Prompt) | `workflow_documents` | Minified JSON: award title, aims, and a plain-language research topic; `{"source":"none"}` when no NoA or aims page was uploaded |
 | 2. Consolidation (output) | `hhs-payment-justification` (Prompt) | `step_input` | Raw JSON array: one object per sheet row, keyed by the sheet's own headers, justification column filled |
 
 ## How to run
 
 1. Import `hhs-draw-justification.vandalizer.json` into Vandalizer.
-2. Upload the current OSP billing spreadsheet. Optionally add:
-   - the Notice of Award and the specific aims page or abstract, so the
-     justifications name the actual work instead of "the research
-     activities supported by this award";
-   - the PI's previous completed billing sheet, so role wording
-     ("project laboratory manager") carries forward.
+2. Upload the current OSP billing spreadsheet. If you have it, also
+   upload the PI's last completed sheet: payroll lines then reuse the
+   PI's own sentences for the same account codes, with the dates
+   updated.
 3. Run, then download the result with **CSV** format (not Word or
    JSON). Open it in Excel and read every justification; the
    Extraction step's output lists any flags (an unrecognized account
@@ -79,6 +75,29 @@ than guessed.
 The draw-window dates in the justification column header (for example
 "ACTIVITY 10/10-23/2026") are not used as the work period.
 
+## Wording
+
+The language is deliberately general, per the PI's review: every cost
+is linked to "the research activities supported by this award", and
+the workflow never names the research topic, a journal, or why an item
+was bought. Sentence patterns follow the justifications the PI
+submitted for the 11/06/2026 draw:
+
+- Payroll: "Payment for salary for project graduate research
+  assistants from 10/11/2026 to 10/24/2026 to conduct the research
+  activities supported by this award."
+- Services: "Payment for services provided by the Laboratory Animal
+  Research Facility, as described in the approved budget, for the
+  month of September 2026, to support the research activities
+  supported by this award."
+- Publication: "Payment for publication costs, as described in the
+  approved budget, for a paper reporting results of research supported
+  by this award."
+- Indirect: HHS's own sufficient F&A sentence, word for word.
+
+The PI can add specifics (the journal, what the supplies were for)
+before sending the sheet.
+
 ## Open questions
 
 - **PMS character limit.** The HHS guidance says justifications must
@@ -100,11 +119,12 @@ The draw-window dates in the justification column header (for example
 ## Status
 
 Experimental. v0.1.0 ran once in Vandalizer on Deborah Stenkamp's
-CB7897 sheet for the 10/23/2026 draw plus the Notice of Award and aims
-page: content correct (10 lines, $8,470.30, 9/27–10/10 pay period,
-activity wording from the aims), but a Markdown report rather than the
-sheet. v0.2.0 ran on the real 11/06/2026 CB7897 sheet (16 lines) and
-downloaded as a clean 16 × 15 CSV; v0.3.0 fixes the sentence ending
-and uses the service month for internal recharges (see CHANGELOG).
-v0.3.0 is not yet run; re-run the same 11/06 sheet and check the seven
-`HDJ-*` validation-plan items.
+CB7897 sheet for the 10/23/2026 draw: content correct (10 lines,
+$8,470.30, 9/27–10/10 pay period), but a Markdown report rather than
+the sheet. v0.2.0 ran on the real 11/06/2026 CB7897 sheet (16 lines)
+and downloaded as a clean 16 × 15 CSV. The PI reviewed it ("Not bad!
+... would lean toward using less specific language") and returned the
+sheet she submitted; v0.4.0 adopts her wording and drops the
+award-document step. v0.4.0 is not yet run: re-run the 11/06 sheet
+(with the 10/23 completed sheet as the prior sheet) and compare
+column O with what she submitted.

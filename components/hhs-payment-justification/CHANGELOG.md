@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0] — 2026-11-04
+
+- Reads one fragment (draw lines); the award-purpose input is gone.
+  General wording only, with sentence patterns taken from the PI's
+  submitted 11/06/2026 justifications; payroll lines reuse
+  `prior_wording` with dates swapped; header fallback "ACTIVITY";
+  empty justification for total rows.
+
 ## [0.3.1] — 2026-11-04
 
 - From a Codex review of PR #21: payroll lines without a pay period read

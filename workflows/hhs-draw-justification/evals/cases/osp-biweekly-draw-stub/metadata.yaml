@@ -17,14 +17,14 @@ workflow_features:
   - payroll_pay_period_lookup
   - service_month_over_posting_date
   - names_kept_in_cells_excluded_from_justifications
-  - research_topic_from_award_documents
+  - prior_wording_reuse_and_general_language
 
 # Validation metadata — REQUIRED.
 validated_by: pending-osp-review
 validated_at: 2026-11-04
-validated_against_version: "0.3.1"
+validated_against_version: "0.4.0"
 component_versions_at_validation:
-  hhs-payment-justification: "0.3.1"
+  hhs-payment-justification: "0.4.0"
 
 notes: |
   Scaffolded case shell only. Development runs used two real CB7897

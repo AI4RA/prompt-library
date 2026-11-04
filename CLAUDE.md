@@ -1250,9 +1250,9 @@ prompt and leaving both risks double-application.
 
 ### `workflows/hhs-draw-justification`
 
-**Status**: ⚠️ v0.3.1 import-ready (PR #21). v0.1.0 and v0.2.0 were
-run in Vandalizer on the 10/23 and 11/06/2026 CB7897 draws; v0.3.x is
-not yet run.
+**Status**: ⚠️ v0.4.0 import-ready (PR #21). v0.1.0 and v0.2.0 were
+run in Vandalizer on the 10/23 and 11/06/2026 CB7897 draws; the PI
+reviewed the v0.3.0-era CSV; v0.3.x / v0.4.0 not yet run.
 
 #### v0.1.0 (2026-11-04) — initial build
 
@@ -1361,6 +1361,35 @@ wording or a document supports more; (5) eval posture inherits →
 `workflow_local: true` with a stub case, per docs/contracts.md; (6)
 README's stale "subaccount justification ~90 words" removed.
 Component 0.3.0 → 0.3.1.
+
+#### v0.3.1 → v0.4.0 (2026-11-04)
+
+**Surfaced by**: PI review (Deb). She saw the v0.2.0 CSV for the 11/06
+draw: "Not bad! I'm on board with the concept, but would lean toward
+using less specific language", and returned the sheet she actually
+submitted (header "ACTIVITY", a "CB7897 Total" row). Her column O:
+payroll identical in shape to the workflow's but with the generic
+"to conduct the research activities supported by this award" (no
+research topic) and her own roles ("project laboratory manager";
+"graduate, undergraduate, and medical student research assistants");
+LARF: "Payment for services provided by the Laboratory Animal Research
+Facility (LARF), as described in the approved budget, for the month of
+September, to support research activities supported by this award.";
+publication: "..., as described in the approved budget, for a paper in
+<journal>, that reviewed results of research supported by this
+award."; supplies: "Payment for tools purchased in October to repair
+pipettes ..." (PI-only knowledge). Our timeframes (10/11–10/24,
+September LARF) and F&A matched hers.
+
+**Changes** (MINOR pre-1.0, breaking: parallel tasks 2 → 1):
+extract-award-purpose removed; general wording only, her sentence
+patterns per cost type; payroll reuses prior_wording with dates
+swapped when her last sheet is uploaded; LARF / publisher / retail
+vendor cost mappings; header fallback "ACTIVITY"; total rows kept with
+empty justification. HDJ-06 rewritten. Component 0.3.1 → 0.4.0.
+
+**Re-test**: upload the 11/06 sheet + her completed 10/23 sheet as the
+prior; payroll sentences should match her 11/06 submission exactly.
 
 ### Batch: KB-step removal across remaining Variant-A workflows (v1.0.0, 2026-08-13)
 

@@ -1616,7 +1616,7 @@
       "slug": "hhs-payment-justification",
       "name": "hhs-payment-justification",
       "summary": "Writes the payment justifications HHS requires with every Payment Management System (PMS) drawdown on a discretionary award: one plain-language, PII-free sentence per expense line, returned as the OSP billing sheet's rows with the justification column filled in.",
-      "version": "0.3.1",
+      "version": "0.4.0",
       "category": "drafting",
       "domain": "research-administration",
       "status": "experimental",
@@ -1647,7 +1647,7 @@
         {
           "type": "prompt",
           "path": "components/hhs-payment-justification/prompt.md",
-          "version": "0.3.1",
+          "version": "0.4.0",
           "role": "canonical_prompt"
         }
       ],
@@ -3782,8 +3782,8 @@
     {
       "slug": "hhs-draw-justification",
       "name": "HHS Draw Justification",
-      "description": "Reads the OSP \"Billed-Unbilled Detail by PMS Code\" spreadsheet for an HHS discretionary award (plus, optionally, the Notice of Award and specific aims page) and returns the same sheet with its justification column filled: one plain-language, PII-free payment justification per expense line, as HHS now requires for each PMS drawdown. Download the result as CSV, open it in Excel, and return it to OSP.",
-      "workflow_version": "0.3.1",
+      "description": "Reads the OSP \"Billed-Unbilled Detail by PMS Code\" spreadsheet for an HHS discretionary award (plus, optionally, the PI's last completed sheet) and returns the same sheet with its justification column filled: one plain-language, PII-free payment justification per expense line, as HHS now requires for each PMS drawdown. Download the result as CSV, open it in Excel, and return it to OSP.",
+      "workflow_version": "0.4.0",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {
@@ -3798,7 +3798,7 @@
       ],
       "steps": {
         "step_count": 2,
-        "task_count": 3,
+        "task_count": 2,
         "output_step_name": "Consolidation"
       },
       "evaluation": {

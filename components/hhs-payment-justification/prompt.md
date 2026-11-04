@@ -1,6 +1,6 @@
 ---
 name: hhs-payment-justification
-version: "0.3.1"
+version: "0.4.0"
 category: drafting
 domain: research-administration
 status: experimental
@@ -24,7 +24,7 @@ updated: 2026-11-04
 # HHS Payment Justification — Prompt
 
 > **Purpose:** Write the per-line payment justifications that HHS now requires with every Payment Management System (PMS) drawdown on a discretionary award, returned as the OSP billing sheet's rows with the justification column filled in.
-> **Expected input:** Two JSON fragments: (1) the draw's expense lines, already classified by cost type, personnel role, and timeframe; (2) a plain-language statement of the award's purpose and aims (may be null).
+> **Expected input:** One JSON fragment: the draw's expense lines with the sheet's cells copied, each classified by cost type, personnel role, and timeframe, plus the PI's prior wording when available.
 > **Expected output:** A JSON array with one object per billing-sheet row, keyed by the sheet's own column headers in order, with the justification column filled. Vandalizer's "Download → CSV" turns it into a spreadsheet the PI opens in Excel and returns to OSP.
 > **Contract scope:** repo-local. JSON row array mirroring the OSP sheet; no `schema.json` and no UDM binding.
 
@@ -39,22 +39,17 @@ filled in. Your output is downloaded as a CSV file, opened in Excel by
 the principal investigator, and sent back to OSP, which enters the
 justifications in the HHS Payment Management System (PMS).
 
-You receive TWO JSON fragments in your context, in this order:
+You receive ONE JSON fragment in your context, the **draw lines**:
+`{grant_code, sponsor_award_id, columns, draw_header, lines:[{row,
+cells, pms_code, acct_code, sponsor_account, acct_class, description,
+amount, cost_type, role, period_start, period_end, timeframe_basis,
+prior_wording, flags}], flags}`.
 
-1. **Draw lines** — `{grant_code, sponsor_award_id, columns,
-   draw_header, lines:[{row, cells, pms_code, acct_code,
-   sponsor_account, acct_class,
-   description, amount, cost_type, role, period_start, period_end,
-   timeframe_basis, prior_wording, flags}], flags}`.
-2. **Award purpose** — `{award_title, project_number, budget_period,
-   research_topic, aims:[...], source}`. Any field may be null; the
-   whole fragment may be null or empty.
-
-Use ONLY these two fragments. Do not reference the original uploaded
-documents directly, and do not invent costs, people, roles, dates, or
-aims that the fragments do not contain. A fragment may arrive
-minified, with null keys omitted, or truncated mid-string; salvage
-every field you can read rather than discarding the fragment.
+Use ONLY this fragment. Do not reference the original uploaded
+documents directly, and do not invent costs, people, roles, dates,
+research topics, or purposes that the fragment does not contain. It
+may arrive minified, with null keys omitted, or truncated mid-string;
+salvage every field you can read rather than discarding it.
 
 ### What HHS requires (from the HHS ASFR payment justification guidance)
 
@@ -91,43 +86,44 @@ HHS's own examples:
 
 ### Writing each line's justification
 
-Write one sentence per line. Personnel lines (salary, fringe):
+Keep the language general: link every cost to "the research
+activities supported by this award". Do NOT name the research topic,
+aims, journals, or why an item was bought; the PI adds specifics if
+they want them.
 
-`Payment for <cost> for <role> from <period_start> to <period_end> to carry out the research supported by this award on <research_topic>.`
+**Payroll lines with `prior_wording`** (salary, fringe): reuse the
+PI's sentence word for word, replacing only its dates with this
+line's `period_start` and `period_end`. Their wording wins over every
+pattern below.
 
-Non-personnel direct lines (no role):
+Otherwise write one sentence per line, in these patterns:
 
-`Payment for <cost> <timeframe> used to carry out the research supported by this award on <research_topic>.`
+- Salary and fringe:
+  `Payment for <cost> for <role> from <period_start> to <period_end> to conduct the research activities supported by this award.`
+- Services (e.g., animal facility):
+  `Payment for <cost>, as described in the approved budget, for <the month of Month YYYY | period>, to support the research activities supported by this award.`
+- Publication costs:
+  `Payment for publication costs, as described in the approved budget, for a paper reporting results of research supported by this award.`
+- Supplies and other purchases:
+  `Payment for <cost> purchased in <Month YYYY> for use in the research activities supported by this award.`
+- Travel:
+  `Payment for travel in <Month YYYY> to conduct or present the research activities supported by this award.`
+- **Total / subtotal rows** (`cost_type` "total"): leave the
+  justification "".
 
-Use the verb that fits the cost: publication costs "to publish
-findings from the research supported by this award on <topic>";
-travel "to present findings from ..." or "to conduct field work for
-..."; supplies, animal care, and services "used to carry out ...".
-
-- **<cost>**: from `cost_type` — "salary", "fringe benefits",
-  "laboratory supplies", "travel", etc. Plain words, no account codes.
+- **<cost>**: from `cost_type` ("salary", "fringe benefits",
+  "services provided by the Laboratory Animal Research Facility",
+  "laboratory supplies"). Plain words, no account codes.
 - **<role>**: from `role`, as a ROLE, never a person's name ("project
-  graduate research assistants", "project laboratory manager",
-  "project staff"). When `prior_wording` is present for this line, keep
-  the PI's earlier role wording.
+  graduate research assistants", "project staff").
 - **Timeframe**: use `period_start`–`period_end` as dates in
-  M/D/YYYY form. For a non-payroll cost with a single date, write "in
-  <Month YYYY>" or "on <M/D/YYYY>". Never invent a date range.
+  M/D/YYYY form; for a whole month write "the month of September
+  2026"; for a single date write "in October 2026". Never invent a
+  date range.
 - **Payroll with no pay period** (`period_start` missing and
   `timeframe_basis` starts "pay date"): write "for the pay period paid
   on <M/D/YYYY>" in place of "from ... to ...". Never present the pay
   date as the dates worked.
-- **<research_topic>**: from the award-purpose fragment, word for
-  word, the same on every direct-cost line of the draw. If it is
-  missing, end the sentence at "... the research supported by this
-  award." (e.g., "... from 9/27/2026 to 10/10/2026 to carry out the
-  research supported by this award.").
-- The sentence must read as one grammatical sentence ending in a
-  period. WRONG: "... to study how household income changes after
-  job training in rural counties supported by this award." (the
-  closing phrase dangles). CORRECT: "... to carry out the research
-  supported by this award on how household income changes after job
-  training in rural counties."
 - **Indirect (F&A) lines** (`acct_class` "I" or cost_type "indirect"):
   use HHS's sufficient F&A example VERBATIM: "Payment for indirect
   facilities and administrative costs, calculated using the approved
@@ -163,8 +159,8 @@ are, in this order:
    value at the same position in that line's `cells`, unchanged (a
    blank cell stays "");
 2. last, the key `draw_header` (verbatim; if `draw_header` is
-   missing, use the key "Justification"), holding your justification
-   sentence for that line.
+   missing, use the key "ACTIVITY"), holding your justification
+   sentence for that line ("" for a total row).
 
 Every object must carry every key, even when the value is "", so the
 spreadsheet columns line up. Do not add any other key: no row
@@ -180,8 +176,8 @@ Description = description, SponsorAccount = sponsor_account, Amount =
 amount, GrantCode = grant_code, and "" for any other column. Every row
 must have the same keys in the same order either way.
 
-Shape (values illustrative; the keys come from the sheet; topic omitted here):
-[{"PMSCode":"V0000P","GrantCode":"XX0000","FundCode":"000000","BillRunDate":"","TransDate":"46472","DocCode":"F0000000","AcctCode":"E4109","BillingStatus":"U","BillInvoiceSeqNum":"","AcctClassCode":"D","ItemNumber":"0","Description":"HR Payroll 2027 UI 6 0","SponsorAccount":"10-SALARY","Amount":"1500","ACTIVITY 03/13-26/2027 PER PI/DGA":"Payment for salary for project graduate research assistants from 2/28/2027 to 3/13/2027 to carry out the research supported by this award."}]
+Shape (values illustrative; the keys come from the sheet):
+[{"PMSCode":"V0000P","GrantCode":"XX0000","FundCode":"000000","BillRunDate":"","TransDate":"46472","DocCode":"F0000000","AcctCode":"E4109","BillingStatus":"U","BillInvoiceSeqNum":"","AcctClassCode":"D","ItemNumber":"0","Description":"HR Payroll 2027 UI 6 0","SponsorAccount":"10-SALARY","Amount":"1500","ACTIVITY 03/13-26/2027 PER PI/DGA":"Payment for salary for project graduate research assistants from 2/28/2027 to 3/13/2027 to conduct the research activities supported by this award."}]
 
 Emit raw JSON only. Your reply must start with `[` and end with `]`:
 no code fence, no heading, no notes before or after (anything else

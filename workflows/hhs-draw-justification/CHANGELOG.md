@@ -5,6 +5,29 @@ workflow semantics: MAJOR for step-structure changes, MINOR for prompt
 tracking a referenced component MINOR or additive options, PATCH for
 display-name / description polish.
 
+## [0.4.0] — 2026-11-04
+
+- **PI review.** Deb reviewed the v0.3.0 CSV ("Not bad! ... would lean
+  toward using less specific language") and returned the sheet she
+  submitted for the 11/06/2026 draw. Changes to match it:
+  - `extract-award-purpose` removed: justifications stay general ("to
+    conduct the research activities supported by this award"), so no
+    Notice of Award or aims page is needed. Parallel tasks 2 → 1
+    (breaking, hence 0.4.0).
+  - Sentence patterns follow hers: services and publication costs
+    read "..., as described in the approved budget, ..."; supplies
+    "purchased in <month> for use in ..."; no journal names or
+    purchase purposes are invented.
+  - With the PI's last completed sheet uploaded, payroll lines reuse
+    her sentence for the same account code with the dates swapped.
+  - "LARF PD" → "services provided by the Laboratory Animal Research
+    Facility"; publishers → publication costs; retail vendors →
+    laboratory supplies.
+  - Justification header falls back to "ACTIVITY"; total rows are
+    copied in place with an empty justification.
+- Validation check HDJ-06 now checks for general wording.
+- Tracks `hhs-payment-justification` 0.3.1 → 0.4.0.
+
 ## [0.3.1] — 2026-11-04
 
 - Fixes from a Codex review of PR #21:
