@@ -1,0 +1,55 @@
+# Changelog
+
+All notable changes to this workflow. Versions follow semver adapted to
+workflow semantics: MAJOR for step-structure changes, MINOR for prompt
+tracking a referenced component MINOR or additive options, PATCH for
+display-name / description polish.
+
+## [0.3.0] — 2026-11-04
+
+- First v0.2.0 run on the real 11/06/2026 CB7897 sheet (16 lines:
+  payroll, animal per diem, publication, supplies, F&A) downloaded as a
+  clean 16 × 15 CSV. Two prompt fixes from it:
+  - **Sentence shape.** "... to study how thyroid hormone controls
+    color vision genes ... supported by this award." left the closing
+    phrase dangling. `extract-award-purpose` now returns a noun-phrase
+    `research_topic` (was `activity_phrase`) and justifications read
+    "... to carry out the research supported by this award on
+    <topic>.", with cost-fitting verbs (publication costs "to publish
+    findings from ...").
+  - **Service month over posting date.** The September 2026 LARF per
+    diem posted 10/19 was justified as "October 2026".
+    `extract-draw-lines` now uses a service period named in Description
+    before TransDate for non-payroll lines.
+- Validation checks HDJ-03 and HDJ-06 reworded to match.
+- Tracks `hhs-payment-justification` 0.2.0 → 0.3.0.
+
+## [0.2.0] — 2026-11-04
+
+- **The output is now the filled billing sheet.** The first Vandalizer
+  run (CB7897) got the content right, but the PI's job is to return
+  OSP's spreadsheet with the justification column filled, not to copy
+  sentences out of a report. The consolidation now emits a JSON array
+  with one object per sheet row, keyed by the sheet's own headers in
+  order, with the justification column filled. Vandalizer's
+  **Download → CSV** turns it into a spreadsheet that opens in Excel.
+- `extract-draw-lines` now captures the sheet's headers (`columns`)
+  and each row's cells verbatim (`cells`) so the output can reproduce
+  every column.
+- Dropped from the deliverable: the Markdown table, paste block, PMS
+  subaccount paragraph, and reviewer notes. Line flags are still in the
+  Extraction step's output.
+- Justifications are plain ASCII so Excel doesn't garble them.
+- Validation plan rewritten for the row-array output (8 → 7 checks).
+- Tracks `hhs-payment-justification` 0.1.0 → 0.2.0.
+
+## [0.1.0] — 2026-11-04
+
+- Initial version. Two parallel extraction tasks (`extract-draw-lines`,
+  `extract-award-purpose`) reading `workflow_documents`, then the
+  `hhs-payment-justification` consolidation as the output step.
+- Payroll timeframes come from a pay-date → pay-period table
+  (pay dates 9/25/2026 through 6/18/2027) embedded in
+  `extract-draw-lines`, derived from one confirmed example.
+- Eight-check `HDJ-*` validation plan in the Vandalizer runtime schema.
+- Not yet run in Vandalizer.

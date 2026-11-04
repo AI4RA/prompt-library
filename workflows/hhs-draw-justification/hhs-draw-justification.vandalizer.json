@@ -1,0 +1,119 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "exported_at": "2026-11-04T00:00:00+00:00",
+  "exported_by": "ui-insight",
+  "items": [
+    {
+      "name": "HHS Draw Justification v0.3.0",
+      "description": "Reads the OSP \"Billed-Unbilled Detail by PMS Code\" spreadsheet for an HHS discretionary award (plus, optionally, the Notice of Award and specific aims page) and returns the same sheet with its justification column filled: one plain-language, PII-free payment justification per expense line, as HHS now requires for each PMS drawdown. Download the result as CSV, open it in Excel, and return it to OSP.",
+      "steps": [
+        {
+          "name": "Extraction",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-draw-lines",
+                "prompt": "You are reading the University of Idaho OSP \"Billed-Unbilled\nDetail by PMS Code\" spreadsheet for one HHS grant's drawdown and\npreparing each expense line for a payment justification.\n\n## Find the billing sheet\nIt has the column headers PMSCode, GrantCode, FundCode,\nBillRunDate, TransDate, DocCode, AcctCode, BillingStatus,\nBillInvoiceSeqNum, AcctClassCode, ItemNumber, Description,\nSponsorAccount, Amount, and often a last column for the PI's\njustification (its header may read like \"ACTIVITY 10/10-23/2026\nPER PI/DGA\"). Other uploaded documents (Notice of Award, aims\npage) are NOT expense lines; ignore them here.\n\nIf TWO billing sheets are uploaded, the CURRENT draw is the one\nwhose justification column is empty; the other is a PRIOR draw.\nExtract lines only from the current sheet. Use the prior sheet\nonly for `prior_wording` (below). If only one sheet is uploaded\nand its justification column is filled, treat it as the current\nsheet AND use its own text as `prior_wording`.\n\n## The sheet's columns\n`columns` — every column header of the sheet EXCEPT the\njustification column, verbatim, left to right (normally the 14\nheaders PMSCode through Amount). `draw_header` — the\njustification column's header verbatim (null if the sheet has\nno such column).\n\n## For every data row, in row order\n`cells` — that row's value for each entry in `columns`, in the\nsame order, copied EXACTLY as shown, as strings. A blank cell\nis \"\" (never skip it, so positions stay aligned). Do not\nreformat dates, numbers, or codes.\nCopy verbatim: `row` (spreadsheet row number, header = 1),\n`pms_code`, `acct_code`, `sponsor_account`, `acct_class`\n(AcctClassCode: D = direct, I = indirect), `description`,\n`amount` (number exactly as shown, keep cents).\nThen derive:\n\n`cost_type` — from SponsorAccount:\n- \"10-SALARY\" or \"12-IRRHELP\" → \"salary\"\n- \"11-FRINGE\" → \"fringe benefits\"\n- \"60-F and A\" or AcctClassCode I → \"indirect\"\n- anything else → a short plain phrase from the account name and\n  Description (\"laboratory supplies\", \"travel\", \"animal care\",\n  \"publication costs\"); never the code itself.\n\n`role` — who the cost is for, as a ROLE, never a name:\n- AcctCode E4109 → \"project graduate research assistants\"\n- AcctCode E4135 → \"project undergraduate and medical student\n  research assistants\"\n- AcctCode E4106 → \"project staff\"\n- AcctCode E4281 → fringe for \"project staff\"\n- AcctCode E4282 → fringe for \"project graduate, undergraduate,\n  and medical student research assistants\"\n- indirect lines → null\n- non-personnel costs → null\n- any other personnel code → \"project personnel\" and add a flag\n  asking the PI to name the role.\nIf `prior_wording` exists for the same AcctCode, take the role\nfrom it instead (e.g., the PI wrote \"project laboratory manager\"\nfor E4106).\n\n`period_start`, `period_end`, `timeframe_basis`:\n- PAYROLL lines (Description begins \"HR Payroll\"): TransDate is\n  the PAY DATE. Look it up below and use the pay period worked.\n  TransDate may appear as a date or as an Excel serial number;\n  both columns are given. timeframe_basis = \"pay period\".\n- Not in the table → period_start/period_end null,\n  timeframe_basis = \"pay date <TransDate>\", and add a flag.\n- NON-PAYROLL direct lines: if Description names the month\n  or period the goods or service were provided (e.g. \"ef/IDG\n  Sep 2026 LARF PD\" = animal facility per diem for September\n  2026), use THAT period: period_start = its first day,\n  period_end = its last day, timeframe_basis = \"service\n  period\". TransDate on these internal recharges is only the\n  posting date. WRONG: \"animal care in October 2026\" for\n  \"Sep 2026 LARF PD\" posted 10/19/2026. Otherwise\n  period_start = period_end = TransDate as M/D/YYYY;\n  timeframe_basis = \"transaction date\".\n- INDIRECT lines: both null; timeframe_basis = \"current budget\n  period\".\nNever use the draw-window dates in the justification column\nheader as the work period.\n\n| Pay date | Excel serial | Pay period start | Pay period end |\n|---|---|---|---|\n| 09/25/2026 | 46290 | 08/30/2026 | 09/12/2026 |\n| 10/09/2026 | 46304 | 09/13/2026 | 09/26/2026 |\n| 10/23/2026 | 46318 | 09/27/2026 | 10/10/2026 |\n| 11/06/2026 | 46332 | 10/11/2026 | 10/24/2026 |\n| 11/20/2026 | 46346 | 10/25/2026 | 11/07/2026 |\n| 12/04/2026 | 46360 | 11/08/2026 | 11/21/2026 |\n| 12/18/2026 | 46374 | 11/22/2026 | 12/05/2026 |\n| 01/01/2027 | 46388 | 12/06/2026 | 12/19/2026 |\n| 01/15/2027 | 46402 | 12/20/2026 | 01/02/2027 |\n| 01/29/2027 | 46416 | 01/03/2027 | 01/16/2027 |\n| 02/12/2027 | 46430 | 01/17/2027 | 01/30/2027 |\n| 02/26/2027 | 46444 | 01/31/2027 | 02/13/2027 |\n| 03/12/2027 | 46458 | 02/14/2027 | 02/27/2027 |\n| 03/26/2027 | 46472 | 02/28/2027 | 03/13/2027 |\n| 04/09/2027 | 46486 | 03/14/2027 | 03/27/2027 |\n| 04/23/2027 | 46500 | 03/28/2027 | 04/10/2027 |\n| 05/07/2027 | 46514 | 04/11/2027 | 04/24/2027 |\n| 05/21/2027 | 46528 | 04/25/2027 | 05/08/2027 |\n| 06/04/2027 | 46542 | 05/09/2027 | 05/22/2027 |\n| 06/18/2027 | 46556 | 05/23/2027 | 06/05/2027 |\n\n`prior_wording` — the PI's earlier justification text for this\nAcctCode (from the prior sheet or the filled column), else null.\n\n`flags` — short strings for the reviewer: unknown personnel\ncode, pay date not in the table, a person's name appearing in\nDescription (do NOT copy the name into any other field), a\nnon-payroll description too vague to name the cost.\n\nTop-level: `grant_code`, `sponsor_award_id` (the sponsor ID, if\nshown anywhere, e.g. \"REY012146F\"; else null), `columns`,\n`draw_header`, `flags` (sheet-level issues).\n\n## Output compactness\nEmit minified single-line JSON (no indentation, no line breaks).\nMinify the SYNTAX only — never shorten or drop a line or a\nvalue. Omit keys whose value is null (but keep \"\" entries inside\n`cells`). If a value must contain a\ndouble quote, escape it as \\\" or rephrase.\n\n## Output\n{\"grant_code\":\"\",\"sponsor_award_id\":\"\",\"columns\":[\"PMSCode\",\"GrantCode\",\"...\"],\"draw_header\":\"\",\"lines\":[{\"row\":2,\"cells\":[\"V0000P\",\"XX0000\",\"...\"],\"pms_code\":\"\",\"acct_code\":\"\",\"sponsor_account\":\"\",\"acct_class\":\"D\",\"description\":\"\",\"amount\":0,\"cost_type\":\"\",\"role\":\"\",\"period_start\":\"M/D/YYYY\",\"period_end\":\"M/D/YYYY\",\"timeframe_basis\":\"\",\"prior_wording\":\"\",\"flags\":[]}],\"flags\":[]}\n\nBegin your reply with `{`. Output only the JSON: no questions,\nno offers to help, no commentary.",
+                "input_sources": [
+                  "workflow_documents"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "extract-award-purpose",
+                "prompt": "You are reading the documents uploaded for an HHS (usually NIH)\ngrant drawdown to find a plain-language statement of what the\naward pays for. The uploads may include a Notice of Award (NoA),\na specific aims page, a project summary/abstract, and the OSP\nbilling spreadsheet. Ignore the billing spreadsheet here.\n\nIf NO Notice of Award, aims page, or abstract was uploaded,\nreturn exactly {\"source\":\"none\"}. Do not guess the science from\nthe grant code, the PI's department, or the expense lines.\n\nOtherwise extract:\n- `award_title` — the project title verbatim.\n- `project_number` — e.g. \"5R01XX000000-03\" verbatim, if shown.\n- `budget_period` — start and end dates verbatim, if shown.\n- `aims` — each specific aim restated in at most 15 plain words\n  (no gene names, abbreviations, or jargon a member of the\n  public would not know), in the document's order.\n- `research_topic` — ONE plain-language phrase of at most 15\n  words that completes the sentence \"Payment for salary for\n  project staff from 9/27/2026 to 10/10/2026 to carry out the\n  research supported by this award on ___.\" It names WHAT the\n  award studies, covering the award as a whole, not one aim. Do\n  not start it with \"to\". Example: \"how household income\n  changes after job training in rural counties\" (shape only;\n  write yours from the documents).\n- `source` — which document(s) you used (\"Notice of Award\",\n  \"Specific Aims\", \"Abstract\").\n\nRules: no person names, no budget figures, nothing that is not\nstated in the documents. Plain language: write for a reviewer at\nHHS who is not a scientist.\n\n## Output compactness\nEmit minified single-line JSON (no indentation, no line breaks).\nOmit keys whose value is null. If a value must contain a double\nquote, escape it as \\\" or rephrase.\n\n## Output\n{\"award_title\":\"\",\"project_number\":\"\",\"budget_period\":\"\",\"aims\":[\"\"],\"research_topic\":\"\",\"source\":\"\"}\n\nBegin your reply with `{`. Output only the JSON: no questions,\nno offers to help, no commentary.",
+                "input_sources": [
+                  "workflow_documents"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consolidation",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "name": "hhs-payment-justification",
+                "prompt": "You are writing HHS payment justifications for one drawdown on an HHS\ndiscretionary award and returning the University of Idaho Office of\nSponsored Programs (OSP) billing sheet with its justification column\nfilled in. Your output is downloaded as a CSV file, opened in Excel by\nthe principal investigator, and sent back to OSP, which enters the\njustifications in the HHS Payment Management System (PMS).\n\nYou receive TWO JSON fragments in your context, in this order:\n\n1. **Draw lines** — `{grant_code, sponsor_award_id, columns,\n   draw_header, lines:[{row, cells, pms_code, acct_code,\n   sponsor_account, acct_class,\n   description, amount, cost_type, role, period_start, period_end,\n   timeframe_basis, prior_wording, flags}], flags}`.\n2. **Award purpose** — `{award_title, project_number, budget_period,\n   research_topic, aims:[...], source}`. Any field may be null; the\n   whole fragment may be null or empty.\n\nUse ONLY these two fragments. Do not reference the original uploaded\ndocuments directly, and do not invent costs, people, roles, dates, or\naims that the fragments do not contain. A fragment may arrive\nminified, with null keys omitted, or truncated mid-string; salvage\nevery field you can read rather than discarding the fragment.\n\n### What HHS requires (from the HHS ASFR payment justification guidance)\n\nAt a minimum, a payment justification must:\n- identify and describe the cost or activity consistent with\n  applicable award requirements;\n- explain how the cost or activity supports the objectives and goals\n  of the award;\n- include the timeframe when costs were incurred, as appropriate;\n- use plain language;\n- EXCLUDE confidential, sensitive, or personally identifiable\n  information;\n- follow any additional requirements issued by the HHS Division.\n\nWhere a payment request contains multiple subaccounts, the\njustification for each subaccount must describe the costs attributable\nto that subaccount. If a subaccount includes multiple types of costs,\nthe justification should clearly summarize each type. A justification\nmust fit within the character limit available in PMS.\n\nHHS's own examples:\n- INSUFFICIENT: \"Payment for staff salaries for July through\n  September.\" (cost and timeframe, but no link to the award)\n- SUFFICIENT: \"Payment for salary and fringe benefits for project\n  staff from July through September to conduct the community outreach\n  activities supported by this award.\"\n- SUFFICIENT: \"Payment for equipment purchased in August, identified\n  in the approved budget, that will be used to conduct laboratory\n  testing under the award.\"\n- SUFFICIENT: \"Payment for indirect facilities and administrative\n  costs, calculated using the approved negotiated indirect cost rate\n  agreement, that support essential operations for activities under\n  this award during the current budget period.\"\n\n### Writing each line's justification\n\nWrite one sentence per line. Personnel lines (salary, fringe):\n\n`Payment for <cost> for <role> from <period_start> to <period_end> to carry out the research supported by this award on <research_topic>.`\n\nNon-personnel direct lines (no role):\n\n`Payment for <cost> <timeframe> used to carry out the research supported by this award on <research_topic>.`\n\nUse the verb that fits the cost: publication costs \"to publish\nfindings from the research supported by this award on <topic>\";\ntravel \"to present findings from ...\" or \"to conduct field work for\n...\"; supplies, animal care, and services \"used to carry out ...\".\n\n- **<cost>**: from `cost_type` — \"salary\", \"fringe benefits\",\n  \"laboratory supplies\", \"travel\", etc. Plain words, no account codes.\n- **<role>**: from `role`, as a ROLE, never a person's name (\"project\n  graduate research assistants\", \"project laboratory manager\",\n  \"project staff\"). When `prior_wording` is present for this line, keep\n  the PI's earlier role wording.\n- **Timeframe**: use `period_start`–`period_end` as dates in\n  M/D/YYYY form. For a non-payroll cost with a single date, write \"in\n  <Month YYYY>\" or \"on <M/D/YYYY>\". Never invent a date range.\n- **<research_topic>**: from the award-purpose fragment, word for\n  word, the same on every direct-cost line of the draw. If it is\n  missing, end the sentence at \"... the research supported by this\n  award.\" (e.g., \"... from 9/27/2026 to 10/10/2026 to carry out the\n  research supported by this award.\").\n- The sentence must read as one grammatical sentence ending in a\n  period. WRONG: \"... to study how household income changes after\n  job training in rural counties supported by this award.\" (the\n  closing phrase dangles). CORRECT: \"... to carry out the research\n  supported by this award on how household income changes after job\n  training in rural counties.\"\n- **Indirect (F&A) lines** (`acct_class` \"I\" or cost_type \"indirect\"):\n  use HHS's sufficient F&A example VERBATIM: \"Payment for indirect\n  facilities and administrative costs, calculated using the approved\n  negotiated indirect cost rate agreement, that support essential\n  operations for activities under this award during the current budget\n  period.\"\n- Plain language: no account codes, Banner object codes, acronyms the\n  public would not know, or technical jargon. Spell out \"facilities and\n  administrative\".\n- Plain ASCII characters only: straight quotes and hyphens, no em\n  dashes, curly quotes, or symbols (Excel can garble them in a CSV).\n- NO personally identifiable information: no person names, employee\n  IDs, student status details beyond the role, salaries per person, or\n  vendor invoice numbers tied to individuals.\n\nWRONG: \"Payment for HR Payroll 2026 UI 22 E4109 10-SALARY.\"\n(account codes, no role, no timeframe, no link to the award)\n\nWRONG: \"Payment for salary for Jane Doe, graduate student, 9/27/2026\nto 10/10/2026.\" (personal name; no link to the award)\n\nCORRECT: \"Payment for salary for project graduate research assistants\nfrom 9/27/2026 to 10/10/2026 to conduct the research activities\nsupported by this award.\"\n\n### Output: the billing sheet's rows\n\nReturn a JSON array with ONE object per entry in `lines`, in `row`\norder — every line, none merged, dropped, or added. Each object's keys\nare, in this order:\n\n1. every name in `columns`, verbatim and in order, each holding the\n   value at the same position in that line's `cells`, unchanged (a\n   blank cell stays \"\");\n2. last, the key `draw_header` (verbatim; if `draw_header` is\n   missing, use the key \"Justification\"), holding your justification\n   sentence for that line.\n\nEvery object must carry every key, even when the value is \"\", so the\nspreadsheet columns line up. Do not add any other key: no row\nnumbers, notes, totals, or flags (the sheet goes back to OSP as is).\nIf `columns` or a line's `cells` is missing, build the object from\nthe named fields instead (PMSCode = pms_code, AcctCode = acct_code,\nDescription = description, SponsorAccount = sponsor_account, Amount =\namount).\n\nShape (values illustrative; the keys come from the sheet; topic omitted here):\n[{\"PMSCode\":\"V0000P\",\"GrantCode\":\"XX0000\",\"FundCode\":\"000000\",\"BillRunDate\":\"\",\"TransDate\":\"46472\",\"DocCode\":\"F0000000\",\"AcctCode\":\"E4109\",\"BillingStatus\":\"U\",\"BillInvoiceSeqNum\":\"\",\"AcctClassCode\":\"D\",\"ItemNumber\":\"0\",\"Description\":\"HR Payroll 2027 UI 6 0\",\"SponsorAccount\":\"10-SALARY\",\"Amount\":\"1500\",\"ACTIVITY 03/13-26/2027 PER PI/DGA\":\"Payment for salary for project graduate research assistants from 2/28/2027 to 3/13/2027 to carry out the research supported by this award.\"}]\n\nEmit raw JSON only. Your reply must start with `[` and end with `]`:\nno code fence, no heading, no notes before or after (anything else\nstops the CSV download from splitting the columns). Minify it on\none line. Escape any double quote inside a value as \\\" or rephrase.",
+                "input_sources": [
+                  "step_input"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "id": "HDJ-01",
+          "name": "One output row per spreadsheet row",
+          "category": "completeness",
+          "description": "The output is a JSON array with exactly one object per data row of the billing spreadsheet, in spreadsheet row order. FAIL if any row is dropped, merged, duplicated, or reordered.\n"
+        },
+        {
+          "id": "HDJ-02",
+          "name": "Sheet columns copied unchanged",
+          "category": "accuracy",
+          "description": "Each object carries the sheet's column headers verbatim and in order (PMSCode through Amount, then the justification column header), and every copied value (codes, dates, descriptions, amounts) matches its spreadsheet cell exactly; blank cells stay blank. FAIL on any altered, missing, or extra column, or a changed value.\n"
+        },
+        {
+          "id": "HDJ-03",
+          "name": "HHS required elements present",
+          "category": "content",
+          "description": "Every direct-cost justification names the cost, the role (not a person, for personnel), the timeframe, and how the cost supports the award (e.g., \"to carry out the research supported by this award on ...\"), as one grammatical sentence. Non-payroll lines use the service period named in Description (e.g., \"Sep 2026 LARF PD\" → September 2026), not the posting date. Indirect (F&A) lines use HHS's negotiated-rate wording. FAIL if any justification omits the link to the award or the timeframe (the HHS \"insufficient\" pattern).\n"
+        },
+        {
+          "id": "HDJ-04",
+          "name": "No personally identifiable information",
+          "category": "content",
+          "description": "No justification contains a person's name, employee or student ID, an individual's pay rate, or other personal details. Roles (\"project laboratory manager\", \"graduate research assistants\") are acceptable. FAIL on any PII.\n"
+        },
+        {
+          "id": "HDJ-05",
+          "name": "Payroll timeframe matches the pay period",
+          "category": "accuracy",
+          "description": "Payroll lines give the pay period worked (for a 10/23/2026 pay date, 9/27/2026 to 10/10/2026), not the pay date or the draw window. FAIL if a payroll line's dates are invented, use the transaction date as the work period, or differ between lines from the same payroll run.\n"
+        },
+        {
+          "id": "HDJ-06",
+          "name": "Award activity grounded in the documents",
+          "category": "accuracy",
+          "description": "Any specific research activity named in the justifications appears in the uploaded Notice of Award or aims page. When neither was uploaded, the sentence ends at \"the research supported by this award.\" FAIL on an invented aim or topic.\n"
+        },
+        {
+          "id": "HDJ-07",
+          "name": "Raw JSON that downloads as CSV",
+          "category": "formatting",
+          "description": "The final output is only a JSON array of flat objects: no code fence, heading, or commentary before or after, so Vandalizer's CSV download splits it into columns. Justifications use plain ASCII and no Banner account codes or payroll run labels. FAIL on any surrounding text, nested values, or codes inside justification text.\n"
+        }
+      ],
+      "validation_inputs": [],
+      "x_ai4ra": {
+        "workflow_source": "workflows/hhs-draw-justification/manifest.yaml",
+        "workflow_version": "0.3.0",
+        "status": "experimental",
+        "components": [
+          {
+            "slug": "hhs-payment-justification",
+            "version": "0.3.0",
+            "prompt_sha256": "e3f1b28da20fa184db45e5698711afb11ca5df0f1781d672969e6e5e87c3fbb2"
+          }
+        ]
+      }
+    }
+  ]
+}

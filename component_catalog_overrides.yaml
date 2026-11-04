@@ -1563,3 +1563,29 @@ components:
         notes: >
           Plain-text announcement output; no shared UDM fields are read
           or produced.
+
+  hhs-payment-justification:
+    output_contract:
+      format: json_array
+      scope: repo_local_payment_justification_contract
+      notes: >
+        Repo-local drafting contract: the OSP billing sheet's rows as a JSON
+        array of flat objects keyed by the sheet's own column headers, with
+        the justification column filled by one plain-language, PII-free HHS
+        PMS payment justification per line (cost, role, timeframe, link to
+        the award). Downloaded from Vandalizer as CSV. No JSON schema file
+        and no UDM binding.
+    triad_integration:
+      evaluation_datasets: []
+      harness_notes: >
+        Canonical invocation surface is prompt.md, which consumes the two
+        JSON fragments produced by the extraction step of the
+        workflows/hhs-draw-justification Vandalizer workflow. No runner or
+        validated cases yet; the first reference is a PI-completed CB7897
+        billing sheet (not committed; carries staff and grant financial
+        detail).
+      udm_alignment:
+        status: repo_local_payment_justification_contract
+        notes: >
+          Mirrors a University of Idaho OSP billing report; no shared UDM
+          fields are read or produced.
