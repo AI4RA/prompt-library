@@ -1612,6 +1612,72 @@
       }
     },
     {
+      "component_id": "prompt.hhs-payment-justification",
+      "slug": "hhs-payment-justification",
+      "name": "hhs-payment-justification",
+      "summary": "Writes the payment justifications HHS requires with every Payment Management System (PMS) drawdown on a discretionary award: one plain-language, PII-free sentence per expense line, returned as the OSP billing sheet's rows with the justification column filled in.",
+      "version": "0.4.1",
+      "category": "drafting",
+      "domain": "research-administration",
+      "status": "experimental",
+      "tags": [
+        "hhs",
+        "nih",
+        "pms",
+        "drawdown",
+        "payment-justification",
+        "post-award",
+        "billing"
+      ],
+      "audience": [
+        "principal-investigators",
+        "department-grant-administrators",
+        "sponsored-programs-offices"
+      ],
+      "paths": {
+        "component_dir": "components/hhs-payment-justification",
+        "readme": "components/hhs-payment-justification/README.md",
+        "prompt": "components/hhs-payment-justification/prompt.md",
+        "schema": null,
+        "evals_dir": "components/hhs-payment-justification/evals",
+        "eval_case_metadata_glob": "components/hhs-payment-justification/evals/cases/*/metadata.yaml",
+        "eval_reports_dir": "components/hhs-payment-justification/evals/reports"
+      },
+      "manifestations": [
+        {
+          "type": "prompt",
+          "path": "components/hhs-payment-justification/prompt.md",
+          "version": "0.4.1",
+          "role": "canonical_prompt"
+        }
+      ],
+      "contracts": {
+        "output": {
+          "format": "json_array",
+          "scope": "repo_local_payment_justification_contract",
+          "notes": "Repo-local drafting contract: the OSP billing sheet's rows as a JSON array of flat objects keyed by the sheet's own column headers, with the justification column filled by one plain-language, PII-free HHS PMS payment justification per line (cost, role, timeframe, link to the award). Downloaded from Vandalizer as CSV. No JSON schema file and no UDM binding.",
+          "schema_path": null,
+          "schema_entrypoints": [],
+          "validation_surfaces": []
+        }
+      },
+      "evaluation": {
+        "case_count": 0,
+        "report_count": 0,
+        "last_fully_evaluated_version": null,
+        "current_version_is_fully_evaluated": false
+      },
+      "related_components": [],
+      "triad_integration": {
+        "evaluation_datasets": [],
+        "harness_notes": "Canonical invocation surface is prompt.md, which consumes the single draw-lines JSON fragment (sheet cells plus cost type, role, timeframe, and the PI's prior wording from an optional earlier completed sheet) produced by the extraction step of the workflows/hhs-draw-justification Vandalizer workflow. No runner or validated cases yet; the first reference is a PI-completed CB7897 billing sheet (not committed; carries staff and grant financial detail).",
+        "udm_alignment": {
+          "status": "repo_local_payment_justification_contract",
+          "notes": "Mirrors a University of Idaho OSP billing report; no shared UDM fields are read or produced."
+        }
+      }
+    },
+    {
       "component_id": "prompt.noa-summary-udm",
       "slug": "noa-summary-udm",
       "name": "noa-summary-udm",
@@ -3775,6 +3841,33 @@
       "evaluation": {
         "posture": "workflow_local",
         "source": "workflows/foa-checklist-extraction/evals"
+      }
+    },
+    {
+      "slug": "hhs-draw-justification",
+      "name": "HHS Draw Justification",
+      "description": "Reads the OSP \"Billed-Unbilled Detail by PMS Code\" spreadsheet for an HHS discretionary award (plus, optionally, the PI's last completed sheet) and returns the same sheet with its justification column filled: one plain-language, PII-free payment justification per expense line, as HHS now requires for each PMS drawdown. Download the result as CSV, open it in Excel, and return it to OSP.",
+      "workflow_version": "0.4.1",
+      "status": "experimental",
+      "vandalizer_schema_version": 2,
+      "paths": {
+        "workflow_dir": "workflows/hhs-draw-justification",
+        "manifest": "workflows/hhs-draw-justification/manifest.yaml",
+        "export": "workflows/hhs-draw-justification/hhs-draw-justification.vandalizer.json",
+        "readme": "workflows/hhs-draw-justification/README.md",
+        "changelog": "workflows/hhs-draw-justification/CHANGELOG.md"
+      },
+      "components_manifested": [
+        "hhs-payment-justification"
+      ],
+      "steps": {
+        "step_count": 2,
+        "task_count": 2,
+        "output_step_name": "Consolidation"
+      },
+      "evaluation": {
+        "posture": "workflow_local",
+        "source": "workflows/hhs-draw-justification/evals"
       }
     },
     {

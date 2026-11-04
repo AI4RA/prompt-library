@@ -1,0 +1,353 @@
+# Authored source for the HHS Draw Justification Vandalizer workflow.
+#
+# The companion hhs-draw-justification.vandalizer.json is generated from
+# this file by scripts/build_vandalizer_workflows.py and committed
+# alongside. Never hand-edit the generated JSON — update this manifest
+# and rebuild.
+#
+# === v0.4.1 (2026-11-04): CODEX RE-REVIEW FIXES (PR #21) ===
+# Dropped "as described in the approved budget" (no budget evidence in
+# the input; the PI may add it); publication sentences now carry the
+# month; prior_wording reuse only when the line has a pay period, the
+# prior sentence has a date range to swap, and no name/code — the
+# missing-period, ASCII, and PII rules always win; docs describe the
+# single fragment.
+#
+# === v0.4.0 (2026-11-04): PI STYLE — GENERIC AWARD LINK, ONE EXTRACTION ===
+# Deb reviewed the v0.3.0 CSV ("Not bad! ... would lean toward using
+# less specific language") and returned the sheet she actually
+# submitted for the 11/06/2026 draw. She kept the generic "to conduct
+# the research activities supported by this award", her own role
+# wording, and wrote non-payroll lines as "Payment for <service>, as
+# described in the approved budget, for <period>, to support research
+# activities supported by this award." So: extract-award-purpose is
+# REMOVED (no NoA / aims upload needed; parallel tasks 2 → 1); the
+# sentences follow her patterns; a prior completed sheet, when
+# uploaded, supplies her exact payroll sentences (dates swapped);
+# justification header fallback "ACTIVITY"; total rows copied with an
+# empty justification.
+#
+# === v0.3.1 (2026-11-04): CODEX REVIEW FIXES (PR #21) ===
+# Unknown-pay-period wording, a fixed-header fallback when cells are
+# missing, names kept in copied cells but banned from derived fields,
+# generic student roles for E4135/E4282, workflow-local eval posture.
+#
+# === v0.3.0 (2026-11-04): SENTENCE SHAPE + SERVICE-MONTH TIMEFRAME ===
+# First v0.2.0 run on the real 11/06/2026 CB7897 sheet (16 lines incl.
+# animal per diem, publication, supplies): CSV opened as 16 x 15 with
+# cells intact. Fixed: (1) the activity phrase ("to study how ...")
+# left "supported by this award" dangling at the end; the award-purpose
+# task now returns a noun-phrase research_topic and the sentence reads
+# "... to carry out the research supported by this award on <topic>",
+# with cost-specific verbs (publication → "to publish findings from");
+# (2) the September LARF per diem posted 10/19 was justified as
+# "October 2026"; non-payroll lines now use a service month named in
+# Description over the posting date.
+#
+# === v0.2.0 (2026-11-04): OUTPUT IS THE FILLED BILLING SHEET ===
+# v0.1.0's first run (CB7897, Deb's completed sheet + NoA/aims) had the
+# right content, but the deliverable was a Markdown report and the PI's
+# real job is returning OSP's spreadsheet with the justification column
+# filled. The consolidation now emits a JSON array of row objects keyed
+# by the sheet's own headers (PMSCode … Amount, then the justification
+# column header). Vandalizer's run download with format=csv json.loads
+# a string output and writes a list of dicts as real columns
+# (routers/workflows.py _render_workflow_output, checked against
+# ui-insight/vandalizer 09a0716) — so "Download → CSV" yields the sheet.
+# A Data Export step would NOT work here: DataExportNode only tabulates
+# a Python list/dict, and a Prompt step's output is a string, so it
+# would ship a .txt. The v0.1.0 Markdown table, paste block, PMS
+# subaccount paragraph, and reviewer notes are dropped (extra columns
+# would have to be deleted before the sheet goes back to OSP); line
+# flags remain visible in the Extraction step's output.
+#
+# === Topology (v0.1.0) ===
+#
+# Origin (2026-11-04): HHS updated its PMS payment-justification
+# requirements for discretionary awards, effective immediately. University
+# of Idaho OSP now sends each affected PI/DGA a "Billed-Unbilled Detail by
+# PMS Code" spreadsheet every other Tuesday; the PI must return one
+# justification per line by close of business Wednesday so OSP can draw
+# on Thursday. 19 UI grants are affected. First test case: Deborah
+# Stenkamp's CB7897 (sponsor award REY012146F) sheet for the 10/23/2026
+# draw, which she completed by hand.
+#
+# Step 1  Extraction (2 parallel Prompt tasks, workflow_documents)
+#   extract-draw-lines     — reads the OSP billing sheet; classifies each
+#                            line's cost type and role and resolves its
+#                            timeframe (payroll lines via the pay-date →
+#                            pay-period table embedded in the prompt).
+#   extract-award-purpose  — reads the Notice of Award / aims page, if
+#                            uploaded, for a plain-language activity
+#                            phrase. Returns nulls when absent.
+# Step 2  Consolidation (output) — hhs-payment-justification component,
+#   step_input only. v0.1.0: Markdown report. v0.2.0+: JSON row array
+#   mirroring the OSP sheet with the justification column filled.
+#
+# Assumptions to confirm with OSP / Payroll (see README):
+#   - UI biweekly payroll: pay date (Friday) = TransDate on payroll lines;
+#     the pay period worked runs pay date − 26 days to pay date − 13 days.
+#     Derived from ONE confirmed example (10/23/2026 pay date → 9/27–10/10
+#     in the completed CB7897 sheet). Table runs through 6/18/2027.
+#   - The PMS justification character limit is not yet confirmed; the
+#     subaccount summary is kept to ~90 words.
+
+name: HHS Draw Justification
+description: >
+  Reads the OSP "Billed-Unbilled Detail by PMS Code" spreadsheet for an HHS
+  discretionary award (plus, optionally, the PI's last completed sheet)
+  and returns the same sheet with its justification column
+  filled: one plain-language, PII-free payment justification per expense
+  line, as HHS now requires for each PMS drawdown. Download the result as
+  CSV, open it in Excel, and return it to OSP.
+
+workflow_version: 0.4.1
+vandalizer_schema_version: 2
+status: experimental
+owner: ui-insight
+created: 2026-11-04
+updated: 2026-11-04
+
+components:
+  - slug: hhs-payment-justification
+    pinned_version: 0.4.1
+
+validation_plan:
+  - id: HDJ-01
+    name: One output row per spreadsheet row
+    category: completeness
+    description: >
+      The output is a JSON array with exactly one object per data row of the
+      billing spreadsheet, in spreadsheet row order. FAIL if any row is
+      dropped, merged, duplicated, or reordered.
+  - id: HDJ-02
+    name: Sheet columns copied unchanged
+    category: accuracy
+    description: >
+      Each object carries the sheet's column headers verbatim and in order
+      (PMSCode through Amount, then the justification column header), and
+      every copied value (codes, dates, descriptions, amounts) matches its
+      spreadsheet cell exactly; blank cells stay blank. FAIL on any altered,
+      missing, or extra column, or a changed value.
+  - id: HDJ-03
+    name: HHS required elements present
+    category: content
+    description: >
+      Every direct-cost justification names the cost, the role (not a
+      person, for personnel), the timeframe, and how the cost supports the
+      award (e.g., "to conduct the research activities supported by this
+      award"), as one grammatical sentence. Non-payroll lines use the
+      service period named in Description (e.g., "Sep 2026 LARF PD" →
+      September 2026), not the posting date.
+      Indirect (F&A) lines use HHS's negotiated-rate wording. FAIL if any
+      justification omits the link to the award or the timeframe (the
+      HHS "insufficient" pattern).
+  - id: HDJ-04
+    name: No personally identifiable information
+    category: content
+    description: >
+      No justification contains a person's name, employee or student ID, an
+      individual's pay rate, or other personal details. Roles ("project
+      laboratory manager", "graduate research assistants") are acceptable.
+      FAIL on any PII.
+  - id: HDJ-05
+    name: Payroll timeframe matches the pay period
+    category: accuracy
+    description: >
+      Payroll lines give the pay period worked (for a 10/23/2026 pay date,
+      9/27/2026 to 10/10/2026), not the pay date or the draw window. FAIL if
+      a payroll line's dates are invented, use the transaction date as the
+      work period, or differ between lines from the same payroll run.
+  - id: HDJ-06
+    name: Generic award link, no invented specifics
+    category: accuracy
+    description: >
+      Justifications link costs to "the research activities supported by
+      this award" without naming research topics, aims, journals, or
+      purchase purposes that are not in the billing sheet or the PI's prior
+      wording. When a prior completed sheet was uploaded, payroll lines
+      reuse the PI's sentence for the same account code with the dates
+      updated. FAIL on an invented specific.
+  - id: HDJ-07
+    name: Raw JSON that downloads as CSV
+    category: formatting
+    description: >
+      The final output is only a JSON array of flat objects: no code fence,
+      heading, or commentary before or after, so Vandalizer's CSV download
+      splits it into columns. Justifications use plain ASCII and no Banner
+      account codes or payroll run labels. FAIL on any surrounding text,
+      nested values, or codes inside justification text.
+
+steps:
+  - name: Extraction
+    tasks:
+      - name: extract-draw-lines
+        input_sources:
+          - workflow_documents
+        prompt_inline: |
+          You are reading the University of Idaho OSP "Billed-Unbilled
+          Detail by PMS Code" spreadsheet for one HHS grant's drawdown and
+          preparing each expense line for a payment justification.
+
+          ## Find the billing sheet
+          It has the column headers PMSCode, GrantCode, FundCode,
+          BillRunDate, TransDate, DocCode, AcctCode, BillingStatus,
+          BillInvoiceSeqNum, AcctClassCode, ItemNumber, Description,
+          SponsorAccount, Amount, and often a last column for the PI's
+          justification (its header may read like "ACTIVITY 10/10-23/2026
+          PER PI/DGA" or just "ACTIVITY"). Any other uploaded document is
+          not an expense sheet; ignore it.
+
+          A TOTAL or subtotal row (e.g. "CB7897 Total" with only an
+          Amount; no AcctCode) is not an expense line: still include it
+          in `lines` in its place, with its `cells` copied and
+          `cost_type` = "total", so the sheet's shape is kept.
+
+          If TWO billing sheets are uploaded, the CURRENT draw is the one
+          whose justification column is empty; the other is a PRIOR draw.
+          Extract lines only from the current sheet. Use the prior sheet
+          only for `prior_wording` (below). If only one sheet is uploaded
+          and its justification column is filled, treat it as the current
+          sheet AND use its own text as `prior_wording`.
+
+          ## The sheet's columns
+          `columns` — every column header of the sheet EXCEPT the
+          justification column, verbatim, left to right (normally the 14
+          headers PMSCode through Amount). `draw_header` — the
+          justification column's header verbatim (null if the sheet has
+          no such column).
+
+          ## For every data row, in row order
+          `cells` — that row's value for each entry in `columns`, in the
+          same order, copied EXACTLY as shown, as strings. A blank cell
+          is "" (never skip it, so positions stay aligned). Do not
+          reformat dates, numbers, or codes.
+          Copy verbatim: `row` (spreadsheet row number, header = 1),
+          `pms_code`, `acct_code`, `sponsor_account`, `acct_class`
+          (AcctClassCode: D = direct, I = indirect), `description`,
+          `amount` (number exactly as shown, keep cents).
+          Then derive:
+
+          `cost_type` — from SponsorAccount:
+          - "10-SALARY" or "12-IRRHELP" → "salary"
+          - "11-FRINGE" → "fringe benefits"
+          - "60-F and A" or AcctClassCode I → "indirect"
+          - anything else → a short plain phrase from the account name and
+            Description; never the code itself. Known patterns:
+            "LARF PD" → "services provided by the Laboratory Animal
+            Research Facility"; a publisher (Elsevier, Springer, Wiley,
+            etc.) → "publication costs"; a retail vendor (Amazon, Fisher,
+            VWR, etc.) → "laboratory supplies"; otherwise a short plain
+            phrase ("travel", "equipment").
+
+          `role` — who the cost is for, as a ROLE, never a name:
+          - AcctCode E4109 → "project graduate research assistants"
+          - AcctCode E4135 → "project student research assistants"
+          - AcctCode E4106 → "project staff"
+          - AcctCode E4281 → fringe for "project staff"
+          - AcctCode E4282 → fringe for "project student research
+            assistants"
+          Keep these defaults general: name a narrower category (e.g.
+          medical students) only when `prior_wording` or an uploaded
+          document supports it for this grant.
+          - indirect lines → null
+          - non-personnel costs → null
+          - any other personnel code → "project personnel" and add a flag
+            asking the PI to name the role.
+          If `prior_wording` exists for the same AcctCode, take the role
+          from it instead (e.g., the PI wrote "project laboratory manager"
+          for E4106).
+
+          `period_start`, `period_end`, `timeframe_basis`:
+          - PAYROLL lines (Description begins "HR Payroll"): TransDate is
+            the PAY DATE. Look it up below and use the pay period worked.
+            TransDate may appear as a date or as an Excel serial number;
+            both columns are given. timeframe_basis = "pay period".
+          - Not in the table → period_start/period_end null,
+            timeframe_basis = "pay date <TransDate as M/D/YYYY>", and add
+            a flag. Never use the pay date itself as the work period.
+          - NON-PAYROLL direct lines: if Description names the month
+            or period the goods or service were provided (e.g. "ef/IDG
+            Sep 2026 LARF PD" = animal facility per diem for September
+            2026), use THAT period: period_start = its first day,
+            period_end = its last day, timeframe_basis = "service
+            period". TransDate on these internal recharges is only the
+            posting date. WRONG: "animal care in October 2026" for
+            "Sep 2026 LARF PD" posted 10/19/2026. Otherwise
+            period_start = period_end = TransDate as M/D/YYYY;
+            timeframe_basis = "transaction date".
+          - INDIRECT lines: both null; timeframe_basis = "current budget
+            period".
+          Never use the draw-window dates in the justification column
+          header as the work period.
+
+          | Pay date | Excel serial | Pay period start | Pay period end |
+          |---|---|---|---|
+          | 09/25/2026 | 46290 | 08/30/2026 | 09/12/2026 |
+          | 10/09/2026 | 46304 | 09/13/2026 | 09/26/2026 |
+          | 10/23/2026 | 46318 | 09/27/2026 | 10/10/2026 |
+          | 11/06/2026 | 46332 | 10/11/2026 | 10/24/2026 |
+          | 11/20/2026 | 46346 | 10/25/2026 | 11/07/2026 |
+          | 12/04/2026 | 46360 | 11/08/2026 | 11/21/2026 |
+          | 12/18/2026 | 46374 | 11/22/2026 | 12/05/2026 |
+          | 01/01/2027 | 46388 | 12/06/2026 | 12/19/2026 |
+          | 01/15/2027 | 46402 | 12/20/2026 | 01/02/2027 |
+          | 01/29/2027 | 46416 | 01/03/2027 | 01/16/2027 |
+          | 02/12/2027 | 46430 | 01/17/2027 | 01/30/2027 |
+          | 02/26/2027 | 46444 | 01/31/2027 | 02/13/2027 |
+          | 03/12/2027 | 46458 | 02/14/2027 | 02/27/2027 |
+          | 03/26/2027 | 46472 | 02/28/2027 | 03/13/2027 |
+          | 04/09/2027 | 46486 | 03/14/2027 | 03/27/2027 |
+          | 04/23/2027 | 46500 | 03/28/2027 | 04/10/2027 |
+          | 05/07/2027 | 46514 | 04/11/2027 | 04/24/2027 |
+          | 05/21/2027 | 46528 | 04/25/2027 | 05/08/2027 |
+          | 06/04/2027 | 46542 | 05/09/2027 | 05/22/2027 |
+          | 06/18/2027 | 46556 | 05/23/2027 | 06/05/2027 |
+
+          `prior_wording` — the PI's earlier justification sentence for
+          this AcctCode, copied verbatim (from the prior sheet or the
+          filled column), else null. Only for payroll lines (salary,
+          fringe) and indirect lines; null for other costs, whose
+          specifics change from draw to draw.
+
+          `flags` — short strings for the reviewer: unknown personnel
+          code, pay date not in the table, a person's name appearing in
+          Description, a non-payroll description too vague to name the
+          cost.
+
+          Names: `cells` and `description` are copies of OSP's own sheet
+          and keep every value exactly, including any person's name.
+          Every DERIVED field (`cost_type`, `role`, `flags`,
+          `prior_wording` role text) must never contain a person's name;
+          a name-in-Description flag says "a person's name appears in
+          the Description", without repeating the name.
+
+          Top-level: `grant_code`, `sponsor_award_id` (the sponsor ID, if
+          shown anywhere, e.g. "REY012146F"; else null), `columns`,
+          `draw_header`, `flags` (sheet-level issues).
+
+          ## Output compactness
+          Emit minified single-line JSON (no indentation, no line breaks).
+          Minify the SYNTAX only — never shorten or drop a line or a
+          value. Omit keys whose value is null (but keep "" entries inside
+          `cells`). If a value must contain a
+          double quote, escape it as \" or rephrase.
+
+          ## Output
+          {"grant_code":"","sponsor_award_id":"","columns":["PMSCode","GrantCode","..."],"draw_header":"","lines":[{"row":2,"cells":["V0000P","XX0000","..."],"pms_code":"","acct_code":"","sponsor_account":"","acct_class":"D","description":"","amount":0,"cost_type":"","role":"","period_start":"M/D/YYYY","period_end":"M/D/YYYY","timeframe_basis":"","prior_wording":"","flags":[]}],"flags":[]}
+
+          Begin your reply with `{`. Output only the JSON: no questions,
+          no offers to help, no commentary.
+
+  - name: Consolidation
+    is_output: true
+    tasks:
+      - name: hhs-payment-justification
+        input_sources:
+          - step_input
+        prompt_ref:
+          component: hhs-payment-justification
+          from_section: "## Prompt"
+
+evals:
+  workflow_local: true

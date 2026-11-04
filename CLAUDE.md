@@ -1248,6 +1248,183 @@ order VE-05). Re-test note: if a copy still carries the Formatter
 post-process prompt, remove it — the rules now live in the main
 prompt and leaving both risks double-application.
 
+### `workflows/hhs-draw-justification`
+
+**Status**: ✅ v0.4.0 confirmed (v0.4.1 = review fixes, not re-run) on the 11/06/2026 CB7897 draw against
+the PI's own submitted justifications (PR #21). Pay-period rule still
+rests on one example; confirm with OSP/Payroll.
+
+#### v0.1.0 (2026-11-04) — initial build
+
+**Surfaced by**: Deborah Stenkamp (PI, CB7897 / HHS REY012146F)
+forwarding OSP's instructions for the new HHS PMS payment-justification
+requirement (effective Oct 2026; 19 UI grants; justification due to
+osp-billing by COB Wednesday each draw week) plus her hand-completed
+"Billed-Unbilled Detail by PMS Code" sheet for the 10/23/2026 draw
+(10 lines: 3 salary, 2 fringe, 5 F&A; total $8,470.30). Neither file is
+committed (staff names, grant financials).
+
+**Design**: two parallel extractions (`extract-draw-lines` classifies
+each row's cost type / role / timeframe; `extract-award-purpose` pulls
+a plain-language activity phrase from the NoA / aims page, or
+`{"source":"none"}`) → `hhs-payment-justification` consolidation
+(per-line table, paste-ready column block, per-PMS-subaccount
+paragraph, reviewer notes). Payroll timeframe uses an embedded pay-date
+→ pay-period table (period = pay date −26 to −13 days, derived from the
+single 10/23 → 9/27–10/10 example; table ends 6/18/2027 — extend it).
+Role wording for E4106/E4109/E4135/E4281/E4282 inferred from Deb's
+sheet; a prior completed sheet, if uploaded, carries the PI's role
+wording forward.
+
+**Open**: PMS character limit unconfirmed (HHS PDF 403s on automated
+fetch); confirm pay-period rule with OSP/Payroll; whether OSP enters
+justifications per line or per subaccount. Re-test: Deb's sheet alone,
+then with the NoA + aims page she's been asked for.
+
+#### v0.1.0 → v0.2.0 (2026-11-04)
+
+**Test input**: Deb's completed CB7897 sheet + NoA ("Patterning Genes
+in Retinal Development") + aims page, in-Vandalizer run of the v0.1.0
+import.
+
+**Result / bug**: content passed: 10 lines in order, amounts exact,
+total $8,470.30 with correct subtotals, payroll dated 9/27–10/10,
+activity wording from the aims ("how hormones control color-vision
+gene activity in the eye"), F&A verbatim. But the deliverable was a
+Markdown report; the PI's actual task is returning OSP's spreadsheet
+with column O filled. The Word download also mangled the paste block's
+code fence into stray `` `text `` / `` ` `` lines that would have
+shifted every pasted row by one. (Role wording came from Deb's own
+filled column O, so the default-role path is still untested.)
+
+**Changes**: consolidation now emits a raw JSON array of row objects
+keyed by the sheet's own headers (PMSCode … Amount + the
+justification column header) — Vandalizer's run download with
+format=csv json.loads a string output and writes a list of dicts as
+columns (`routers/workflows.py` `_render_workflow_output`, verified
+against ui-insight/vandalizer 09a0716). A DataExport step was ruled
+out: `DataExportNode` only tabulates a Python list/dict, and Prompt
+output is a string, so it ships .txt. `extract-draw-lines` gains
+`columns` + per-row `cells` (verbatim, "" for blanks). Markdown
+table, paste block, subaccount paragraph, and reviewer notes dropped;
+plain-ASCII rule added; validation plan 8 → 7 checks. Component
+0.1.0 → 0.2.0.
+
+**Re-test**: copy of the CB7897 sheet with column O cleared (+ NoA and
+aims); download as CSV; confirm 10 rows × 15 columns open cleanly in
+Excel, copied cells unchanged, and E4106 falls back to "project
+staff".
+
+#### v0.2.0 → v0.3.0 (2026-11-04)
+
+**Test input**: the REAL 11/06/2026 CB7897 billing sheet (16 lines:
+pay period 23 salary/fringe/student help, Sep 2026 LARF animal per
+diem $1,413.48, Elsevier publication $2,003, Amazon supplies $15.99,
+eight F&A lines; total $13,688.73; no justification column) + NoA +
+aims, v0.2.0 import, downloaded as CSV.
+
+**Result**: the CSV path works — 16 rows × 15 columns, all copied
+cells intact (dates rendered ISO, e.g. 2026-11-06), header fell back
+to "Justification" since OSP's raw sheet has no column O. Payroll
+dated 10/11–10/24 (table lookup for the 11/06 pay date). E4106 fell
+back to "project staff" as designed. No PII in justifications (the
+PI's name in OSP's LARF Description is copied, as OSP's own data).
+
+**Bugs**: (1) every direct-cost sentence ended "... to study how
+thyroid hormone controls color vision genes in fish and human retinas
+supported by this award." — the verb-phrase activity left the closing
+phrase dangling; (2) "ef/IDG Sep 2026 LARF PD" (posted 10/19) was
+justified as "animal care in October 2026" — the posting date, not
+the September service month.
+
+**Changes**: award-purpose returns a noun-phrase `research_topic`;
+sentence patterns "... to carry out the research supported by this
+award on <topic>." (personnel) / "... used to carry out ..."
+(non-personnel), publication → "to publish findings from ...", with
+the run's dangling sentence as the WRONG example; non-payroll
+timeframe prefers a service period named in Description (the LARF
+line as the WRONG example). Component 0.2.0 → 0.3.0.
+
+#### v0.3.0 → v0.3.1 (2026-11-04)
+
+**Surfaced by**: Codex (gpt-6.1-sol, medium) review of PR #21, not a
+test run. Fixes: (1) the missing-`cells` fallback built rows from five
+fields, so keys could differ between rows; it now uses OSP's fixed
+14-column header list for every row; (2) payroll lines with a pay date
+outside the table had no sentence rule; now "for the pay period paid
+on <date>", never the pay date as dates worked; (3) "do NOT copy the
+name into any other field" contradicted verbatim `cells`; now names
+stay in copied cells and are banned from derived fields; (4) E4135 /
+E4282 defaults said "undergraduate and medical student", inferred from
+one grant; now "project student research assistants" unless prior
+wording or a document supports more; (5) eval posture inherits →
+`workflow_local: true` with a stub case, per docs/contracts.md; (6)
+README's stale "subaccount justification ~90 words" removed.
+Component 0.3.0 → 0.3.1.
+
+#### v0.3.1 → v0.4.0 (2026-11-04)
+
+**Surfaced by**: PI review (Deb). She saw the v0.2.0 CSV for the 11/06
+draw: "Not bad! I'm on board with the concept, but would lean toward
+using less specific language", and returned the sheet she actually
+submitted (header "ACTIVITY", a "CB7897 Total" row). Her column O:
+payroll identical in shape to the workflow's but with the generic
+"to conduct the research activities supported by this award" (no
+research topic) and her own roles ("project laboratory manager";
+"graduate, undergraduate, and medical student research assistants");
+LARF: "Payment for services provided by the Laboratory Animal Research
+Facility (LARF), as described in the approved budget, for the month of
+September, to support research activities supported by this award.";
+publication: "..., as described in the approved budget, for a paper in
+<journal>, that reviewed results of research supported by this
+award."; supplies: "Payment for tools purchased in October to repair
+pipettes ..." (PI-only knowledge). Our timeframes (10/11–10/24,
+September LARF) and F&A matched hers.
+
+**Changes** (MINOR pre-1.0, breaking: parallel tasks 2 → 1):
+extract-award-purpose removed; general wording only, her sentence
+patterns per cost type; payroll reuses prior_wording with dates
+swapped when her last sheet is uploaded; LARF / publisher / retail
+vendor cost mappings; header fallback "ACTIVITY"; total rows kept with
+empty justification. HDJ-06 rewritten. Component 0.3.1 → 0.4.0.
+
+**Re-test**: upload the 11/06 sheet + her completed 10/23 sheet as the
+prior; payroll sentences should match her 11/06 submission exactly.
+
+#### v0.4.0 confirmation run (2026-11-04)
+
+**Test input**: the 11/06/2026 CB7897 billing sheet + Deb's completed
+10/23 sheet as the prior, v0.4.0 import, CSV download; compared
+cell-by-cell with the sheet she submitted to OSP.
+
+**Result: pass.** 17 rows × 15 columns, header "ACTIVITY", "CB7897
+Total" row kept in place with an empty justification. All 14 copied
+columns match her sheet on every row (dates render ISO in the CSV vs
+Excel serials in hers; same values). 13 of 16 justifications match
+hers word for word: all 5 payroll lines (prior_wording reuse with the
+10/11–10/24 period) and all 8 F&A lines. The 3 differences carry
+PI-only knowledge the workflow correctly does not invent: LARF ("(LARF)"
+acronym, "September" without year), Elsevier (her journal name), Amazon
+(her "tools … to repair pipettes"). The PI edits 2–3 cells instead of
+writing 16.
+
+#### v0.4.0 → v0.4.1 (2026-11-04)
+
+**Surfaced by**: Codex (gpt-6.1-sol, medium) re-review of PR #21 —
+"would not merge yet", four findings; prior findings #1/#3–#6
+confirmed resolved, #2 partly reopened by prior-wording precedence.
+Fixes: (1) dropped "as described in the approved budget" — an
+unverified assertion (the PI used it; she can add it back after
+checking); (2) publication pattern now includes the month incurred
+(HDJ-03 timeframe); (3) prior_wording reuse gated on the line having a
+pay period, the prior sentence having a "from…to" range, and no
+name/code — missing-period, ASCII, and PII rules take precedence; (4)
+catalog override, component evals README, and the workflow eval stub
+no longer describe the removed NoA/aims inputs. Component 0.4.0 →
+0.4.1. Effect on the confirmation run: payroll/F&A unchanged; LARF and
+Elsevier lines lose the budget clause, Elsevier gains "incurred in
+October 2026".
+
 ### Batch: KB-step removal across remaining Variant-A workflows (v1.0.0, 2026-08-13)
 
 PR #2 (branch `remove-kb-step-remaining-workflows`) removes the inert

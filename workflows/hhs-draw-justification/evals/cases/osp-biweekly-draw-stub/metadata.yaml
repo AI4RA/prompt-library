@@ -1,0 +1,33 @@
+# Case identity
+case: osp-biweekly-draw-stub
+source: "Placeholder case shell — to be replaced with a de-identified University of Idaho OSP Billed-Unbilled Detail by PMS Code sheet for an HHS discretionary award, plus the PI's previous completed sheet as the prior."
+source_url: "https://www.hhs.gov/sites/default/files/asfr-payment-justification-guidance-hhs-recipients.pdf"
+retrieved: 2026-11-04
+
+# Which structural features of the input billing sheet this case exercises.
+structural_features:
+  - biweekly-payroll-lines
+  - internal-recharge-with-service-month
+  - publication-and-supplies-lines
+  - indirect-lines-per-direct-line
+
+# Workflow-level behaviors this case targets.
+workflow_features:
+  - column_fidelity_json_rows_for_csv_download
+  - payroll_pay_period_lookup
+  - service_month_over_posting_date
+  - names_kept_in_cells_excluded_from_justifications
+  - prior_wording_reuse_and_general_language
+
+# Validation metadata — REQUIRED.
+validated_by: pending-osp-review
+validated_at: 2026-11-04
+validated_against_version: "0.4.1"
+component_versions_at_validation:
+  hhs-payment-justification: "0.4.1"
+
+notes: |
+  Scaffolded case shell only. Development runs used two real CB7897
+  sheets (10/23 and 11/06/2026 draws), which are not committed. Add
+  input-source.md and expected.csv once a de-identified sheet is
+  available and OSP or the PI has validated the filled output.
