@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.1] — 2026-11-04
+
+- No approved-budget claims; publication sentences carry the month;
+  prior-wording reuse gated on a pay period, a swappable date range,
+  and no names or codes, with the safety rules taking precedence.
+
 ## [0.4.0] — 2026-11-04
 
 - Reads one fragment (draw lines); the award-purpose input is gone.

@@ -5,6 +5,14 @@
 # alongside. Never hand-edit the generated JSON — update this manifest
 # and rebuild.
 #
+# === v0.4.1 (2026-11-04): CODEX RE-REVIEW FIXES (PR #21) ===
+# Dropped "as described in the approved budget" (no budget evidence in
+# the input; the PI may add it); publication sentences now carry the
+# month; prior_wording reuse only when the line has a pay period, the
+# prior sentence has a date range to swap, and no name/code — the
+# missing-period, ASCII, and PII rules always win; docs describe the
+# single fragment.
+#
 # === v0.4.0 (2026-11-04): PI STYLE — GENERIC AWARD LINK, ONE EXTRACTION ===
 # Deb reviewed the v0.3.0 CSV ("Not bad! ... would lean toward using
 # less specific language") and returned the sheet she actually
@@ -93,7 +101,7 @@ description: >
   line, as HHS now requires for each PMS drawdown. Download the result as
   CSV, open it in Excel, and return it to OSP.
 
-workflow_version: 0.4.0
+workflow_version: 0.4.1
 vandalizer_schema_version: 2
 status: experimental
 owner: ui-insight
@@ -102,7 +110,7 @@ updated: 2026-11-04
 
 components:
   - slug: hhs-payment-justification
-    pinned_version: 0.4.0
+    pinned_version: 0.4.1
 
 validation_plan:
   - id: HDJ-01

@@ -1,6 +1,6 @@
 ---
 name: hhs-payment-justification
-version: "0.4.0"
+version: "0.4.1"
 category: drafting
 domain: research-administration
 status: experimental
@@ -93,23 +93,36 @@ they want them.
 
 **Payroll lines with `prior_wording`** (salary, fringe): reuse the
 PI's sentence word for word, replacing only its dates with this
-line's `period_start` and `period_end`. Their wording wins over every
-pattern below.
+line's `period_start` and `period_end`, but ONLY when all of these
+hold:
+- this line has both `period_start` and `period_end`;
+- the prior sentence contains a "from <date> to <date>" range to
+  replace;
+- the prior sentence contains no person's name, account or object
+  code, or payroll run label.
+If any fails, write the line from the patterns below instead (keeping
+the PI's role wording when it is a role, not a name). The rules on
+missing pay periods, plain language, plain ASCII, and personal
+information below always win over prior wording.
 
 Otherwise write one sentence per line, in these patterns:
 
 - Salary and fringe:
   `Payment for <cost> for <role> from <period_start> to <period_end> to conduct the research activities supported by this award.`
 - Services (e.g., animal facility):
-  `Payment for <cost>, as described in the approved budget, for <the month of Month YYYY | period>, to support the research activities supported by this award.`
+  `Payment for <cost> for <the month of Month YYYY | period>, to support the research activities supported by this award.`
 - Publication costs:
-  `Payment for publication costs, as described in the approved budget, for a paper reporting results of research supported by this award.`
+  `Payment for publication costs incurred in <Month YYYY> for a paper reporting results of research supported by this award.`
 - Supplies and other purchases:
   `Payment for <cost> purchased in <Month YYYY> for use in the research activities supported by this award.`
 - Travel:
   `Payment for travel in <Month YYYY> to conduct or present the research activities supported by this award.`
 - **Total / subtotal rows** (`cost_type` "total"): leave the
   justification "".
+
+Do not claim a cost is in the approved budget, was prior-approved,
+or is allowable: nothing in the fragment shows that. The PI may add
+such wording ("as described in the approved budget") after checking.
 
 - **<cost>**: from `cost_type` ("salary", "fringe benefits",
   "services provided by the Laboratory Animal Research Facility",

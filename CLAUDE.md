@@ -1250,7 +1250,7 @@ prompt and leaving both risks double-application.
 
 ### `workflows/hhs-draw-justification`
 
-**Status**: ✅ v0.4.0 confirmed on the 11/06/2026 CB7897 draw against
+**Status**: ✅ v0.4.0 confirmed (v0.4.1 = review fixes, not re-run) on the 11/06/2026 CB7897 draw against
 the PI's own submitted justifications (PR #21). Pay-period rule still
 rests on one example; confirm with OSP/Payroll.
 
@@ -1407,6 +1407,23 @@ PI-only knowledge the workflow correctly does not invent: LARF ("(LARF)"
 acronym, "September" without year), Elsevier (her journal name), Amazon
 (her "tools … to repair pipettes"). The PI edits 2–3 cells instead of
 writing 16.
+
+#### v0.4.0 → v0.4.1 (2026-11-04)
+
+**Surfaced by**: Codex (gpt-6.1-sol, medium) re-review of PR #21 —
+"would not merge yet", four findings; prior findings #1/#3–#6
+confirmed resolved, #2 partly reopened by prior-wording precedence.
+Fixes: (1) dropped "as described in the approved budget" — an
+unverified assertion (the PI used it; she can add it back after
+checking); (2) publication pattern now includes the month incurred
+(HDJ-03 timeframe); (3) prior_wording reuse gated on the line having a
+pay period, the prior sentence having a "from…to" range, and no
+name/code — missing-period, ASCII, and PII rules take precedence; (4)
+catalog override, component evals README, and the workflow eval stub
+no longer describe the removed NoA/aims inputs. Component 0.4.0 →
+0.4.1. Effect on the confirmation run: payroll/F&A unchanged; LARF and
+Elsevier lines lose the budget clause, Elsevier gains "incurred in
+October 2026".
 
 ### Batch: KB-step removal across remaining Variant-A workflows (v1.0.0, 2026-08-13)
 

@@ -1578,8 +1578,10 @@ components:
     triad_integration:
       evaluation_datasets: []
       harness_notes: >
-        Canonical invocation surface is prompt.md, which consumes the two
-        JSON fragments produced by the extraction step of the
+        Canonical invocation surface is prompt.md, which consumes the single
+        draw-lines JSON fragment (sheet cells plus cost type, role,
+        timeframe, and the PI's prior wording from an optional earlier
+        completed sheet) produced by the extraction step of the
         workflows/hhs-draw-justification Vandalizer workflow. No runner or
         validated cases yet; the first reference is a PI-completed CB7897
         billing sheet (not committed; carries staff and grant financial

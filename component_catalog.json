@@ -1616,7 +1616,7 @@
       "slug": "hhs-payment-justification",
       "name": "hhs-payment-justification",
       "summary": "Writes the payment justifications HHS requires with every Payment Management System (PMS) drawdown on a discretionary award: one plain-language, PII-free sentence per expense line, returned as the OSP billing sheet's rows with the justification column filled in.",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "category": "drafting",
       "domain": "research-administration",
       "status": "experimental",
@@ -1647,7 +1647,7 @@
         {
           "type": "prompt",
           "path": "components/hhs-payment-justification/prompt.md",
-          "version": "0.4.0",
+          "version": "0.4.1",
           "role": "canonical_prompt"
         }
       ],
@@ -1670,7 +1670,7 @@
       "related_components": [],
       "triad_integration": {
         "evaluation_datasets": [],
-        "harness_notes": "Canonical invocation surface is prompt.md, which consumes the two JSON fragments produced by the extraction step of the workflows/hhs-draw-justification Vandalizer workflow. No runner or validated cases yet; the first reference is a PI-completed CB7897 billing sheet (not committed; carries staff and grant financial detail).",
+        "harness_notes": "Canonical invocation surface is prompt.md, which consumes the single draw-lines JSON fragment (sheet cells plus cost type, role, timeframe, and the PI's prior wording from an optional earlier completed sheet) produced by the extraction step of the workflows/hhs-draw-justification Vandalizer workflow. No runner or validated cases yet; the first reference is a PI-completed CB7897 billing sheet (not committed; carries staff and grant financial detail).",
         "udm_alignment": {
           "status": "repo_local_payment_justification_contract",
           "notes": "Mirrors a University of Idaho OSP billing report; no shared UDM fields are read or produced."
@@ -3783,7 +3783,7 @@
       "slug": "hhs-draw-justification",
       "name": "HHS Draw Justification",
       "description": "Reads the OSP \"Billed-Unbilled Detail by PMS Code\" spreadsheet for an HHS discretionary award (plus, optionally, the PI's last completed sheet) and returns the same sheet with its justification column filled: one plain-language, PII-free payment justification per expense line, as HHS now requires for each PMS drawdown. Download the result as CSV, open it in Excel, and return it to OSP.",
-      "workflow_version": "0.4.0",
+      "workflow_version": "0.4.1",
       "status": "experimental",
       "vandalizer_schema_version": 2,
       "paths": {

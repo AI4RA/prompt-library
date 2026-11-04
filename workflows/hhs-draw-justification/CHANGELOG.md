@@ -5,6 +5,20 @@ workflow semantics: MAJOR for step-structure changes, MINOR for prompt
 tracking a referenced component MINOR or additive options, PATCH for
 display-name / description polish.
 
+## [0.4.1] — 2026-11-04
+
+- Fixes from a Codex re-review of PR #21:
+  - "as described in the approved budget" removed from the services
+    and publication patterns: nothing the workflow reads shows the
+    budget. The PI can add it after checking.
+  - Publication sentences now include the month incurred.
+  - Prior-wording reuse applies only when the line has a pay period,
+    the prior sentence has a date range to replace, and it carries no
+    name or code; the missing-period, ASCII, and PII rules always win.
+  - Catalog notes and eval docs describe the single input fragment and
+    the optional prior sheet (no NoA / aims).
+- Tracks `hhs-payment-justification` 0.4.0 → 0.4.1.
+
 ## [0.4.0] — 2026-11-04
 
 - **PI review.** Deb reviewed the v0.3.0 CSV ("Not bad! ... would lean

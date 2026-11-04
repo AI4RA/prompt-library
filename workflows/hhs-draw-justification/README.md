@@ -87,16 +87,17 @@ submitted for the 11/06/2026 draw:
   assistants from 10/11/2026 to 10/24/2026 to conduct the research
   activities supported by this award."
 - Services: "Payment for services provided by the Laboratory Animal
-  Research Facility, as described in the approved budget, for the
-  month of September 2026, to support the research activities
-  supported by this award."
-- Publication: "Payment for publication costs, as described in the
-  approved budget, for a paper reporting results of research supported
-  by this award."
+  Research Facility for the month of September 2026, to support the
+  research activities supported by this award."
+- Publication: "Payment for publication costs incurred in October 2026
+  for a paper reporting results of research supported by this award."
 - Indirect: HHS's own sufficient F&A sentence, word for word.
 
 The PI can add specifics (the journal, what the supplies were for)
-before sending the sheet.
+before sending the sheet. The PI's own submissions also said "as
+described in the approved budget"; the workflow leaves that out
+because nothing it reads shows the budget, so the PI adds it after
+checking.
 
 ## Open questions
 

@@ -1,6 +1,6 @@
 # Case identity
 case: osp-biweekly-draw-stub
-source: "Placeholder case shell — to be replaced with a de-identified University of Idaho OSP Billed-Unbilled Detail by PMS Code sheet for an HHS discretionary award, plus the matching Notice of Award and aims page."
+source: "Placeholder case shell — to be replaced with a de-identified University of Idaho OSP Billed-Unbilled Detail by PMS Code sheet for an HHS discretionary award, plus the PI's previous completed sheet as the prior."
 source_url: "https://www.hhs.gov/sites/default/files/asfr-payment-justification-guidance-hhs-recipients.pdf"
 retrieved: 2026-11-04
 
@@ -22,9 +22,9 @@ workflow_features:
 # Validation metadata — REQUIRED.
 validated_by: pending-osp-review
 validated_at: 2026-11-04
-validated_against_version: "0.4.0"
+validated_against_version: "0.4.1"
 component_versions_at_validation:
-  hhs-payment-justification: "0.4.0"
+  hhs-payment-justification: "0.4.1"
 
 notes: |
   Scaffolded case shell only. Development runs used two real CB7897

@@ -13,9 +13,11 @@ Ten lines: three salary, two fringe, five F&A; total $8,470.30. Check:
 - payroll lines say 9/27/2026 to 10/10/2026 (the pay period), not the
   10/23 pay date or the "10/10-23/2026" column header;
 - roles, never names; no account codes in the text;
-- with the Notice of Award / aims page uploaded, the activity wording
-  comes from them; without them, the generic wording is used and
-  flagged.
+- general wording only ("the research activities supported by this
+  award"), no research topic, journal, purchase purpose, or
+  approved-budget claim;
+- with the PI's earlier completed sheet uploaded, payroll sentences
+  match the PI's, with the dates updated.
 
 The billing sheet and the PI's correspondence are not committed (they
 carry staff names and grant financials). Add a case under
