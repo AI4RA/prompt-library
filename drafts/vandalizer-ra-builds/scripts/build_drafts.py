@@ -60,7 +60,6 @@ Record each literal field separately with record_value and link its exact source
 Step 4. Classify
 Propose an Associated Type that describes what kind of organization it is: federal, another state's government, foundation or non-profit, private industry, and so on. If the person has attached the "Associate Type Code Definitions" guide or a knowledge base that contains it, use its wording and codes; otherwise give the plain description and say the code must be chosen from the guide.
 Never propose "Foreign" as the Associated Type. Foreign status is a separate yes/no field: answer Yes when the sponsor or its parent company is a foreign entity, even if the address used is in the United States. Name the foreign parent and its country when there is one.
-If the sponsor or its parent company appears to be Chinese-owned, stop there. Tell the person to consult the OSP Director before the record is created, state what you saw and on which page, and do not write the confirmation reply.
 Compare the legal name with the common name: a leading "The" or "A", and a trailing "s", are the usual differences. The legal name goes in the name field; the common name is the familiar name.
 
 Sign-in, permission and safety

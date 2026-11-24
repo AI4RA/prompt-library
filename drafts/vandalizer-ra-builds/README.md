@@ -93,9 +93,10 @@ A file cannot carry a link to a knowledge base. These workflows import with thei
 
 ## Things for RAs to check
 
-- Each processing checklist and rule comes from one recorded walkthrough. Are the steps, order and thresholds right? In particular: the TPS tiers (below 50, 50–74, above 74); the sponsor record's "always Sponsor, Vendor and Subrecipient" setting and its stop-and-consult rule; SFI disclosures valid one year; the 35-character short title rule.
+- Each processing checklist and rule comes from one recorded walkthrough. Are the steps, order and thresholds right? In particular: the TPS tiers (below 50, 50–74, above 74); the sponsor record's "always Sponsor, Vendor and Subrecipient" setting; SFI disclosures valid one year; the 35-character short title rule.
 - `idc-exception-triage` treats a difference under half a percentage point as rounding. That cut-off is a guess to be confirmed.
 - The TPS waiver questions and the due date calculator's rules are not in the process map.
+- `add-sponsor-research` here leaves out one institution-specific sentence from Step 4 of the source draft: an instruction to stop and consult before creating a record for a sponsor with a particular country of ownership. Reviewers working from the source version will see it; decide whether a general form of that rule belongs in the Skill.
 
 ## Test documents and results
 

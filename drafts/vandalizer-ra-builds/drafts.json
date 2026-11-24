@@ -10,7 +10,10 @@
     "repo": "ui-insight/ProcessMapping",
     "path": "drafts/vandalizer",
     "branch": "drafts/vandalizer-ra-builds",
-    "commit": "52c7b257ba9196928c6e0207472b0745f93e67fd"
+    "commit": "52c7b257ba9196928c6e0207472b0745f93e67fd",
+    "differences_from_source": [
+      "new/add-sponsor-research.skill.vandalizer.json omits one sentence of Step 4: an institution-specific instruction to stop and consult before creating the record for a sponsor with a particular country of ownership. The source repository keeps it."
+    ]
   },
   "generator": {
     "scripts": [
@@ -61,7 +64,7 @@
       "kind": "vandalizer-skill",
       "group": "new",
       "path": "new/add-sponsor-research.skill.vandalizer.json",
-      "sha256": "1069c8bb6923a501bbfd0d86bc60e8837faefedf6b5a26274c45f74f8248ecbe",
+      "sha256": "d8eb95c5fe559acbea5945304f46414656d72ffa6db878661f97610faed7caec",
       "summary": "VERAS search variants, SAM.gov research, and a proposed business associate record with a source per value.",
       "requires_browser_extension": true,
       "when_to_use": "Research a new sponsor on SAM.gov and other public sources and propose the VERAS business associate record, before an administrator adds it.",
