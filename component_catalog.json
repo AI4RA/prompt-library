@@ -4224,5 +4224,64 @@
         "source": "components/viva-engage-reformat/evals"
       }
     }
+  ],
+  "drafts": [
+    {
+      "slug": "vandalizer-ra-builds",
+      "title": "Vandalizer drafts for RA review",
+      "summary": "Draft Vandalizer Skills and workflows built from recorded research-administration process walkthroughs and from Vandalizer's catalog. Nothing here is published and no catalog item is changed.",
+      "status": "draft",
+      "status_as_of": "2026-11-23",
+      "paths": {
+        "collection_dir": "drafts/vandalizer-ra-builds",
+        "index": "drafts/vandalizer-ra-builds/drafts.json",
+        "readme": "drafts/vandalizer-ra-builds/README.md",
+        "changelog": "drafts/vandalizer-ra-builds/CHANGELOG.md"
+      },
+      "item_count": 25,
+      "items_by_kind": {
+        "vandalizer-skill": 11,
+        "vandalizer-workflow": 14
+      },
+      "items_by_group": {
+        "companion": 4,
+        "new": 12,
+        "variant": 9
+      },
+      "related_workflows": [
+        "award-compliance-extraction",
+        "award-modification-intake",
+        "budget-justification-generator",
+        "compliance-personnel-verification",
+        "effort-reporting-extraction",
+        "export-to-banner-extraction",
+        "ffr-management-extraction",
+        "foa-checklist-extraction",
+        "noa-summary",
+        "prior-approval-extraction",
+        "proposal-document-completeness",
+        "rfa-checklist-extraction",
+        "section2-personnel-eligibility",
+        "subaward-extraction"
+      ],
+      "evaluation": {
+        "test_site": "Vandalizer dev",
+        "model": "moonshotai/kimi-k3",
+        "fixtures": {
+          "repo": "AI4RA/evaluation-data-sets",
+          "dataset_id": "synthetic.ra_process_test_documents",
+          "path": "synthetic/ra_process_test_documents"
+        },
+        "results": {
+          "repo": "AI4RA/evaluation-data-sets",
+          "path": "evaluation_results/vandalizer-ra-drafts"
+        },
+        "runner": {
+          "repo": "AI4RA/evaluation-harness",
+          "path": "runners/vandalizer-ra-drafts"
+        },
+        "note": "Outcomes record what a run produced. They are not accuracy scores, and no draft has been reviewed by an RA yet."
+      }
+    }
   ]
 }

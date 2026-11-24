@@ -25,6 +25,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 COMPONENTS_DIR = REPO_ROOT / "components"
 WORKFLOWS_DIR = REPO_ROOT / "workflows"
+DRAFTS_DIR = REPO_ROOT / "drafts"
 OVERRIDES_PATH = REPO_ROOT / "component_catalog_overrides.yaml"
 OUTPUT_PATH = REPO_ROOT / "component_catalog.json"
 
@@ -358,6 +359,51 @@ def build_component_entry(component: Component, overrides: dict) -> dict:
     }
 
 
+def discover_draft_collections() -> list[dict]:
+    """Summarize each drafts/<collection>/drafts.json for the catalog.
+
+    The index stays the source of truth for per-file detail; the catalog
+    carries only what a consumer needs to find the collection and see its
+    size. Index validity is checked by .github/scripts/lint_components.py.
+    """
+    entries: list[dict] = []
+    if not DRAFTS_DIR.is_dir():
+        return entries
+    for index_path in sorted(DRAFTS_DIR.glob("*/drafts.json")):
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+        collection_dir = index_path.parent
+        items = index.get("items") or []
+        kinds: dict[str, int] = {}
+        groups: dict[str, int] = {}
+        related: set[str] = set()
+        for item in items:
+            kinds[item["kind"]] = kinds.get(item["kind"], 0) + 1
+            groups[item["group"]] = groups.get(item["group"], 0) + 1
+            related.update(item.get("related_workflows") or [])
+        rel_dir = collection_dir.relative_to(REPO_ROOT)
+        entries.append(
+            {
+                "slug": index["slug"],
+                "title": index.get("title"),
+                "summary": index.get("summary"),
+                "status": index.get("status"),
+                "status_as_of": index.get("status_as_of"),
+                "paths": {
+                    "collection_dir": str(rel_dir),
+                    "index": str(rel_dir / "drafts.json"),
+                    "readme": str(rel_dir / "README.md"),
+                    "changelog": str(rel_dir / "CHANGELOG.md"),
+                },
+                "item_count": len(items),
+                "items_by_kind": dict(sorted(kinds.items())),
+                "items_by_group": dict(sorted(groups.items())),
+                "related_workflows": sorted(related),
+                "evaluation": index.get("evaluation"),
+            }
+        )
+    return entries
+
+
 def build_catalog() -> dict:
     overrides = load_overrides()
     components = discover_components()
@@ -407,6 +453,7 @@ def build_catalog() -> dict:
             build_workflow_entry(workflow, workflow_overrides.get(workflow.slug) or {})
             for workflow in workflows
         ],
+        "drafts": discover_draft_collections(),
     }
 
 

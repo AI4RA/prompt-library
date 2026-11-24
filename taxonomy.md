@@ -40,3 +40,18 @@ Lifecycle stage of a component.
 - `experimental` — under active development; output contract may change
 - `stable` — intended for downstream use and backed by validated reference coverage, but consumers should still pin versions and check the component's last fully evaluated version
 - `deprecated` — superseded; consult `README.md` for the replacement
+
+## Draft kinds
+
+File kinds allowed in a draft collection's `drafts.json`. See [`drafts/README.md`](drafts/README.md).
+
+- `vandalizer-skill` — Vandalizer chat Skill import file: `export_type: search_set` with one `set_type: prompt` item whose instructions are in `extraction_config.content`
+- `vandalizer-workflow` — Vandalizer workflow import file (`export_type: workflow`) stored as generated, not built from a `manifest.yaml`
+
+## Draft groups
+
+How a draft relates to what already exists in Vandalizer's catalog.
+
+- `new` — covers a task the catalog does not
+- `companion` — used beside an existing catalog item
+- `variant` — a modified copy of an existing catalog item, for side-by-side comparison

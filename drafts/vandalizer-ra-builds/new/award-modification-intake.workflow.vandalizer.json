@@ -1,0 +1,109 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "items": [
+    {
+      "name": "Award Modification Intake",
+      "description": "Classifies an award modification (additional funds, no-cost extension, PI change, rebudget) and writes an intake brief: key details, checks, sponsor conditions, a processing checklist and draft correspondence.",
+      "steps": [
+        {
+          "name": "Modification details",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Extraction",
+              "data": {
+                "extractions": [
+                  "Award Number or FAIN",
+                  "Sponsor Award Number",
+                  "Amendment or Modification Number",
+                  "Modification Type",
+                  "Execution Status",
+                  "Sponsor or Agency Name",
+                  "Program or Grants Officer",
+                  "Principal Investigator",
+                  "Previous Principal Investigator",
+                  "New Principal Investigator",
+                  "Effective Date",
+                  "Sponsor Approval Date",
+                  "Current End Date",
+                  "New End Date",
+                  "Modification Amount",
+                  "Award Amount Before This Modification",
+                  "Total Obligated Amount After This Modification",
+                  "F&A Rate",
+                  "F&A Amount",
+                  "Budget Breakdown by Category",
+                  "Rebudget Source Category",
+                  "Rebudget Destination Category",
+                  "Cost Share Changes",
+                  "Payment System or PMS Code",
+                  "Point of Contact Changes",
+                  "Prior Approval Reference",
+                  "Sponsor Conditions",
+                  "Regulations or Terms Cited"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Intake brief",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "prompt": "You are preparing a Modification Intake Brief for a post-award specialist in a university Office of Sponsored Programs. Your input is the modification document (an amendment, no-cost extension, PI change approval, rebudget approval or similar) and the details extracted from it in the previous step. The specialist uses the brief to process the modification in VERAS and Banner. You cannot see VERAS or Banner: never state what they contain.\n\nRules\n- Use only the document. Copy every amount, date, name and identifier exactly as written; do not round, reformat or abbreviate them.\n- If the document does not state something, write \"Not stated in the document\". If a field does not apply to this type of modification, write \"Not applicable\".\n- If an extracted value contradicts the document, follow the document and note the difference under Discrepancies. Do not mention fields the extraction left empty, or the extraction step itself.\n- Do not mention page headers, footers or watermarks at all, not even to say you ignored them, and do not comment on whether the document is genuine.\n- A sponsor approval letter that says no amendment will be issued is not an amendment: say so, and give the amendment number as \"None issued\".\n- Do not add requirements from general knowledge of federal rules. Cite a regulation or term only if the document cites it.\n\nWrite these sections, in this order.\n\n1. Classification\nType: exactly one of Additional Funds, No-Cost Extension, PI Change, Rebudget, Scope Change, Administrative Change, or Combined (name each type included).\nConfidence: High, Medium or Low.\nEvidence: the document's own words that show the type, quoted, with the page if shown.\nAward number or FAIN, sponsor award number if different, amendment number, sponsor.\nExecution status: Unilateral (issued by the sponsor, no university signature needed), Bilateral (needs signatures; say whose are present and whose are missing), or Not stated in the document.\n\n2. Key details\nA table of Field and Value with only the rows that apply to the type:\n- Additional Funds: modification amount; award amount before; total obligated after; F&A rate; F&A amount; budget by category; cost share changes.\n- No-Cost Extension: current end date; new end date; any change in funding (normally none; say what the document says).\n- PI Change: previous PI; new PI; effective date; sponsor approval date.\n- Rebudget: amount moved; source category; destination category; sponsor approval date; the justification as stated.\n- Scope Change or Administrative Change: what changed, in the document's words.\nFor Combined, include the rows for each type.\n\n3. Checks\n- For Additional Funds: add the award amount before and the modification amount and compare with the total obligated after. Show the arithmetic and say whether it agrees. If any of the three is not stated, say the check could not be made.\n- For a No-Cost Extension: say whether the new end date is later than the current end date.\n- For a PI Change: say whether both the previous and new PI are named.\n- Say whether the award number is the same everywhere it appears in the document.\n\n4. Conditions and approvals\nSponsor conditions, each as a bullet in the document's words. A condition is something new this modification requires; a sentence saying other terms are unchanged, or restating how payment works, is not one. If there are none, write \"None\". Prior approval the document refers to, with its date. Regulations or terms the document cites. Payment system or PMS code, and any point of contact changes.\n\n5. Discrepancies and open questions\nAnything inconsistent inside the document, anything the specialist needs that the document does not state, and anything ambiguous in the classification.\n\n6. Processing checklist\nIf the execution status is Bilateral and a signature is missing, begin this section with \"Do not process yet: awaiting\" and name the missing signature; give the checklist under the heading \"Once fully executed\".\nGive the checklist for the classified type only (each one for Combined). These are the specialist's steps; you have not done any of them. Put the document's values into the steps where they belong.\n- Additional Funds: match the sponsor ID on the modification to Banner; verify the cumulative amounts against Banner; check for point of contact updates; enter the amendment details, funding amounts, F&A rate and budget by account category in the VERAS mod processing form and confirm the form total; create the journal entry in Banner and record its number in the form; update the FOA text and the current and cumulative amounts in Banner; send correspondence to the PI and DGAs; forward to the Financial Unit and wait for its confirmation.\n- No-Cost Extension: upload the fully executed agreement to the VERAS mod processing form and enter the amendment details; check the PMS code in Banner; update the end dates in Banner to the new end date; update the FOA text in Banner; send correspondence; update the processing notes; reassign the task to the Financial Unit; update the review outcome and project status.\n- PI Change: verify the amendment details; record the sponsor approval in the VERAS sponsor prior approval request; in Banner remove the previous PI, insert the new PI and update the PI on the main page; update the FOA text; mark Banner updated in VERAS; send correspondence with the amendment attached; update the submission outcome; file the correspondence.\n- Rebudget: upload the sponsor approval to VERAS; open the sponsor prior approval request (SPAR) form; look up the index in Banner and enter it in the form; verify the budget accounts; check the narrative for anything the PI must follow up; create the journal entry in Banner with the debit to the source account and the credit to the destination account, and record its number in the form; complete the form; send correspondence; reset the project status to Active.\n- Scope Change or Administrative Change: no standard checklist. List what the document changes and say the specialist should confirm the processing path with their supervisor.\n\n7. Draft correspondence\nA short draft email to the PI and DGAs, for the specialist to edit and send from VERAS: what the modification is, the amendment number, the values that changed, every sponsor condition with its deadline, and any change in point of contact, each exactly as in the document. If a signature is still missing, word the email as notice that the amendment is awaiting signature and not yet in effect. End with a line saying the amendment is attached. Then one line headed \"FOA text for Banner\" stating the amendment number, the type and the changed values. Mark both as drafts.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "id": "abcda6b9-7ac3-5b6c-9ee8-b8e594fce08b",
+          "name": "The modification type is right and evidenced",
+          "category": "accuracy",
+          "description": "The brief names exactly one type from its list (or Combined with each type named), and quotes words from the document that show it. FAIL if the type is wrong, or the evidence is not in the document."
+        },
+        {
+          "id": "69bf4ce0-cdde-5669-af43-8f4fce7ec96c",
+          "name": "Amounts, dates and identifiers match the document",
+          "category": "accuracy",
+          "description": "Every award number, amendment number, dollar amount, date and name in the brief appears in the document with the same value and year, unrounded. FAIL if any differs or has no basis in the document."
+        },
+        {
+          "id": "ef876c27-adec-5db7-8a33-f192eda6d490",
+          "name": "Nothing is filled in that the document does not state",
+          "category": "accuracy",
+          "description": "Where the document does not state a detail, the brief says \"Not stated in the document\" or \"Not applicable\". FAIL if the brief supplies an F&A rate, PMS code, account, regulation or other detail the document does not give, or says what VERAS or Banner contains."
+        },
+        {
+          "id": "e4e61163-16dd-5bb9-9286-c923eff2a467",
+          "name": "The checklist fits the type",
+          "category": "content",
+          "description": "The processing checklist is the one for the classified type only, written as steps for the specialist and not as work already done, and the draft correspondence gives the amendment number and the changed values. FAIL if another type's checklist is given or a step is described as completed."
+        }
+      ],
+      "validation_inputs": [
+        {
+          "id": "32f2644d-c759-5ca8-8736-31bd2f880a6d",
+          "type": "text",
+          "label": "Fictional no-cost extension. Answer key: type No-Cost Extension; FAIN EX-2025-67013-00412; Amendment 003; unilateral; end date August 31, 2027 changed to August 31, 2028; total obligated stays $412,650.00 with no funds added; effective April 1, 2027; one condition (revised project timeline within 30 days); F&A rate, PMS code and budget categories are not stated.",
+          "text": "FICTIONAL QA MATERIAL - NOT A REAL AWARD\nExample Science Agency\nAMENDMENT TO GRANT AGREEMENT\n\nFederal Award Identification Number (FAIN): EX-2025-67013-00412\nAmendment Number: 003\nRecipient: Example State University\nPrincipal Investigator: Dr. Jordan Example\nProject Title: Soil Moisture Sensing for Dryland Wheat\nGrants Officer: Casey Sample\n\n1. PURPOSE. This amendment extends the period of performance at no additional cost to the Example Science Agency. The recipient requested the extension by letter dated March 3, 2027, and the request is approved.\n\n2. PERIOD OF PERFORMANCE. The period of performance end date is changed from August 31, 2027 to August 31, 2028.\n\n3. FUNDING. The total amount obligated remains $412,650.00. No funds are added or removed by this amendment.\n\n4. CONDITIONS. The recipient shall submit a revised project timeline within 30 days of the effective date of this amendment. All other terms and conditions of the award remain unchanged.\n\n5. EFFECTIVE DATE. This amendment is effective April 1, 2027. It is issued unilaterally by the Example Science Agency and does not require the recipient's signature.\n\nIssued by: Casey Sample, Grants Officer, Example Science Agency, March 28, 2027\n"
+        }
+      ]
+    }
+  ]
+}

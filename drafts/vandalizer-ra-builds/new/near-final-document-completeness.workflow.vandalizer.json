@@ -1,0 +1,79 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "items": [
+    {
+      "name": "Near-Final Document Completeness Review",
+      "description": "Checks a near-final proposal for required documents: budget documents, the four senior and key documents per person, required proposal documents, mentoring plan and letter of collaboration when they apply, and subaward documents; then drafts the missing-documents note to the PI.",
+      "steps": [
+        {
+          "name": "Proposal details",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Extraction",
+              "data": {
+                "extractions": [
+                  "Proposal Title",
+                  "Sponsor",
+                  "Program or Track",
+                  "Review Type",
+                  "Subawards Included",
+                  "Subrecipient Names",
+                  "Senior and Key Personnel in the Budget",
+                  "Senior and Key Personnel on the Cover Sheet or Senior Personnel Section",
+                  "Postdoctoral Researchers in the Budget",
+                  "Graduate Students in the Budget",
+                  "Documents Provided"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Completeness review",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "prompt": "You are helping a pre-award sponsored programs administrator review a proposal for document completeness at the near-final stage. Your input is the set of proposal documents provided (which may include the budget, budget justification, project documents, subaward documents and a list of what is uploaded in VERAS), the details extracted from them, and, if a knowledge base step ran, passages from the sponsor's proposal guide labeled with their source.\n\nJudge presence from what was provided. You cannot see VERAS: a document counts as present only if it is in the input or in a list of uploaded documents in the input. Do not judge the quality of any document.\n\nThe extracted details arrive as one set per document, and a set made from one document can be wrong or empty about another. Work from the documents themselves and use the extracted details only as a guide; do not report differences between the sets. Ignore page headers, footers and watermarks; do not comment on whether a document is genuine.\n\n1. Budget documents\nIs the institution's Excel budget present? Is the budget justification present?\n\n2. Senior and key personnel\nList the senior and key personnel named in the budget, and those named in the proposal's senior and key personnel section. Say whether the two lists agree; name duplicates and anyone on one list only.\n\n3. Senior and key documents per person\nA table with one row per senior or key person and four columns: Biosketch, Current and pending support, Collaborators and other affiliations, Synergistic activities. Write Present, Missing, or Cannot tell (say why). The last two are mainly NSF requirements: if the sponsor is not NSF, mark them \"Check sponsor requirement\" unless the sponsor guide passages say they are required.\n\n4. Required proposal documents\nFor each of these, Present or Missing: project summary, project description, references cited, budget and budget justification, facilities equipment and other resources, data management and sharing plan. If sponsor guide passages were provided, add any other document they require, citing the passage. Do not add requirements from memory.\n\n5. Conditional documents\n- Mentoring plan: required if the budget includes postdoctoral researchers or graduate students. Say which are in the budget and whether the plan is present.\n- Letter of collaboration: required for a TTP-P (partnership) track proposal. Say what track the proposal is, quoting the basis, and whether a letter is present. If the track is not stated, say so.\n\n6. Subaward documents\nIf the proposal has no subawards, say so and skip this section. Otherwise, for each subrecipient, Present or Missing for: signed subrecipient commitment form, Excel budget, budget justification, senior and key documents for its co-PIs, project-specific scope of work, and facilities equipment and other resources if applicable.\n\n7. Missing documents summary\nOne list, grouped as: subaward documents; required proposal documents; senior and key documents, by person; conditional documents. If nothing is missing, write \"No missing documents found in what was provided\".\n\n8. Draft note to the PI\nA short, courteous draft listing what is missing and asking for it to be uploaded before the submission deadline. Mark it as a draft for the administrator to send. Leave it out if nothing is missing.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "id": "a12cbecd-1587-5fe3-8b90-792260313c77",
+          "name": "Figures and names match the source",
+          "category": "accuracy",
+          "description": "Every amount, date, name, code and identifier in the output appears in the input with the same value and year. FAIL if any differs or has no basis in the input."
+        },
+        {
+          "id": "b176ef81-b507-5698-99f3-0a564aefe616",
+          "name": "Nothing is filled in that the input does not state",
+          "category": "accuracy",
+          "description": "Where the input does not state something, the output says so in the words its instructions give. FAIL if the output supplies a value, a lookup result or a rule the input does not contain, or says what VERAS or Banner contains."
+        },
+        {
+          "id": "d468a36f-6232-5ab8-a199-ca324841d0f4",
+          "name": "Every senior and key person has a row",
+          "category": "completeness",
+          "description": "The senior and key document table has one row for each person named in the budget or the proposal's senior and key section, with a status in all four columns. FAIL for each person or column left out."
+        }
+      ],
+      "validation_inputs": []
+    }
+  ]
+}

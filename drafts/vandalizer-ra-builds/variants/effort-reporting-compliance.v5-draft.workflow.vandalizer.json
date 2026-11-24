@@ -1,0 +1,93 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "items": [
+    {
+      "name": "Effort Reporting & Time and Effort Compliance (V5 draft)",
+      "description": "Effort reporting requirements. V5 draft: tightens the report rules after test runs; cites Uniform Guidance from a knowledge base step.",
+      "steps": [
+        {
+          "name": "Regulation passages",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "KnowledgeBaseQuery",
+              "data": {
+                "kb_uuid": "",
+                "_embedded_knowledge_base": {
+                  "title": "Uniform Guidance (2 CFR 200)"
+                },
+                "query": "compensation for personal services; standards for documentation of personnel expenses; institutional base salary; cost sharing of effort",
+                "mode": "passages",
+                "k": 8
+              }
+            }
+          ]
+        },
+        {
+          "name": "Extraction",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "prompt": "Your input has two parts: the document, and passages from the Uniform Guidance (2 CFR 200) retrieved for this review, each labeled with its source. The document's own terms come first. Where you state a federal rule the document does not spell out, take it from those passages. Cite a section number only if that number appears in the passage you are using; otherwise cite the passage by its label. If the passages do not cover a point, say so and do not state the rule or a section number from memory. Do not describe what was retrieved; just use it.\n\nYou are an expert post-award compliance analyst specializing in federal effort reporting regulations. Your task is to analyze a Federal Award Notice/Agreement document and its attachments to create a definitive summary of all personnel and effort compliance requirements.\n\n<task>\nExtract, synthesize, and structure ALL effort reporting, time and effort, and personnel compliance requirements from the provided document(s).\n</task>\n\n<search_sections>\nSearch for these terms and sections:\n- \"Effort Reporting\", \"Time and Effort\", \"Personnel\", \"Key Personnel\"\n- \"Salary/Effort Certification\", \"2 CFR 200.430\", \"Cost Share Effort\"\n- \"Budget Justification\", \"Person-Months\", \"Summer Months\"\n- \"FATC\", \"Financial and Administrative Terms\"\n- \"RTC\", \"Research Terms and Conditions\"\n- Personnel listings (Principal Investigator, co-Principal Investigator, etc.)\n- Budget sections with cost sharing amounts\n</search_sections>\n\n<output_structure>\n### Effort Compliance Summary: [Award Number]\n\n* **Principal Investigator:** [Extract PI Name]\n* **Project Title:** [Extract Project Title]\n\n---\n\n#### EFFORT REPORTING OBLIGATIONS\n- **Frequency:** [e.g., Semi-annually]\n- **Personnel Subject to Reporting:** [e.g., All personnel charging salary to the award]\n- **Certification Deadlines:** [e.g., 60 days after the end of the reporting period]\n- **Confirmation Method:** [e.g., After-the-fact confirmation]\n\n#### COMMITTED EFFORT TRACKING\n- **Principal Investigator (PI) Commitment:** [Extract specific commitment, e.g., \"2.0 summer months\"]\n- **Key Personnel Commitments:** [List other key personnel and their specific commitments]\n- **Cost-Shared Effort:** [e.g., \"1.0 academic month for Dr. Smith\"]\n- **Voluntary Committed Cost Sharing:** [e.g., \"Not specified, but must be tracked if it occurs\"]\n\n#### DOCUMENTATION & COMPLIANCE\n- **Governing Regulation:** [e.g., \"2 CFR 200.430\"]\n- **Record Retention:** [e.g., \"3 years from the date of final FFR submission\"]\n- **Agency-Specific Rules:** [e.g., \"NSF RTCs apply\"]\n- **Non-Compliance Penalties:** [e.g., \"Withholding of payments, suspension of award\"]\n\n#### PERSONNEL EFFORT COMMITMENTS\nCreate a Markdown table with the following columns: **Personnel Name/Role**, **Committed Effort**, **Cost-Shared Effort**, and **Notes**. Populate it with ALL personnel listed in the award.\n\n| Personnel Name/Role | Committed Effort | Cost-Shared Effort | Notes |\n| :--- | :--- | :--- | :--- |\n| [Extract Name & Role] | [e.g., 2.0 SM] | [e.g., $0 / None] | [e.g., Identified as PI] |\n| [Extract Name & Role] | [e.g., 10%] | [e.g., 5% / $5,000] | [e.g., Identified as Key Personnel] |\n\n---\n#### REFERENCED REQUIREMENTS\n- **Primary Documents:** [List referenced documents like CA-FATC, RTC, etc.]\n- **Specific Citations:** [Note specific URLs or document sections if provided]\n\n</output_structure>\n\n<response_rules>\n1.  If information for a field is not found, explicitly state \"Not specified in the document\".\n2.  If cost sharing is explicitly $0 or not mentioned, state \"No cost sharing required\".\n3.  Source personnel names, roles, and specific effort commitments (like person-months) from both the personnel list AND the budget justification.\n4.  Identify the PI and anyone explicitly named as \"Key Personnel\" or \"Senior Personnel\".\n5.  Do not include instructional text from this prompt in your final response.\n</response_rules>\n\nBegin your output with four lines copied exactly from the document: award number, project title, principal investigator, and project period.\n\nDo not mention page headers, footers or watermarks at all, not even to say you ignored them, and do not comment on whether the document is genuine or on the quality of its text. Where the document does not state something, say so; do not fill the gap.",
+                "input_sources": [
+                  "workflow_documents",
+                  "step_input"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Format",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Formatter",
+              "data": {
+                "prompt": "You are an expert editor and information designer for a university research compliance office. Your sole function is to take raw, extracted data about effort reporting and transform it into a polished, professional, and perfectly structured \"Effort Compliance Brief.\"\n\n**## GOAL:**\nYour task is to process the raw text provided below, which was generated by another AI. You must synthesize, de-duplicate, re-organize, and format this raw text into the single, authoritative brief defined in the template.\n\n**## CORE INSTRUCTIONS:**\n\n1.  **De-duplicate Mercilessly:** This is your most critical function. Information must appear only once in the most logical section. For example, if a specific PI effort commitment (e.g., \"2.0 summer months\") is mentioned in a text section AND in the personnel table data, the final output should **only** show it within the table. The table is the single source of truth for specific personnel commitments.\n2.  **Adhere Strictly to the Template:** The output structure defined below is not a suggestion; it is a rigid requirement. Do not invent new sections, change the order, or deviate from the specified formatting (headings, tables, bolding, etc.).\n3.  **Generate a Perfect Markdown Table:** The personnel data from the input must be formatted into a clean, left-aligned Markdown table as shown in the template.\n4.  **Preserve \"Not Specified\":** If the input text states \"Not specified in the document\" for a data point, retain that exact phrase in the final output. Do not infer or invent information.\n5.  **Use Professional Formatting:** Employ Markdown headings (`###`, `####`), bold text for emphasis, bullet points for lists, and horizontal rules (`---`) exactly as shown.\n\n---\n\n### **Required Output Structure & Template**\n\nPlease format the combined information *exactly* according to the following template.\n\n### **Effort Compliance Brief: [Extract Award Number from input]**\n\n* **Principal Investigator:** `[Extract PI Name]`\n* **Project Title:** `[Extract Project Title]`\n* **Period of Performance:** `[Extract Project Period if available, otherwise state \"Not specified\"]`\n\n---\n\n#### **Executive Summary of Obligations**\n\nThe primary governing regulation for effort on this award is **[Extract governing regulation, e.g., 2 CFR §200.430]**. Effort for all personnel charging salary to this award must be certified **[Extract frequency, e.g., semi-annually]**. All commitments, including any cost-shared effort, must be tracked and documented in accordance with institutional and agency-specific policies. See the referenced documents section for a full list of applicable terms.\n\n---\n\n#### **Personnel Commitments & Effort**\n\nThe following table details the specific effort commitments for all personnel identified in the award notice and budget justification.\n\n| Personnel Name / Role       | Committed Effort | Cost-Shared Effort | Notes                               |\n| :-------------------------- | :--------------- | :----------------- | :---------------------------------- |\n| `[Populate with data for PI]`   | `[Extract value]`  | `[Extract value]`    | `[e.g., \"Principal Investigator\"]`    |\n| `[Populate with data for all other personnel]` | `[Extract value]`  | `[Extract value]`    | `[e.g., \"Key Personnel\"]` |\n\n---\n\n#### **Detailed Compliance Framework**\n\n* **Reporting Frequency:** `[Extract frequency, e.g., \"Semi-annually\"]`\n* **Certification Deadlines:** `[Extract deadline, e.g., \"Within 60 days after the end of the reporting period\"]`\n* **Cost Sharing Verification:** `[Summarize requirements, e.g., \"No cost sharing required\" or \"Must be documented in institutional records\"]`\n* **Record Retention:** `[Summarize requirement, e.g., \"3 years from the date of the final expenditure report per 2 CFR §200.334\"]`\n* **Penalties for Non-Compliance:** `[Summarize potential penalties, e.g., \"Withholding of payments, cost disallowance, or award suspension.\"]`\n\n---\n\n#### **Referenced Documents**\n\nThe following documents govern effort compliance for this award:\n* `[Create a bulleted list of all documents extracted from the \"REFERENCED REQUIREMENTS\" section of the input, e.g., \"NSF Research Terms and Conditions (RTCs)\"]`\n* `[e.g., \"NSF Cooperative Agreement Financial & Administrative Terms and Conditions (CA-FATC)\"]`\n\n---\n\n**## Raw Input Text to Process:**\n\n[Insert the raw, unformatted output from your first extraction prompt here]\n\nLeave out any remark about page headers, footers, watermarks, whether the document is genuine, how its text was read, or what an earlier step did."
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "validation_plan": [
+        {
+          "id": "0c5364ae-fca1-538d-ac16-2a357c5ba1f5",
+          "name": "Figures match the source",
+          "category": "accuracy",
+          "description": "Every person-month, percentage of effort, salary, date and name in the output appears in the source document with the same value, unit and (for dates) year. A figure the output calculated says how it was calculated and the arithmetic is right. FAIL if any value differs from the source, or appears with no basis in it."
+        },
+        {
+          "id": "7669dfbd-62e1-53c5-a8b4-1cac41849fb8",
+          "name": "Every person's committed effort is reported",
+          "category": "completeness",
+          "description": "Each person the document names with an effort commitment appears with the effort as stated (person-months or percent, and the period it covers), and every effort-related prior-approval or certification requirement is included. FAIL for each person or requirement omitted."
+        },
+        {
+          "id": "e61fca3d-23e1-5ce7-a8c9-94227a400e5a",
+          "name": "Says when the document is silent",
+          "category": "content",
+          "description": "For each effort, certification or reporting requirement that the source document does not state, the output says it is not stated (or not found) instead of filling in a typical value, a common practice or a figure from memory, and instead of leaving it out without comment. FAIL if a missing item is given a value the document does not contain."
+        }
+      ],
+      "validation_inputs": [
+        {
+          "id": "df57065c-0a30-508a-861a-f1c317d13650",
+          "type": "text",
+          "label": "Fictional notice of award. Answer key: award EXA-2027-0412; project period July 1, 2027 to June 30, 2029; budget period 1 July 1, 2027 to June 30, 2028; this action $250,000 ($200,000 direct, $50,000 indirect); total anticipated $510,000; indirect 25% of MTDC; no cost sharing; annual progress report and SF-425 due 90 days after each budget period (September 28, 2028 for period 1); final reports and invention statement due 120 days after the project end (October 28, 2029); prior approval for a PI change, foreign travel, rebudgeting participant support, equipment over $10,000 per item, and a PI effort reduction over 25%; one no-cost extension, requested at least 10 days before the end (by June 20, 2029); records kept 3 years from the final SF-425. Not stated: a data management plan requirement.",
+          "text": "FICTIONAL QA MATERIAL — NOT A REAL AWARD\nNotice of Award — Example Science Agency\nAward Number: EXA-2027-0412\nFederal Award Identification Number (FAIN): EXA20270412\nRecipient: Example State University\nPrincipal Investigator: Jordan Sample\nProject Title: Watershed Sensor Network Pilot\nProject period: July 1, 2027 through June 30, 2029\nBudget period 1: July 1, 2027 through June 30, 2028\nAmount of this action (budget period 1): $250,000, of which direct costs $200,000 and indirect costs $50,000.\nTotal anticipated award for both budget periods, subject to the availability of funds: $510,000.\nIndirect costs: 25% of modified total direct costs (MTDC), per the recipient's negotiated rate agreement dated March 3, 2026.\nCost sharing: none required.\n\nReporting\n- An annual progress report is due 90 days after the end of each budget period.\n- An annual Federal Financial Report (SF-425) is due 90 days after the end of each budget period.\n- The final progress report, final SF-425 and final invention statement are due 120 days after the end of the project period.\n\nPrior approval\nPrior written approval from the agency is required for (a) a change of principal investigator, (b) foreign travel, and (c) rebudgeting of participant support costs.\nEquipment purchases over $10,000 per item require prior approval.\nThe principal investigator commits 1.2 calendar months per year; a reduction of more than 25% requires prior approval.\nOne no-cost extension may be requested, at least 10 days before the end of the project period.\n\nRecords\nRecords must be kept for 3 years from the date the final SF-425 is submitted."
+        }
+      ],
+      "resource_config": {}
+    }
+  ]
+}

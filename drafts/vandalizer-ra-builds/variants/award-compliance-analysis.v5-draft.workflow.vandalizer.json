@@ -1,0 +1,248 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "items": [
+    {
+      "name": "Award Notice/Agreement Compliance Analysis 1.0 (V5 draft)",
+      "description": "Extract and organize all compliance requirements, terms, conditions, and administrative obligations from Award Notices. V5 draft: tightens the report rules after test runs; cites Uniform Guidance from a knowledge base step; after one approval, creates the project and adds deadlines to the RA inbox and saves an award snapshot Page.",
+      "steps": [
+        {
+          "name": "Regulation passages",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "KnowledgeBaseQuery",
+              "data": {
+                "kb_uuid": "",
+                "_embedded_knowledge_base": {
+                  "title": "Uniform Guidance (2 CFR 200)"
+                },
+                "query": "Financial management, payment and federal financial reporting by recipients",
+                "mode": "passages",
+                "k": 2
+              }
+            },
+            {
+              "name": "KnowledgeBaseQuery",
+              "data": {
+                "kb_uuid": "",
+                "_embedded_knowledge_base": {
+                  "title": "Uniform Guidance (2 CFR 200)"
+                },
+                "query": "Performance reporting and closeout deadlines for recipient final reports",
+                "mode": "passages",
+                "k": 2
+              }
+            },
+            {
+              "name": "KnowledgeBaseQuery",
+              "data": {
+                "kb_uuid": "",
+                "_embedded_knowledge_base": {
+                  "title": "Uniform Guidance (2 CFR 200)"
+                },
+                "query": "Retention period for recipient records and exceptions to record retention",
+                "mode": "passages",
+                "k": 2
+              }
+            },
+            {
+              "name": "KnowledgeBaseQuery",
+              "data": {
+                "kb_uuid": "",
+                "_embedded_knowledge_base": {
+                  "title": "Uniform Guidance (2 CFR 200)"
+                },
+                "query": "Recipient procurement standards and pass-through entity monitoring of subrecipients",
+                "mode": "passages",
+                "k": 2
+              }
+            },
+            {
+              "name": "KnowledgeBaseQuery",
+              "data": {
+                "kb_uuid": "",
+                "_embedded_knowledge_base": {
+                  "title": "Uniform Guidance (2 CFR 200)"
+                },
+                "query": "Single audit applicability and responsibilities of the auditee",
+                "mode": "passages",
+                "k": 2
+              }
+            }
+          ]
+        },
+        {
+          "name": "Extraction",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "prompt": "Read the award and the retrieved Uniform Guidance excerpts separately. Attribute each award term to the award. For a rule added from an excerpt, give the source title and a short verbatim quote supporting the rule. Use a section identifier for that rule only when its heading appears in the same excerpt and the quoted text belongs to that heading. When an excerpt starts midway through a section, the title and quote are the citation. Report gaps when the excerpts do not support an answer.\n\nYou are analyzing a Federal Award Notice/Agreement document. Extract ALL terms, conditions, and compliance requirements to create a comprehensive post-award compliance framework.\nThoroughly search the entire document, including attachments, appendices, and referenced documents. Pay special attention to sections titled:\n\n\"Terms and Conditions\"\n\"Special Terms and Conditions\"\n\"Administrative Requirements\"\n\"Programmatic Requirements\"\n\"High Risk Terms\"\n\"Award Specific Requirements\"\n\"Federal Requirements\"\n\"Regulatory Requirements\"\n\nCreate a comprehensive response with these sections:\n\nSTANDARD FEDERAL REQUIREMENTS:\n\nUniform Guidance (2 CFR 200) applicability\nResearch Terms and Conditions (RTCs) applicability\nAgency-specific regulations referenced\nStatutory requirements mentioned\n\n\nADMINISTRATIVE TERMS & CONDITIONS:\n\nFinancial reporting requirements (frequency, deadlines, systems)\nProgress reporting requirements (type, frequency, format)\nPrior approval requirements (categorized by type)\nBudget modification restrictions\nAudit and record-keeping requirements\nProperty management requirements\n\n\nPROGRAMMATIC TERMS & CONDITIONS:\n\nSubstantial involvement requirements (if cooperative agreement)\nTechnical reporting specifications\nDeliverable requirements and deadlines\nPerformance metrics and measurement requirements\nCollaboration/partnership obligations\n\n\nHIGH-RISK OR SPECIAL CONDITIONS:\n\nEnhanced monitoring requirements\nAdditional reporting obligations\nSpecific restrictions or limitations\nSpecial approval processes\nRisk mitigation measures\n\n\nCOMPLIANCE CALENDAR:\nCreate a table with:\n\nRequirement Type\nSpecific Deadline/Frequency\nResponsible Party\nConsequences of Non-compliance\n\n\n\nBe thorough. Search for keywords: 'condition,' 'requirement,' 'must,' 'shall,' 'comply,' 'report,' 'submit,' 'approve,' 'prior,' 'deadline,' 'CFR,' 'federal,' 'audit,' 'monitor.'\nIf information is not found for any section, explicitly state 'Not specified in the document' rather than omitting the section.\n\nBegin your output with four lines copied exactly from the document: award number, project title, principal investigator, and project period.\n\nDo not mention page headers, footers or watermarks at all, not even to say you ignored them, and do not comment on whether the document is genuine or on the quality of its text. Where the document does not state something, say so; do not fill the gap.",
+                "input_sources": [
+                  "workflow_documents",
+                  "step_input"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "prompt": "Read the award and the retrieved Uniform Guidance excerpts separately. Attribute each award term to the award. For a rule added from an excerpt, give the source title and a short verbatim quote supporting the rule. Use a section identifier for that rule only when its heading appears in the same excerpt and the quoted text belongs to that heading. When an excerpt starts midway through a section, the title and quote are the citation. Report gaps when the excerpts do not support an answer.\n\nYou are analyzing a Federal Award Notice/Agreement document. Extract ALL financial management requirements, budget details, and fiscal compliance obligations to establish proper financial oversight.\nThoroughly search the entire document, including budget attachments and financial terms. Pay special attention to sections titled:\n\n\"Award Amount\"\n\"Budget Information\"\n\"Financial Management\"\n\"Cost Sharing/Matching\"\n\"Indirect Costs\"\n\"Financial Reporting\"\n\"Payment/Drawdown Information\"\n\nCreate a comprehensive response with these sections:\n\nAWARD FINANCIAL DETAILS:\n\nTotal Award Amount\nBudget Period Amounts (by year)\nFederal Share vs. Non-Federal Share\nCost Sharing/Matching Requirements (amount and type)\nIndirect Cost Rate and Base\nPeriod of Performance dates\n\n\nBUDGET CATEGORIES & RESTRICTIONS:\nCreate a table with:\n\nBudget Category (Personnel, Equipment, etc.)\nApproved Amount\nSpecific Restrictions or Limitations\nPrior Approval Requirements\n\n\nFINANCIAL REPORTING REQUIREMENTS:\n\nFederal Financial Report (FFR) frequency and deadlines\nPayment Management System (PMS) requirements\nCash management and drawdown procedures\nFinancial monitoring and oversight requirements\n\n\nALLOWABLE COSTS FRAMEWORK:\n\nReference to applicable cost principles (2 CFR 200, etc.)\nSpecific allowable cost guidance\nUnallowable costs explicitly mentioned\nEquipment purchase approval requirements\n\n\nFINANCIAL COMPLIANCE OBLIGATIONS:\n\nAudit requirements (Single Audit thresholds)\nRecord retention requirements\nFinancial monitoring and internal controls\nCost allocation and documentation standards\n\n\n\nBe thorough. Search for keywords: 'budget,' 'cost,' 'financial,' 'funding,' 'allowable,' 'report,' 'FFR,' 'PMS,' 'drawdown,' 'match,' 'share,' 'indirect,' 'audit,' 'record.'\nIf information is not found for any section, explicitly state 'Not specified in the document' rather than omitting the section.\n\nDo not mention page headers, footers or watermarks at all, not even to say you ignored them, and do not comment on whether the document is genuine or on the quality of its text. Where the document does not state something, say so; do not fill the gap.",
+                "input_sources": [
+                  "workflow_documents",
+                  "step_input"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Formatting",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Formatter",
+              "data": {
+                "prompt": "Merge the compliance and financial extractions. Use the award face sheet to verify the header. Begin with Award Compliance & Financial Overview and give the project title, legal awardee organization, awarding agency, FAIN, principal investigator and period of performance. Use the agency and regulations named in this award. Distinguish the awardee institution from the investigator and the federal sponsor.\n\nUse a two-column Financial Summary table for total, obligations, annual breakdown if stated, federal and nonfederal shares, cost sharing, indirect rate and base, and performance dates. Follow with Approved Budget & Restrictions, retaining category amounts and restrictions. Use the five compliance sections from the extraction, including a Compliance Calendar covering every report and deadline. Keep exceptions, thresholds, agencies, systems, and due dates as given. Mark missing information explicitly. Attribute award requirements to the award. For supplemental rules retain the supporting excerpt title and exact quote, checking both against the Regulation passages. Omit a rule when the cited excerpt does not support it.\n\nLeave out any remark about page headers, footers, watermarks, whether the document is genuine, how its text was read, or what an earlier step did.",
+                "input_sources": [
+                  "workflow_documents",
+                  "earlier_steps"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Review before setup",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Approval",
+              "data": {
+                "review_instructions": "Check the report above. Approving creates a project for this award with the file in it and adds its deadlines and required material to the RA inbox (each checked against its page; anything that can't be checked is listed for review, not added), and saves an award snapshot Page.",
+                "assignee_role": "workflow_owner"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create project",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "CreateProject",
+              "data": {
+                "name_template": "{document}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add deadlines to RA inbox",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "InboxDeadlines",
+              "data": {}
+            }
+          ]
+        },
+        {
+          "name": "Award snapshot page",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "AwardSnapshotPage",
+              "data": {}
+            }
+          ]
+        }
+      ],
+      "input_config": {
+        "trigger_type": "manual"
+      },
+      "output_config": {
+        "storage": {
+          "enabled": true,
+          "destination_folder": "934eaa508073436c94b9b1c8b2c8e110",
+          "file_naming": "APHIS Award Term Comparison_June2026"
+        }
+      },
+      "validation_plan": [
+        {
+          "id": "9e1005d3-8634-4732-9420-61adbc2cc217",
+          "name": "Header Fields Presence",
+          "description": "The report identifies the project title, legal awardee, awarding agency, FAIN, principal investigator and project period as given on the award face sheet. Fail if the report omits a supplied value or substitutes a person for the awardee.",
+          "category": "completeness"
+        },
+        {
+          "id": "22b02ffd-a198-4aeb-8189-c2bd176e4db5",
+          "name": "All Compliance Sections Included",
+          "description": "Verify that the output contains each of the five required compliance sections—**STANDARD FEDERAL REQUIREMENTS**, **ADMINISTRATIVE TERMS & CONDITIONS**, **PROGRAMMATIC TERMS & CONDITIONS**, **HIGH-RISK OR SPECIAL CONDITIONS**, and **COMPLIANCE CALENDAR**—with their headings spelled exactly as shown. Each section must appear once, even if its content is only the phrase “Not specified in the document.”",
+          "category": "completeness"
+        },
+        {
+          "id": "f78e6e90-3d08-44d3-b885-7115ec3a808d",
+          "name": "Financial Summary Table Structure",
+          "description": "Check that a markdown table titled **Financial Summary** is present, with two columns labeled “Financial Item” and “Details”. The table must include rows for at least: Total Award Amount, Budget Period Amounts (by year), Federal Share vs. Non‑Federal Share, Cost Sharing/Matching Requirements, Indirect Cost Rate and Base, and Period of Performance dates. Empty cells should contain the exact phrase “Not specified in the document”.",
+          "category": "completeness"
+        },
+        {
+          "id": "e65ec1fa-eb5b-45d8-86bc-10cb14580533",
+          "name": "No Hallucinated or Modified Data",
+          "description": "Inspect all numeric values, dates, percentages, regulation citations (e.g., “2 CFR 200”), and dollar amounts. They must match the phrasing and figures from the raw extraction steps. Any value that does not appear in the source extractions indicates a hallucination and fails this check.",
+          "category": "accuracy"
+        },
+        {
+          "id": "6b5dcaba-a95f-41fe-ac56-1bee8c7f7a85",
+          "name": "Preserve Missing‑Info Notation",
+          "description": "For any field where the extraction step explicitly reported “Not specified in the document”, ensure the same exact phrase appears in the final output at the appropriate location. The formatter must not replace it with guesses, blanks, or alternative wording such as “N/A”.",
+          "category": "content"
+        },
+        {
+          "id": "bffd4ee9-97d9-4c9f-b698-b5a286dbe0aa",
+          "name": "Markdown Formatting Consistency",
+          "description": "Validate that the document uses proper Markdown: level‑2 headings (###) for each major section, bold text (**…**) for emphasized labels, horizontal rules (---) separating the overview from the financial and compliance parts, and correctly formatted tables with pipe delimiters and aligned columns. No raw JSON or plain‑text blocks should be present.",
+          "category": "formatting"
+        },
+        {
+          "id": "c5e46a68-a51b-40eb-9003-fbbbadd5dd1d",
+          "name": "De‑duplication of Overlapping Facts",
+          "description": "Cross‑check that any fact appearing in both the compliance extraction and the financial extraction (e.g., award period dates, total award amount) is presented only once in the merged summary. Duplicate entries of the same fact in separate sections constitute a failure.",
+          "category": "content"
+        },
+        {
+          "id": "0d27eac6-4afe-52a1-a247-61cd9f920a06",
+          "name": "Deadlines and reporting obligations are not omitted",
+          "category": "completeness",
+          "description": "Every deadline and every reporting obligation the award states (progress, financial, invention and closeout reports, with their due dates or timing) appears in the output. FAIL for each one the source states and the output omits."
+        },
+        {
+          "id": "f507fbc3-f7b8-591f-a44f-1543bca5ba87",
+          "name": "Supplemental rules can be traced to their passages",
+          "category": "accuracy",
+          "description": "For each supplemental rule, find its source title and quoted words in the retrieved passages. The quote must support the claim. Fail if a section locator is attributed to an excerpt that lacks its heading or if an award term is attributed to another source."
+        }
+      ],
+      "validation_inputs": [
+        {
+          "id": "30062902-4ccd-5459-b8c1-fca48342d37c",
+          "type": "text",
+          "label": "Fictional notice of award. Answer key: award EXA-2027-0412; project period July 1, 2027 to June 30, 2029; budget period 1 July 1, 2027 to June 30, 2028; this action $250,000 ($200,000 direct, $50,000 indirect); total anticipated $510,000; indirect 25% of MTDC; no cost sharing; annual progress report and SF-425 due 90 days after each budget period (September 28, 2028 for period 1); final reports and invention statement due 120 days after the project end (October 28, 2029); prior approval for a PI change, foreign travel, rebudgeting participant support, equipment over $10,000 per item, and a PI effort reduction over 25%; one no-cost extension, requested at least 10 days before the end (by June 20, 2029); records kept 3 years from the final SF-425. Not stated: a data management plan requirement.",
+          "text": "FICTIONAL QA MATERIAL — NOT A REAL AWARD\nNotice of Award — Example Science Agency\nAward Number: EXA-2027-0412\nFederal Award Identification Number (FAIN): EXA20270412\nRecipient: Example State University\nPrincipal Investigator: Jordan Sample\nProject Title: Watershed Sensor Network Pilot\nProject period: July 1, 2027 through June 30, 2029\nBudget period 1: July 1, 2027 through June 30, 2028\nAmount of this action (budget period 1): $250,000, of which direct costs $200,000 and indirect costs $50,000.\nTotal anticipated award for both budget periods, subject to the availability of funds: $510,000.\nIndirect costs: 25% of modified total direct costs (MTDC), per the recipient's negotiated rate agreement dated March 3, 2026.\nCost sharing: none required.\n\nReporting\n- An annual progress report is due 90 days after the end of each budget period.\n- An annual Federal Financial Report (SF-425) is due 90 days after the end of each budget period.\n- The final progress report, final SF-425 and final invention statement are due 120 days after the end of the project period.\n\nPrior approval\nPrior written approval from the agency is required for (a) a change of principal investigator, (b) foreign travel, and (c) rebudgeting of participant support costs.\nEquipment purchases over $10,000 per item require prior approval.\nThe principal investigator commits 1.2 calendar months per year; a reduction of more than 25% requires prior approval.\nOne no-cost extension may be requested, at least 10 days before the end of the project period.\n\nRecords\nRecords must be kept for 3 years from the date the final SF-425 is submitted."
+        }
+      ],
+      "resource_config": {}
+    }
+  ]
+}

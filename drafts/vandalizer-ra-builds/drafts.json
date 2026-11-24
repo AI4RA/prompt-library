@@ -1,0 +1,738 @@
+{
+  "schema_version": 1,
+  "artifact": "vandalizer_draft_collection",
+  "slug": "vandalizer-ra-builds",
+  "title": "Vandalizer drafts for RA review",
+  "status": "draft",
+  "summary": "Draft Vandalizer Skills and workflows built from recorded research-administration process walkthroughs and from Vandalizer's catalog. Nothing here is published and no catalog item is changed.",
+  "status_as_of": "2026-11-23",
+  "source": {
+    "repo": "ui-insight/ProcessMapping",
+    "path": "drafts/vandalizer",
+    "branch": "drafts/vandalizer-ra-builds",
+    "commit": "52c7b257ba9196928c6e0207472b0745f93e67fd",
+    "differences_from_source": [
+      "new/add-sponsor-research.skill.vandalizer.json omits one sentence of Step 4: an institution-specific instruction to stop and consult before creating the record for a sponsor with a particular country of ownership. The source repository keeps it."
+    ]
+  },
+  "generator": {
+    "scripts": [
+      "scripts/build_drafts.py",
+      "scripts/more_drafts.py"
+    ],
+    "vandalizer_seed_ref": {
+      "repo": "ui-insight/vandalizer",
+      "branch": "major/agentic-chat",
+      "commit": "1453fc46ea022b9e2e9d6a783a3c86731485437d"
+    },
+    "note": "A rebuild at this seed commit reproduces every file byte for byte."
+  },
+  "evaluation": {
+    "test_site": "Vandalizer dev",
+    "model": "moonshotai/kimi-k3",
+    "fixtures": {
+      "repo": "AI4RA/evaluation-data-sets",
+      "dataset_id": "synthetic.ra_process_test_documents",
+      "path": "synthetic/ra_process_test_documents"
+    },
+    "results": {
+      "repo": "AI4RA/evaluation-data-sets",
+      "path": "evaluation_results/vandalizer-ra-drafts"
+    },
+    "runner": {
+      "repo": "AI4RA/evaluation-harness",
+      "path": "runners/vandalizer-ra-drafts"
+    },
+    "note": "Outcomes record what a run produced. They are not accuracy scores, and no draft has been reviewed by an RA yet."
+  },
+  "counts": {
+    "items": 25,
+    "by_kind": {
+      "vandalizer-skill": 11,
+      "vandalizer-workflow": 14
+    },
+    "by_group": {
+      "new": 12,
+      "companion": 4,
+      "variant": 9
+    }
+  },
+  "items": [
+    {
+      "id": "add-sponsor-research",
+      "title": "Research a sponsor for VERAS",
+      "kind": "vandalizer-skill",
+      "group": "new",
+      "path": "new/add-sponsor-research.skill.vandalizer.json",
+      "sha256": "d8eb95c5fe559acbea5945304f46414656d72ffa6db878661f97610faed7caec",
+      "summary": "VERAS search variants, SAM.gov research, and a proposed business associate record with a source per value.",
+      "requires_browser_extension": true,
+      "when_to_use": "Research a new sponsor on SAM.gov and other public sources and propose the VERAS business associate record, before an administrator adds it.",
+      "built_from_processes": [
+        "adding-sponsor-to-veras"
+      ],
+      "related_workflows": [],
+      "test_fixtures": [
+        "13-add-sponsor"
+      ],
+      "evaluation": {
+        "outcome": "exercised_in_browser_no_saved_output",
+        "note": "Awaits a live rerun with the revised instructions."
+      }
+    },
+    {
+      "id": "award-modification-intake",
+      "title": "Award Modification Intake",
+      "kind": "vandalizer-workflow",
+      "group": "new",
+      "path": "new/award-modification-intake.workflow.vandalizer.json",
+      "sha256": "dd135512b64334cd38b9cb62111134242e4146af4ca1eb6876f89a50e9d38039",
+      "summary": "Classifies an amendment and writes an intake brief: key details, checks, conditions, the processing checklist for that type, and draft correspondence.",
+      "step_count": 2,
+      "task_kinds": [
+        "Extraction",
+        "Prompt"
+      ],
+      "validation_check_count": 4,
+      "built_from_processes": [
+        "more-money-processing",
+        "nce-processing",
+        "pi-change-processing",
+        "rebudget-processing"
+      ],
+      "related_workflows": [
+        "award-modification-intake"
+      ],
+      "test_fixtures": [
+        "02-amendments"
+      ],
+      "evaluation": {
+        "saved_runs_latest_pass": 4,
+        "outcome": "report_produced",
+        "note": "Flagged the missing countersignature on the unsigned PI-change amendment."
+      }
+    },
+    {
+      "id": "budget-justification",
+      "title": "Budget justification with the PI's answers",
+      "kind": "vandalizer-skill",
+      "group": "new",
+      "path": "new/budget-justification.skill.vandalizer.json",
+      "sha256": "d902d4ccfa19eb128f3dcd46502ec85837c46da31ca62a469d5fe039b0f53ab2",
+      "summary": "The catalog Budget Generator's rules as a chat Skill, so the RA can answer the gaps and get a revised draft.",
+      "requires_browser_extension": false,
+      "when_to_use": "Draft a line-by-line budget justification from a budget, list what the PI must supply, and revise the draft as the answers come in.",
+      "vandalizer_catalog_items": [
+        "Budget Generator"
+      ],
+      "related_workflows": [
+        "budget-justification-generator"
+      ],
+      "test_fixtures": [
+        "07-near-final-proposal"
+      ],
+      "evaluation": {
+        "outcome": "chat_transcript_saved"
+      }
+    },
+    {
+      "id": "export-to-banner-form-review",
+      "title": "Export to Banner form review",
+      "kind": "vandalizer-skill",
+      "group": "new",
+      "path": "new/export-to-banner-form-review.skill.vandalizer.json",
+      "sha256": "9d87ea7361543dd91292d01c71a48bd163bcb69f9cbcc81322de567fbc6bb1a1",
+      "summary": "Compares a prepared form with the award and lists differences as questions for the analyst, plus the lookups the reviewer still has to do.",
+      "requires_browser_extension": false,
+      "when_to_use": "Compare a prepared Export to Banner form with the award document and list the differences as questions for the analyst.",
+      "built_from_processes": [
+        "export-to-banner-review"
+      ],
+      "related_workflows": [
+        "export-to-banner-extraction"
+      ],
+      "test_fixtures": [
+        "04-export-to-banner-form",
+        "01-award"
+      ],
+      "evaluation": {
+        "outcome": "chat_transcript_saved",
+        "note": "Found all six planted discrepancies and marked the effective date as needing a payroll-calendar lookup."
+      }
+    },
+    {
+      "id": "export-to-banner-worksheet",
+      "title": "Export to Banner Worksheet",
+      "kind": "vandalizer-workflow",
+      "group": "new",
+      "path": "new/export-to-banner-worksheet.workflow.vandalizer.json",
+      "sha256": "6309883d4640a5d340051c076484e68ae7d24e9ab375fda94625f6cfdf63c5d9",
+      "summary": "Lays out an award's values in the order of the Export to Banner form, with pages, and lists what the award does not state.",
+      "step_count": 2,
+      "task_kinds": [
+        "Extraction",
+        "Prompt"
+      ],
+      "validation_check_count": 3,
+      "built_from_processes": [
+        "financial-unit-account-setup",
+        "export-to-banner-review"
+      ],
+      "related_workflows": [
+        "export-to-banner-extraction"
+      ],
+      "test_fixtures": [
+        "01-award",
+        "03-subaward"
+      ],
+      "evaluation": {
+        "saved_runs_latest_pass": 2,
+        "outcome": "report_produced"
+      }
+    },
+    {
+      "id": "final-billing-review",
+      "title": "Final billing review helper",
+      "kind": "vandalizer-skill",
+      "group": "new",
+      "path": "new/final-billing-review.skill.vandalizer.json",
+      "sha256": "5e590bc65f144db19452ea2448b234e322011965386477f908fcf5d629a9082d",
+      "summary": "Totals check, payroll around the end date, flagged transactions, documentation request. Allowability stays with the specialist.",
+      "requires_browser_extension": false,
+      "when_to_use": "Organise a grant's unbilled transactions for closeout: check totals, lay out payroll around the end date, and flag transactions to review before the final invoice.",
+      "built_from_processes": [
+        "final-billing"
+      ],
+      "related_workflows": [],
+      "test_fixtures": [
+        "12-final-billing"
+      ],
+      "evaluation": {
+        "outcome": "chat_transcript_saved",
+        "note": "Stopped at the $125 reconciliation difference."
+      }
+    },
+    {
+      "id": "idc-exception-triage",
+      "title": "Indirect cost exception triage",
+      "kind": "vandalizer-skill",
+      "group": "new",
+      "path": "new/idc-exception-triage.skill.vandalizer.json",
+      "sha256": "e0dd1e24b409e27466cd00f5b2e714eff37804c1e13e0c357dc97f1be27e3152",
+      "summary": "Sorts exception report rows into rounding, possible subaward threshold, possible exempt costs, and rows that need a Banner lookup.",
+      "requires_browser_extension": false,
+      "when_to_use": "Sort the rows of an Indirect Cost Exception Report into rounding, likely subaward threshold, likely exempt costs, and rows that need a Banner lookup.",
+      "built_from_processes": [
+        "indirect-cost-exception-review"
+      ],
+      "related_workflows": [],
+      "test_fixtures": [
+        "11-idc-exception-report"
+      ],
+      "evaluation": {
+        "outcome": "chat_transcript_saved",
+        "note": "The half-percentage-point rounding cut-off is a guess that reviewers need to confirm."
+      }
+    },
+    {
+      "id": "modification-correspondence",
+      "title": "Modification correspondence",
+      "kind": "vandalizer-skill",
+      "group": "new",
+      "path": "new/modification-correspondence.skill.vandalizer.json",
+      "sha256": "744aa73e9f1ed0da2ee7f513d07a91492959cb474663ad90f98356b0642732e9",
+      "summary": "PI/DGA email, Banner FOA text line and processing note from the executed amendment.",
+      "requires_browser_extension": false,
+      "when_to_use": "Draft the PI and DGA email, the Banner FOA text line and the processing note for an award modification, from the executed amendment.",
+      "built_from_processes": [
+        "more-money-processing",
+        "nce-processing",
+        "pi-change-processing",
+        "rebudget-processing",
+        "closeout-de-obligation"
+      ],
+      "related_workflows": [
+        "award-modification-intake"
+      ],
+      "test_fixtures": [
+        "02-amendments"
+      ],
+      "evaluation": {
+        "outcome": "chat_transcript_saved"
+      }
+    },
+    {
+      "id": "near-final-document-completeness",
+      "title": "Near-Final Document Completeness Review",
+      "kind": "vandalizer-workflow",
+      "group": "new",
+      "path": "new/near-final-document-completeness.workflow.vandalizer.json",
+      "sha256": "31bbcd0515e5b47ed0d1c24ff146ec58d7b8c013b2774cda555b29855925066b",
+      "summary": "Required documents, the four senior/key documents per person, conditional documents, subaward documents, and a draft note to the PI.",
+      "step_count": 2,
+      "task_kinds": [
+        "Extraction",
+        "Prompt"
+      ],
+      "validation_check_count": 3,
+      "built_from_processes": [
+        "near-final-doc-review"
+      ],
+      "related_workflows": [
+        "proposal-document-completeness"
+      ],
+      "test_fixtures": [
+        "07-near-final-proposal"
+      ],
+      "evaluation": {
+        "saved_runs_latest_pass": 1,
+        "outcome": "report_produced",
+        "note": "Found the missing mentoring plan."
+      }
+    },
+    {
+      "id": "section2-personnel-eligibility",
+      "title": "Section 2 Personnel Eligibility Check",
+      "kind": "vandalizer-workflow",
+      "group": "new",
+      "path": "new/section2-personnel-eligibility.workflow.vandalizer.json",
+      "sha256": "be61aa367352039fb97c0017ac2f12674b60c8937b9a61b76adcfb24f38f8613",
+      "summary": "PI/Co-PI eligibility against APM 45.22 and required DGAs against Section 2.",
+      "step_count": 2,
+      "task_kinds": [
+        "Extraction",
+        "KnowledgeBaseQuery",
+        "Prompt"
+      ],
+      "validation_check_count": 3,
+      "knowledge_base_to_select": "University of Idaho Office of Sponsored Programs (APM 45)",
+      "built_from_processes": [
+        "spa-section2-review"
+      ],
+      "related_workflows": [
+        "section2-personnel-eligibility"
+      ],
+      "test_fixtures": [
+        "08-section-2-eligibility"
+      ],
+      "evaluation": {
+        "saved_runs_latest_pass": 1,
+        "outcome": "stopped_knowledge_base_not_selected",
+        "note": "Stopped before producing a report: the OSP policy knowledge base was not selected on the test site."
+      }
+    },
+    {
+      "id": "sfi-rst-personnel-check",
+      "title": "SFI and RST Personnel Check",
+      "kind": "vandalizer-workflow",
+      "group": "new",
+      "path": "new/sfi-rst-personnel-check.workflow.vandalizer.json",
+      "sha256": "b86dc6d558da36d82c78713960ab26985b9eac7f1667156197c05986f0e1b242",
+      "summary": "Compliance matrix: who must comply, SFI disclosure dates and when they lapse, RST completion.",
+      "step_count": 2,
+      "task_kinds": [
+        "Extraction",
+        "Prompt"
+      ],
+      "validation_check_count": 3,
+      "built_from_processes": [
+        "sfi-rst-compliance-check"
+      ],
+      "related_workflows": [
+        "compliance-personnel-verification"
+      ],
+      "test_fixtures": [
+        "09-sfi-rst"
+      ],
+      "evaluation": {
+        "saved_runs_latest_pass": 1,
+        "outcome": "report_produced"
+      }
+    },
+    {
+      "id": "tps-waiver-review",
+      "title": "TPS waiver review",
+      "kind": "vandalizer-skill",
+      "group": "new",
+      "path": "new/tps-waiver-review.skill.vandalizer.json",
+      "sha256": "78114c5c098ef8db10118d5bc55ce645a81db7a16dc7c0c6e2d684c1aeabccab",
+      "summary": "PI and SPA scores side by side, tier, timeline, reviewer notes and decision message. The reviewer decides.",
+      "requires_browser_extension": false,
+      "when_to_use": "Review a TPS waiver ticket: compare PI and SPA scores, total them into the justification tier, lay out the timeline, and draft reviewer notes and the decision message.",
+      "built_from_processes": [
+        "tps-waiver-review"
+      ],
+      "related_workflows": [],
+      "test_fixtures": [
+        "10-tps-waiver"
+      ],
+      "evaluation": {
+        "outcome": "chat_transcript_saved"
+      }
+    },
+    {
+      "id": "fa-rate-agreement-check",
+      "title": "F&A rate agreement check",
+      "kind": "vandalizer-skill",
+      "group": "companion",
+      "path": "companion/fa-rate-agreement-check.skill.vandalizer.json",
+      "sha256": "d4dd6a551a0fe8abb50bcbfda2bbbd4f544aa3298b76b7f67138ae940d864733",
+      "summary": "Compares the rate and base in an award with the institution's published rate page.",
+      "requires_browser_extension": true,
+      "when_to_use": "Compare the F&A rate and base in an award or budget with the institution's published rate agreement page.",
+      "vandalizer_catalog_items": [
+        "F&A Rate Validator"
+      ],
+      "related_workflows": [],
+      "test_fixtures": [
+        "03-subaward",
+        "01-award"
+      ],
+      "evaluation": {
+        "outcome": "exercised_in_browser_no_saved_output",
+        "note": "Awaits a live rerun with the revised instructions."
+      }
+    },
+    {
+      "id": "live-solicitation-check",
+      "title": "Live solicitation check",
+      "kind": "vandalizer-skill",
+      "group": "companion",
+      "path": "companion/live-solicitation-check.skill.vandalizer.json",
+      "sha256": "1ca81d9d3f8041c07205440eb3e79cf2fd4a3fa88c0ec406bceed73c63acbb47",
+      "summary": "Compares the solicitation PDF with the opportunity's live page for a changed deadline or new amendment.",
+      "requires_browser_extension": true,
+      "when_to_use": "Compare the solicitation PDF the team is using with the opportunity's live page, to catch a changed deadline or a new amendment.",
+      "vandalizer_catalog_items": [
+        "FOA Checklist",
+        "RFA Checklist",
+        "Sponsor Compliance Checker"
+      ],
+      "related_workflows": [
+        "foa-checklist-extraction",
+        "rfa-checklist-extraction"
+      ],
+      "test_fixtures": [],
+      "evaluation": {
+        "outcome": "exercised_in_browser_no_saved_output",
+        "note": "Exercised on a real NSF opportunity; awaits a live rerun with the revised instructions."
+      }
+    },
+    {
+      "id": "screening-list-lookup",
+      "title": "Screening list lookup",
+      "kind": "vandalizer-skill",
+      "group": "companion",
+      "path": "companion/screening-list-lookup.skill.vandalizer.json",
+      "sha256": "1e62e9edb7982d12668f706213f9dcd24fe681b00e1b96bcbe1cdba525da70b4",
+      "summary": "Looks parties up on the Consolidated Screening List (trade.gov) and reports entries found.",
+      "requires_browser_extension": true,
+      "when_to_use": "Look up the parties in a project or agreement on the Consolidated Screening List in the browser and report what the list shows. Use alongside Export Control Screening.",
+      "vandalizer_catalog_items": [
+        "Export Control Screening"
+      ],
+      "related_workflows": [],
+      "test_fixtures": [
+        "14-screening"
+      ],
+      "evaluation": {
+        "outcome": "exercised_in_browser_no_saved_output",
+        "note": "Two live retests identified both federal source lists; later result pages and a parenthetical name variant still need review."
+      }
+    },
+    {
+      "id": "subrecipient-sam-check",
+      "title": "Subrecipient SAM.gov check",
+      "kind": "vandalizer-skill",
+      "group": "companion",
+      "path": "companion/subrecipient-sam-check.skill.vandalizer.json",
+      "sha256": "49d2c3129936481698e02dec7f6a8bfeedd61f73efb21c8587f1aac2e1c66c2b",
+      "summary": "SAM.gov registration, UEI, expiry and exclusions, compared with the subaward.",
+      "requires_browser_extension": true,
+      "when_to_use": "Check a subrecipient's SAM.gov registration, UEI, expiry and exclusions in the browser and compare them with the subaward document.",
+      "vandalizer_catalog_items": [
+        "Subaward Extraction",
+        "New Subaward Intake"
+      ],
+      "related_workflows": [
+        "subaward-extraction"
+      ],
+      "test_fixtures": [
+        "03-subaward"
+      ],
+      "evaluation": {
+        "outcome": "exercised_in_browser_no_saved_output",
+        "note": "Awaits a live rerun with the revised instructions."
+      }
+    },
+    {
+      "id": "award-compliance-analysis",
+      "title": "Award Notice/Agreement Compliance Analysis 1.0 (V5 draft)",
+      "kind": "vandalizer-workflow",
+      "group": "variant",
+      "path": "variants/award-compliance-analysis.v5-draft.workflow.vandalizer.json",
+      "sha256": "6b7440671bffc63b91db5f6f531ed5dc1ccd17ed796e4ce3cb746433c94d3c44",
+      "summary": "Adds topic-specific Uniform Guidance knowledge base steps, the setup steps, and an award snapshot Page.",
+      "step_count": 7,
+      "task_kinds": [
+        "KnowledgeBaseQuery",
+        "Prompt",
+        "Formatter",
+        "Approval",
+        "CreateProject",
+        "InboxDeadlines",
+        "AwardSnapshotPage"
+      ],
+      "validation_check_count": 9,
+      "knowledge_base_to_select": "Uniform Guidance (2 CFR 200)",
+      "variant_of_vandalizer_seed": "backend/seeds/workflows/award_compliance_analysis.json",
+      "related_workflows": [
+        "award-compliance-extraction"
+      ],
+      "test_fixtures": [
+        "01-award"
+      ],
+      "evaluation": {
+        "saved_runs_latest_pass": 1,
+        "outcome": "report_produced_then_stopped_at_setup_approval",
+        "note": "Repeat runs still named regulation sections that appear in neither the award nor the retrieved passages."
+      }
+    },
+    {
+      "id": "effort-reporting-compliance",
+      "title": "Effort Reporting & Time and Effort Compliance (V5 draft)",
+      "kind": "vandalizer-workflow",
+      "group": "variant",
+      "path": "variants/effort-reporting-compliance.v5-draft.workflow.vandalizer.json",
+      "sha256": "04c9c1655650f06e912ee819e6cb4dbd1cc8b8e62548550ffb999c38ae7751f0",
+      "summary": "Adds a Uniform Guidance knowledge base step only.",
+      "step_count": 3,
+      "task_kinds": [
+        "KnowledgeBaseQuery",
+        "Prompt",
+        "Formatter"
+      ],
+      "validation_check_count": 3,
+      "knowledge_base_to_select": "Uniform Guidance (2 CFR 200)",
+      "variant_of_vandalizer_seed": "backend/seeds/workflows/effort_reporting_compliance.json",
+      "related_workflows": [
+        "effort-reporting-extraction"
+      ],
+      "test_fixtures": [
+        "01-award"
+      ],
+      "evaluation": {
+        "saved_runs_latest_pass": 1,
+        "outcome": "report_produced"
+      }
+    },
+    {
+      "id": "ffr-management",
+      "title": "Federal Financial Reporting (FFR) Management (V5 draft)",
+      "kind": "vandalizer-workflow",
+      "group": "variant",
+      "path": "variants/ffr-management.v5-draft.workflow.vandalizer.json",
+      "sha256": "5477cac3437249676b9edab07713bd4ed976a929ad055634a6f160d658dac8b8",
+      "summary": "Adds a Uniform Guidance knowledge base step; then approval, create project, add deadlines to the RA inbox.",
+      "step_count": 6,
+      "task_kinds": [
+        "KnowledgeBaseQuery",
+        "Prompt",
+        "Formatter",
+        "Approval",
+        "CreateProject",
+        "InboxDeadlines"
+      ],
+      "validation_check_count": 3,
+      "knowledge_base_to_select": "Uniform Guidance (2 CFR 200)",
+      "variant_of_vandalizer_seed": "backend/seeds/workflows/ffr_management.json",
+      "related_workflows": [
+        "ffr-management-extraction"
+      ],
+      "test_fixtures": [
+        "01-award"
+      ],
+      "evaluation": {
+        "saved_runs_latest_pass": 1,
+        "outcome": "report_produced_then_stopped_at_setup_approval"
+      }
+    },
+    {
+      "id": "foa-checklist",
+      "title": "FOA Checklist (Pre-Award) 1.0 (V5 draft)",
+      "kind": "vandalizer-workflow",
+      "group": "variant",
+      "path": "variants/foa-checklist.v5-draft.workflow.vandalizer.json",
+      "sha256": "1f40a4264f6f7ebdc10a364269b0dd9c8a02aec0cc0e121075360be139f32cc9",
+      "summary": "Adds a structured key-fields step first; then approval, create project, add deadlines to the RA inbox.",
+      "step_count": 6,
+      "task_kinds": [
+        "Extraction",
+        "Prompt",
+        "Approval",
+        "CreateProject",
+        "InboxDeadlines"
+      ],
+      "validation_check_count": 3,
+      "variant_of_vandalizer_seed": "backend/seeds/workflows/foa_checklist.json",
+      "related_workflows": [
+        "foa-checklist-extraction"
+      ],
+      "test_fixtures": [
+        "05-foa"
+      ],
+      "evaluation": {
+        "saved_runs_latest_pass": 1,
+        "outcome": "report_produced_then_stopped_at_setup_approval"
+      }
+    },
+    {
+      "id": "noa-summary",
+      "title": "NOA Summary (V5 draft)",
+      "kind": "vandalizer-workflow",
+      "group": "variant",
+      "path": "variants/noa-summary.v5-draft.workflow.vandalizer.json",
+      "sha256": "40190449a37db19becdb0debd538b25cf995f2cdf629bdf9170b66c9391b30b8",
+      "summary": "Adds a Uniform Guidance knowledge base step, the setup steps, and an award snapshot Page.",
+      "step_count": 7,
+      "task_kinds": [
+        "KnowledgeBaseQuery",
+        "Prompt",
+        "Formatter",
+        "Approval",
+        "CreateProject",
+        "InboxDeadlines",
+        "AwardSnapshotPage"
+      ],
+      "validation_check_count": 3,
+      "knowledge_base_to_select": "Uniform Guidance (2 CFR 200)",
+      "variant_of_vandalizer_seed": "backend/seeds/workflows/noa_summary.json",
+      "related_workflows": [
+        "noa-summary"
+      ],
+      "test_fixtures": [
+        "01-award"
+      ],
+      "evaluation": {
+        "saved_runs_latest_pass": 1,
+        "outcome": "report_produced_then_stopped_at_setup_approval"
+      }
+    },
+    {
+      "id": "post-award-closeout-checklist",
+      "title": "Closeout Checklist Generator (V5 draft)",
+      "kind": "vandalizer-workflow",
+      "group": "variant",
+      "path": "variants/post-award-closeout-checklist.v5-draft.workflow.vandalizer.json",
+      "sha256": "39849c10be37edb5933b3872d8a75fdb13bd9b04ad9f5716915087a469585d77",
+      "summary": "Adds approval, create project, and add deadlines to the RA inbox.",
+      "step_count": 6,
+      "task_kinds": [
+        "Extraction",
+        "Prompt",
+        "Formatter",
+        "Approval",
+        "CreateProject",
+        "InboxDeadlines"
+      ],
+      "validation_check_count": 3,
+      "variant_of_vandalizer_seed": "backend/seeds/workflows/post_award_closeout_checklist.json",
+      "related_workflows": [],
+      "test_fixtures": [
+        "01-award"
+      ],
+      "evaluation": {
+        "saved_runs_latest_pass": 1,
+        "outcome": "report_produced_then_stopped_at_setup_approval"
+      }
+    },
+    {
+      "id": "prior-approval-tracking",
+      "title": "Prior Approval Requirements Tracking (V5 draft)",
+      "kind": "vandalizer-workflow",
+      "group": "variant",
+      "path": "variants/prior-approval-tracking.v5-draft.workflow.vandalizer.json",
+      "sha256": "c1aacde4e31d96e1656d2506c4ffaa33e6c59308049b27fd59a45c85e60d62c3",
+      "summary": "Adds a Uniform Guidance knowledge base step; then approval, create project, add deadlines to the RA inbox.",
+      "step_count": 6,
+      "task_kinds": [
+        "KnowledgeBaseQuery",
+        "Prompt",
+        "Formatter",
+        "Approval",
+        "CreateProject",
+        "InboxDeadlines"
+      ],
+      "validation_check_count": 4,
+      "knowledge_base_to_select": "Uniform Guidance (2 CFR 200)",
+      "variant_of_vandalizer_seed": "backend/seeds/workflows/prior_approval_tracking.json",
+      "related_workflows": [
+        "prior-approval-extraction"
+      ],
+      "test_fixtures": [
+        "01-award"
+      ],
+      "evaluation": {
+        "saved_runs_latest_pass": 1,
+        "outcome": "report_produced_then_stopped_at_setup_approval",
+        "note": "One repeat run stated the equipment threshold correctly and then contradicted it later in the report."
+      }
+    },
+    {
+      "id": "rfa-checklist",
+      "title": "RFA (Working Complete Checklist) (V5 draft)",
+      "kind": "vandalizer-workflow",
+      "group": "variant",
+      "path": "variants/rfa-checklist.v5-draft.workflow.vandalizer.json",
+      "sha256": "5831c70fd69f203b361a249d7281c7057c6fd1af0abfb349c009c202407388f0",
+      "summary": "Adds a structured key-fields step first; then approval, create project, add deadlines to the RA inbox.",
+      "step_count": 6,
+      "task_kinds": [
+        "Extraction",
+        "Prompt",
+        "Approval",
+        "CreateProject",
+        "InboxDeadlines"
+      ],
+      "validation_check_count": 10,
+      "variant_of_vandalizer_seed": "backend/seeds/workflows/rfa_checklist.json",
+      "related_workflows": [
+        "rfa-checklist-extraction"
+      ],
+      "test_fixtures": [
+        "06-rfa"
+      ],
+      "evaluation": {
+        "saved_runs_latest_pass": 1,
+        "outcome": "report_produced_then_stopped_at_setup_approval"
+      }
+    },
+    {
+      "id": "subaward-extraction",
+      "title": "Subaward Extraction Workflow 1.0 (V5 draft)",
+      "kind": "vandalizer-workflow",
+      "group": "variant",
+      "path": "variants/subaward-extraction.v5-draft.workflow.vandalizer.json",
+      "sha256": "dbe0007ff637e85896e1d3372d4972309d6ff13dec752302040f463514a5ae8d",
+      "summary": "Adds a structured key-fields step first.",
+      "step_count": 3,
+      "task_kinds": [
+        "Extraction",
+        "Prompt",
+        "Formatter"
+      ],
+      "validation_check_count": 3,
+      "variant_of_vandalizer_seed": "backend/seeds/workflows/subaward_extraction.json",
+      "related_workflows": [
+        "subaward-extraction"
+      ],
+      "test_fixtures": [
+        "03-subaward"
+      ],
+      "evaluation": {
+        "saved_runs_latest_pass": 1,
+        "outcome": "report_produced"
+      }
+    }
+  ]
+}

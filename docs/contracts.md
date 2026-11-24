@@ -14,7 +14,8 @@ This repository has both human-facing documentation and machine-facing contract 
 | `components/<slug>/evals/cases/*/metadata.yaml` | Validation metadata, including `validated_against_version`. |
 | `workflows/<wf-slug>/manifest.yaml` | Authored Vandalizer-workflow source. Declares workflow version, pinned component version(s), steps, and eval posture. |
 | `workflows/<wf-slug>/<wf-slug>.vandalizer.json` | Generated Vandalizer export, rebuilt from the manifest. Carries an `x_ai4ra` provenance block (workflow source path, pinned component versions, embedded-prompt SHA256). Never hand-edited. |
-| [`taxonomy.md`](https://github.com/AI4RA/prompt-library/blob/main/taxonomy.md) | Controlled vocabulary for categories, domains, and lifecycle status. |
+| `drafts/<collection-slug>/drafts.json` | Index of a draft collection: one entry per Vandalizer import file with its kind, group, SHA256, and related workflows. Review material, not an evaluated contract. |
+| [`taxonomy.md`](https://github.com/AI4RA/prompt-library/blob/main/taxonomy.md) | Controlled vocabulary for categories, domains, lifecycle status, and draft kinds and groups. |
 
 ## Reading contract scope
 
@@ -35,6 +36,15 @@ A workflow is a Vandalizer-shaped manifestation of one or more components. Every
 - A workflow's eval posture is either **inherited** (1:1 repackaging of a component's canonical prompt — reuses the component's evals) or **workflow-local** (multi-step orchestration, parameterization, or prompt override — carries its own `evals/cases/` under the workflow directory). Multi-component orchestrations are always `workflow_local` because the pipeline's behavior emerges from step interactions.
 - The generated export's `x_ai4ra` block makes round-tripped exports traceable back to a specific prompt-library commit, including the SHA256 of each embedded prompt body.
 - `component_catalog.json` surfaces workflows in a top-level `workflows: [...]` array. Each entry lists the components the workflow pins in `components_manifested`. Optional triad metadata lives under the top-level `workflows:` mapping in `component_catalog_overrides.yaml`.
+
+## Draft collections
+
+A draft collection holds Vandalizer import files that are ready for subject-matter review and are not yet components or manifest-built workflows. See [`drafts/README.md`](https://github.com/AI4RA/prompt-library/blob/main/drafts/README.md).
+
+- Two file kinds exist. A `vandalizer-skill` is a chat Skill: a `search_set` export whose single item has `set_type: prompt` and carries its instructions in `extraction_config.content`. A `vandalizer-workflow` is a workflow export stored as generated, which may use task kinds the manifest builder does not compile.
+- Drafts have no semver and no eval cases. `drafts.json` pins each file by SHA256 and may record what a trial run produced. That record is not a validation claim.
+- `component_catalog.json` lists collections in a top-level `drafts: [...]` array with their paths, counts, and the `workflows/` slugs their items overlap.
+- A draft is promoted by authoring a component and, for a workflow, a manifest. It then leaves the collection.
 
 ## Harness expectations
 
