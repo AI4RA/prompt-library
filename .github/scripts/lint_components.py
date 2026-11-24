@@ -20,6 +20,9 @@ Checks:
   9. scripts/build_vandalizer_workflows.py --check passes (enforces manifest
      validity, pinned component versions, prompt_ref resolution, and
      idempotent exports).
+ 10. Each drafts/<collection>/ has README.md, CHANGELOG.md, and a drafts.json
+     index that lists every *.vandalizer.json file in the collection with a
+     matching SHA256, kind, group, and title.
 
 Errors exit 1. Warnings don't affect exit status. Both use GitHub Actions
 annotation format (::error or ::warning file=...::message).
@@ -27,6 +30,8 @@ annotation format (::error or ::warning file=...::message).
 
 from __future__ import annotations
 
+import hashlib
+import json
 import re
 import subprocess
 import sys
@@ -37,6 +42,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[2]
 COMPONENTS_DIR = REPO_ROOT / "components"
 WORKFLOWS_DIR = REPO_ROOT / "workflows"
+DRAFTS_DIR = REPO_ROOT / "drafts"
 TAXONOMY_PATH = REPO_ROOT / "taxonomy.md"
 CATALOG_BUILD_SCRIPT = REPO_ROOT / "scripts" / "build_component_catalog.py"
 CATALOG_OUTPUT_PATH = REPO_ROOT / "component_catalog.json"
@@ -295,6 +301,104 @@ def check_workflows() -> list[dict]:
     return results
 
 
+def draft_file_kind_and_title(data: dict) -> tuple[str | None, str | None]:
+    """Classify a Vandalizer export by its envelope; return (kind, title)."""
+    items = data.get("items") if isinstance(data, dict) else None
+    if not data.get("vandalizer_export") or not isinstance(items, list) or len(items) != 1:
+        return None, None
+    item = items[0]
+    if data.get("export_type") == "workflow":
+        return "vandalizer-workflow", item.get("name")
+    if data.get("export_type") == "search_set" and item.get("set_type") == "prompt":
+        config = item.get("extraction_config") or {}
+        if not str(config.get("content") or "").strip():
+            return None, None
+        return "vandalizer-skill", item.get("title")
+    return None, None
+
+
+def check_draft_collection(collection_dir: Path, taxonomy: dict[str, set[str]]) -> int:
+    """Validate one drafts/<collection>/ against its drafts.json index."""
+    for required in ("README.md", "CHANGELOG.md", "drafts.json"):
+        if not (collection_dir / required).is_file():
+            error(collection_dir, f"Draft collection missing {required}.")
+    index_path = collection_dir / "drafts.json"
+    if not index_path.is_file():
+        return 0
+    try:
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        error(index_path, f"Invalid JSON: {e}")
+        return 0
+
+    if index.get("artifact") != "vandalizer_draft_collection":
+        error(index_path, "`artifact` must be 'vandalizer_draft_collection'.")
+    if index.get("slug") != collection_dir.name:
+        error(index_path, f"`slug` must equal the directory name {collection_dir.name!r}.")
+    items = index.get("items")
+    if not isinstance(items, list) or not items:
+        error(index_path, "`items` must be a non-empty list.")
+        return 0
+
+    kinds = taxonomy.get("draft kinds", set())
+    groups = taxonomy.get("draft groups", set())
+    workflow_slugs = {p.name for p in WORKFLOWS_DIR.iterdir() if p.is_dir()} if WORKFLOWS_DIR.is_dir() else set()
+    seen_ids: set[str] = set()
+    indexed_paths: set[str] = set()
+    for item in items:
+        ident = item.get("id")
+        label = f"item {ident!r}"
+        if not ident or ident in seen_ids:
+            error(index_path, f"{label}: `id` is missing or duplicated.")
+        seen_ids.add(ident)
+        if item.get("kind") not in kinds:
+            error(index_path, f"{label}: kind {item.get('kind')!r} is not under '## Draft kinds' in taxonomy.md.")
+        if item.get("group") not in groups:
+            error(index_path, f"{label}: group {item.get('group')!r} is not under '## Draft groups' in taxonomy.md.")
+        for slug in item.get("related_workflows") or []:
+            if slug not in workflow_slugs:
+                error(index_path, f"{label}: related workflow {slug!r} does not exist under workflows/.")
+        rel = item.get("path")
+        if not rel:
+            error(index_path, f"{label}: `path` is missing.")
+            continue
+        indexed_paths.add(rel)
+        file_path = collection_dir / rel
+        if not file_path.is_file():
+            error(index_path, f"{label}: file {rel} does not exist.")
+            continue
+        raw = file_path.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != item.get("sha256"):
+            error(file_path, f"SHA256 does not match the `sha256` recorded for {label} in drafts.json.")
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError as e:
+            error(file_path, f"Invalid JSON: {e}")
+            continue
+        kind, title = draft_file_kind_and_title(data)
+        if kind != item.get("kind"):
+            error(file_path, f"Export envelope reads as {kind!r} but drafts.json records {item.get('kind')!r}.")
+        elif title != item.get("title"):
+            error(file_path, f"Item title {title!r} does not match drafts.json title {item.get('title')!r}.")
+
+    on_disk = {
+        str(p.relative_to(collection_dir))
+        for p in collection_dir.rglob("*.vandalizer.json")
+    }
+    for rel in sorted(on_disk - indexed_paths):
+        error(collection_dir / rel, "Draft file is not listed in drafts.json.")
+    return len(items)
+
+
+def check_drafts(taxonomy: dict[str, set[str]]) -> list[tuple[str, int]]:
+    status: list[tuple[str, int]] = []
+    if not DRAFTS_DIR.is_dir():
+        return status
+    for collection_dir in sorted(p for p in DRAFTS_DIR.iterdir() if p.is_dir()):
+        status.append((collection_dir.name, check_draft_collection(collection_dir, taxonomy)))
+    return status
+
+
 def check_component(
     component_dir: Path, taxonomy: dict[str, set[str]]
 ) -> tuple[str | None, str | None]:
@@ -365,6 +469,7 @@ def main() -> int:
         component_status.append((component_dir.name, current, last))
 
     workflow_status: list[dict] = check_workflows()
+    draft_status: list[tuple[str, int]] = check_drafts(taxonomy)
 
     for w in warnings:
         print(w)
@@ -397,6 +502,12 @@ def main() -> int:
                 f"  workflows/{wf['slug']}: v{version} "
                 f"({wf['posture']} evals, pins {pin_summary})"
             )
+
+    if draft_status:
+        print()
+        print("Draft collections:")
+        for slug, count in draft_status:
+            print(f"  drafts/{slug}: {count} indexed file(s)")
 
     if CATALOG_BUILD_SCRIPT.is_file():
         result = subprocess.run(

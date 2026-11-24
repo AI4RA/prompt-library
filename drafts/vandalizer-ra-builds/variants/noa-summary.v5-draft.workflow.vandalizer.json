@@ -1,0 +1,152 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "items": [
+    {
+      "name": "NOA Summary (V5 draft)",
+      "description": "NOA BASIC AWARD & FINANCIAL SUMMARY & NOA COMPLIANCE & ADMINISTRATIVE REQUIREMENTS. V5 draft: cites Uniform Guidance from a knowledge base step; after one approval, creates the project and adds deadlines to the RA inbox and saves an award snapshot Page.",
+      "steps": [
+        {
+          "name": "Regulation passages",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "KnowledgeBaseQuery",
+              "data": {
+                "kb_uuid": "",
+                "_embedded_knowledge_base": {
+                  "title": "Uniform Guidance (2 CFR 200)"
+                },
+                "query": "period of performance; allowable costs; indirect cost rates; reporting requirements; prior approval requirements; record retention; closeout",
+                "mode": "passages",
+                "k": 8
+              }
+            }
+          ]
+        },
+        {
+          "name": "Prompt Tasks",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "prompt": "Your input has two parts: the document, and passages from the Uniform Guidance (2 CFR 200) retrieved for this review, each labeled with its source. The document's own terms come first. Where you state a federal rule the document does not spell out, take it from those passages. Cite a section number only if that number appears in the passage you are using; otherwise cite the passage by its label. If the passages do not cover a point, say so and do not state the rule or a section number from memory. Do not describe what was retrieved; just use it.\n\nYou are analyzing a federal grant Notice of Award for university contract review. Extract ALL basic award information and financial terms. Be 100% accurate and review the entire document.\n\nAWARD IDENTIFICATION:\n- Award Number:\n- FAIN (Federal Award Identification Number):\n- Agency/Institute:\n- Program Title:\n- Award Type (New/Renewal/etc.):\n- Is this R&D (Yes/No):\n\nKEY PERSONNEL:\n- Principal Investigator(s):\n- Contact PI:\n- Authorized Official:\n- Federal Program Officer:\n- Federal Grants Management Officer:\n\nFINANCIAL SUMMARY:\n- Total Federal Award Amount:\n- Current Budget Period Amount:\n- Direct Costs:\n- Indirect Costs:\n- Indirect Cost Rate and Base:\n- Cost Sharing Required (Amount/Type):\n\nAWARD PERIODS:\n- Current Budget Period (Start/End Dates):\n- Total Project Period (Start/End Dates):\n- Future Year Funding (if listed):\n\nFINANCIAL RESTRICTIONS:\n- Salary Cap (Yes/No with amount):\n- Equipment Purchase Restrictions:\n- Travel Restrictions:\n- Other Cost Limitations:\n\nBASIC COMPLIANCE ALERTS:\n- Human Subjects/IRB Required:\n- Animal Use Required:\n- Clinical Trial (Yes/No):\n- FCOI Reporting Required:\n- Data Management Plan Required:\n\nCONSORTIUM/SUBAWARDS:\n- Subawards Included (Yes/No):\n- Partner Institutions:\n\nIf information is not found, state \"Not specified.\" Quote exact dollar amounts and dates from the document.\n\nDo not mention page headers, footers or watermarks at all, not even to say you ignored them, and do not comment on whether the document is genuine or on the quality of its text. Where the document does not state something, say so; do not fill the gap.",
+                "input_sources": [
+                  "workflow_documents",
+                  "step_input"
+                ]
+              }
+            },
+            {
+              "name": "Prompt",
+              "data": {
+                "prompt": "Your input has two parts: the document, and passages from the Uniform Guidance (2 CFR 200) retrieved for this review, each labeled with its source. The document's own terms come first. Where you state a federal rule the document does not spell out, take it from those passages. Cite a section number only if that number appears in the passage you are using; otherwise cite the passage by its label. If the passages do not cover a point, say so and do not state the rule or a section number from memory. Do not describe what was retrieved; just use it.\n\nYou are analyzing a federal grant Notice of Award for university contract review. Extract ALL compliance requirements, administrative obligations, and special conditions. Be 100% accurate and review the entire document.\n\nDETAILED COMPLIANCE REQUIREMENTS:\n- Human Subjects Protection Details:\n- IRB/sIRB Requirements:\n- FCOI Reporting Specifics:\n- Data Management & Sharing Requirements:\n- Civil Rights/Non-Discrimination Requirements:\n- Publication/Acknowledgment Requirements:\n- Public Access Policy Requirements:\n\nADMINISTRATIVE OBLIGATIONS:\n- Reporting Requirements (type/frequency):\n- Prior Approval Requirements:\n- Record Keeping Requirements:\n- Audit Requirements:\n- System Registration Requirements (SAM, etc.):\n\nSPECIAL TERMS & CONDITIONS:\nExtract any award-specific conditions, restrictions, or requirements that deviate from standard terms.\n\nPROGRAM INCOME & CARRYOVER:\n- Program Income Treatment:\n- Carryover Provisions:\n- Budget Flexibility:\n\nCRITICAL DEADLINES:\n- Report Due Dates:\n- Budget Period Ends:\n- Other Important Deadlines:\n\nRISK FACTORS & ACTION ITEMS:\n- High-Risk Compliance Areas:\n- Unusual/Non-Standard Terms:\n- Immediate Action Items with Deadlines:\n- Training/Setup Requirements:\n\nCONTACT INFORMATION:\n- Who to contact for business matters:\n- Who to contact for technical matters:\n- Emergency/hotline information:\n\nSearch for keywords: \"must,\" \"shall,\" \"required,\" \"prior approval,\" \"compliance,\" \"report,\" \"deadline,\" \"restriction.\" If information is not found, state \"Not specified.\" Flag any unusual terms for legal review.\n\nDo not mention page headers, footers or watermarks at all, not even to say you ignored them, and do not comment on whether the document is genuine or on the quality of its text. Where the document does not state something, say so; do not fill the gap.",
+                "input_sources": [
+                  "workflow_documents",
+                  "step_input"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Formatting NOA",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Formatter",
+              "data": {
+                "prompt": "Role: You are an AI assistant expert in federal grant administration. Your task is to process raw text extracted from a Notice of Award (NOA) and its related compliance analysis, and synthesize them into a single, comprehensive, and actionable Grant Award Summary for a university's Office of Sponsored Programs.\n\nGoal: Transform the provided information into a logically structured document that prioritizes key data, financial terms, deadlines, and significant compliance risks. The final output must be easy to scan and use for post-award management.\n\nKey Instructions:\n\nSynthesize and De-duplicate: Combine information from all provided text blocks into a single, cohesive summary. If the same fact (e.g., Award Number) is mentioned multiple times, present it only once in the most logical location.\n\nPrioritize Actionable Information: Use tables for key data like finances and deadlines. Use bold text to emphasize critical restrictions, required approvals, and non-standard terms.\n\nStructure for Usability: Organize the output according to the precise five-part structure below. Do not deviate from these section headings and order.\n\nPreserve Critical Language: If the source specifies a requirement (e.g., \"must be approved,\" \"must be submitted in writing\"), retain that imperative language. If the source states information is \"Not specified,\" preserve that note.\n\nDesired Output Structure\nPlease format the combined information exactly according to the following template:\n\nPart 1: Key Personnel & Contacts\n(A list of all project personnel and federal contacts.)\n\nPart 2: Grant Summary At-a-Glance\n(A high-level table with the most essential award details.)\n\nPart 3: Financial & Period of Performance\n(A detailed breakdown of all financial figures, rates, and key dates.)\n\nPart 4: Reporting & Critical Deadlines\n(A clear schedule of all required reports and their due dates.)\n\nPart 5: Key Compliance & Administrative Requirements\n(A summary of standard and special obligations, organized by topic for easy reference.)\n\nLeave out any remark about page headers, footers, watermarks, whether the document is genuine, how its text was read, or what an earlier step did."
+              }
+            }
+          ]
+        },
+        {
+          "name": "Review before setup",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Approval",
+              "data": {
+                "review_instructions": "Check the report above. Approving creates a project for this award with the file in it and adds its deadlines and required material to the RA inbox (each checked against its page; anything that can't be checked is listed for review, not added), and saves an award snapshot Page.",
+                "assignee_role": "workflow_owner"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create project",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "CreateProject",
+              "data": {
+                "name_template": "{document}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add deadlines to RA inbox",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "InboxDeadlines",
+              "data": {}
+            }
+          ]
+        },
+        {
+          "name": "Award snapshot page",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "AwardSnapshotPage",
+              "data": {}
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "validation_plan": [
+        {
+          "id": "eb0a4db1-5cbb-5022-b20a-91831854548c",
+          "name": "Figures match the source",
+          "category": "accuracy",
+          "description": "Every award number, amount, rate, date, period and name in the output appears in the source document with the same value, unit and (for dates) year. A figure the output calculated says how it was calculated and the arithmetic is right. FAIL if any value differs from the source, or appears with no basis in it."
+        },
+        {
+          "id": "a4335dcc-8a22-52d8-a0d2-a083c76c7967",
+          "name": "Core award facts are present",
+          "category": "completeness",
+          "description": "When the notice states them, the summary gives the award number, project and budget periods, total and current amounts (direct and indirect), indirect cost rate and base, PI, and every reporting deadline. FAIL for each stated fact the summary omits."
+        },
+        {
+          "id": "b760e68c-1da4-5c18-9ecf-deeaa07dc547",
+          "name": "Says when the document is silent",
+          "category": "content",
+          "description": "For each award field or compliance requirement that the source document does not state, the output says it is not stated (or not found) instead of filling in a typical value, a common practice or a figure from memory, and instead of leaving it out without comment. FAIL if a missing item is given a value the document does not contain."
+        }
+      ],
+      "validation_inputs": [
+        {
+          "id": "592d3546-4f6d-5b78-8242-aa8dcffcd654",
+          "type": "text",
+          "label": "Fictional notice of award. Answer key: award EXA-2027-0412; project period July 1, 2027 to June 30, 2029; budget period 1 July 1, 2027 to June 30, 2028; this action $250,000 ($200,000 direct, $50,000 indirect); total anticipated $510,000; indirect 25% of MTDC; no cost sharing; annual progress report and SF-425 due 90 days after each budget period (September 28, 2028 for period 1); final reports and invention statement due 120 days after the project end (October 28, 2029); prior approval for a PI change, foreign travel, rebudgeting participant support, equipment over $10,000 per item, and a PI effort reduction over 25%; one no-cost extension, requested at least 10 days before the end (by June 20, 2029); records kept 3 years from the final SF-425. Not stated: a data management plan requirement.",
+          "text": "FICTIONAL QA MATERIAL — NOT A REAL AWARD\nNotice of Award — Example Science Agency\nAward Number: EXA-2027-0412\nFederal Award Identification Number (FAIN): EXA20270412\nRecipient: Example State University\nPrincipal Investigator: Jordan Sample\nProject Title: Watershed Sensor Network Pilot\nProject period: July 1, 2027 through June 30, 2029\nBudget period 1: July 1, 2027 through June 30, 2028\nAmount of this action (budget period 1): $250,000, of which direct costs $200,000 and indirect costs $50,000.\nTotal anticipated award for both budget periods, subject to the availability of funds: $510,000.\nIndirect costs: 25% of modified total direct costs (MTDC), per the recipient's negotiated rate agreement dated March 3, 2026.\nCost sharing: none required.\n\nReporting\n- An annual progress report is due 90 days after the end of each budget period.\n- An annual Federal Financial Report (SF-425) is due 90 days after the end of each budget period.\n- The final progress report, final SF-425 and final invention statement are due 120 days after the end of the project period.\n\nPrior approval\nPrior written approval from the agency is required for (a) a change of principal investigator, (b) foreign travel, and (c) rebudgeting of participant support costs.\nEquipment purchases over $10,000 per item require prior approval.\nThe principal investigator commits 1.2 calendar months per year; a reduction of more than 25% requires prior approval.\nOne no-cost extension may be requested, at least 10 days before the end of the project period.\n\nRecords\nRecords must be kept for 3 years from the date the final SF-425 is submitted."
+        }
+      ],
+      "resource_config": {}
+    }
+  ]
+}

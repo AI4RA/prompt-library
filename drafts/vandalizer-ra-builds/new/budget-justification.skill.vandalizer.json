@@ -1,0 +1,25 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "search_set",
+  "items": [
+    {
+      "title": "Budget justification with the PI's answers",
+      "set_type": "prompt",
+      "extraction_config": {
+        "content": "Draft a budget justification with the person, from their budget and any project narrative they attach, and revise it as they supply what is missing. Work in chat: write the draft, list what you need from the PI, and update the draft when the person answers.\n\nWhat you need\nThe budget (spreadsheet or form). The project narrative and the solicitation are optional; use them only for facts they state. If a knowledge base with the sponsor's budget guidance is attached, use it for the order and headings the sponsor expects and cite it; otherwise follow the budget's own order.\n\nWriting the draft\n- Go through the budget line by line, in its own order and categories (for example personnel, fringe benefits, equipment, travel, participant support, materials and supplies, consultants, subawards, other direct costs, indirect costs). Give every line its own justification with the same amount the budget shows, by year where the budget gives years.\n- Explain each line using only what the documents state: names, roles, effort, salary bases, rates, quantities, unit costs, destinations and quotes. When the budget gives the inputs, show how the amount was calculated (for example, 2 trips at $1,800 each = $3,600) and check that the arithmetic is right.\n- Do not invent a cost, quantity, rate, person, purpose or rationale the documents don't give. Where a line has no stated basis, write \"[Basis to be supplied: ...]\" saying what the PI needs to provide.\n- State the indirect cost rate and base exactly as the budget does. Do not apply a rate or threshold from memory.\n- End with the totals by category and the overall total, and confirm they equal the budget's totals. If the budget's own figures don't add up, say where and by how much instead of correcting them silently.\n\nAfter the draft\n- List every \"[Basis to be supplied: ...]\" gap as a numbered question for the PI, in the budget's order.\n- When the person answers a question, replace that gap with their answer, in their words, and show the revised line. Do not fill a gap from anything but their answer or the documents.\n- When no gaps remain, say so, restate the totals check, and offer to export the justification as a document.",
+        "when_to_use": "Draft a line-by-line budget justification from a budget, list what the PI must supply, and revise the draft as the answers come in."
+      },
+      "items": [
+        {
+          "title": "Budget justification with the PI's answers",
+          "searchphrase": "Draft a budget justification with the person, from their budget and any project narrative they attach, and revise it as they supply what is missing. Work in chat: write the draft, list what you need from the PI, and update the draft when the person answers.\n\nWhat you need\nThe budget (spreadsheet or form). The project narrative and the solicitation are optional; use them only for facts they state. If a knowledge base with the sponsor's budget guidance is attached, use it for the order and headings the sponsor expects and cite it; otherwise follow the budget's own order.\n\nWriting the draft\n- Go through the budget line by line, in its own order and categories (for example personnel, fringe benefits, equipment, travel, participant support, materials and supplies, consultants, subawards, other direct costs, indirect costs). Give every line its own justification with the same amount the budget shows, by year where the budget gives years.\n- Explain each line using only what the documents state: names, roles, effort, salary bases, rates, quantities, unit costs, destinations and quotes. When the budget gives the inputs, show how the amount was calculated (for example, 2 trips at $1,800 each = $3,600) and check that the arithmetic is right.\n- Do not invent a cost, quantity, rate, person, purpose or rationale the documents don't give. Where a line has no stated basis, write \"[Basis to be supplied: ...]\" saying what the PI needs to provide.\n- State the indirect cost rate and base exactly as the budget does. Do not apply a rate or threshold from memory.\n- End with the totals by category and the overall total, and confirm they equal the budget's totals. If the budget's own figures don't add up, say where and by how much instead of correcting them silently.\n\nAfter the draft\n- List every \"[Basis to be supplied: ...]\" gap as a numbered question for the PI, in the budget's order.\n- When the person answers a question, replace that gap with their answer, in their words, and show the revised line. Do not fill a gap from anything but their answer or the documents.\n- When no gaps remain, say so, restate the totals check, and offer to export the justification as a document.",
+          "searchtype": "extraction",
+          "is_optional": false,
+          "enum_values": []
+        }
+      ],
+      "test_cases": []
+    }
+  ]
+}

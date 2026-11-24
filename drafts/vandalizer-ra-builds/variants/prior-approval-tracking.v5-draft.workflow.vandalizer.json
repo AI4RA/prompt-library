@@ -1,0 +1,141 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "items": [
+    {
+      "name": "Prior Approval Requirements Tracking (V5 draft)",
+      "description": "Identify and to track all activities requiring federal agency prior approval to prevent compliance violations. V5 draft: cites Uniform Guidance from a knowledge base step; after one approval, creates the project and adds deadlines to the RA inbox.",
+      "steps": [
+        {
+          "name": "Regulation passages",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "KnowledgeBaseQuery",
+              "data": {
+                "kb_uuid": "",
+                "_embedded_knowledge_base": {
+                  "title": "Uniform Guidance (2 CFR 200)"
+                },
+                "query": "prior approval requirements; revision of budget and program plans; changes requiring prior written approval; no-cost extension; change in key person; equipment and subawards",
+                "mode": "passages",
+                "k": 8
+              }
+            }
+          ]
+        },
+        {
+          "name": "Extraction",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "prompt": "Read the award and the retrieved Uniform Guidance excerpts separately. Attribute each award term to the award. For a rule added from an excerpt, give the source title and a short verbatim quote supporting the rule. Use a section identifier for that rule only when its heading appears in the same excerpt and the quoted text belongs to that heading. When an excerpt starts midway through a section, the title and quote are the citation. Report gaps when the excerpts do not support an answer.\n\nYou are analyzing a Federal Award Notice/Agreement document. Extract ALL prior approval requirements to create a comprehensive tracking system for activities requiring federal agency authorization.\nThoroughly search the entire document for prior approval requirements. Pay special attention to sections referencing:\n\n\"Prior Approval\"\n\"Pre-approval\"\n\"Written Approval\"\n\"Agency Approval\"\n\"2 CFR 200\" sections\n\"Research Terms and Conditions\" (RTCs)\n\nCreate a comprehensive response with these sections:\n\nBUDGET-RELATED PRIOR APPROVALS:\n\nRe-budgeting thresholds and restrictions\nEquipment purchases requiring approval\nSubcontracting/subaward approvals\nCost sharing changes\nPersonnel effort modifications\n\n\nSCOPE & TIMELINE APPROVALS:\n\nScope of work changes\nPrincipal Investigator changes\nKey personnel changes\nNo-cost extension requests\nPerformance site changes\n\n\nADMINISTRATIVE APPROVALS:\n\nForeign travel approvals\nConference/meeting expenditures\nParticipant support costs\nProperty acquisition or disposition\nIntellectual property arrangements\n\n\nAPPROVAL PROCEDURES:\nCreate a table with:\n\nApproval Type\nThreshold/Trigger\nRequired Documentation\nApproval Authority\nProcessing Timeline\nConsequences of Non-compliance\n\n\nWAIVED APPROVALS:\n\nResearch Terms and Conditions (RTC) waivers\nAgency-specific approval delegations\nStreamlined approval processes\n\n\n\nBe thorough. Search for keywords: 'prior approval,' 'pre-approval,' 'written approval,' 'agency approval,' 'permission,' 'authorize,' 'CFR 200,' 'RTC,' 'waive,' 'delegate,' 'threshold.'\nIf information is not found for any section, explicitly state 'Not specified in the document' rather than omitting the section. Please be 100% accurate.\n\nDo not mention page headers, footers or watermarks at all, not even to say you ignored them, and do not comment on whether the document is genuine or on the quality of its text. Where the document does not state something, say so; do not fill the gap.",
+                "input_sources": [
+                  "workflow_documents",
+                  "step_input"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Formatting",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Formatter",
+              "data": {
+                "prompt": "Format the Extraction report with bold category labels and preserve its five sections. Use a Markdown table for approval procedures with columns for approval type, trigger, required documentation, authority, timeline and consequences. Keep the award terms separate from supplemental federal guidance. Verify every supplemental rule against the original Regulation passages. Retain the source title and a short exact quote. Remove any section or subsection locator the quoted excerpt does not establish. Retain award citations found in the award. Preserve thresholds, dates, responsible parties and missing-information statements.\n\nLeave out any remark about page headers, footers, watermarks, whether the document is genuine, how its text was read, or what an earlier step did.",
+                "input_sources": [
+                  "workflow_documents",
+                  "earlier_steps"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Review before setup",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Approval",
+              "data": {
+                "review_instructions": "Check the report above. Approving creates a project for this award with the file in it and adds its deadlines and required material to the RA inbox (each checked against its page; anything that can't be checked is listed for review, not added).",
+                "assignee_role": "workflow_owner"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create project",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "CreateProject",
+              "data": {
+                "name_template": "{document}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add deadlines to RA inbox",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "InboxDeadlines",
+              "data": {}
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "validation_plan": [
+        {
+          "id": "ce694d26-5179-5cd8-b11f-c192c5832d44",
+          "name": "Figures match the source",
+          "category": "accuracy",
+          "description": "Every threshold, percentage, dollar amount and day count in the output appears in the source document with the same value, unit and (for dates) year. A figure the output calculated says how it was calculated and the arithmetic is right. FAIL if any value differs from the source, or appears with no basis in it."
+        },
+        {
+          "id": "6e25f95a-aeb3-56a5-97a0-d803d659d616",
+          "name": "Every prior-approval requirement is listed",
+          "category": "completeness",
+          "description": "Each activity the award says needs prior written approval (rebudgeting, equipment, PI or key personnel change, effort reduction, foreign travel, no-cost extension, subawards) is listed with its threshold or timing as stated. FAIL for each requirement omitted."
+        },
+        {
+          "id": "3d4e3042-9c97-5150-be70-8a755298d747",
+          "name": "Says when the document is silent",
+          "category": "content",
+          "description": "For each approval requirement or procedure that the source document does not state, the output says it is not stated (or not found) instead of filling in a typical value, a common practice or a figure from memory, and instead of leaving it out without comment. FAIL if a missing item is given a value the document does not contain."
+        },
+        {
+          "id": "cf4c546b-83c1-5c3f-b3b7-ee832366d05b",
+          "name": "Supplemental rules can be traced to their passages",
+          "category": "accuracy",
+          "description": "For each supplemental rule, find its source title and quoted words in the retrieved passages. The quote must support the claim. Fail if a section locator is attributed to an excerpt that lacks its heading or if an award term is attributed to another source."
+        }
+      ],
+      "validation_inputs": [
+        {
+          "id": "746b6a3c-1e36-51aa-ae59-bca5ebd05840",
+          "type": "text",
+          "label": "Fictional notice of award. Answer key: award EXA-2027-0412; project period July 1, 2027 to June 30, 2029; budget period 1 July 1, 2027 to June 30, 2028; this action $250,000 ($200,000 direct, $50,000 indirect); total anticipated $510,000; indirect 25% of MTDC; no cost sharing; annual progress report and SF-425 due 90 days after each budget period (September 28, 2028 for period 1); final reports and invention statement due 120 days after the project end (October 28, 2029); prior approval for a PI change, foreign travel, rebudgeting participant support, equipment over $10,000 per item, and a PI effort reduction over 25%; one no-cost extension, requested at least 10 days before the end (by June 20, 2029); records kept 3 years from the final SF-425. Not stated: a data management plan requirement.",
+          "text": "FICTIONAL QA MATERIAL — NOT A REAL AWARD\nNotice of Award — Example Science Agency\nAward Number: EXA-2027-0412\nFederal Award Identification Number (FAIN): EXA20270412\nRecipient: Example State University\nPrincipal Investigator: Jordan Sample\nProject Title: Watershed Sensor Network Pilot\nProject period: July 1, 2027 through June 30, 2029\nBudget period 1: July 1, 2027 through June 30, 2028\nAmount of this action (budget period 1): $250,000, of which direct costs $200,000 and indirect costs $50,000.\nTotal anticipated award for both budget periods, subject to the availability of funds: $510,000.\nIndirect costs: 25% of modified total direct costs (MTDC), per the recipient's negotiated rate agreement dated March 3, 2026.\nCost sharing: none required.\n\nReporting\n- An annual progress report is due 90 days after the end of each budget period.\n- An annual Federal Financial Report (SF-425) is due 90 days after the end of each budget period.\n- The final progress report, final SF-425 and final invention statement are due 120 days after the end of the project period.\n\nPrior approval\nPrior written approval from the agency is required for (a) a change of principal investigator, (b) foreign travel, and (c) rebudgeting of participant support costs.\nEquipment purchases over $10,000 per item require prior approval.\nThe principal investigator commits 1.2 calendar months per year; a reduction of more than 25% requires prior approval.\nOne no-cost extension may be requested, at least 10 days before the end of the project period.\n\nRecords\nRecords must be kept for 3 years from the date the final SF-425 is submitted."
+        }
+      ],
+      "resource_config": {}
+    }
+  ]
+}

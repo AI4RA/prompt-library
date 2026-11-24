@@ -1,0 +1,89 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "items": [
+    {
+      "name": "Section 2 Personnel Eligibility Check",
+      "description": "Checks PI and Co-PI eligibility against APM 45.22 and the DGAs listed in Section 2, from the proposal's Section 2, the Banner details the administrator looked up, and the Department List.",
+      "steps": [
+        {
+          "name": "Section 2 people",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Extraction",
+              "data": {
+                "extractions": [
+                  "Proposal Title",
+                  "Sponsor",
+                  "Principal Investigator (Section 2.1)",
+                  "Co-Principal Investigators (Section 2.1)",
+                  "Senior and Key Personnel (Section 2.2A)",
+                  "Departmental Editors Listed in Section 2",
+                  "Employee Class for Each Person",
+                  "Timesheet Org Code for Each Person",
+                  "Department List Org Codes and the DGAs for Each"
+                ]
+              }
+            },
+            {
+              "name": "KnowledgeBaseQuery",
+              "data": {
+                "kb_uuid": "",
+                "_embedded_knowledge_base": {
+                  "title": "University of Idaho Office of Sponsored Programs"
+                },
+                "query": "APM 45.22 eligibility to serve as principal investigator or co-principal investigator; faculty and staff classifications eligible; exceptions and approvals",
+                "mode": "passages",
+                "k": 8
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eligibility and DGA review",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "prompt": "You are helping a pre-award sponsored programs administrator review Section 2 of a proposal: whether each PI and Co-PI is eligible to serve in that role, and whether the right Departmental Grant Administrators (DGAs) are listed.\n\nYour input can have up to four parts: the proposal's Section 2 (Sections 2.1 and 2.2A); employment details for each person as the administrator looked them up in Banner (employee class and timesheet org code); the Department List mapping org codes to DGAs; and passages from the institution's policy on who may serve as PI or Co-PI (APM 45.22), each labeled with its source. Use only these. You cannot see Banner, and you never state a person's employee class or org code unless the input gives it.\n\nThe extracted details arrive as one set per document, and a set made from one document can be wrong or empty about another. Work from the documents themselves and use the extracted details only as a guide; do not report differences between the sets. Ignore page headers, footers and watermarks; do not comment on whether a document is genuine.\n\n1. People to review\nList everyone in Section 2.1 (PI and Co-PIs) and Section 2.2A (senior and key personnel) with their role, exactly as named. Say if a name appears twice or with two spellings.\n\n2. Eligibility of each PI and Co-PI\nA table: Person, Role, Employee class (from the Banner details), Eligible under APM 45.22?, Basis.\n- Decide eligibility only from the policy passages: quote the passage and give its section. If the passages do not cover that employee class, write \"Not covered by the passages provided\" and do not decide.\n- If no employee class was given for a person, write \"Employee class needed (Banner NBAJOBS)\".\n- Senior and key personnel in Section 2.2A are not checked for eligibility; say so once.\n\n3. Timesheet org codes\nA table: Person, Timesheet org code(s). Include everyone from Sections 2.1 and 2.2A. Write \"Org code needed (Banner NBAJOBS, Payroll Default tab)\" where none was given. A person can have more than one.\n\n4. Required DGAs\nIf the Department List was given: for each org code, the DGA or DGAs it maps to, quoting the list. An org code can map to more than one DGA. If an org code is not in the list, say so. If the list was not given, write \"Department List needed\" and skip to section 6.\n\n5. DGAs against Section 2\nCompare the required DGAs with the Departmental Editors listed in Section 2.\n- Missing: each required DGA not listed. These must be added.\n- Extra: people listed who are not required. These are left in place; say so.\n\n6. Summary for the administrator\nThree short lists: eligibility concerns; DGAs to add; lookups still needed. If there is nothing in a list, write \"None\".",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "id": "143f4b69-ee2a-522f-ac26-4a47a8a81564",
+          "name": "Figures and names match the source",
+          "category": "accuracy",
+          "description": "Every amount, date, name, code and identifier in the output appears in the input with the same value and year. FAIL if any differs or has no basis in the input."
+        },
+        {
+          "id": "ea829289-11d3-584b-bc00-4feb50933614",
+          "name": "Nothing is filled in that the input does not state",
+          "category": "accuracy",
+          "description": "Where the input does not state something, the output says so in the words its instructions give. FAIL if the output supplies a value, a lookup result or a rule the input does not contain, or says what VERAS or Banner contains."
+        },
+        {
+          "id": "59c93dfa-5a23-5a86-bd87-f0e872e11fdf",
+          "name": "Eligibility is decided only from the policy passages",
+          "category": "accuracy",
+          "description": "Each eligibility decision quotes a policy passage and its section. Where the passages do not cover an employee class, or no employee class was given, the output says so and does not decide. FAIL if a person is called eligible or ineligible without a quoted passage."
+        }
+      ],
+      "validation_inputs": []
+    }
+  ]
+}

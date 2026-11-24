@@ -33,6 +33,8 @@ Each component is a directory under `components/` named by a short slug. A compo
 
 Workflows are a Vandalizer-shaped manifestation layered on top of components. Every workflow lives at `workflows/<wf-slug>/` regardless of whether it pins one component (a 1:1 repackaging) or several (a multi-component orchestration). Each workflow directory has an authored `manifest.yaml` (source of truth, pins component version(s) and describes steps) and a generated `<wf-slug>.vandalizer.json` (the uploadable export, with an `x_ai4ra` provenance block). See [`templates/new-workflow/`](templates/new-workflow/) for the scaffold and [`docs/contracts.md`](docs/contracts.md) for the workflow lifecycle rules.
 
+Drafts are ideas that are ready for subject-matter review but are not yet components or manifest-built workflows. Each collection lives at `drafts/<collection-slug>/` and holds Vandalizer import files (chat Skills and workflows) with a `drafts.json` index that pins every file by SHA256. Drafts carry no version and no validation claim. See [`drafts/README.md`](drafts/README.md) for the draft kinds, the index contract, and how a draft is promoted.
+
 ## Contract surfaces
 
 Harness and automation consumers should start with these surfaces, in this order:
@@ -44,6 +46,7 @@ Harness and automation consumers should start with these surfaces, in this order
 5. `components/<slug>/evals/cases/*/metadata.yaml` plus `expected.*` — golden-case validation surface.
 6. `workflows/<wf-slug>/manifest.yaml` — authored Vandalizer-workflow source, pinning one or more components.
 7. `workflows/<wf-slug>/<wf-slug>.vandalizer.json` — the generated export, carrying an `x_ai4ra` provenance block (workflow source path, pinned component versions, embedded-prompt SHA256). Never hand-edited.
+8. `drafts/<collection-slug>/drafts.json` — index of a draft collection's import files. Drafts are review material, not contracts: do not pin them as evaluated components.
 
 Important nuance: a component name that ends in `-udm` does **not** automatically mean the checked-in `schema.json` is the shared UDM contract from `ui-insight/AI4RA-UDM`. In this repo, many `-udm` components are repo-local extraction or routing contracts that align to shared UDM semantics without redefining the shared UDM itself. `component_catalog.json` records which contract scope applies per component.
 
@@ -83,6 +86,12 @@ That distinction matters:
 
 When a referenced component bumps MAJOR, the workflow must either re-pin (and bump its own MAJOR) or be marked retired in its manifest — the build script fails loudly on drift unless `pinned_version_sha` records an intentional lag.
 
+## Adding or updating a draft collection
+
+1. Put the import files under `drafts/<collection-slug>/` with a `README.md` and `CHANGELOG.md`.
+2. List every `*.vandalizer.json` file in `drafts.json` with its `id`, `title`, `kind`, `group`, `path`, `sha256` and `related_workflows`. Kinds and groups come from [`taxonomy.md`](taxonomy.md).
+3. Regenerate [`component_catalog.json`](component_catalog.json) so the collection appears in its `drafts` array, then run the lint script.
+
 ## Local validation
 
 ```bash
@@ -105,7 +114,7 @@ If `mkdocs` is already on `PATH`, the bare `mkdocs` command is equivalent; the `
 
 Two GitHub Actions workflows run on pushes to `main`:
 
-- [`lint.yml`](.github/workflows/lint.yml) checks component manifests, taxonomy usage, eval validation metadata, lockstep manifestation versions, workflow directory structure, that [`component_catalog.json`](component_catalog.json) matches the generated catalog, and that every checked-in `<wf-slug>.vandalizer.json` matches a fresh build of its `manifest.yaml`.
+- [`lint.yml`](.github/workflows/lint.yml) checks component manifests, taxonomy usage, eval validation metadata, lockstep manifestation versions, workflow directory structure, that [`component_catalog.json`](component_catalog.json) matches the generated catalog, that every checked-in `<wf-slug>.vandalizer.json` matches a fresh build of its `manifest.yaml`, and that every draft collection's `drafts.json` matches its files.
 - [`pages.yml`](.github/workflows/pages.yml) regenerates [`component_catalog.json`](component_catalog.json), rebuilds generated docs from components, and publishes the MkDocs site.
 
 ## Observed upstream refs

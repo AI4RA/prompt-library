@@ -23,6 +23,7 @@ This repository is the prompt-library leg of the AI4RA triad. It owns prompts, s
 - `component_catalog.json` is the repo-level machine discovery surface.
 - `component_catalog_overrides.yaml` is the editable source for repo-level triad metadata and observed upstream refs.
 - `components/<slug>/schema.json` is authoritative for that component's structured output contract when present.
+- `drafts/<collection-slug>/drafts.json` indexes a draft collection's Vandalizer import files. Drafts are review material: they carry no version, no eval cases, and no validation claim.
 - A `-udm` suffix in a component slug does not automatically mean the checked-in schema is the shared UDM contract from `ui-insight/AI4RA-UDM`.
 - Record contract scope explicitly as repo-local, UDM-aligned repo-local, delegated wrapper, or shared UDM backed.
 

@@ -1,0 +1,74 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "items": [
+    {
+      "name": "SFI and RST Personnel Check",
+      "description": "Builds a compliance matrix for a federal research proposal: who must comply (Sections 2 and 6.6), whether each has an SFI disclosure and when it lapses, and whether each appears in the RST completion spreadsheet.",
+      "steps": [
+        {
+          "name": "Proposal personnel",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Extraction",
+              "data": {
+                "extractions": [
+                  "Proposal Title",
+                  "Sponsor",
+                  "Federal Research Proposal",
+                  "Planned Submission Date",
+                  "Personnel Listed in Section 6.6",
+                  "PI and Senior Key Personnel in Section 2"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Compliance matrix",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "prompt": "You are helping a pre-award sponsored programs administrator confirm that everyone on a federal research proposal has a current Significant Financial Interest (SFI) disclosure and has completed Research Security Training (RST).\n\nYour input can have: the proposal's Section 6.6 and Section 2; SFI disclosure confirmations (emails or a list) with their dates; and the RST completion spreadsheet. Use only these. Do not assume a person has disclosed or trained because they are senior, and do not use any outside knowledge of the people named.\n\nThe extracted details arrive as one set per document, and a set made from one document can be wrong or empty about another. Work from the documents themselves and use the extracted details only as a guide; do not report differences between the sets. Ignore page headers, footers and watermarks; do not comment on whether a document is genuine.\n\n1. Does the check apply?\nSay whether the proposal is a research proposal to a federal sponsor, quoting the basis. If the input does not say, write \"Not stated: confirm before relying on this check\" and continue.\n\n2. People who must comply\nList the personnel in Section 6.6 and the PI and senior key personnel in Section 2. Say whether the two lists agree, and name anyone who is in one and not the other. The people to check are everyone on either list. Match names carefully: note differences in spelling, middle initials and nicknames, and treat an uncertain match as a question, not a match.\n\n3. SFI disclosures\nA table: Person, Disclosure found?, Disclosure date, Valid through.\n- A disclosure is valid for one year from the date it was submitted. Give the date one year after the disclosure date as \"Valid through\".\n- If the planned submission date is given, say whether the disclosure is still valid on that date. If it is not given, do not judge validity against today's date; say that the administrator must compare \"Valid through\" with the submission date.\n- If no confirmation was provided for a person, write \"No disclosure provided\".\n\n4. Research Security Training\nA table: Person, Found in the RST completion spreadsheet?, Name as it appears there, Completion date if shown. The spreadsheet is sorted by first name; check each person under their first name and under any variant. A nickname or a different spelling (Tom for Tomas, Kathryn O'Brian for Katherine O'Brien) is never a match: write \"Possible match: confirm\", and leave RST complete unconfirmed for that person in the result matrix. If the spreadsheet was not provided, write \"RST spreadsheet needed\".\n\n5. Result\nA compliance matrix: Person, On Section 6.6, On Section 2, SFI current, RST complete, Follow-up needed.\nThen list the follow-ups: expired or missing disclosures, people not found in the RST spreadsheet, and name matches the administrator must confirm. If everyone is compliant on the evidence given, say \"All personnel show a current SFI disclosure and RST completion in the records provided\", and say that the administrator marks the checks complete in VERAS.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "id": "c2e9306f-2e6c-5d0e-93a2-a999a056a174",
+          "name": "Figures and names match the source",
+          "category": "accuracy",
+          "description": "Every amount, date, name, code and identifier in the output appears in the input with the same value and year. FAIL if any differs or has no basis in the input."
+        },
+        {
+          "id": "8270d6ba-52dc-50ad-82b1-4975be199dc0",
+          "name": "Nothing is filled in that the input does not state",
+          "category": "accuracy",
+          "description": "Where the input does not state something, the output says so in the words its instructions give. FAIL if the output supplies a value, a lookup result or a rule the input does not contain, or says what VERAS or Banner contains."
+        },
+        {
+          "id": "3bc70e13-266d-53a5-967f-dbc7d937b2ae",
+          "name": "Validity is one year from the disclosure date",
+          "category": "accuracy",
+          "description": "Each \"Valid through\" date is exactly one year after the disclosure date given in the input, and validity is judged only against a submission date the input states. FAIL if a date is miscalculated or validity is judged against an unstated date."
+        }
+      ],
+      "validation_inputs": []
+    }
+  ]
+}

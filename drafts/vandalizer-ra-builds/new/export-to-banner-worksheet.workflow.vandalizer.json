@@ -1,0 +1,114 @@
+{
+  "vandalizer_export": true,
+  "schema_version": 2,
+  "export_type": "workflow",
+  "items": [
+    {
+      "name": "Export to Banner Worksheet",
+      "description": "Reads a fully executed award and lays out its values in the order of the Export to Banner form, with the page for each and a list of what the award does not state.",
+      "steps": [
+        {
+          "name": "Award details",
+          "data": {},
+          "is_output": false,
+          "tasks": [
+            {
+              "name": "Extraction",
+              "data": {
+                "extractions": [
+                  "Award Number",
+                  "Project Title",
+                  "Principal Investigator",
+                  "Award Type",
+                  "Pass-Through Award",
+                  "Prime Sponsor Name",
+                  "Assistance Listing Number",
+                  "Federal Agency Name",
+                  "Project Period Start",
+                  "Project Period End",
+                  "Performance Period Start",
+                  "Performance Period End",
+                  "Budget Period Dates",
+                  "Multi-Year or Incremental Funding",
+                  "Sponsor Name",
+                  "Sponsor Entity Type",
+                  "Sponsor Address",
+                  "Sponsor UEI",
+                  "Awardee Organization",
+                  "Total Award Amount",
+                  "Total Anticipated Amount",
+                  "Budget by Category",
+                  "Total Direct Costs",
+                  "Total Indirect Costs",
+                  "F&A Rate",
+                  "F&A Rate Base",
+                  "F&A Waived or Reduced",
+                  "Cost Share Amount",
+                  "Cost Share Type",
+                  "Program Income",
+                  "Billing Type",
+                  "Billing Frequency",
+                  "Postal Address for Invoices",
+                  "Invoice Email",
+                  "PMS or LOC Code",
+                  "Payment Terms",
+                  "Invoice Requirements",
+                  "Final Invoice or Final Draw Deadline",
+                  "Invoice or Payment Contact (leave empty if the award has no invoices)",
+                  "Reports Marked Required with Due Dates as Written",
+                  "Record Retention Period",
+                  "Carry-Forward Policy",
+                  "Prior Approval Requirements",
+                  "Special Terms",
+                  "Closeout Requirements",
+                  "Governing Regulations"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Export to Banner worksheet",
+          "data": {},
+          "is_output": true,
+          "tasks": [
+            {
+              "name": "Prompt",
+              "data": {
+                "prompt": "You are preparing an Export to Banner worksheet for a grants specialist setting up a new award. Your input is the fully executed award document and the details extracted from it in the previous step. The specialist uses the worksheet to fill in the Export to Banner form in VERAS. You cannot see VERAS or Banner.\n\nRules\n- Use only the award document. Copy every amount, date, name, code and address exactly; do not round or reformat.\n- Where the document does not state a value, write \"Not stated in the award\". Where an item cannot apply to this award, for example an invoice email on an award paid by electronic draw, write \"Not applicable\" and quote the term that shows why. Do not supply a value from general knowledge of the sponsor or of federal rules.\n- Never fill an item with a different kind of value. A billing address must be a postal address. A billing contact is a person or office the award names for invoices or payment; a grants officer, program officer or authorizing official is not one unless the award says so. On an award paid by electronic draw with no invoices, billing contact, billing address and invoice email are all \"Not applicable\".\n- Copy each report's due date in the award's own words, including \"before\" or \"after\" and the number of days. List only reports the award requires; where a form has boxes, only the checked ones.\n- The extracted details can be wrong. Where one contradicts the document, follow the document. Do not mention the extraction, the previous step or empty fields anywhere in the worksheet.\n- Ignore page headers, footers and watermarks; do not comment on whether the document is genuine. Do not describe the document as garbled; if a value cannot be read, say which one.\n- Give the page for every value when the document shows page numbers.\n\nWrite a table with columns Form item, Value from the award, Page, for each section below, in this order.\n\nSection 1, basic award information: award number; project title; sponsor name; prime sponsor and pass-through status (a second sponsor means pass-through); award type (grant, contract, cooperative agreement); Assistance Listing Number; project period start and end; performance period end, saying whether the award is funded in increments; budget period dates; principal investigator.\n\nSection 1, indirect costs: F&A rate; the base it applies to; whether indirect costs are waived or capped, quoting the term.\n\nSection 3, funding and budget: awarded funding amount; total intended or anticipated funding; budget by category as the award gives it; total direct costs; total indirect costs; cost share amount and type; program income terms. Add the categories and say whether they equal the total, showing the arithmetic.\n\nSection 4, billing: billing type as the payment terms describe it (cost reimbursable, fixed price and so on), quoting the term; billing frequency; billing address; invoice email; PMS or LOC code; billing contact; invoice requirements; final invoice deadline.\n\nSection 5, FOA text: one bullet for each award requirement the specialist should capture, quoted or closely paraphrased with its page: invoicing requirements, cost allowability terms, subcontract terms, reporting requirements with their due dates, record retention period, carry-forward restrictions, prior approval requirements, compliance requirements, closeout requirements, and other special terms.\n\nFinish with:\n- \"For the specialist to determine\", listing the form items the award cannot answer: the short title (sponsor acronym first, 35 characters at most), the effective date from the payroll calendar, PI and Co-PI departments and org codes, the F&A distribution code and activity code, DGAs, the LR approver and the project contact.\n- \"Differences and gaps\": anything inconsistent in the award, and anything the form needs that the award does not state.",
+                "input_sources": [
+                  "step_input",
+                  "workflow_documents"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "input_config": {},
+      "output_config": {},
+      "resource_config": {},
+      "validation_plan": [
+        {
+          "id": "9df368e2-1312-5b48-a4ea-693745a53dc0",
+          "name": "Figures and names match the source",
+          "category": "accuracy",
+          "description": "Every amount, date, name, code and identifier in the output appears in the input with the same value and year. FAIL if any differs or has no basis in the input."
+        },
+        {
+          "id": "7d432cb8-9215-5c6a-89be-ff8a695b49a9",
+          "name": "Nothing is filled in that the input does not state",
+          "category": "accuracy",
+          "description": "Where the input does not state something, the output says so in the words its instructions give. FAIL if the output supplies a value, a lookup result or a rule the input does not contain, or says what VERAS or Banner contains."
+        },
+        {
+          "id": "03ca2023-b97c-5ad6-8a56-18f3e74ce8e7",
+          "name": "Every form section is covered",
+          "category": "completeness",
+          "description": "The worksheet has Section 1 basic information, Section 1 indirect costs, Section 3 funding and budget, Section 4 billing and Section 5 FOA text, then the items for the specialist to determine. FAIL for each section left out."
+        }
+      ],
+      "validation_inputs": []
+    }
+  ]
+}
